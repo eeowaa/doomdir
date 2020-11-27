@@ -1,0 +1,347 @@
+* Inbox
+* Doom [2/5]
+** TODO [#A] Sync Doom dotfiles
+** DONE [#A] Create a =custom.el= file and load it when present
++ I believe there is a Doom-specific construct for checking for file existence
++ Move my name and email-address to =custom.el=
+
+** TODO [#B] Write =$DOOMDIR/README.org=
+Interestingly, when I first opened the file, it was pre-populated (probably by
+the =:editor file-templates= module) to look like documentation for a Doom
+module. IIRC, the private user configuration in =$DOOMDIR= is a module itself,
+so I suppose it makes sense. But certain things do *not* make sense:
+
+- [ ] Does the =$DOOMDIR= module have a formal name?
+- [ ] Does the =$DOOMDIR= module have module flags?
+  - [ ] If so, where are they specified?
+- [ ] Is =$DOOMDIR/init.el= a member of the =$DOOMDIR= module?
+
+** DONE [#B] Rewrite this document using Doom project conventions
+*** DONE Determine conventions
+**** DONE When to use =this= vs. ~that~
+Here is the convention:
++ CLI commands and generic code
+  + ~echo 'Hello, world!'~
+  + ~printf("Hello, world!\n");~
++ elisp code and symbols
+  + ~(message "Hello, world!")~
+  + ~doom+emacs+dir~
+  + ~doom/reload~
++ markup
+  + ~#+STARTUP:~
+  + ~*** Org Headline~
+  + ~### Markdown Headline~
++ key bindings
+  + =K=
+  + =M+x +lookup/documentation=
++ file paths
+  + =$DOOMDIR/config.el=
++ citations
+  + =:editor evil=
+  + =evil=
+  + =+everywhere=
+
+***** DONE See if I get a response on Discord
+https://discord.com/channels/406534637242810369/406627025030348820/780499424983646240
+
+From Henrik himself:
+#+begin_quote
+~...~ for code/markup and elisp symbols. =...= for keybinds, file paths, and
+citations (names of modules and packages).
+
+TODO, #include, and :DRAWER: are all org markup, so use the former for them.
+#+end_quote
+
+**** DONE Bullet point style
+So far, I haven't really seen a consistent style in the Doom documentation, but
+I have noticed a few patterns:
+
++ ~+~ is used more often than ~-~
+  + The benefit of using ~+~ is that it is slightly more conspicuous than ~-~
+  + The downside is that one more keystroke is needed to start a list
+  + For now, I'll use ~+~ for information and ~-~ for checkbox lists
+    + Checkboxes are already pretty conspicuous
+    + Having separate checkbox list syntax means that I can search for those
+      lists by ~^ *-~ instead of ~^ *\+ \[[ X-]\]~
++ Each item in a given list (including nested items) starts with the same symbol
++ Tables of contents always use ~-~
+
+*** DONE Rewrite the document
+** TODO [#C] Make ~PREREQ~ lines OS-independent
+Currently, the ~PREREQ~ comments just explain what prerequisite commands need to
+be run for macOS. I would like to refactor these comments into a script or set
+of scripts to install prerequisites based on the host OS. For the module
+prerequisites, it would be great to be able to run the prerequisite system
+commands based on which modules are enabled; to do that, we must be able to
+programmatically query which modules are enabled.  It would be easy enough to
+write a command to do that:
+
+#+begin_src sh
+sed -n \
+    -e '/^(doom!/d' -e '/^[ 	]*;;/d' \
+    -e 's/^[ 	]*(\{0,1\}\([^:; 	][^ 	]*\).*$/\1/p' \
+    init.el
+#+end_src
+
+Which actually comes pretty close (it misses ~(:if IS-MAC macos)~ but otherwise
+gets everything). The better way would be to parse the output of ~doom info~:
+
+#+begin_src sh
+doom info | sed -n \
+    -e 's/^[ 	]*modules[ 	]\{1,\}//p'
+    # (keep parsing...)
+#+end_src
+
+Which doesn't miss anything, and seems more idiomatic.
+
+* Help [2/2]
+** DONE [#A] Persist ~woman~ and ~man~ buffers even though they are popups
+** DONE [#B] Create a function for describing where all invocations of a key sequence is
+*** DONE Check out ~describe-key-briefly~ for how to read keybindings
+*** DONE Create the function in =config.el=
+#+begin_src emacs-lisp :tangle no
+(defun my/alternate-keys (key &optional insert)
+  "Print message listing equivalent alternate key sequences for KEY.
+KEY is a pair (SEQ . RAW-SEQ) of key sequences, where
+RAW-SEQ is the untranslated form of the key sequence SEQ.
+If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
+
+While reading KEY interactively, this command temporarily enables
+menu items or tool-bar buttons that are disabled to allow getting help
+on them."
+  (interactive
+   ;; Ignore mouse movement events because it's too easy to miss the
+   ;; message while moving the mouse.
+   (list (car (help--read-key-sequence 'no-mouse-movement)) current-prefix-arg))
+  (where-is (cadr (help--analyze-key (car key) (cdr key))) insert))
+#+end_src
+
+*** DONE Bind the function to the help keymap
+**** DONE Check out the FAQ for how to do that
+Just use ~map!~. By the way, you need to use =SPC h f map\!= to get help (be
+sure to escape the exclamation point).
+
+#+begin_src emacs-lisp :tangle no
+;; Custom help keys -- these aren't under `+bindings' because they ought to be
+;; universal.
+(define-key! help-map
+  ;; new keybinds
+  "'"    #'describe-char
+  "u"    #'doom/help-autodefs
+  "E"    #'doom/sandbox
+  "M"    #'doom/describe-active-minor-mode
+  "O"    #'+lookup/online
+  "T"    #'doom/toggle-profiler
+  "V"    #'set-variable
+  "W"    #'+default/man-or-woman
+  "C-k"  #'describe-key-briefly
+  "C-l"  #'describe-language-environment
+  "C-m"  #'info-emacs-manual
+
+  ;; Unbind `help-for-help'. Conflicts with which-key's help command for the
+  ;; <leader> h prefix. It's already on ? and F1 anyway.
+  "C-h"  nil
+
+  ;; replacement keybinds
+  ;; replaces `info-emacs-manual' b/c it's on C-m now
+  "r"    nil
+  "rr"   #'doom/reload
+  "rt"   #'doom/reload-theme
+  "rp"   #'doom/reload-packages
+  "rf"   #'doom/reload-font
+  "re"   #'doom/reload-env
+
+  ;; make `describe-bindings' available under the b prefix which it previously
+  ;; occupied. Add more binding related commands under that prefix as well
+  "b"    nil
+  "bb"   #'describe-bindings
+  "bi"   #'which-key-show-minor-mode-keymap
+  "bm"   #'which-key-show-major-mode
+  "bt"   #'which-key-show-top-level
+  "bf"   #'which-key-show-full-keymap
+  "bk"   #'which-key-show-keymap
+
+  ;; replaces `apropos-documentation' b/c `apropos' covers this
+  "d"    nil
+  "db"   #'doom/report-bug
+  "dc"   #'doom/goto-private-config-file
+  "dC"   #'doom/goto-private-init-file
+  "dd"   #'doom-debug-mode
+  "df"   #'doom/help-faq
+  "dh"   #'doom/help
+  "dl"   #'doom/help-search-load-path
+  "dL"   #'doom/help-search-loaded-files
+  "dm"   #'doom/help-modules
+  "dn"   #'doom/help-news
+  "dN"   #'doom/help-search-news
+  "dpc"  #'doom/help-package-config
+  "dpd"  #'doom/goto-private-packages-file
+  "dph"  #'doom/help-package-homepage
+  "dpp"  #'doom/help-packages
+  "ds"   #'doom/help-search-headings
+  "dS"   #'doom/help-search
+  "dt"   #'doom/toggle-profiler
+  "du"   #'doom/help-autodefs
+  "dv"   #'doom/version
+  "dx"   #'doom/sandbox
+
+  ;; replaces `apropos-command'
+  "a"    #'apropos
+  "A"    #'apropos-documentation
+  ;; replaces `describe-copying' b/c not useful
+  "C-c"  #'describe-coding-system
+  ;; replaces `Info-got-emacs-command-node' b/c redundant w/ `Info-goto-node'
+  "F"    #'describe-face
+  ;; replaces `view-hello-file' b/c annoying
+  "h"    nil
+  ;; replaces `view-emacs-news' b/c it's on C-n too
+  "n"    #'doom/help-news
+  ;; replaces `help-with-tutorial', b/c it's less useful than `load-theme'
+  "t"    #'load-theme
+  ;; replaces `finder-by-keyword' b/c not useful
+  "p"    #'doom/help-packages
+  ;; replaces `describe-package' b/c redundant w/ `doom/help-packages'
+  "P"    #'find-library)
+#+end_src
+
+* Org [5/8]
+** TODO [#C] Create headline sorting function
++ Sort by priority, then by by ~TODO~ keyword
++ Reference ~org-sort-entries~
+
+** TODO [#C] Create integration between embedded ~TODO~ and project =todo.org=
+Something like this Atlassian VS Code plugin:
+https://support.atlassian.com/bitbucket-cloud/docs/jira-issues-in-vs-code/
+
++ Embedded ~TODO~ comments:
+  + https://github.com/tarsius/hl-todo
+  + ~hl-todo-keyword-faces~
+  + ~hl-todo-next~, ~hl-todo-previous~, ~hl-todo-occur~
++ Project =todo.org= list:
+  + ~org-capture-templates~
+  + ~counsel-projectile-org-capture-templates~
+  + ~counsel-projectile-org-capture~
++ Integration with Git:
+  + https://github.com/alphapapa/magit-todos
+  + ~magit-todos-list~
+
+** TODO [#C] Figure out how to /easily/ insert screenshots into Org buffers
+Right now, the best way I know how is to take a screenshot using the macOS
+system keybinding (=Cmd-Shift-4=), save it as a file, and then drag and drop the
+file itself (from Finder) into an Org buffer via =+dragndrop=. This takes too
+long. What about ~org-screenshot-take~?
+
+** DONE [#A] Capture Org in separate files for work and otherwise
+** DONE [#A] Do not indent text in bodies of subtrees
+** DONE [#B] Remove file links from org capture
+At least from the personal ones...
+#+begin_src emacs-lisp :tangle no
+(setq org-default-notes-file
+      (expand-file-name +org-capture-notes-file org-directory)
+      +org-capture-journal-file
+      (expand-file-name +org-capture-journal-file org-directory)
+      org-capture-templates
+      '(("t" "Personal todo" entry
+         (file+headline +org-capture-todo-file "Inbox")
+         "* TODO %?\n%i\n%a" :prepend t)
+        ("n" "Personal notes" entry
+         (file+headline +org-capture-notes-file "Inbox")
+         "* %u %?\n%i\n%a" :prepend t)
+        ("j" "Journal" entry
+         (file+olp+datetree +org-capture-journal-file)
+         "* %U %?\n%i\n%a" :prepend t)
+
+        ;; Will use {project-root}/{todo,notes,changelog}.org, unless a
+        ;; {todo,notes,changelog}.org file is found in a parent directory.
+        ;; Uses the basename from `+org-capture-todo-file',
+        ;; `+org-capture-changelog-file' and `+org-capture-notes-file'.
+        ("p" "Templates for projects")
+        ("pt" "Project-local todo" entry  ; {project-root}/todo.org
+         (file+headline +org-capture-project-todo-file "Inbox")
+         "* TODO %?\n%i\n%a" :prepend t)
+        ("pn" "Project-local notes" entry  ; {project-root}/notes.org
+         (file+headline +org-capture-project-notes-file "Inbox")
+         "* %U %?\n%i\n%a" :prepend t)
+        ("pc" "Project-local changelog" entry  ; {project-root}/changelog.org
+         (file+headline +org-capture-project-changelog-file "Unreleased")
+         "* %U %?\n%i\n%a" :prepend t)
+
+        ;; Will use {org-directory}/{+org-capture-projects-file} and store
+        ;; these under {ProjectName}/{Tasks,Notes,Changelog} headings. They
+        ;; support `:parents' to specify what headings to put them under, e.g.
+        ;; :parents ("Projects")
+        ("o" "Centralized templates for projects")
+        ("ot" "Project todo" entry
+         (function +org-capture-central-project-todo-file)
+         "* TODO %?\n %i\n %a"
+         :heading "Tasks"
+         :prepend nil)
+        ("on" "Project notes" entry
+         (function +org-capture-central-project-notes-file)
+         "* %U %?\n %i\n %a"
+         :heading "Notes"
+         :prepend t)
+        ("oc" "Project changelog" entry
+         (function +org-capture-central-project-changelog-file)
+         "* %U %?\n %i\n %a"
+         :heading "Changelog"
+         :prepend t)))
+#+end_src
+
+** DONE [#C] New headings following non-blank entries should come after a blank line
+This one was really sticky.  Finally got it how I like it, though.
+
+** DONE [#C] Make the default Org keyword be '[ ]'
+* Markdown [1/2]
+** DONE [#B] Create ligatures for Markdown
+| Before      | After |
+|-------------+-------|
+| &copy       | ©    |
+| \\.         | .     |
+| \\(         | (     |
+| \\)         | )     |
+| \\-         | -     |
+| <a.*>.*</a> |       |
+
+[[file:~/.config/doom/config.el::;;; ui/ligatures]]
+
+** TODO [#C] Replace Markdown ligatures and syntax hiding with mode-native hiding
+:PROPERTIES:
+:CUSTOM_ID: emacs-1
+:END:
+- [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::defun markdown-toggle-markup-hiding (&optional arg][(defun markdown-toggle-markup-hiding]]
+- [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][;;; Markup Hiding]]
+
+* YAML [0/1]
+** TODO [#A] Set the YAML LSP server to RedHat's implementation
+https://developers.redhat.com/blog/2017/10/18/yaml-language-server-extension-vs-code/
+
+* Python [0/2]
+** TODO [#A] Develop and run a simple "Hello World" program
+** TODO [#B] Set up debugging
+* Typescript [0/2]
+** TODO [#A] Develop and run a simple "Hello World" program
+** TODO [#B] Set up debugging
+Try ~dap-mode~ https://www.youtube.com/watch?v=0bilcQVSlbM
+
+* Miscellany [4/6]
+** DONE [#A] Find undocumented prerequisites via ~executable-find~ in =config.el= files
+Some prerequisites are installed by LSP at run-time, so just use that.
+
+** KILL [#A] Install a package to assign unique names to buffers based on file path
+Not needed.  There's a builtin option.
+
+** TODO [#C] Enable global mode provided by ~page-break-lines~ package at startup
+I could write a custom module to do this, placing it under
+=$DOOMDIR/modules/ui/page-break-lines=. (See the documentation for
+~doom-modules-dirs~.) It would be nice to include a ~CUSTOM~ comment tag over
+the module declaration in the ~doom!~ block of =$DOOMDIR/init.el= just to
+remember that /I/ defined the module.
+
+** HOLD [#C] Add dictionary and thesaurus backends for =SPC s t/T=
+I've done everything that the Doom documentation told me to do, but things
+aren't working very well. Just try it out for yourself and see. Might want to
+open a PR or two.
+
+** DONE [#C] Enable all disabled commands disabled by Emacs and Doom Emacs
+** DONE [#C] Enable emojis (just for =SPC i e=)
