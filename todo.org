@@ -1,6 +1,6 @@
 * Inbox
-* Doom [2/5]
-** TODO [#A] Sync Doom dotfiles
+* Doom [3/5]
+** DONE [#A] Sync Doom dotfiles
 ** DONE [#A] Create a =custom.el= file and load it when present
 + I believe there is a Doom-specific construct for checking for file existence
 + Move my name and email-address to =custom.el=
@@ -204,7 +204,22 @@ sure to escape the exclamation point).
   "P"    #'find-library)
 #+end_src
 
-* Org [5/8]
+* Org [4/10]
+** TODO [#B] Reorganize layout of agenda files and directories
+*** DONE Determine relevant variables and commands
+- ~org-directory~
+- ~org-agenda-files~
+- ~org-attach-directory~
+- ~org-mobile-directory~
+
+| Candidates          | Buffer or File             | Headline          | Text              |
+|---------------------+----------------------------+-------------------+-------------------|
+| Current buffer      |                            | org: =SPC m .=    | global: =SPC s s= |
+| Org buffers         | org: =SPC m ,=             | org: =SPC m /=    |                   |
+| Agenda files        | org: =SPC u SPC u SPC m ,= | global: =SPC n S= |                   |
+| Org directory files | global: =SPC n f=          |                   | global: =SPC n s= |
+
+** TODO [#B] Have progress cookies only reference top-level ~TODO~ items
 ** TODO [#C] Create headline sorting function
 + Sort by priority, then by by ~TODO~ keyword
 + Reference ~org-sort-entries~
@@ -230,6 +245,16 @@ Right now, the best way I know how is to take a screenshot using the macOS
 system keybinding (=Cmd-Shift-4=), save it as a file, and then drag and drop the
 file itself (from Finder) into an Org buffer via =+dragndrop=. This takes too
 long. What about ~org-screenshot-take~?
+
+** TODO [#C] Ignore surrounding tildes for interactive help functions
+Doom's org markup convention is to surround elisp symbols with tildes. However,
+this makes it difficult to use commands such as ~counsel-describe-variable~
+(=SPC h v=), ~counsel-describe-function~ (=SPC h f=), and ~find-function~
+(custom-mapped to =C-h C-f=) for symbols under point.
+
+The current workaround is to select the "object" under point using =v i e= and
+then use the corresponding help command. This works well enough, but is an
+annoying extra step.
 
 ** DONE [#A] Capture Org in separate files for work and otherwise
 ** DONE [#A] Do not indent text in bodies of subtrees
@@ -291,7 +316,6 @@ At least from the personal ones...
 ** DONE [#C] New headings following non-blank entries should come after a blank line
 This one was really sticky.  Finally got it how I like it, though.
 
-** DONE [#C] Make the default Org keyword be '[ ]'
 * Markdown [1/2]
 ** DONE [#B] Create ligatures for Markdown
 | Before      | After |
