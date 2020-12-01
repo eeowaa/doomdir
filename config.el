@@ -82,9 +82,19 @@
 ;;; lang/org
 
 ;; PREREQ mkdir -p ~/Documents/org && ln -s ~/Documents/org ~/org
-;; If you use `org' and don't want your org files in the default location below,
-;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/org/")
+(setq
+      ;; Top-level directory (used by `+default/find-in-notes', etc.)
+      org-directory "~/org"
+
+      ;; Directories to search for agenda files
+      my/org-directories `("work" "life" ,doom-private-dir)
+      org-agenda-files (mapcar (lambda (f)
+                                 (if (file-name-absolute-p f) f
+                                   (expand-file-name f org-directory)))
+                               `("" ,@my/org-directories))
+
+      ;; Only "todo.org" files hold agenda items
+      org-agenda-file-regexp "\\`todo.org\\'")
 
 (after! org
   ;; Do not indent org headlines
