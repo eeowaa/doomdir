@@ -67,6 +67,18 @@
 ;; TODO Experiment with Keychain as a member of `auth-sources'
 
 
+;;; lang/markdown
+
+;; FIXME [emacs-1]
+;; Improve Markdown readability
+;; <https://emacs.stackexchange.com/questions/3753/prettify-symbols-mode-character-replacement-regex>
+(add-to-list 'font-lock-extra-managed-props 'display)
+(font-lock-add-keywords
+ 'markdown-mode
+ '(("<a name=\".*\"></a>" 0 '(face nil display "")) ; <a name=".*"></a> -> ""
+   ("\\(\\\\\\)[().-]" 1 '(face nil display ""))    ; "\?"              -> "?"
+   ("&copy;" 0 '(face nil display "©"))))          ; "&copy;"          -> "©"
+
 ;;; lang/org
 
 ;; PREREQ mkdir -p ~/Documents/org && ln -s ~/Documents/org ~/org
@@ -227,16 +239,6 @@ on them."
 
 
 ;;; uncategorized
-
-;; FIXME [emacs-1]
-;; Improve Markdown readability
-;; <https://emacs.stackexchange.com/questions/3753/prettify-symbols-mode-character-replacement-regex>
-(add-to-list 'font-lock-extra-managed-props 'display)
-(font-lock-add-keywords
- 'markdown-mode
- '(("<a name=\".*\"></a>" 0 '(face nil display "")) ; <a name=".*"></a> -> ""
-   ("\\(\\\\\\)[().-]" 1 '(face nil display ""))    ; "\?"              -> "?"
-   ("&copy;" 0 '(face nil display "©"))))          ; "&copy;"          -> "©"
 
 ;; Give buffers unique names based on file path
 (setq uniquify-buffer-name-style 'forward)
