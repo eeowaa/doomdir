@@ -256,6 +256,10 @@ on them."
 ;; Enable all disabled commands
 (setq disabled-command-function nil)
 
+;; Display ^L characters as horizontal lines
+(use-package! page-break-lines
+  :config (global-page-break-lines-mode))
+
 ;; Load custom config if present
 (load! "custom" doom-emacs-dir t)
 
