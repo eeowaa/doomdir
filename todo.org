@@ -1,5 +1,94 @@
 * Inbox
-* Doom [3/5]
+** TODO [#B] Fix spelling correction
+~+spell/correct~ (=z ==) spits the following error:
+#+begin_quote
+Starting new Ispell process aspell with english dictionary...done
+ispell-init-process: Error: /Users/gouldsam/.config/emacs/.local/etc/ispell/english.pws: The language "english" is not known. This is probably because: the file "/usr/local/Cellar/aspell/0.60.8/lib/aspell-0.60/english.dat" can not be opened for reading.
+#+end_quote
+
+* Upstream [0/3]
+** TODO [#A] Send PRs for Doom Emacs
+*** DONE Set email in Doom repo to GitHub noreply email
+- If you look in the git log, others are doing that
+- My email address: ~7460185+eeowaa@users.noreply.github.com~
+  - From here: https://github.com/settings/emails
+- Set for just that one repo:
+  #+begin_src sh
+  cd ~/.config/emacs
+  git config user.name eeowaa
+  git config user.email '7460185+eeowaa@users.noreply.github.com'
+  #+end_src
+
+*** DONE Get SSH keys set up for GitHub
+- [[https://linuxnatives.net/2019/how-to-create-good-ssh-keys][Use ed25519 cipher]]
+  #+begin_src sh
+  mkdir -p ~/.ssh/github
+  chmod 700 ~/.ssh/github
+  ssh-keygen -t ed25519 -C 7460185+eeowaa@users.noreply.github.com -f ~/.ssh/github/id_ed25519
+  #+end_src
+- Generate password for SSH key in macOS Keychain
+- Upload public part to GitHub
+  - ~/.ssh/github/id_ed25519.pub
+
+*** TODO Integrate SSH keys with Macbook
+https://www.getpagespeed.com/work/proper-use-of-ssh-client-in-mac-os-x
+- Need to restart computer before I can really test
+- In the meantime, I can check the Keychain
+
+*** DONE Set up 2FA hardware device on GitHub
+When registering a new security key, you'll eventually get a "waiting for"
+message. At that point, touch the side of the YubiKey.
+
+*** DONE Add forked repo as remote and fetch
+#+begin_src sh
+cd ~/.config/emacs
+git remote add eeowaa git@github.com:eeowaa/doom-emacs.git
+git fetch eeowaa
+#+end_src
+
+** TODO [#C] Fix documentation for session persistence
+This just doesn't make any sense:
+#+begin_quote
+You can supply either a name to load a specific session to replace your current
+one.
+#+end_quote
+
+[[file:~/.config/emacs/modules/ui/workspaces/README.org::*Session persistence][Session persistence]]
+
+** TODO [#C] Fix documentation for automatic workspaces
+[[file:modules/ui/workspaces/README.org::*Automatic workspaces][modules/ui/workspaces/README.org]]:
+#+begin_quote
+A workspace is automatically created (and switched to) when you:
+
++ Create a new frame (with =make-frame=; bound to =M-N= by default).
+#+end_quote
+
+The =M-N= keybinding is incorrect, both for Evil mode and regular Emacs
+keybindings.
+
+** TODO [#C] Reconcile discrepancies in documentation for Doom font variables
+- [[file:~/.config/emacs/modules/ui/doom/README.org::*Changing fonts][modules/ui/doom/README.org]]:
+  #+begin_quote
+  core/core-ui.el has four relevant variables
+
+  + ~doom-font~ :: the default font to use in Doom Emacs.
+  + ~doom-big-font~ :: the font to use when ~doom-big-font-mode~ is enabled.
+  + ~doom-variable-font~ :: the font to use when ~variable-pitch-mode~ is active (or where the ~variable-pitch~ face is used).
+  + ~doom-unicode-font~ :: the font used to display unicode symbols. This is ignored if the =:ui unicode= module is enabled.
+  #+end_quote
+
+- [[file:~/.config/emacs/core/templates/config.example.el::;; Doom exposes five (optional) variables for controlling fonts in Doom. Here][core/templates/config.example.el]]:
+  #+begin_quote
+  ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
+  ;; are the three important ones:
+  ;;
+  ;; + `doom-font'
+  ;; + `doom-variable-pitch-font'
+  ;; + `doom-big-font' -- used for `doom-big-font-mode'; use this for
+  ;;   presentations or streaming.
+  #+end_quote
+
+* Config [3/6]
 ** DONE [#A] Sync Doom dotfiles
 ** DONE [#A] Create a =custom.el= file and load it when present
 + I believe there is a Doom-specific construct for checking for file existence
@@ -94,8 +183,173 @@ doom info | sed -n \
 
 Which doesn't miss anything, and seems more idiomatic.
 
-* Help [2/2]
+** TODO [#C] Figure out how to patch specific functions in Doom
+- =el-patch= looks great: https://github.com/raxod502/el-patch
+  - Doesn't look like it's used in Doom Emacs
+
+*** TODO Check the Doom documentation
+*** HOLD Ask on Discord
+* Org [5/12]
+** TODO [#A] Display distinguishable name in refile targets
+** DONE [#A] Capture Org in separate files for work and otherwise
+** DONE [#A] Do not indent text in bodies of subtrees
+** TODO [#B] Have progress cookies only reference top-level ~TODO~ items
+** TODO [#B] Display parent directory instead of "todo.org" for Org agenda
+Currently, the agenda displays "todo.org" for entries in =~/org/todo.org=,
+=~/org/work/todo.org=, and =~/org/life/todo.org=. I would rather it just display
+"org", "work", and "life", respectively.
+
+- ~org-todo-list~ (=SPC o a t=)
+- ~org-agenda-prefix-format~
+
+** DONE [#B] Remove file links from org capture
+At least from the personal ones...
+#+begin_src emacs-lisp :tangle no
+(setq org-default-notes-file
+      (expand-file-name +org-capture-notes-file org-directory)
+      +org-capture-journal-file
+      (expand-file-name +org-capture-journal-file org-directory)
+      org-capture-templates
+      '(("t" "Personal todo" entry
+         (file+headline +org-capture-todo-file "Inbox")
+         "* TODO %?\n%i\n%a" :prepend t)
+        ("n" "Personal notes" entry
+         (file+headline +org-capture-notes-file "Inbox")
+         "* %u %?\n%i\n%a" :prepend t)
+        ("j" "Journal" entry
+         (file+olp+datetree +org-capture-journal-file)
+         "* %U %?\n%i\n%a" :prepend t)
+
+        ;; Will use {project-root}/{todo,notes,changelog}.org, unless a
+        ;; {todo,notes,changelog}.org file is found in a parent directory.
+        ;; Uses the basename from `+org-capture-todo-file',
+        ;; `+org-capture-changelog-file' and `+org-capture-notes-file'.
+        ("p" "Templates for projects")
+        ("pt" "Project-local todo" entry  ; {project-root}/todo.org
+         (file+headline +org-capture-project-todo-file "Inbox")
+         "* TODO %?\n%i\n%a" :prepend t)
+        ("pn" "Project-local notes" entry  ; {project-root}/notes.org
+         (file+headline +org-capture-project-notes-file "Inbox")
+         "* %U %?\n%i\n%a" :prepend t)
+        ("pc" "Project-local changelog" entry  ; {project-root}/changelog.org
+         (file+headline +org-capture-project-changelog-file "Unreleased")
+         "* %U %?\n%i\n%a" :prepend t)
+
+        ;; Will use {org-directory}/{+org-capture-projects-file} and store
+        ;; these under {ProjectName}/{Tasks,Notes,Changelog} headings. They
+        ;; support `:parents' to specify what headings to put them under, e.g.
+        ;; :parents ("Projects")
+        ("o" "Centralized templates for projects")
+        ("ot" "Project todo" entry
+         (function +org-capture-central-project-todo-file)
+         "* TODO %?\n %i\n %a"
+         :heading "Tasks"
+         :prepend nil)
+        ("on" "Project notes" entry
+         (function +org-capture-central-project-notes-file)
+         "* %U %?\n %i\n %a"
+         :heading "Notes"
+         :prepend t)
+        ("oc" "Project changelog" entry
+         (function +org-capture-central-project-changelog-file)
+         "* %U %?\n %i\n %a"
+         :heading "Changelog"
+         :prepend t)))
+#+end_src
+
+** DONE [#B] Reorganize layout of agenda files and directories
+*** DONE Determine relevant variables and commands
+- ~org-directory~
+- ~org-agenda-files~
+- ~org-attach-directory~
+- ~org-mobile-directory~
+
+| Candidates          | Buffer or File             | Headline          | Text              |
+|---------------------+----------------------------+-------------------+-------------------|
+| Current buffer      |                            | org: =SPC m .=    | global: =SPC s s= |
+| Org buffers         | org: =SPC m ,=             | org: =SPC m /=    |                   |
+| Agenda files        | org: =SPC u SPC u SPC m ,= | global: =SPC n S= |                   |
+| Org directory files | global: =SPC n f=          |                   | global: =SPC n s= |
+
+** TODO [#C] Create headline sorting function
++ Sort by priority, then by by ~TODO~ keyword
++ Reference ~org-sort-entries~
+
+** TODO [#C] Create integration between embedded ~TODO~ and project =todo.org=
+Something like this Atlassian VS Code plugin:
+https://support.atlassian.com/bitbucket-cloud/docs/jira-issues-in-vs-code/
+
++ Embedded ~TODO~ comments:
+  + https://github.com/tarsius/hl-todo
+  + ~hl-todo-keyword-faces~
+  + ~hl-todo-next~, ~hl-todo-previous~, ~hl-todo-occur~
++ Project =todo.org= list:
+  + ~org-capture-templates~
+  + ~counsel-projectile-org-capture-templates~
+  + ~counsel-projectile-org-capture~
++ Integration with Git:
+  + https://github.com/alphapapa/magit-todos
+  + ~magit-todos-list~
+
+** TODO [#C] Figure out how to /easily/ insert screenshots into Org buffers
+Right now, the best way I know how is to take a screenshot using the macOS
+system keybinding (=Cmd-Shift-4=), save it as a file, and then drag and drop the
+file itself (from Finder) into an Org buffer via =+dragndrop=. This takes too
+long. What about ~org-screenshot-take~?
+
+** TODO [#C] Ignore surrounding tildes for interactive help functions
+Doom's org markup convention is to surround elisp symbols with tildes. However,
+this makes it difficult to use commands such as ~counsel-describe-variable~
+(=SPC h v=), ~counsel-describe-function~ (=SPC h f=), and ~find-function~
+(custom-mapped to =C-h C-f=) for symbols under point.
+
+The current workaround is to select the "object" under point using =v i e= and
+then use the corresponding help command. This works well enough, but is an
+annoying extra step.
+
+** DONE [#C] New headings following non-blank entries should come after a blank line
+This one was really sticky.  Finally got it how I like it, though.
+
+* Markdown [1/2]
+** DONE [#B] Create ligatures for Markdown
+| Before      | After |
+|-------------+-------|
+| &copy       | ©    |
+| \\.         | .     |
+| \\(         | (     |
+| \\)         | )     |
+| \\-         | -     |
+| <a.*>.*</a> |       |
+
+[[file:~/.config/doom/config.el::;;; ui/ligatures]]
+
+** TODO [#C] Replace Markdown ligatures and syntax hiding with mode-native hiding
+:PROPERTIES:
+:CUSTOM_ID: emacs-1
+:END:
+- [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::defun markdown-toggle-markup-hiding (&optional arg][(defun markdown-toggle-markup-hiding]]
+- [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][;;; Markup Hiding]]
+
+* YAML [0/1]
+** TODO [#A] Set the YAML LSP server to RedHat's implementation
+https://developers.redhat.com/blog/2017/10/18/yaml-language-server-extension-vs-code/
+
+* Python [0/2]
+** TODO [#A] Develop and run a simple "Hello World" program
+** TODO [#B] Set up debugging
+* Typescript [0/2]
+** TODO [#A] Develop and run a simple "Hello World" program
+** TODO [#B] Set up debugging
+Try ~dap-mode~ https://www.youtube.com/watch?v=0bilcQVSlbM
+
+* Miscellany [7/10]
+** DONE [#A] Find undocumented prerequisites via ~executable-find~ in =config.el= files
+Some prerequisites are installed by LSP at run-time, so just use that.
+
 ** DONE [#A] Persist ~woman~ and ~man~ buffers even though they are popups
+** KILL [#A] Install a package to assign unique names to buffers based on file path
+Not needed.  There's a builtin option.
+
 ** DONE [#B] Create a function for describing where all invocations of a key sequence is
 *** DONE Check out ~describe-key-briefly~ for how to read keybindings
 *** DONE Create the function in =config.el=
@@ -204,163 +458,19 @@ sure to escape the exclamation point).
   "P"    #'find-library)
 #+end_src
 
-* Org [4/10]
-** TODO [#B] Reorganize layout of agenda files and directories
-*** DONE Determine relevant variables and commands
-- ~org-directory~
-- ~org-agenda-files~
-- ~org-attach-directory~
-- ~org-mobile-directory~
+** TODO [#C] Figure out how to use ~projectile-edit-dir-locals~ (=SPC p e=)
+https://www.emacswiki.org/emacs/SkeletonMode
 
-| Candidates          | Buffer or File             | Headline          | Text              |
-|---------------------+----------------------------+-------------------+-------------------|
-| Current buffer      |                            | org: =SPC m .=    | global: =SPC s s= |
-| Org buffers         | org: =SPC m ,=             | org: =SPC m /=    |                   |
-| Agenda files        | org: =SPC u SPC u SPC m ,= | global: =SPC n S= |                   |
-| Org directory files | global: =SPC n f=          |                   | global: =SPC n s= |
-
-** TODO [#B] Have progress cookies only reference top-level ~TODO~ items
-** TODO [#C] Create headline sorting function
-+ Sort by priority, then by by ~TODO~ keyword
-+ Reference ~org-sort-entries~
-
-** TODO [#C] Create integration between embedded ~TODO~ and project =todo.org=
-Something like this Atlassian VS Code plugin:
-https://support.atlassian.com/bitbucket-cloud/docs/jira-issues-in-vs-code/
-
-+ Embedded ~TODO~ comments:
-  + https://github.com/tarsius/hl-todo
-  + ~hl-todo-keyword-faces~
-  + ~hl-todo-next~, ~hl-todo-previous~, ~hl-todo-occur~
-+ Project =todo.org= list:
-  + ~org-capture-templates~
-  + ~counsel-projectile-org-capture-templates~
-  + ~counsel-projectile-org-capture~
-+ Integration with Git:
-  + https://github.com/alphapapa/magit-todos
-  + ~magit-todos-list~
-
-** TODO [#C] Figure out how to /easily/ insert screenshots into Org buffers
-Right now, the best way I know how is to take a screenshot using the macOS
-system keybinding (=Cmd-Shift-4=), save it as a file, and then drag and drop the
-file itself (from Finder) into an Org buffer via =+dragndrop=. This takes too
-long. What about ~org-screenshot-take~?
-
-** TODO [#C] Ignore surrounding tildes for interactive help functions
-Doom's org markup convention is to surround elisp symbols with tildes. However,
-this makes it difficult to use commands such as ~counsel-describe-variable~
-(=SPC h v=), ~counsel-describe-function~ (=SPC h f=), and ~find-function~
-(custom-mapped to =C-h C-f=) for symbols under point.
-
-The current workaround is to select the "object" under point using =v i e= and
-then use the corresponding help command. This works well enough, but is an
-annoying extra step.
-
-** DONE [#A] Capture Org in separate files for work and otherwise
-** DONE [#A] Do not indent text in bodies of subtrees
-** DONE [#B] Remove file links from org capture
-At least from the personal ones...
-#+begin_src emacs-lisp :tangle no
-(setq org-default-notes-file
-      (expand-file-name +org-capture-notes-file org-directory)
-      +org-capture-journal-file
-      (expand-file-name +org-capture-journal-file org-directory)
-      org-capture-templates
-      '(("t" "Personal todo" entry
-         (file+headline +org-capture-todo-file "Inbox")
-         "* TODO %?\n%i\n%a" :prepend t)
-        ("n" "Personal notes" entry
-         (file+headline +org-capture-notes-file "Inbox")
-         "* %u %?\n%i\n%a" :prepend t)
-        ("j" "Journal" entry
-         (file+olp+datetree +org-capture-journal-file)
-         "* %U %?\n%i\n%a" :prepend t)
-
-        ;; Will use {project-root}/{todo,notes,changelog}.org, unless a
-        ;; {todo,notes,changelog}.org file is found in a parent directory.
-        ;; Uses the basename from `+org-capture-todo-file',
-        ;; `+org-capture-changelog-file' and `+org-capture-notes-file'.
-        ("p" "Templates for projects")
-        ("pt" "Project-local todo" entry  ; {project-root}/todo.org
-         (file+headline +org-capture-project-todo-file "Inbox")
-         "* TODO %?\n%i\n%a" :prepend t)
-        ("pn" "Project-local notes" entry  ; {project-root}/notes.org
-         (file+headline +org-capture-project-notes-file "Inbox")
-         "* %U %?\n%i\n%a" :prepend t)
-        ("pc" "Project-local changelog" entry  ; {project-root}/changelog.org
-         (file+headline +org-capture-project-changelog-file "Unreleased")
-         "* %U %?\n%i\n%a" :prepend t)
-
-        ;; Will use {org-directory}/{+org-capture-projects-file} and store
-        ;; these under {ProjectName}/{Tasks,Notes,Changelog} headings. They
-        ;; support `:parents' to specify what headings to put them under, e.g.
-        ;; :parents ("Projects")
-        ("o" "Centralized templates for projects")
-        ("ot" "Project todo" entry
-         (function +org-capture-central-project-todo-file)
-         "* TODO %?\n %i\n %a"
-         :heading "Tasks"
-         :prepend nil)
-        ("on" "Project notes" entry
-         (function +org-capture-central-project-notes-file)
-         "* %U %?\n %i\n %a"
-         :heading "Notes"
-         :prepend t)
-        ("oc" "Project changelog" entry
-         (function +org-capture-central-project-changelog-file)
-         "* %U %?\n %i\n %a"
-         :heading "Changelog"
-         :prepend t)))
-#+end_src
-
-** DONE [#C] New headings following non-blank entries should come after a blank line
-This one was really sticky.  Finally got it how I like it, though.
-
-* Markdown [1/2]
-** DONE [#B] Create ligatures for Markdown
-| Before      | After |
-|-------------+-------|
-| &copy       | ©    |
-| \\.         | .     |
-| \\(         | (     |
-| \\)         | )     |
-| \\-         | -     |
-| <a.*>.*</a> |       |
-
-[[file:~/.config/doom/config.el::;;; ui/ligatures]]
-
-** TODO [#C] Replace Markdown ligatures and syntax hiding with mode-native hiding
-:PROPERTIES:
-:CUSTOM_ID: emacs-1
-:END:
-- [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::defun markdown-toggle-markup-hiding (&optional arg][(defun markdown-toggle-markup-hiding]]
-- [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][;;; Markup Hiding]]
-
-* YAML [0/1]
-** TODO [#A] Set the YAML LSP server to RedHat's implementation
-https://developers.redhat.com/blog/2017/10/18/yaml-language-server-extension-vs-code/
-
-* Python [0/2]
-** TODO [#A] Develop and run a simple "Hello World" program
-** TODO [#B] Set up debugging
-* Typescript [0/2]
-** TODO [#A] Develop and run a simple "Hello World" program
-** TODO [#B] Set up debugging
-Try ~dap-mode~ https://www.youtube.com/watch?v=0bilcQVSlbM
-
-* Miscellany [4/6]
-** DONE [#A] Find undocumented prerequisites via ~executable-find~ in =config.el= files
-Some prerequisites are installed by LSP at run-time, so just use that.
-
-** KILL [#A] Install a package to assign unique names to buffers based on file path
-Not needed.  There's a builtin option.
-
-** TODO [#C] Enable global mode provided by ~page-break-lines~ package at startup
-I could write a custom module to do this, placing it under
+** TODO [#C] Create custom module =:ui page-break-lines=
+Although I already have the =page-break-lines= package installed in
+=$DOOMDIR/packages.el= and ~global-page-break-lines-mode~ enabled in
+=$DOOMDIR/config.el=, I could write a custom module to do this, placing it under
 =$DOOMDIR/modules/ui/page-break-lines=. (See the documentation for
-~doom-modules-dirs~.) It would be nice to include a ~CUSTOM~ comment tag over
-the module declaration in the ~doom!~ block of =$DOOMDIR/init.el= just to
-remember that /I/ defined the module.
+~doom-modules-dirs~.)  This would be an easy introduction to writing modules.
+
+It would be nice to include a ~CUSTOM~ comment tag over the module declaration
+in the ~doom!~ block of =$DOOMDIR/init.el= just to remember that /I/ defined the
+module.
 
 ** HOLD [#C] Add dictionary and thesaurus backends for =SPC s t/T=
 I've done everything that the Doom documentation told me to do, but things
@@ -369,3 +479,4 @@ open a PR or two.
 
 ** DONE [#C] Enable all disabled commands disabled by Emacs and Doom Emacs
 ** DONE [#C] Enable emojis (just for =SPC i e=)
+** DONE [#C] Configure =counsel-spotify= in local config file
