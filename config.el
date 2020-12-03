@@ -40,10 +40,16 @@
 
 ;;; ui/popup
 
-;; (Wo)Man buffers and windows should stick around until I close them
-(set-popup-rule!
-  "^\\*\\(?:Wo\\)?Man "
-  :vslot -6 :size 0.45 :select t :quit 'current :ttl nil)
+;;; Configure popup buffers
+(set-popup-rules!
+  '(
+    ;; (Wo)Man buffers and windows should stick around until I close them
+    ("^\\*\\(?:Wo\\)?Man "
+     :vslot -6 :size 0.45 :select t :quit current :ttl nil)
+
+    ;; NOAA weather reports open to the left (like "*undo-tree*" buffers)
+    ("^\\*noaa\\.el\\*$"
+     :slot 1 :side left :size 70 :select t :quit t)))
 
 ;; TODO Modify popup behavior for Customize buffers
 
