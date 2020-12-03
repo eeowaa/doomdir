@@ -1,12 +1,20 @@
+#+STARTUP:  overview
+#+FILETAGS: :doom:
 * Inbox
+:PROPERTIES:
+:CATEGORY: doom/inbox
+:END:
 ** TODO [#B] Fix spelling correction
 ~+spell/correct~ (=z ==) spits the following error:
 #+begin_quote
 Starting new Ispell process aspell with english dictionary...done
-ispell-init-process: Error: /Users/gouldsam/.config/emacs/.local/etc/ispell/english.pws: The language "english" is not known. This is probably because: the file "/usr/local/Cellar/aspell/0.60.8/lib/aspell-0.60/english.dat" can not be opened for reading.
+ispell-init-process: Error: /Users/eeowaa/.config/emacs/.local/etc/ispell/english.pws: The language "english" is not known. This is probably because: the file "/usr/local/Cellar/aspell/0.60.8/lib/aspell-0.60/english.dat" can not be opened for reading.
 #+end_quote
 
 * Upstream [0/3]
+:PROPERTIES:
+:CATEGORY: doom/upstream
+:END:
 ** TODO [#A] Send PRs for Doom Emacs
 *** DONE Set email in Doom repo to GitHub noreply email
 - If you look in the git log, others are doing that
@@ -89,6 +97,9 @@ keybindings.
   #+end_quote
 
 * Config [3/6]
+:PROPERTIES:
+:CATEGORY: doom/config
+:END:
 ** DONE [#A] Sync Doom dotfiles
 ** DONE [#A] Create a =custom.el= file and load it when present
 + I believe there is a Doom-specific construct for checking for file existence
@@ -190,6 +201,9 @@ Which doesn't miss anything, and seems more idiomatic.
 *** TODO Check the Doom documentation
 *** HOLD Ask on Discord
 * Org [5/12]
+:PROPERTIES:
+:CATEGORY: doom/org
+:END:
 ** TODO [#A] Display distinguishable name in refile targets
 ** DONE [#A] Capture Org in separate files for work and otherwise
 ** DONE [#A] Do not indent text in bodies of subtrees
@@ -311,6 +325,9 @@ annoying extra step.
 This one was really sticky.  Finally got it how I like it, though.
 
 * Markdown [1/2]
+:PROPERTIES:
+:CATEGORY: doom/markdown
+:END:
 ** DONE [#B] Create ligatures for Markdown
 | Before      | After |
 |-------------+-------|
@@ -331,18 +348,30 @@ This one was really sticky.  Finally got it how I like it, though.
 - [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][;;; Markup Hiding]]
 
 * YAML [0/1]
+:PROPERTIES:
+:CATEGORY: doom/yaml
+:END:
 ** TODO [#A] Set the YAML LSP server to RedHat's implementation
 https://developers.redhat.com/blog/2017/10/18/yaml-language-server-extension-vs-code/
 
 * Python [0/2]
+:PROPERTIES:
+:CATEGORY: doom/python
+:END:
 ** TODO [#A] Develop and run a simple "Hello World" program
 ** TODO [#B] Set up debugging
 * Typescript [0/2]
+:PROPERTIES:
+:CATEGORY: doom/ts
+:END:
 ** TODO [#A] Develop and run a simple "Hello World" program
 ** TODO [#B] Set up debugging
 Try ~dap-mode~ https://www.youtube.com/watch?v=0bilcQVSlbM
 
 * Miscellany [7/10]
+:PROPERTIES:
+:CATEGORY: doom/misc
+:END:
 ** DONE [#A] Find undocumented prerequisites via ~executable-find~ in =config.el= files
 Some prerequisites are installed by LSP at run-time, so just use that.
 
