@@ -48,6 +48,12 @@
 ;; TODO Modify popup behavior for Customize buffers
 
 
+;;; editor/evil
+
+;; Define modes that should always come up in Emacs state
+(pushnew! evil-emacs-state-modes 'noaa-mode)
+
+
 ;;; os/macos
 
 ;; Remap keys for macOS
