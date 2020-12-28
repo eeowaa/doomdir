@@ -4,14 +4,27 @@
 :PROPERTIES:
 :CATEGORY: doom/inbox
 :END:
-** TODO [#B] Fix spelling correction
-~+spell/correct~ (=z ==) spits the following error:
-#+begin_quote
-Starting new Ispell process aspell with english dictionary...done
-ispell-init-process: Error: /Users/eeowaa/.config/emacs/.local/etc/ispell/english.pws: The language "english" is not known. This is probably because: the file "/usr/local/Cellar/aspell/0.60.8/lib/aspell-0.60/english.dat" can not be opened for reading.
-#+end_quote
+** TODO [#B] Figure out the autosave and backup situation for Doom Emacs
+Compare with my old config and try to match it
 
-* Upstream [0/3]
+** TODO [#C] Create method to store link from =eshell= buffers
+Just store the current working directory.
+
+** TODO [#C] Fix eshell for operations that output lots of ANSI color escape codes
+Just try ~rg~ or ~fd~ somewhere in =~/.config/emacs= and you'll eventually see
+the escape codes instead of colors being output. The only workaround I know of
+now is to use =vterm= instead of =eshell=.
+
+** TODO [#C] Fix ImageMagick display of images
+** TODO [#A] Fix the size of the popup buffer invoked by =M-x lsp=
+/Note that ~lsp~ is invoked when you enter a buffer, as well/.
+
+When the frame is too small (e.g. its default size), the first few menu items in
+the popup window are cut off, and all you see are options to exclude the file
+from the LSP workspace. Unless you know about the other available options, LSP
+won't work for you. Unfortunately, resizing the frame does not help.
+
+* Upstream [0/5]
 :PROPERTIES:
 :CATEGORY: doom/upstream
 :END:
@@ -52,6 +65,31 @@ message. At that point, touch the side of the YubiKey.
 cd ~/.config/emacs
 git remote add eeowaa git@github.com:eeowaa/doom-emacs.git
 git fetch eeowaa
+#+end_src
+
+** TODO [#B] Submit a PR for =lsp-yaml=
+The ~lsp-yaml-download-schema-store-db~ function is flawed:
+
+#+begin_src elisp
+(defun lsp-yaml-download-schema-store-db (&optional force-downloading)
+  "Download the remote schema store at `lsp-yaml-schema-store-uri' into local cache.
+Set FORCE-DOWNLOADING to non-nil to force re-download the database."
+  (interactive "P")
+  (or force-downloading ;; FIXME We shouldn't short-circuit here!
+      (file-exists-p lsp-yaml-schema-store-local-db)
+      (url-copy-file lsp-yaml-schema-store-uri lsp-yaml-schema-store-local-db)))
+#+end_src
+
+Better implementation:
+
+#+begin_src elisp
+(defun lsp-yaml-download-schema-store-db (&optional force-downloading)
+  "Download the remote schema store at `lsp-yaml-schema-store-uri' into local cache.
+Set FORCE-DOWNLOADING to non-nil to force re-download the database."
+  (interactive "P")
+  (when (or force-downloading
+            (not (file-exists-p lsp-yaml-schema-store-local-db)))
+    (url-copy-file lsp-yaml-schema-store-uri lsp-yaml-schema-store-local-db)))
 #+end_src
 
 ** TODO [#C] Fix documentation for session persistence
@@ -200,15 +238,26 @@ Which doesn't miss anything, and seems more idiomatic.
 
 *** TODO Check the Doom documentation
 *** HOLD Ask on Discord
-* Org [5/12]
+* Org [9/16]
 :PROPERTIES:
 :CATEGORY: doom/org
 :END:
-** TODO [#A] Display distinguishable name in refile targets
+** DONE [#A] Display distinguishable name in refile targets
+Well, it's distinguishable, but I don't like seeing the entire path. I guess
+this counts as done, and I'll continue to shorten the path (but that will be a
+lower-priority item).
+
 ** DONE [#A] Capture Org in separate files for work and otherwise
 ** DONE [#A] Do not indent text in bodies of subtrees
-** TODO [#B] Have progress cookies only reference top-level ~TODO~ items
-** TODO [#B] Display parent directory instead of "todo.org" for Org agenda
+** DONE [#A] Indent Org source blocks
+Refer to your old dotfiles.
+
+** TODO [#B] Fix org headline insert hook
+I do not want there to be a blank line after drawers or scheduling information:
+- [ ] ~^:END:$~
+- [ ] ~^\\(?:DEADLINE\\|SCHEDULED\\):~
+
+** DONE [#B] Display parent directory instead of "todo.org" for Org agenda
 Currently, the agenda displays "todo.org" for entries in =~/org/todo.org=,
 =~/org/work/todo.org=, and =~/org/life/todo.org=. I would rather it just display
 "org", "work", and "life", respectively.
@@ -285,6 +334,12 @@ At least from the personal ones...
 | Agenda files        | org: =SPC u SPC u SPC m ,= | global: =SPC n S= |                   |
 | Org directory files | global: =SPC n f=          |                   | global: =SPC n s= |
 
+** DONE [#B] Have progress cookies only reference top-level ~TODO~ items
+Turns out this is already the case. I just wasn't updating the cookies.
+
+** TODO [#C] Use Org speed keys
+Just apply your old configuration
+
 ** TODO [#C] Create headline sorting function
 + Sort by priority, then by by ~TODO~ keyword
 + Reference ~org-sort-entries~
@@ -321,6 +376,10 @@ The current workaround is to select the "object" under point using =v i e= and
 then use the corresponding help command. This works well enough, but is an
 annoying extra step.
 
+** TODO [#C] Fix alignment for agenda view (the one with the dates)
+- https://www.reddit.com/r/orgmode/comments/6ybjjw/aligned_agenda_view_anyway_to_make_this_more/
+- IIRC, this is called the "fancy diary"
+
 ** DONE [#C] New headings following non-blank entries should come after a blank line
 This one was really sticky.  Finally got it how I like it, though.
 
@@ -347,18 +406,31 @@ This one was really sticky.  Finally got it how I like it, though.
 - [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::defun markdown-toggle-markup-hiding (&optional arg][(defun markdown-toggle-markup-hiding]]
 - [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][;;; Markup Hiding]]
 
-* YAML [0/1]
+* YAML [1/2]
 :PROPERTIES:
 :CATEGORY: doom/yaml
 :END:
-** TODO [#A] Set the YAML LSP server to RedHat's implementation
+** DONE [#A] Set the YAML LSP server to RedHat's implementation
 https://developers.redhat.com/blog/2017/10/18/yaml-language-server-extension-vs-code/
 
-* Python [0/2]
+Every time I try to use LSP with ~yamlls~, this is what I get:
+: Server yamlls:4133 status:starting exited with status exit. Do you want to restart it? (y or n)
+
+Got it working. See the ~PREREQ~ lines for the =yaml= module in
+=$DOOMDIR/init.el=. Could use some cleanup.
+
+** TODO Import the CloudFormation YAML schema
+- ~lsp-yaml-schemas~
+
+* Python [1/2]
 :PROPERTIES:
 :CATEGORY: doom/python
 :END:
-** TODO [#A] Develop and run a simple "Hello World" program
+** DONE [#A] Develop and run a simple "Hello World" program
+More than a simple "Hello World":
+- [[file:~/src/life/secret-santa/][Secret Santa project]]
+- [[file:~/Documents/org/life/notes.org::*Developing with interpreted languages][Notes for developing with interpreted languages]]
+
 ** TODO [#B] Set up debugging
 * Typescript [0/2]
 :PROPERTIES:
@@ -368,14 +440,20 @@ https://developers.redhat.com/blog/2017/10/18/yaml-language-server-extension-vs-
 ** TODO [#B] Set up debugging
 Try ~dap-mode~ https://www.youtube.com/watch?v=0bilcQVSlbM
 
-* Miscellany [7/10]
+* Miscellany [10/18]
 :PROPERTIES:
 :CATEGORY: doom/misc
 :END:
+** DONE [#A] Do not auto-insert pairs of quotes
+More than half the time, I do not want that behavior.
+
 ** DONE [#A] Find undocumented prerequisites via ~executable-find~ in =config.el= files
 Some prerequisites are installed by LSP at run-time, so just use that.
 
 ** DONE [#A] Persist ~woman~ and ~man~ buffers even though they are popups
+** DONE [#A] Have ^L bring to the top first (like clearing the screen)
+This is in my old Emacs config
+
 ** KILL [#A] Install a package to assign unique names to buffers based on file path
 Not needed.  There's a builtin option.
 
@@ -487,6 +565,25 @@ sure to escape the exclamation point).
   "P"    #'find-library)
 #+end_src
 
+** TODO [#B] Make a toggle for ~auto-fill-mode~
+** TODO [#B] Fix spelling correction
+~+spell/correct~ (=z ==) spits the following error:
+#+begin_quote
+Starting new Ispell process aspell with english dictionary...done
+ispell-init-process: Error: /Users/eeowaa/.config/emacs/.local/etc/ispell/english.pws: The language "english" is not known. This is probably because: the file "/usr/local/Cellar/aspell/0.60.8/lib/aspell-0.60/english.dat" can not be opened for reading.
+#+end_quote
+
+** TODO [#B] Always trust file-location and directory-local variables
+At least for all files in allowed paths (e.g. my source code).
+
+** TODO [#C] Remove =~/.emacs/local= subdirectories from known projects
+#+begin_src elisp
+(after! projectile
+  (dolist (f (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)))
+    (when (and (file-directory-p f) (not (member f '("." ".."))))
+      (push (abbreviate-file-name f) projectile-globally-ignored-directories))))
+#+end_src
+
 ** TODO [#C] Figure out how to use ~projectile-edit-dir-locals~ (=SPC p e=)
 https://www.emacswiki.org/emacs/SkeletonMode
 
@@ -501,6 +598,9 @@ It would be nice to include a ~CUSTOM~ comment tag over the module declaration
 in the ~doom!~ block of =$DOOMDIR/init.el= just to remember that /I/ defined the
 module.
 
+** TODO [#C] Replace =C-?= with backspace
+We already have =C-r=, so might as well replace this mostly-useless keybinding.
+
 ** HOLD [#C] Add dictionary and thesaurus backends for =SPC s t/T=
 I've done everything that the Doom documentation told me to do, but things
 aren't working very well. Just try it out for yourself and see. Might want to
@@ -509,3 +609,8 @@ open a PR or two.
 ** DONE [#C] Enable all disabled commands disabled by Emacs and Doom Emacs
 ** DONE [#C] Enable emojis (just for =SPC i e=)
 ** DONE [#C] Configure =counsel-spotify= in local config file
+** KILL [#C] Replace npm symbol in Treemacs with something better
+Currently, it is an image with a white background (at least in the ~dracula~
+theme -- maybe it's different with themes with jet black backgrounds)
+
+After upgrading Doom Emacs, I don't see the problem anymore.

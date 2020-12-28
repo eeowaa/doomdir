@@ -14,7 +14,7 @@
 
 ;; Set the font and theme
 ;; PREREQ brew install font-terminus
-(setq doom-font (font-spec :family "Terminus (TTF)" :size 16)
+(setq doom-font (font-spec :family "Menlo" :size 16)
       doom-theme 'doom-henna)
 
 ;;; ui/fill-column
@@ -33,6 +33,45 @@
                   ("PREREQ" font-lock-doc-face bold))
                 hl-todo-keyword-faces)))
 
+;;; ui/hydra
+
+(defhydra hydra-game (:color blue :hint nil)
+  "
+^Arcade^      ^Puzzle^        ^Board^          ^Text^        ^Self-Playing^
+^-^-----------^-^--------------------------------------------^-^-----------
+_t_: Tetris   _5_: 5x5        _g_: Gomoku      _a_: Dunnet   _l_: Life
+_s_: Snake    _b_: Blackbox   _i_: Solitaire   _d_: Doctor   _h_: Hanoi
+_p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
+^ ^           _o_: Bubbles
+"
+  ;; Arcade
+  ("t" tetris)
+  ("s" snake)
+  ("p" pong)
+
+  ;; Puzzle
+  ("5" 5x5)
+  ("b" blackbox)
+  ("m" mpuz)
+  ("o" bubbles)
+
+  ;; Board
+  ("i" solitaire)
+  ("g" gomoku)
+
+  ;; Text
+  ("a" dunnet)
+  ("d" doctor)
+
+  ;; Self-Playing
+  ("l" life)
+  ("h" hanoi)
+  ("z" zone)
+
+  ;; Other
+  ("q" nil))
+(global-set-key (kbd "C-c g") #'hydra-game/body)
+
 ;;; ui/ligatures
 
 ;; Only enable extra ligatures in Org mode (for now)
@@ -40,10 +79,14 @@
 
 ;;; ui/popup
 
-;; (Wo)Man buffers and windows should stick around until I close them
-(set-popup-rule!
-  "^\\*\\(?:Wo\\)?Man "
-  :vslot -6 :size 0.45 :select t :quit 'current :ttl nil)
+;; Do not open (Wo)Man buffers in a popup window
+;; TODO Do not open an another window (use the current one)
+;; TODO Do not delete the buffer when I close it
+(setq +popup--display-buffer-alist
+      (delq (assoc "^\\*\\(?:Wo\\)?Man " +popup--display-buffer-alist)
+            +popup--display-buffer-alist))
+(when (bound-and-true-p +popup-mode)
+  (setq display-buffer-alist +popup--display-buffer-alist))
 
 ;; TODO Modify popup behavior for Customize buffers
 
@@ -52,6 +95,34 @@
 
 ;; Define modes that should always come up in Emacs state
 (pushnew! evil-emacs-state-modes 'noaa-mode)
+
+
+;;; emacs/undo
+
+;; Enable `undo-tree'
+(global-undo-tree-mode)
+
+
+;;; term/eshell
+
+;; Do not scroll after every command
+(setq eshell-scroll-show-maximum-output nil)
+
+;; NOTE Unlike with `vterm', we do not export $EDITOR to `eshell'. This is to
+;; avoid a dangerous situation in which C-c C-k not only returns an error code
+;; to `eshell', it forcefully clears the file on disk.
+
+;;; term/vterm
+
+;; Export $EDITOR to `vterm'
+(add-hook! vterm-mode #'with-editor-export-editor)
+
+;; TODO Let C-j and <M-backspace> pass through in insert mode
+;; Reference: (find-function #'evil-collection-vterm-setup)
+(after! evil-collection-vterm
+  (dolist (key '("C-j" "<M-backspace>"))
+    (evil-collection-define-key 'insert 'vterm-mode-map
+      (kbd key) 'vterm--self-insert)))
 
 
 ;;; os/macos
@@ -82,13 +153,15 @@
 (font-lock-add-keywords
  'markdown-mode
  '(("<a name=\".*\"></a>" 0 '(face nil display "")) ; <a name=".*"></a> -> ""
-   ("\\(\\\\\\)[().-]" 1 '(face nil display ""))    ; "\?"              -> "?"
-   ("&copy;" 0 '(face nil display "©"))))          ; "&copy;"          -> "©"
+   ("\\(\\\\\\)[[().-]" 1 '(face nil display ""))   ; "\?"              -> "?"
+   ("&copy;" 0 '(face nil display "©"))))           ; "&copy;"          -> "©"
 
 ;;; lang/org
 
 ;; PREREQ mkdir -p ~/Documents/org && ln -s ~/Documents/org ~/org
 (setq
+
+
       ;; Top-level directory (used by `+default/find-in-notes', etc.)
       org-directory "~/org"
 
@@ -102,7 +175,64 @@
       ;; Only "todo.org" files hold agenda items
       org-agenda-file-regexp "\\`todo.org\\'")
 
+;; Do not display file tags in the agenda
+(setq org-agenda-hide-tags-regexp "\\`work\\|life\\|doom\\|todo\\'")
+
+;; Widen the agenda prefix and indent subtasks
+(setq org-agenda-prefix-format
+      '((agenda  . " %i  %l%-16:c%?-12t% s")
+        (todo    . " %i  %l%-16:c")
+        (tags    . " %i  %l%-16:c")))
+
+;; TODO Display weekly/daily agenda view properly
+
+;; Set icons for agenda prefix
+(setq org-agenda-category-icon-alist
+      `(("/inbox\\'"           (,(all-the-icons-faicon     "inbox"      nil nil :height 1.00 :face 'all-the-icons-dred)))
+        ;; work/*
+        ("\\`work/admin\\'"    (,(all-the-icons-faicon     "fax"        nil nil :height 0.85 :face 'all-the-icons-lred)))
+        ("\\`work/oncall\\'"   (,(all-the-icons-faicon     "users"      nil nil :height 0.80 :face 'all-the-icons-lyellow)))
+        ("\\`work/cots\\'"     (,(all-the-icons-faicon     "server"     nil nil :height 0.85 :face 'all-the-icons-dorange)))
+        ("\\`work/metrics\\'"  (,(all-the-icons-faicon     "eye"        nil nil :height 0.85 :face 'all-the-icons-dmaroon)))
+        ("\\`work/infra\\'"    (,(all-the-icons-faicon     "cubes"      nil nil :height 0.65 :face 'all-the-icons-lorange)))
+        ;; life/*
+        ("\\`life/family\\'"   (,(all-the-icons-faicon     "heart"      nil nil :height 0.85 :face 'all-the-icons-red)))
+        ("\\`life/money\\'"    (,(all-the-icons-faicon     "money"      nil nil :height 0.80 :face 'all-the-icons-dgreen)))
+        ("\\`life/tech\\'"     (,(all-the-icons-faicon     "laptop"     nil nil :height 0.80 :face 'all-the-icons-dsilver)))
+        ;; doom/*
+        ("\\`doom/upstream\\'" (,(all-the-icons-alltheicon "git"        nil nil :height 0.85 :face 'all-the-icons-lred)))
+        ("\\`doom/config\\'"   (,(all-the-icons-fileicon   "emacs"      nil nil :height 0.85 :face 'all-the-icons-purple)))
+        ("\\`doom/org\\'"      (,(all-the-icons-fileicon   "org"        nil nil :height 0.90 :face 'all-the-icons-lgreen)))
+        ("\\`doom/markdown\\'" (,(all-the-icons-octicon    "markdown"   nil nil :height 0.85 :face 'all-the-icons-maroon)))
+        ("\\`doom/yaml\\'"     (,(all-the-icons-faicon     "cogs"       nil nil :height 0.80 :face 'all-the-icons-lsilver)))
+        ("\\`doom/python\\'"   (,(all-the-icons-alltheicon "python"     nil nil :height 0.85 :face 'all-the-icons-dblue)))
+        ("\\`doom/ts\\'"       (,(all-the-icons-fileicon   "typescript" nil nil :height 0.85 :face 'all-the-icons-blue)))
+        ("\\`doom/misc\\'"     (,(all-the-icons-fileicon   "config"     nil nil :height 0.85 :face 'all-the-icons-lblue)))))
+
 (after! org
+  ;; Proper indentation for source blocks
+  ;; <https://emacs.stackexchange.com/a/9483/21977>
+  (setq org-src-preserve-indentation nil
+        org-edit-src-content-indentation 0)
+
+  ;; TODO Prefix refile targets with the directory name (file tag)
+  (setq org-refile-use-outline-path 'full-file-path)
+
+  ;; Inherit priority so that subtasks appear under their parents in the agenda
+  (defun my/org-inherited-priority (s)
+    (cond
+     ;; Priority cookie in this heading
+     ((string-match org-priority-regexp s)
+      (* 1000 (- org-priority-lowest
+                 (org-priority-to-value (match-string 2 s)))))
+     ;; No priority cookie, but already at highest level
+     ((not (org-up-heading-safe))
+      (* 1000 (- org-priority-lowest org-priority-default)))
+     ;; Look for the parent's priority
+     (t
+      (my/org-inherited-priority (org-get-heading)))))
+  (setq org-priority-get-priority-function #'my/org-inherited-priority)
+
   ;; Do not indent org headlines
   (setq org-hide-leading-stars nil
         org-startup-indented nil
@@ -209,6 +339,16 @@ to `org-footnote-section'.  Inline definitions are ignored."
             (unless (member label inserted)
               (insert definition "\n")))))))))
 
+;;; lang/yaml
+
+;; FIXME The implementation of `lsp-yaml-download-schema-store-db' is buggy
+;; Download the schema definitions if we don't have them already
+(after! lsp-yaml
+  (let ((f lsp-yaml-schema-store-local-db))
+    (unless (file-exists-p f)
+      (mkdir (file-name-directory f) t)
+      (lsp-yaml-download-schema-store-db))))
+
 
 ;;; config/default
 
@@ -221,6 +361,24 @@ to `org-footnote-section'.  Inline definitions are ignored."
 ;; Adjust `which-key' timing
 (setq which-key-idle-delay 0.5
       which-key-idle-secondary-delay 0.1)
+
+;; Do not auto-insert pairs of quotes
+(sp-pair "\"" nil :actions :rem)
+(sp-pair "'"  nil :actions :rem)
+(sp-pair "`"  nil :actions :rem)
+
+;; Disable smartparens in the minibuffer, including the `evil-ex' prompt...
+;; According to the documentation, each mode listed in `sp-ignore-modes-list'
+;; will have smartparens disabled when `smartparens-global-mode' is active.
+;; However, this does not appear to be functioning properly, at least for
+;; `minibuffer-inactive-mode', so I get around this by overriding all the pair
+;; insertion rules for that specific mode.
+(after! smartparens
+  (let* ((default-pairs (cdr (assoc t sp-pairs)))
+         (default-openers (mapcar (lambda (pair) (plist-get pair :open))
+                                  default-pairs)))
+    (dolist (opener default-openers)
+      (sp-local-pair 'minibuffer-inactive-mode opener nil :actions nil))))
 
 ;; REVIEW See if there is a better way to do this (e.g. with `map!')
 ;; Add a toggle keybinding for `toggle-truncate-lines'
@@ -256,6 +414,22 @@ on them."
 
 ;;; uncategorized
 
+;; Keep icons small by default
+(setq all-the-icons-scale-factor 1.0)
+
+;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
+;; Remove `straight' package repos from projectile
+(after! projectile
+  (eval
+   `(pushnew!
+     projectile-globally-ignored-directories
+     ,@(mapcan
+        (lambda (f)
+          (when (file-directory-p f)
+            (list (abbreviate-file-name f))))
+        (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
+                                   t "\\`[^.]")))))
+
 ;; Give buffers unique names based on file path
 (setq uniquify-buffer-name-style 'forward)
 
@@ -265,6 +439,9 @@ on them."
 ;; Display ^L characters as horizontal lines
 (use-package! page-break-lines
   :config (global-page-break-lines-mode))
+
+;; Have C-l send the current line to the top of the window
+(setq recenter-positions '(top bottom middle))
 
 ;; Load custom config if present
 (load! "custom" doom-emacs-dir t)
