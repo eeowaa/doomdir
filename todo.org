@@ -24,7 +24,7 @@ the popup window are cut off, and all you see are options to exclude the file
 from the LSP workspace. Unless you know about the other available options, LSP
 won't work for you. Unfortunately, resizing the frame does not help.
 
-* Upstream [0/5]
+* Upstream [0/6]
 :PROPERTIES:
 :CATEGORY: doom/upstream
 :END:
@@ -91,6 +91,15 @@ Set FORCE-DOWNLOADING to non-nil to force re-download the database."
             (not (file-exists-p lsp-yaml-schema-store-local-db)))
     (url-copy-file lsp-yaml-schema-store-uri lsp-yaml-schema-store-local-db)))
 #+end_src
+
+** TODO [#B] Do not fail to store Org links before opening a PDF
+~org-store-link~ fails with the following error message:
+#+begin_quote
+pdf-info-check-epdfinfo: pdf-info-epdfinfo-program is not executable
+#+end_quote
+
+This happens when =+pdf= is enabled but before ~epdfinfo~ is built (which
+usually happens after visiting a PDF for the first time).
 
 ** TODO [#C] Fix documentation for session persistence
 This just doesn't make any sense:
