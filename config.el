@@ -380,13 +380,49 @@ to `org-footnote-section'.  Inline definitions are ignored."
     (dolist (opener default-openers)
       (sp-local-pair 'minibuffer-inactive-mode opener nil :actions nil))))
 
+;; Function to toggle 1 or 2 spaces at the end of sentences
+(defun my/toggle-sentence-end-double-space ()
+  (interactive)
+  (if (not sentence-end-double-space)
+      (progn
+        (setq-local sentence-end-double-space t)
+        (message "Sentences end with 2 spaces"))
+    (setq-local sentence-end-double-space nil)
+    (message "Sentences end with 1 space")))
+
 ;; REVIEW See if there is a better way to do this (e.g. with `map!')
-;; Add a toggle keybinding for `toggle-truncate-lines'
-(define-key! doom-leader-toggle-map "t" #'toggle-truncate-lines)
+;; Add additional toggle keybindings
+;; TODO Add other toggles:
+;; "Line"          hl-line-mode
+;; "Column"        column-highlight-mode
+;; "Battery"       display-battery-mode
+;; "Visual Lines"  visual-line-mode
+(define-key! doom-leader-toggle-map
+  "a" #'auto-fill-mode
+  "h" #'use-hard-newlines
+  "o" #'overwrite-mode
+  "p" #'page-break-lines-mode
+  "t" #'toggle-truncate-lines
+  "|" #'visual-fill-column-mode
+  "." #'my/toggle-sentence-end-double-space
+  "SPC" #'whitespace-mode)
 (after! which-key
   (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
-    (cl-pushnew `((,(format "\\`%s t t\\'" prefix-re))
-                  nil . "Truncate lines")
+    (cl-pushnew `((,(format "\\`%s t a\\'" prefix-re)) nil . "Auto fill")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t h\\'" prefix-re)) nil . "Hard newlines")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t o\\'" prefix-re)) nil . "Overwrite")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t p\\'" prefix-re)) nil . "Page break lines")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t t\\'" prefix-re)) nil . "Truncate lines")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t |\\'" prefix-re)) nil . "Visual fill column")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t \\.\\'" prefix-re)) nil . "Sentence spacing")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t SPC\\'" prefix-re)) nil . "Whitespace mode")
                 which-key-replacement-alist)))
 
 ;; Improve builtin help
