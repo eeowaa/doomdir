@@ -253,7 +253,8 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
   (setq org-src-preserve-indentation nil
         org-edit-src-content-indentation 0)
 
-  ;; TODO Prefix refile targets with the directory name (file tag)
+  ;; TODO Use the file-level Org tag instead of the full path
+  ;; Prefix refile targets with the directory name
   (setq org-refile-use-outline-path 'full-file-path)
 
   ;; Inherit priority so that subtasks appear under their parents in the agenda
