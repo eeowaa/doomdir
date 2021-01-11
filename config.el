@@ -77,6 +77,11 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 ;; Only enable extra ligatures in Org mode (for now)
 (setq +ligatures-extras-in-modes '(org-mode))
 
+;;; ui/modeline
+
+;; Use 1-based column numbering in modeline
+(setq column-number-indicator-zero-based nil)
+
 ;;; ui/popup
 
 ;; Do not open (Wo)Man buffers in a popup window
@@ -107,6 +112,36 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 
 ;; Do not scroll after every command
 (setq eshell-scroll-show-maximum-output nil)
+
+;; Add aliases
+(set-eshell-alias!
+  ;; C-x [0123]
+  "0" "delete-window"
+  "1" "delete-other-windows"
+  "2" "split-window-below"
+  "3" "split-window-right"
+
+  ;; find-file
+  "e"  "find-file $1"
+  "4e" "find-file-other-window $1"
+  "5e" "find-file-other-frame $1"
+
+  ;; find-file-read-only
+  "r"  "find-file-read-only $1"
+  "4r" "find-file-read-only-other-window $1"
+  "5r" "find-file-read-only-other-frame $1"
+
+  ;; view-file
+  "v"  "view-file $1"
+  "4v" "view-file-other-window"
+  "5v" "view-file-other-frame"
+
+  ;; eww-open-file
+  "w" "eww-open-file $1"
+
+  ;; shell commands
+  "git" "TERM=eterm-color git --no-pager -c color.ui=always -c interactive.singleKey=false $*"
+  "f"   "cd $1 && ls")
 
 ;; NOTE Unlike with `vterm', we do not export $EDITOR to `eshell'. This is to
 ;; avoid a dangerous situation in which C-c C-k not only returns an error code
@@ -478,6 +513,22 @@ on them."
 
 ;; Have C-l send the current line to the top of the window
 (setq recenter-positions '(top bottom middle))
+
+;; Perform a line feed after jumping to a page break
+(defun my/recenter-top (&rest r) (recenter 0))
+(advice-add #'forward-page :after #'my/recenter-top)
+
+;; Don't prompt about killing running processing when quitting
+(setq confirm-kill-processes nil)
+
+;; Don't suggest abbreviations for long command names
+(setq extended-command-suggest-shorter nil)
+
+;; Allow easy input of accented and special characters via C-\
+(setq default-input-method "latin-postfix")
+
+;; Truncate lines by default
+(setq-default truncate-lines t)
 
 ;; Load custom config if present
 (load! "custom" doom-emacs-dir t)
