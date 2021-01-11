@@ -99,6 +99,7 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 ;;; ui/treemacs
 
 ;; TODO Fix size of NPM logo
+;; NOTE I am no longer seeing this issue as of 1/11/2021
 
 
 ;;; editor/evil
