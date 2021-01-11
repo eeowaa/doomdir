@@ -95,6 +95,10 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 
 ;; TODO Modify popup behavior for Customize buffers
 
+;;; ui/treemacs
+
+;; TODO Fix size of NPM logo
+
 
 ;;; editor/evil
 
@@ -152,8 +156,7 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 ;; Export $EDITOR to `vterm'
 (add-hook! vterm-mode #'with-editor-export-editor)
 
-;; TODO Let C-j and <M-backspace> pass through in insert mode
-;; Reference: (find-function #'evil-collection-vterm-setup)
+;; Let C-j and <M-backspace> pass through in insert mode
 (after! evil-collection-vterm
   (dolist (key '("C-j" "<M-backspace>"))
     (evil-collection-define-key 'insert 'vterm-mode-map
@@ -195,8 +198,6 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 
 ;; PREREQ mkdir -p ~/Documents/org && ln -s ~/Documents/org ~/org
 (setq
-
-
       ;; Top-level directory (used by `+default/find-in-notes', etc.)
       org-directory "~/org"
 
@@ -219,7 +220,7 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
         (todo    . " %i  %l%-16:c")
         (tags    . " %i  %l%-16:c")))
 
-;; TODO Display weekly/daily agenda view properly
+;; TODO Display weekly/daily agenda view properly (what's wrong?)
 
 ;; Set icons for agenda prefix
 (setq org-agenda-category-icon-alist

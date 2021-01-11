@@ -85,7 +85,7 @@
        vterm             ; the best terminal emulation in Emacs
 
        :checkers
-       syntax              ; tasing you for every semicolon you forget
+       syntax            ; tasing you for every semicolon you forget
        ;; PREREQ brew install aspell
        spell             ; tasing you for misspelling mispelling
        ;; PREREQ brew install languagetool

@@ -4,6 +4,14 @@
 :PROPERTIES:
 :CATEGORY: doom/inbox
 :END:
+** TODO [#A] Fix the size of the popup buffer invoked by =M-x lsp=
+/Note that ~lsp~ is invoked when you enter a buffer, as well/.
+
+When the frame is too small (e.g. its default size), the first few menu items in
+the popup window are cut off, and all you see are options to exclude the file
+from the LSP workspace. Unless you know about the other available options, LSP
+won't work for you. Unfortunately, resizing the frame does not help.
+
 ** TODO [#B] Figure out the autosave and backup situation for Doom Emacs
 Compare with my old config and try to match it
 
@@ -16,14 +24,6 @@ the escape codes instead of colors being output. The only workaround I know of
 now is to use =vterm= instead of =eshell=.
 
 ** TODO [#C] Fix ImageMagick display of images
-** TODO [#A] Fix the size of the popup buffer invoked by =M-x lsp=
-/Note that ~lsp~ is invoked when you enter a buffer, as well/.
-
-When the frame is too small (e.g. its default size), the first few menu items in
-the popup window are cut off, and all you see are options to exclude the file
-from the LSP workspace. Unless you know about the other available options, LSP
-won't work for you. Unfortunately, resizing the frame does not help.
-
 * Upstream [0/6]
 :PROPERTIES:
 :CATEGORY: doom/upstream
@@ -143,15 +143,10 @@ keybindings.
   ;;   presentations or streaming.
   #+end_quote
 
-* Config [3/6]
+* Config [0/3]
 :PROPERTIES:
 :CATEGORY: doom/config
 :END:
-** DONE [#A] Sync Doom dotfiles
-** DONE [#A] Create a =custom.el= file and load it when present
-+ I believe there is a Doom-specific construct for checking for file existence
-+ Move my name and email-address to =custom.el=
-
 ** TODO [#B] Write =$DOOMDIR/README.org=
 Interestingly, when I first opened the file, it was pre-populated (probably by
 the =:editor file-templates= module) to look like documentation for a Doom
@@ -163,57 +158,6 @@ so I suppose it makes sense. But certain things do *not* make sense:
   - [ ] If so, where are they specified?
 - [ ] Is =$DOOMDIR/init.el= a member of the =$DOOMDIR= module?
 
-** DONE [#B] Rewrite this document using Doom project conventions
-*** DONE Determine conventions
-**** DONE When to use =this= vs. ~that~
-Here is the convention:
-+ CLI commands and generic code
-  + ~echo 'Hello, world!'~
-  + ~printf("Hello, world!\n");~
-+ elisp code and symbols
-  + ~(message "Hello, world!")~
-  + ~doom+emacs+dir~
-  + ~doom/reload~
-+ markup
-  + ~#+STARTUP:~
-  + ~*** Org Headline~
-  + ~### Markdown Headline~
-+ key bindings
-  + =K=
-  + =M+x +lookup/documentation=
-+ file paths
-  + =$DOOMDIR/config.el=
-+ citations
-  + =:editor evil=
-  + =evil=
-  + =+everywhere=
-
-***** DONE See if I get a response on Discord
-https://discord.com/channels/406534637242810369/406627025030348820/780499424983646240
-
-From Henrik himself:
-#+begin_quote
-~...~ for code/markup and elisp symbols. =...= for keybinds, file paths, and
-citations (names of modules and packages).
-
-TODO, #include, and :DRAWER: are all org markup, so use the former for them.
-#+end_quote
-
-**** DONE Bullet point style
-So far, I haven't really seen a consistent style in the Doom documentation, but
-I have noticed a few patterns:
-
-+ ~+~ is used more often than ~-~
-  + The benefit of using ~+~ is that it is slightly more conspicuous than ~-~
-  + The downside is that one more keystroke is needed to start a list
-  + For now, I'll use ~+~ for information and ~-~ for checkbox lists
-    + Checkboxes are already pretty conspicuous
-    + Having separate checkbox list syntax means that I can search for those
-      lists by ~^ *-~ instead of ~^ *\+ \[[ X-]\]~
-+ Each item in a given list (including nested items) starts with the same symbol
-+ Tables of contents always use ~-~
-
-*** DONE Rewrite the document
 ** TODO [#C] Make ~PREREQ~ lines OS-independent
 Currently, the ~PREREQ~ comments just explain what prerequisite commands need to
 be run for macOS. I would like to refactor these comments into a script or set
@@ -247,26 +191,151 @@ Which doesn't miss anything, and seems more idiomatic.
 
 *** TODO Check the Doom documentation
 *** HOLD Ask on Discord
-* Org [9/16]
+** Archive :ARCHIVE:
+*** DONE [#A] Sync Doom dotfiles
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:30
+:END:
+*** DONE [#A] Create a =custom.el= file and load it when present
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:30
+:END:
++ I believe there is a Doom-specific construct for checking for file existence
++ Move my name and email-address to =custom.el=
+
+*** DONE [#B] Rewrite this document using Doom project conventions
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:30
+:END:
+**** DONE Determine conventions
+***** DONE When to use =this= vs. ~that~
+Here is the convention:
++ CLI commands and generic code
+  + ~echo 'Hello, world!'~
+  + ~printf("Hello, world!\n");~
++ elisp code and symbols
+  + ~(message "Hello, world!")~
+  + ~doom+emacs+dir~
+  + ~doom/reload~
++ markup
+  + ~#+STARTUP:~
+  + ~*** Org Headline~
+  + ~### Markdown Headline~
++ key bindings
+  + =K=
+  + =M+x +lookup/documentation=
++ file paths
+  + =$DOOMDIR/config.el=
++ citations
+  + =:editor evil=
+  + =evil=
+  + =+everywhere=
+
+****** DONE See if I get a response on Discord
+https://discord.com/channels/406534637242810369/406627025030348820/780499424983646240
+
+From Henrik himself:
+#+begin_quote
+~...~ for code/markup and elisp symbols. =...= for keybinds, file paths, and
+citations (names of modules and packages).
+
+TODO, #include, and :DRAWER: are all org markup, so use the former for them.
+#+end_quote
+
+***** DONE Bullet point style
+So far, I haven't really seen a consistent style in the Doom documentation, but
+I have noticed a few patterns:
+
++ ~+~ is used more often than ~-~
+  + The benefit of using ~+~ is that it is slightly more conspicuous than ~-~
+  + The downside is that one more keystroke is needed to start a list
+  + For now, I'll use ~+~ for information and ~-~ for checkbox lists
+    + Checkboxes are already pretty conspicuous
+    + Having separate checkbox list syntax means that I can search for those
+      lists by ~^ *-~ instead of ~^ *\+ \[[ X-]\]~
++ Each item in a given list (including nested items) starts with the same symbol
++ Tables of contents always use ~-~
+
+**** DONE Rewrite the document
+* Org [0/7]
 :PROPERTIES:
 :CATEGORY: doom/org
 :END:
-** DONE [#A] Display distinguishable name in refile targets
-Well, it's distinguishable, but I don't like seeing the entire path. I guess
-this counts as done, and I'll continue to shorten the path (but that will be a
-lower-priority item).
-
-** DONE [#A] Capture Org in separate files for work and otherwise
-** DONE [#A] Do not indent text in bodies of subtrees
-** DONE [#A] Indent Org source blocks
-Refer to your old dotfiles.
-
 ** TODO [#B] Fix org headline insert hook
 I do not want there to be a blank line after drawers or scheduling information:
 - [ ] ~^:END:$~
 - [ ] ~^\\(?:DEADLINE\\|SCHEDULED\\):~
 
-** DONE [#B] Display parent directory instead of "todo.org" for Org agenda
+** TODO [#C] Use Org speed keys
+Just apply your old configuration
+
+** TODO [#C] Create headline sorting function
++ Sort by priority, then by by ~TODO~ keyword
++ Reference ~org-sort-entries~
+
+** TODO [#C] Create integration between embedded ~TODO~ and project =todo.org=
+Something like this Atlassian VS Code plugin:
+https://support.atlassian.com/bitbucket-cloud/docs/jira-issues-in-vs-code/
+
++ Embedded ~TODO~ comments:
+  + https://github.com/tarsius/hl-todo
+  + ~hl-todo-keyword-faces~
+  + ~hl-todo-next~, ~hl-todo-previous~, ~hl-todo-occur~
++ Project =todo.org= list:
+  + ~org-capture-templates~
+  + ~counsel-projectile-org-capture-templates~
+  + ~counsel-projectile-org-capture~
++ Integration with Git:
+  + https://github.com/alphapapa/magit-todos
+  + ~magit-todos-list~
+
+** TODO [#C] Figure out how to /easily/ insert screenshots into Org buffers
+Right now, the best way I know how is to take a screenshot using the macOS
+system keybinding (=Cmd-Shift-4=), save it as a file, and then drag and drop the
+file itself (from Finder) into an Org buffer via =+dragndrop=. This takes too
+long. What about ~org-screenshot-take~?
+
+** TODO [#C] Ignore surrounding tildes for interactive help functions
+Doom's org markup convention is to surround elisp symbols with tildes. However,
+this makes it difficult to use commands such as ~counsel-describe-variable~
+(=SPC h v=), ~counsel-describe-function~ (=SPC h f=), and ~find-function~
+(custom-mapped to =C-h C-f=) for symbols under point.
+
+The current workaround is to select the "object" under point using =v i e= and
+then use the corresponding help command. This works well enough, but is an
+annoying extra step.
+
+** TODO [#C] Fix alignment for agenda view (the one with the dates)
+- https://www.reddit.com/r/orgmode/comments/6ybjjw/aligned_agenda_view_anyway_to_make_this_more/
+- IIRC, this is called the "fancy diary"
+
+** Archive :ARCHIVE:
+*** DONE [#A] Display distinguishable name in refile targets
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:30
+:END:
+Well, it's distinguishable, but I don't like seeing the entire path. I guess
+this counts as done, and I'll continue to shorten the path (but that will be a
+lower-priority item).
+
+*** DONE [#A] Capture Org in separate files for work and otherwise
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:30
+:END:
+*** DONE [#A] Do not indent text in bodies of subtrees
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:30
+:END:
+*** DONE [#A] Indent Org source blocks
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:30
+:END:
+Refer to your old dotfiles.
+
+*** DONE [#B] Display parent directory instead of "todo.org" for Org agenda
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:30
+:END:
 Currently, the agenda displays "todo.org" for entries in =~/org/todo.org=,
 =~/org/work/todo.org=, and =~/org/life/todo.org=. I would rather it just display
 "org", "work", and "life", respectively.
@@ -274,7 +343,10 @@ Currently, the agenda displays "todo.org" for entries in =~/org/todo.org=,
 - ~org-todo-list~ (=SPC o a t=)
 - ~org-agenda-prefix-format~
 
-** DONE [#B] Remove file links from org capture
+*** DONE [#B] Remove file links from org capture
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:30
+:END:
 At least from the personal ones...
 #+begin_src emacs-lisp :tangle no
 (setq org-default-notes-file
@@ -329,8 +401,11 @@ At least from the personal ones...
          :prepend t)))
 #+end_src
 
-** DONE [#B] Reorganize layout of agenda files and directories
-*** DONE Determine relevant variables and commands
+*** DONE [#B] Reorganize layout of agenda files and directories
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:30
+:END:
+**** DONE Determine relevant variables and commands
 - ~org-directory~
 - ~org-agenda-files~
 - ~org-attach-directory~
@@ -343,60 +418,34 @@ At least from the personal ones...
 | Agenda files        | org: =SPC u SPC u SPC m ,= | global: =SPC n S= |                   |
 | Org directory files | global: =SPC n f=          |                   | global: =SPC n s= |
 
-** DONE [#B] Have progress cookies only reference top-level ~TODO~ items
+*** DONE [#B] Have progress cookies only reference top-level ~TODO~ items
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:30
+:END:
 Turns out this is already the case. I just wasn't updating the cookies.
 
-** TODO [#C] Use Org speed keys
-Just apply your old configuration
-
-** TODO [#C] Create headline sorting function
-+ Sort by priority, then by by ~TODO~ keyword
-+ Reference ~org-sort-entries~
-
-** TODO [#C] Create integration between embedded ~TODO~ and project =todo.org=
-Something like this Atlassian VS Code plugin:
-https://support.atlassian.com/bitbucket-cloud/docs/jira-issues-in-vs-code/
-
-+ Embedded ~TODO~ comments:
-  + https://github.com/tarsius/hl-todo
-  + ~hl-todo-keyword-faces~
-  + ~hl-todo-next~, ~hl-todo-previous~, ~hl-todo-occur~
-+ Project =todo.org= list:
-  + ~org-capture-templates~
-  + ~counsel-projectile-org-capture-templates~
-  + ~counsel-projectile-org-capture~
-+ Integration with Git:
-  + https://github.com/alphapapa/magit-todos
-  + ~magit-todos-list~
-
-** TODO [#C] Figure out how to /easily/ insert screenshots into Org buffers
-Right now, the best way I know how is to take a screenshot using the macOS
-system keybinding (=Cmd-Shift-4=), save it as a file, and then drag and drop the
-file itself (from Finder) into an Org buffer via =+dragndrop=. This takes too
-long. What about ~org-screenshot-take~?
-
-** TODO [#C] Ignore surrounding tildes for interactive help functions
-Doom's org markup convention is to surround elisp symbols with tildes. However,
-this makes it difficult to use commands such as ~counsel-describe-variable~
-(=SPC h v=), ~counsel-describe-function~ (=SPC h f=), and ~find-function~
-(custom-mapped to =C-h C-f=) for symbols under point.
-
-The current workaround is to select the "object" under point using =v i e= and
-then use the corresponding help command. This works well enough, but is an
-annoying extra step.
-
-** TODO [#C] Fix alignment for agenda view (the one with the dates)
-- https://www.reddit.com/r/orgmode/comments/6ybjjw/aligned_agenda_view_anyway_to_make_this_more/
-- IIRC, this is called the "fancy diary"
-
-** DONE [#C] New headings following non-blank entries should come after a blank line
+*** DONE [#C] New headings following non-blank entries should come after a blank line
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:30
+:END:
 This one was really sticky.  Finally got it how I like it, though.
 
-* Markdown [1/2]
+* Markdown [0/1]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
-** DONE [#B] Create ligatures for Markdown
+** TODO [#C] Replace Markdown ligatures and syntax hiding with mode-native hiding
+:PROPERTIES:
+:CUSTOM_ID: emacs-1
+:END:
+- [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::defun markdown-toggle-markup-hiding (&optional arg][(defun markdown-toggle-markup-hiding]]
+- [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][;;; Markup Hiding]]
+
+** Archive :ARCHIVE:
+*** DONE [#B] Create ligatures for Markdown
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:30
+:END:
 | Before      | After |
 |-------------+-------|
 | &copy       | ©    |
@@ -408,18 +457,18 @@ This one was really sticky.  Finally got it how I like it, though.
 
 [[file:~/.config/doom/config.el::;;; ui/ligatures]]
 
-** TODO [#C] Replace Markdown ligatures and syntax hiding with mode-native hiding
-:PROPERTIES:
-:CUSTOM_ID: emacs-1
-:END:
-- [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::defun markdown-toggle-markup-hiding (&optional arg][(defun markdown-toggle-markup-hiding]]
-- [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][;;; Markup Hiding]]
-
-* YAML [1/2]
+* YAML [0/1]
 :PROPERTIES:
 :CATEGORY: doom/yaml
 :END:
-** DONE [#A] Set the YAML LSP server to RedHat's implementation
+** TODO [#B] Import the CloudFormation YAML schema
+- ~lsp-yaml-schemas~
+
+** Archive :ARCHIVE:
+*** DONE [#A] Set the YAML LSP server to RedHat's implementation
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:30
+:END:
 https://developers.redhat.com/blog/2017/10/18/yaml-language-server-extension-vs-code/
 
 Every time I try to use LSP with ~yamlls~, this is what I get:
@@ -427,9 +476,6 @@ Every time I try to use LSP with ~yamlls~, this is what I get:
 
 Got it working. See the ~PREREQ~ lines for the =yaml= module in
 =$DOOMDIR/init.el=. Could use some cleanup.
-
-** TODO Import the CloudFormation YAML schema
-- ~lsp-yaml-schemas~
 
 * Python [1/2]
 :PROPERTIES:
@@ -440,35 +486,192 @@ More than a simple "Hello World":
 - [[file:~/src/life/secret-santa/][Secret Santa project]]
 - [[file:~/Documents/org/life/notes.org::*Developing with interpreted languages][Notes for developing with interpreted languages]]
 
-** TODO [#B] Set up debugging
-* Typescript [0/2]
+** TODO [#C] Set up debugging
+* Typescript [0/3]
 :PROPERTIES:
 :CATEGORY: doom/ts
 :END:
+** TODO [#A] Fix NPM and Config symbol alignment in Treemacs
+I just asked a question on SE that encapsulates the struggle:
+https://emacs.stackexchange.com/questions/62656/help-troubleshooting-npm-logo-misalignment-in-treemacs
+
+Honestly the question wasn't super well-formed (kind of a cry for help than
+something interesting), but I'm pretty stuck at this point. I'll let it sit for
+a while and then post the question on either Doom's Discord or Treemacs
+whatever.
+
+Found something:
+https://github.com/Alexander-Miller/treemacs#customizing-themes-and-icons
+
+Work-in-progress SE answer:
+#+begin_src markdown
+Running `(lsp-treemacs-get-icon "package-lock.json")` in the Treemacs buffer
+gave me more information about the icon and its properties:
+
+```
+#("  " 0 1
+  (display
+   (image :type imagemagick
+          :file ".../treemacs/icons/default/vsc/npm.png"
+          :scale 1.0051546391752577
+          :ascent center
+          :width 22
+          :height 22
+          :background "#1E2029")
+
+   img-selected
+   (image :type imagemagick
+          :file ".../treemacs/icons/default/vsc/npm.png"
+          :scale 1.0051546391752577
+          :ascent center
+          :width 22
+          :height 22
+          :background "#373844")
+
+   img-unselected
+   (image :type imagemagick
+          :file ".../treemacs/icons/default/vsc/npm.png"
+          :scale 1.0051546391752577
+          :ascent center
+          :width 22
+          :height 22
+          :background "#1E2029")))
+```
+#+end_src
+
 ** TODO [#A] Develop and run a simple "Hello World" program
 ** TODO [#B] Set up debugging
 Try ~dap-mode~ https://www.youtube.com/watch?v=0bilcQVSlbM
 
-* Miscellany [10/18]
+* Terminal [0/3]
+:PROPERTIES:
+:CATEGORY: doom/term
+:END:
+** TODO [#B] Fix ANSI escape codes :eshell:
+Last two lines from ~doom doctor~:
+#+begin_example
+[33mThere are 4 warnings![0m
+[32m✓ Finished in 7.4969s[0m
+#+end_example
+
+** TODO [#B] Fix terminal type :eshell:
+Sometimes ~git~ will spit the following:
+#+begin_example
+tput: unknown terminal "eterm-color"
+#+end_example
+
+** TODO [#C] Prevent ~git-graph~ cutoff :vterm:
+The last character ("o" in this case) gets hidden:
+#+begin_example
+$ git graph
+,* 65a8a6b6da9176bea78eb78c604120714207bcc5 Initial commit  eeowaa   3 weeks ag
+#+end_example
+
+I say "hidden" instead of "truncated" because if you kill the line and yank it
+into another buffer, you can see the "o".
+
+* Miscellany [1/9]
 :PROPERTIES:
 :CATEGORY: doom/misc
 :END:
-** DONE [#A] Do not auto-insert pairs of quotes
+** TODO [#A] Fix DAP mode error message
+I get this error when I visit a file that invokes ~lsp!~:
+#+begin_example
+(doom-hook-error lsp!
+  (error Recursive load
+    ~/.config/emacs/.local/straight/build-28.0.50/dap-mode/dap-mode.el
+    ~/.config/emacs/.local/straight/build-28.0.50/dap-mode/dap-mode.el
+    ~/.config/emacs/.local/straight/build-28.0.50/dap-mode/dap-mode.el
+    ~/.config/emacs/.local/straight/build-28.0.50/dap-mode/dap-mode.el
+    ~/.config/emacs/.local/straight/build-28.0.50/dap-mode/dap-mode.el
+    ~/.config/emacs/.local/straight/build-28.0.50/lsp-mode/lsp-mode.el))
+#+end_example
+
+For now, I might just want to unset ~lsp-enable-dap-auto-configure~ and see if
+that prevents errors. Worst case, I could disable =+debugger=.
+
+** TODO [#B] Fix spelling correction
+~+spell/correct~ (=z ==) spits the following error:
+#+begin_quote
+Starting new Ispell process aspell with english dictionary...done
+ispell-init-process: Error: /Users/eeowaa/.config/emacs/.local/etc/ispell/english.pws: The language "english" is not known. This is probably because: the file "/usr/local/Cellar/aspell/0.60.8/lib/aspell-0.60/english.dat" can not be opened for reading.
+#+end_quote
+
+** TODO [#B] Always trust file-location and directory-local variables
+At least for all files in allowed paths (e.g. my source code).
+
+** TODO [#C] Remove =~/.emacs/local= subdirectories from known projects
+#+begin_src elisp
+(after! projectile
+  (dolist (f (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)))
+    (when (and (file-directory-p f) (not (member f '("." ".."))))
+      (push (abbreviate-file-name f) projectile-globally-ignored-directories))))
+#+end_src
+
+** TODO [#C] Figure out how to use ~projectile-edit-dir-locals~ (=SPC p e=)
+https://www.emacswiki.org/emacs/SkeletonMode
+
+** TODO [#C] Create custom module =:ui page-break-lines=
+Although I already have the =page-break-lines= package installed in
+=$DOOMDIR/packages.el= and ~global-page-break-lines-mode~ enabled in
+=$DOOMDIR/config.el=, I could write a custom module to do this, placing it under
+=$DOOMDIR/modules/ui/page-break-lines=. (See the documentation for
+~doom-modules-dirs~.)  This would be an easy introduction to writing modules.
+
+It would be nice to include a ~CUSTOM~ comment tag over the module declaration
+in the ~doom!~ block of =$DOOMDIR/init.el= just to remember that /I/ defined the
+module.
+
+** TODO [#C] Replace =C-?= with backspace
+We already have =C-r=, so might as well replace this mostly-useless keybinding.
+
+** HOLD [#C] Add dictionary and thesaurus backends for =SPC s t/T=
+I've done everything that the Doom documentation told me to do, but things
+aren't working very well. Just try it out for yourself and see. Might want to
+open a PR or two.
+
+** DONE [#C] Truncate lines by default
+(Instead of needing to toggle truncation)
+
+** Archive :ARCHIVE:
+*** DONE [#A] Do not auto-insert pairs of quotes
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:31
+:END:
 More than half the time, I do not want that behavior.
 
-** DONE [#A] Find undocumented prerequisites via ~executable-find~ in =config.el= files
+*** DONE [#A] Find undocumented prerequisites via ~executable-find~ in =config.el= files
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:31
+:END:
 Some prerequisites are installed by LSP at run-time, so just use that.
 
-** DONE [#A] Persist ~woman~ and ~man~ buffers even though they are popups
-** DONE [#A] Have ^L bring to the top first (like clearing the screen)
+*** DONE [#A] Persist ~woman~ and ~man~ buffers even though they are popups
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:31
+:END:
+*** DONE [#A] Have ^L bring to the top first (like clearing the screen)
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:31
+:END:
 This is in my old Emacs config
 
-** KILL [#A] Install a package to assign unique names to buffers based on file path
+*** KILL [#A] Install a package to assign unique names to buffers based on file path
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:31
+:END:
 Not needed.  There's a builtin option.
 
-** DONE [#B] Create a function for describing where all invocations of a key sequence is
-*** DONE Check out ~describe-key-briefly~ for how to read keybindings
-*** DONE Create the function in =config.el=
+*** DONE [#B] Make a toggle for ~auto-fill-mode~
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:31
+:END:
+*** DONE [#B] Create a function for describing where all invocations of a key sequence is
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:31
+:END:
+**** DONE Check out ~describe-key-briefly~ for how to read keybindings
+**** DONE Create the function in =config.el=
 #+begin_src emacs-lisp :tangle no
 (defun my/alternate-keys (key &optional insert)
   "Print message listing equivalent alternate key sequences for KEY.
@@ -486,8 +689,8 @@ on them."
   (where-is (cadr (help--analyze-key (car key) (cdr key))) insert))
 #+end_src
 
-*** DONE Bind the function to the help keymap
-**** DONE Check out the FAQ for how to do that
+**** DONE Bind the function to the help keymap
+***** DONE Check out the FAQ for how to do that
 Just use ~map!~. By the way, you need to use =SPC h f map\!= to get help (be
 sure to escape the exclamation point).
 
@@ -574,52 +777,15 @@ sure to escape the exclamation point).
   "P"    #'find-library)
 #+end_src
 
-** TODO [#B] Make a toggle for ~auto-fill-mode~
-** TODO [#B] Fix spelling correction
-~+spell/correct~ (=z ==) spits the following error:
-#+begin_quote
-Starting new Ispell process aspell with english dictionary...done
-ispell-init-process: Error: /Users/eeowaa/.config/emacs/.local/etc/ispell/english.pws: The language "english" is not known. This is probably because: the file "/usr/local/Cellar/aspell/0.60.8/lib/aspell-0.60/english.dat" can not be opened for reading.
-#+end_quote
-
-** TODO [#B] Always trust file-location and directory-local variables
-At least for all files in allowed paths (e.g. my source code).
-
-** TODO [#C] Remove =~/.emacs/local= subdirectories from known projects
-#+begin_src elisp
-(after! projectile
-  (dolist (f (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)))
-    (when (and (file-directory-p f) (not (member f '("." ".."))))
-      (push (abbreviate-file-name f) projectile-globally-ignored-directories))))
-#+end_src
-
-** TODO [#C] Figure out how to use ~projectile-edit-dir-locals~ (=SPC p e=)
-https://www.emacswiki.org/emacs/SkeletonMode
-
-** TODO [#C] Create custom module =:ui page-break-lines=
-Although I already have the =page-break-lines= package installed in
-=$DOOMDIR/packages.el= and ~global-page-break-lines-mode~ enabled in
-=$DOOMDIR/config.el=, I could write a custom module to do this, placing it under
-=$DOOMDIR/modules/ui/page-break-lines=. (See the documentation for
-~doom-modules-dirs~.)  This would be an easy introduction to writing modules.
-
-It would be nice to include a ~CUSTOM~ comment tag over the module declaration
-in the ~doom!~ block of =$DOOMDIR/init.el= just to remember that /I/ defined the
-module.
-
-** TODO [#C] Replace =C-?= with backspace
-We already have =C-r=, so might as well replace this mostly-useless keybinding.
-
-** HOLD [#C] Add dictionary and thesaurus backends for =SPC s t/T=
-I've done everything that the Doom documentation told me to do, but things
-aren't working very well. Just try it out for yourself and see. Might want to
-open a PR or two.
-
-** DONE [#C] Enable all disabled commands disabled by Emacs and Doom Emacs
-** DONE [#C] Enable emojis (just for =SPC i e=)
-** DONE [#C] Configure =counsel-spotify= in local config file
-** KILL [#C] Replace npm symbol in Treemacs with something better
-Currently, it is an image with a white background (at least in the ~dracula~
-theme -- maybe it's different with themes with jet black backgrounds)
-
-After upgrading Doom Emacs, I don't see the problem anymore.
+*** DONE [#C] Enable all disabled commands disabled by Emacs and Doom Emacs
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:31
+:END:
+*** DONE [#C] Enable emojis (just for =SPC i e=)
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:31
+:END:
+*** DONE [#C] Configure =counsel-spotify= in local config file
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-01-08 Fri 18:31
+:END:
