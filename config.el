@@ -85,13 +85,14 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 ;;; ui/popup
 
 ;; Do not open (Wo)Man buffers in a popup window
-;; TODO Do not open an another window (use the current one)
-;; TODO Do not delete the buffer when I close it
 (setq +popup--display-buffer-alist
       (delq (assoc "^\\*\\(?:Wo\\)?Man " +popup--display-buffer-alist)
             +popup--display-buffer-alist))
 (when (bound-and-true-p +popup-mode)
   (setq display-buffer-alist +popup--display-buffer-alist))
+
+;; Open manpages in the current window
+(setq Man-notify-method 'pushy)
 
 ;; TODO Modify popup behavior for Customize buffers
 
