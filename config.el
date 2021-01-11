@@ -542,6 +542,6 @@ on them."
 (setq-default truncate-lines t)
 
 ;; Load custom config if present
-(load! "custom" doom-emacs-dir t)
+(load! "custom" doom-private-dir t)
 
 ;; REVIEW Steal config stuff from <https://github.com/tecosaur/emacs-config/blob/master/config.org>
