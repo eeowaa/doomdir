@@ -278,6 +278,15 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
   ;; Show edit buffer in the current window
   (setq org-src-window-setup 'current-window)
 
+  ;; REVIEW See if there is a cleaner way to temporarily set `org-log-into-drawer'
+  ;; Insert notes into :LOGBOOK: drawer without logging state changes
+  (defun my/org-add-note-advice (f &rest r)
+    (let ((restore org-log-into-drawer))
+      (setq org-log-into-drawer t)
+      (apply f r))
+      (setq org-log-into-drawer restore))
+  (advice-add #'org-add-note :around #'my/org-add-note-advice)
+
   ;; Remove file links from personal org capture templates
   (setcar (nthcdr 4 (assoc "t" org-capture-templates)) "* TODO %?") ;; And replace "[ ]"
   (setcar (nthcdr 4 (assoc "n" org-capture-templates)) "* %u %?")
