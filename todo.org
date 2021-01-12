@@ -486,7 +486,9 @@ More than a simple "Hello World":
 - [[file:~/src/life/secret-santa/][Secret Santa project]]
 - [[file:~/Documents/org/life/notes.org::*Developing with interpreted languages][Notes for developing with interpreted languages]]
 
-** TODO [#C] Set up debugging
+** HOLD [#C] Set up debugging
+- Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
+
 * Typescript [0/3]
 :PROPERTIES:
 :CATEGORY: doom/ts
@@ -4156,8 +4158,9 @@ former is what is /actually/ used in my projects, while the latter is what is
 being tracked in ~treemacs--current-theme~. What a weird situation...
 
 ** TODO [#A] Develop and run a simple "Hello World" program
-** TODO [#B] Set up debugging
-Try ~dap-mode~ https://www.youtube.com/watch?v=0bilcQVSlbM
+** HOLD [#B] Set up debugging
+- Try ~dap-mode~ https://www.youtube.com/watch?v=0bilcQVSlbM
+- Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
 
 * Terminal [0/3]
 :PROPERTIES:
@@ -4205,6 +4208,10 @@ I get this error when I visit a file that invokes ~lsp!~:
 
 For now, I might just want to unset ~lsp-enable-dap-auto-configure~ and see if
 that prevents errors. Worst case, I could disable =+debugger=.
+
+*UPDATE*: Unfortunately I was unable to resolve this quickly and opted to
+disable =+debugger= for the time being (it's not super-important for me right
+now, anyway).
 
 ** TODO [#B] Fix spelling correction
 ~+spell/correct~ (=z ==) spits the following error:
