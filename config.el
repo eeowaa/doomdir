@@ -184,6 +184,12 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 ;; TODO Experiment with Keychain as a member of `auth-sources'
 
 
+;;; lang/javascript
+
+;; TESTME Use gitignore-mode for .npmignore files
+(after! javascript
+  (add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode)))
+
 ;;; lang/markdown
 
 ;; FIXME [emacs-1]
