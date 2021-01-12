@@ -100,12 +100,13 @@
        ;;(debugger +lsp)   ; FIXME stepping through code, to help you add bugs
        ;; PREREQ brew install direnv
        direnv
-       ;; PREREQ brew install docker npm
+       ;; PREREQ brew install docker
+       ;; PREREQ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
        ;; PREREQ npm install -g dockerfile-language-server-nodejs
        (docker +lsp)
        ;; PREREQ brew install editorconfig
        editorconfig      ; let someone else argue about tabs vs spaces
-       ;; PREREQ brew install python pip
+       ;; PREREQ brew install python
        ;; PREREQ pip install jupyter
        ein               ; tame Jupyter notebooks with emacs
        (eval +overlay)     ; run code, run (also, repls)
@@ -136,7 +137,7 @@
 
        :lang
        ;;agda              ; types of types of types of types...
-       ;; PREREQ brew install ccls gdb
+       ;; PREREQ brew install ccls gdb glslang
        ;; NOTE `+eglot' adds commands for displaying inheritance type hierarchies
        (cc +lsp)         ; C/C++/Obj-C madness
        ;;clojure           ; java with a lisp
@@ -172,13 +173,13 @@
        ;;(haskell +dante)  ; a language that's lazier than I am
        ;;hy                ; readability of scheme w/ speed of python
        ;;idris             ; a language you can depend on
-       ;; PREREQ brew install jq npm
+       ;; PREREQ brew install jq
+       ;; PREREQ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
        ;; PREREQ npm install -g vscode-json-languageserver
        (json +lsp)       ; At least it ain't XML
        ;;(java +meghanada) ; the poster child for carpal tunnel syndrome
-       ;; PREREQ brew install node typescript npm
-       ;; PREREQ npm install -g javascript-typescript-langserver
-       ;; PREREQ npm install -g trepan-ni
+       ;; PREREQ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+       ;; PREREQ npm install -g typescript javascript-typescript-langserver eslint trepan-ni
        ;; TODO What about installing eslint and the language server for that?
        (javascript +lsp) ; all(hope(abandon(ye(who(enter(here))))))
        ;;julia             ; a better, faster MATLAB
@@ -189,13 +190,13 @@
        ;;factor
        ;;ledger            ; an accounting system in Emacs
        ;;lua               ; one-based indices? one-based indices
-       ;; PREREQ brew install npm
+       ;; PREREQ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
        ;; PREREQ npm install -g markdownlint marked
        markdown          ; writing docs for people to ignore
        ;;nim               ; python + lisp at the speed of c
        ;;nix               ; I hereby declare "nix geht mehr!"
        ;;ocaml             ; an objective camel
-       ;; PREREQ brew install gnuplot pandoc graphviz
+       ;; PREREQ brew install gnuplot pandoc graphviz pngpaste
        ;; PREREQ mkdir -p ~/Documents/org/roam
        (org +dragndrop +gnuplot +jupyter +noter +pandoc +roam)
                          ; organize your plain life in plain text
@@ -204,6 +205,7 @@
        ;;purescript        ; javascript, but functional
        ;; PREREQ brew install python
        ;; PREREQ pip install pylint flake8 pytest nose pyflakes isort ipython jupyter
+       ;; PREREQ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
        ;; PREREQ npm install -g pyright
        (python +lsp +pyright)
                          ; beautiful is better than ugly
@@ -217,6 +219,7 @@
        ;;scala             ; java, but good
        ;;scheme            ; a fully conniving family of lisps
        ;; PREREQ brew install bash zsh fish powershell bashdb zshdb shellcheck
+       ;; PREREQ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
        ;; PREREQ npm install -g bash-language-server
        (sh +lsp +fish +powershell)
                          ; she sells {ba,z,fi}sh shells on the C xor
@@ -236,6 +239,7 @@
        ;;                less-css-mode-local-vars-hook)
        ;;              #'lsp!))
        web               ; the tubes
+       ;; PREREQ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
        ;; PREREQ npm install -g yaml-language-server
        (yaml +lsp)         ; JSON, but readable
 
