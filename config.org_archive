@@ -1,14 +1,14 @@
 #    -*- mode: org -*-
 
 
-Archived entries from file /Users/gouldsam/stow-dotfiles/doom/.config/doom/todo.org
+Archived entries from file ~/stow-dotfiles/doom/.config/doom/config.org
 
 
 * HOLD [#A] Fix NPM and Config symbol alignment in Treemacs
 :PROPERTIES:
 :ARCHIVE_TIME: 2021-01-11 Mon 19:01
-:ARCHIVE_FILE: ~/stow-dotfiles/doom/.config/doom/todo.org
-:ARCHIVE_OLPATH: Typescript
+:ARCHIVE_FILE: ~/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :lang/javascript
 :ARCHIVE_CATEGORY: doom/ts
 :ARCHIVE_TODO: HOLD
 :ARCHIVE_ITAGS: doom

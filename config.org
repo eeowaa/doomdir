@@ -1,0 +1,959 @@
+#+STARTUP:  overview
+#+FILETAGS: :doom:
+* :completion
+** company [1/1]
+*** DONE [#B] Never start completion automatically (require =C-SPC=)
+#+begin_src emacs-lisp :tangle yes
+(setq company-idle-delay nil)
+#+end_src
+
+This was born from a desire to prevent autocompletion of ordinary words in Org
+buffers, but I decided that I don't really need autocompletion anywhere. The
+following are the notes I took when pursuing my original plan:
+
+#+begin_quote
+=M-x company-capf= gives ~company-ispell~ as one completion backend in Org
+buffers. I guess I'd like to have spelling completion as an option that I could
+invoke using =C-SPC= (~+company/complete~), but not something that just pops up
+on its own.
+#+end_quote
+
+** ivy [1/1]
+*** DONE [#A] Make it easier to jump to headlines across Org buffers
+#+begin_src emacs-lisp
+(setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
+#+end_src
+
+* :ui
+** doom [1/1]
+*** DONE [#C] Set the font and theme
+Terminus is also a good font but must be installed first:
+#+begin_src sh :tangle no
+brew install font-terminus
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(setq doom-font (font-spec :family "Menlo" :size 16)
+      doom-theme 'doom-henna)
+#+end_src
+
+** emoji [1/1]
+*** DONE [#C] Enable emojis (just for =SPC i e=)
+This is done in =doom/init.el=.
+
+** fill-column [0/1]
+*** STRT [#C] Do not display fill column indicator by default
+Most of the time, this works, but sometimes the fill column indicator is
+displayed, regardless.
+
+#+begin_src emacs-lisp :tangle yes
+(remove-hook! '(text-mode-hook prog-mode-hook conf-mode-hook)
+              #'+fill-column-enable-h)
+#+end_src
+
+** hl-todo [1/1]
+*** DONE [#B] Add a couple different tags to highlight in programming major-modes
+#+begin_src emacs-lisp :tangle yes
+(after! hl-todo
+  (setq hl-todo-keyword-faces
+        (append '(("TESTME" font-lock-constant-face bold)
+                  ("PREREQ" font-lock-doc-face bold))
+                hl-todo-keyword-faces)))
+#+end_src
+
+** hydra [1/1]
+*** DONE [#C] Add a hydra for games
+#+begin_src emacs-lisp :tangle yes
+(defhydra hydra-game (:color blue :hint nil)
+  "
+^Arcade^      ^Puzzle^        ^Board^          ^Text^        ^Self-Playing^
+^-^-----------^-^--------------------------------------------^-^-----------
+_t_: Tetris   _5_: 5x5        _g_: Gomoku      _a_: Dunnet   _l_: Life
+_s_: Snake    _b_: Blackbox   _i_: Solitaire   _d_: Doctor   _h_: Hanoi
+_p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
+^ ^           _o_: Bubbles
+"
+  ;; Arcade
+  ("t" tetris)
+  ("s" snake)
+  ("p" pong)
+
+  ;; Puzzle
+  ("5" 5x5)
+  ("b" blackbox)
+  ("m" mpuz)
+  ("o" bubbles)
+
+  ;; Board
+  ("i" solitaire)
+  ("g" gomoku)
+
+  ;; Text
+  ("a" dunnet)
+  ("d" doctor)
+
+  ;; Self-Playing
+  ("l" life)
+  ("h" hanoi)
+  ("z" zone)
+
+  ;; Other
+  ("q" nil))
+(global-set-key (kbd "C-c g") #'hydra-game/body)
+#+end_src
+
+** ligatures [1/1]
+*** DONE [#C] Only enable extra ligatures in Org mode (for now)
+#+begin_src emacs-lisp :tangle yes
+(setq +ligatures-extras-in-modes '(org-mode))
+#+end_src
+
+** modeline [1/1]
+*** DONE [#C] Use 1-based column numbering in modeline
+#+begin_src emacs-lisp :tangle yes
+(setq column-number-indicator-zero-based nil)
+#+end_src
+
+** popup [2/3]
+*** DONE [#C] Do not open (Wo)Man buffers in a popup window
+#+begin_src emacs-lisp :tangle yes
+(setq +popup--display-buffer-alist
+      (delq (assoc "^\\*\\(?:Wo\\)?Man " +popup--display-buffer-alist)
+            +popup--display-buffer-alist))
+(when (bound-and-true-p +popup-mode)
+  (setq display-buffer-alist +popup--display-buffer-alist))
+#+end_src
+
+*** DONE [#C] Open manpages in the current window
+#+begin_src emacs-lisp :tangle yes
+(setq Man-notify-method 'pushy)
+#+end_src
+
+*** TODO [#C] Modify popup behavior for Customize buffers
+** treemacs [1/1]
+*** KILL [#B] Fix size of NPM logo
+I am no longer seeing this issue as of [2021-01-11 Mon].
+
+* :editor
+** evil [1/2]
+*** DONE [#B] Define modes that should always come up in Emacs state
+#+begin_src emacs-lisp :tangle yes
+(pushnew! evil-emacs-state-modes 'noaa-mode)
+#+end_src
+
+*** TODO [#C] Bind ~helpful-update~ to an Evil Normal state key
+~helpful-update~ is the function that is used to redisplay help buffers (useful
+for when a value changes). Currently, I need to switch to Emacs state via =C-z=
+and then hit =g=, finally switching back to Normal state via =C-z=.
+
+* :emacs
+** undo [0/1]
+*** STRT [#A] Enable ~undo-tree~
+Sometimes this doesn't seem to work.
+
+#+begin_src emacs-lisp :tangle yes
+(global-undo-tree-mode)
+#+end_src
+
+* :term
+:PROPERTIES:
+:CATEGORY: doom/term
+:END:
+** eshell [2/5]
+*** DONE [#B] Do not scroll after every command
+#+begin_src emacs-lisp :tangle yes
+(setq eshell-scroll-show-maximum-output nil)
+#+end_src
+
+*** DONE [#B] Define aliases
+#+begin_src emacs-lisp :tangle yes
+(set-eshell-alias!
+  ;; C-x [0123]
+  "0" "delete-window"
+  "1" "delete-other-windows"
+  "2" "split-window-below"
+  "3" "split-window-right"
+
+  ;; find-file
+  "e"  "find-file $1"
+  "4e" "find-file-other-window $1"
+  "5e" "find-file-other-frame $1"
+
+  ;; find-file-read-only
+  "r"  "find-file-read-only $1"
+  "4r" "find-file-read-only-other-window $1"
+  "5r" "find-file-read-only-other-frame $1"
+
+  ;; view-file
+  "v"  "view-file $1"
+  "4v" "view-file-other-window"
+  "5v" "view-file-other-frame"
+
+  ;; eww-open-file
+  "w" "eww-open-file $1"
+
+  ;; shell commands
+  "git" "TERM=eterm-color git --no-pager -c color.ui=always -c interactive.singleKey=false $*"
+  "f"   "cd $1 && ls")
+#+end_src
+
+*** TODO [#B] Export ~$EDITOR~ to =eshell=
+Unlike with =vterm=, we currently do not export ~$EDITOR~ to =eshell=. This is
+to avoid a dangerous situation in which =C-c C-k= not only returns an error code
+to =eshell=, it forcefully clears the file on disk.
+
+*** TODO [#B] Fix ANSI escape codes
+Last two lines from ~doom doctor~:
+#+begin_example
+[33mThere are 4 warnings![0m
+[32m✓ Finished in 7.4969s[0m
+#+end_example
+
+You can also try ~rg~ or ~fd~ somewhere in =~/.config/emacs= and you'll
+eventually see the escape codes instead of colors being output. The only
+workaround I know of now is to use =vterm= instead of =eshell=.
+
+*** TODO [#B] Fix terminal type
+Sometimes ~git~ will spit the following:
+#+begin_example
+tput: unknown terminal "eterm-color"
+#+end_example
+
+** vterm [2/3]
+*** DONE [#B] Export ~$EDITOR~ to =vterm=
+#+begin_src emacs-lisp :tangle yes
+(add-hook! vterm-mode #'with-editor-export-editor)
+#+end_src
+
+*** DONE [#B] Let =C-j= and =<M-backspace>= pass through in Evil insert state
+#+begin_src emacs-lisp :tangle yes
+(after! evil-collection-vterm
+  (dolist (key '("C-j" "<M-backspace>"))
+    (evil-collection-define-key 'insert 'vterm-mode-map
+      (kbd key) 'vterm--self-insert)))
+#+end_src
+
+*** TODO [#C] Prevent ~git-graph~ cutoff
+The last character ("o" in this case) gets hidden:
+#+begin_example
+$ git graph
+,* 65a8a6b6da9176bea78eb78c604120714207bcc5 Initial commit  eeowaa   3 weeks ag
+#+end_example
+
+I say "hidden" instead of "truncated" because if you kill the line and yank it
+into another buffer, you can see the "o".
+
+* :checkers
+** syntax [0/1]
+*** TODO [#B] Disable flycheck in Emacs Lisp mode
+It just ends up getting in my way.
+
+**** TODO How is it getting enabled?
+Is LSP to blame? If so, I don't want LSP to be enabled for Emacs Lisp.
+
+** spell [0/1]
+*** TODO [#B] Fix spelling correction
+~+spell/correct~ (=z ==) spits the following error:
+#+begin_quote
+Starting new Ispell process aspell with english dictionary...done
+ispell-init-process: Error: /Users/eeowaa/.config/emacs/.local/etc/ispell/english.pws: The language "english" is not known. This is probably because: the file "/usr/local/Cellar/aspell/0.60.8/lib/aspell-0.60/english.dat" can not be opened for reading.
+#+end_quote
+
+*UPDATE*: After running the following, it worked for me:
+#+begin_src sh :tangle no
+rm -rf ~/.config/emacs/.local/etc/ispell
+#+end_src
+
+I also ran the following, but I'm not sure if it made a difference:
+#+begin_src emacs-lisp
+(setq ispell-dictionary "english")
+#+end_src
+
+**** TODO Prevent this from happening
+I don't know why, but this problem reappears on me.
+
+**** TODO Make spelling corrections match recommendations
+The =company= backend that provides spelling recommendations (via =C-SPC=) must
+use a different dictionary than the =spell= module that highlights errors and
+provides corrections. For example, the word "fluctuant" is highlighted as a
+spelling error by the =spell= module but is a completion for "flu" (just type
+=C-SPC= in Evil insert state with the cursor positioned after the "u" in "flu").
+
+* :tools
+** debugger [0/1]
+*** TODO [#A] Fix DAP mode error message
+I get this error when I visit a file that invokes ~lsp!~:
+#+begin_example
+(doom-hook-error lsp!
+  (error Recursive load
+    ~/.config/emacs/.local/straight/build-28.0.50/dap-mode/dap-mode.el
+    ~/.config/emacs/.local/straight/build-28.0.50/dap-mode/dap-mode.el
+    ~/.config/emacs/.local/straight/build-28.0.50/dap-mode/dap-mode.el
+    ~/.config/emacs/.local/straight/build-28.0.50/dap-mode/dap-mode.el
+    ~/.config/emacs/.local/straight/build-28.0.50/dap-mode/dap-mode.el
+    ~/.config/emacs/.local/straight/build-28.0.50/lsp-mode/lsp-mode.el))
+#+end_example
+
+For now, I might just want to unset ~lsp-enable-dap-auto-configure~ and see if
+that prevents errors. Worst case, I could disable =debugger=.
+
+*UPDATE*: Unfortunately I was unable to resolve this quickly and opted to
+disable =debugger= for the time being (it's not super-important for me right
+now, anyway).
+
+** lookup [0/1]
+*** HOLD [#C] Add dictionary and thesaurus backends for =SPC s t/T=
+I've done everything that the Doom documentation told me to do, but things
+aren't working very well. Just try it out for yourself and see. Might want to
+open a PR or two.
+
+** lsp [0/1]
+*** TODO [#A] Fix the size of the popup buffer invoked by =M-x lsp=
+/Note that ~lsp~ is invoked when you enter a buffer, as well/.
+
+When the frame is too small (e.g. its default size), the first few menu items in
+the popup window are cut off, and all you see are options to exclude the file
+from the LSP workspace. Unless you know about the other available options, LSP
+won't work for you. Unfortunately, resizing the frame does not help.
+
+* :os
+** macos [1/2]
+*** DONE [#A] Remap keys for macOS
+#+begin_src emacs-lisp :tangle yes
+(when IS-MAC
+  (setq ;; Comfortable keys that work most of the time
+        mac-command-modifier 'control
+        mac-right-command-modifier 'meta
+
+        ;; Workaround for when system keybindings take precedence
+        mac-control-modifier 'control
+        mac-right-control-modifier 'meta
+
+        ;; For exotic mappings
+        mac-option-modifier 'super
+        mac-right-option-modifier 'hyper))
+#+end_src
+
+*** STRT [#B] Experiment with Keychain as a member of ~auth-sources~
+I'm already doing this with =forge=, but I'd like to better document what I'm
+doing and how to use Keychain with other Emacs facilities.
+
+* :lang
+** markdown [1/2]
+:PROPERTIES:
+:CATEGORY: doom/markdown
+:END:
+*** DONE [#B] Improve Markdown readability
++ https://emacs.stackexchange.com/questions/3753/prettify-symbols-mode-character-replacement-regex
+
+| Before      | After |
+|-------------+-------|
+| \\.         | .     |
+| \\(         | (     |
+| \\)         | )     |
+| \\-         | -     |
+| &copy       | ©    |
+| <a.*>.*</a> |       |
+
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'font-lock-extra-managed-props 'display)
+(font-lock-add-keywords
+ 'markdown-mode
+ '(("\\(\\\\\\)[[().-]" 1 '(face nil display ""))
+   ("&copy;" 0 '(face nil display "©"))
+   ("<a name=\".*\"></a>" 0 '(face nil display ""))))
+#+end_src
+
+*** TODO [#C] Replace =font-lock= hiding with native =markdown-mode= hiding
++ [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::defun markdown-toggle-markup-hiding (&optional arg][(defun markdown-toggle-markup-hiding]]
++ [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][;;; Markup Hiding]]
+
+** org [10/21]
+:PROPERTIES:
+:CATEGORY: doom/org
+:COOKIE_DATA: recursive
+:END:
+*** Agenda [4/7]
+**** DONE [#A] Establish agenda file layout
+Relevant variables:
++ ~org-directory~
++ ~org-agenda-files~
++ ~org-attach-directory~
++ ~org-mobile-directory~
+
+| Candidates          | Buffer or File             | Headline          | Text              |
+|---------------------+----------------------------+-------------------+-------------------|
+| Current buffer      |                            | org: =SPC m .=    | global: =SPC s s= |
+| Org buffers         | org: =SPC m ,=             | org: =SPC m /=    |                   |
+| Agenda files        | org: =SPC u SPC u SPC m ,= | global: =SPC n S= |                   |
+| Org directory files | global: =SPC n f=          |                   | global: =SPC n s= |
+
+The following is a prerequisite for my organization:
+#+begin_src sh :tangle no
+mkdir -p ~/Documents/org && ln -s ~/Documents/org ~/org
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(setq
+      ;; Top-level directory (used by `+default/find-in-notes', etc.)
+      org-directory "~/org"
+
+      ;; Directories to search for agenda files
+      my/org-directories `("work" "life" ,doom-private-dir)
+      org-agenda-files (mapcar (lambda (f)
+                                 (if (file-name-absolute-p f) f
+                                   (expand-file-name f org-directory)))
+                               `("" ,@my/org-directories))
+
+      ;; Only "todo.org" files hold agenda items
+      org-agenda-file-regexp "\\`todo.org\\'")
+#+end_src
+
+**** DONE [#A] Widen the agenda prefix and indent subtasks
+#+begin_src emacs-lisp :tangle yes
+(setq org-agenda-prefix-format
+      '((agenda  . " %i  %l%-16:c%?-12t% s")
+        (todo    . " %i  %l%-16:c")
+        (tags    . " %i  %l%-16:c")))
+#+end_src
+
+**** DONE [#A] Inherit priority so that subtasks appear under their parents in the agenda
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (defun my/org-inherited-priority (s)
+    (cond
+     ;; Priority cookie in this heading
+     ((string-match org-priority-regexp s)
+      (* 1000 (- org-priority-lowest
+                 (org-priority-to-value (match-string 2 s)))))
+     ;; No priority cookie, but already at highest level
+     ((not (org-up-heading-safe))
+      (* 1000 (- org-priority-lowest org-priority-default)))
+     ;; Look for the parent's priority
+     (t
+      (my/org-inherited-priority (org-get-heading)))))
+  (setq org-priority-get-priority-function #'my/org-inherited-priority))
+#+end_src
+
+**** DONE [#B] Do not display file tags in the agenda
+#+begin_src emacs-lisp :tangle yes
+(setq org-agenda-hide-tags-regexp "\\`work\\|life\\|doom\\|todo\\'")
+#+end_src
+
+**** STRT [#B] Set icons for agenda prefix
+#+begin_src emacs-lisp :tangle yes
+(setq org-agenda-category-icon-alist
+      `(("/inbox\\'"           (,(all-the-icons-faicon     "inbox"      nil nil :height 1.00 :face 'all-the-icons-dred)))
+        ;; work/*
+        ("\\`work/admin\\'"    (,(all-the-icons-faicon     "fax"        nil nil :height 0.85 :face 'all-the-icons-lred)))
+        ("\\`work/oncall\\'"   (,(all-the-icons-faicon     "users"      nil nil :height 0.80 :face 'all-the-icons-lyellow)))
+        ("\\`work/cots\\'"     (,(all-the-icons-faicon     "server"     nil nil :height 0.85 :face 'all-the-icons-dorange)))
+        ("\\`work/metrics\\'"  (,(all-the-icons-faicon     "eye"        nil nil :height 0.85 :face 'all-the-icons-dmaroon)))
+        ("\\`work/infra\\'"    (,(all-the-icons-faicon     "cubes"      nil nil :height 0.65 :face 'all-the-icons-lorange)))
+        ("\\`work/sdlc\\'"     (,(all-the-icons-faicon     "pencil"     nil nil :height 0.95 :face 'all-the-icons-orange)))
+        ;; life/*
+        ("\\`life/family\\'"   (,(all-the-icons-faicon     "heart"      nil nil :height 0.85 :face 'all-the-icons-red)))
+        ("\\`life/money\\'"    (,(all-the-icons-faicon     "money"      nil nil :height 0.80 :face 'all-the-icons-dgreen)))
+        ("\\`life/tech\\'"     (,(all-the-icons-faicon     "laptop"     nil nil :height 0.80 :face 'all-the-icons-dsilver)))
+        ;; doom/*
+        ("\\`doom/upstream\\'" (,(all-the-icons-alltheicon "git"        nil nil :height 0.85 :face 'all-the-icons-lred)))
+        ("\\`doom/config\\'"   (,(all-the-icons-fileicon   "emacs"      nil nil :height 0.85 :face 'all-the-icons-purple)))
+        ("\\`doom/org\\'"      (,(all-the-icons-fileicon   "org"        nil nil :height 0.90 :face 'all-the-icons-lgreen)))
+        ("\\`doom/markdown\\'" (,(all-the-icons-octicon    "markdown"   nil nil :height 0.85 :face 'all-the-icons-maroon)))
+        ("\\`doom/yaml\\'"     (,(all-the-icons-faicon     "cogs"       nil nil :height 0.80 :face 'all-the-icons-lsilver)))
+        ("\\`doom/python\\'"   (,(all-the-icons-alltheicon "python"     nil nil :height 0.85 :face 'all-the-icons-dblue)))
+        ("\\`doom/ts\\'"       (,(all-the-icons-fileicon   "typescript" nil nil :height 0.85 :face 'all-the-icons-blue)))
+        ("\\`doom/term\\'"     (,(all-the-icons-faicon     "terminal"   nil nil :height 0.95 :face 'all-the-icons-dgreen)))
+        ("\\`doom/misc\\'"     (,(all-the-icons-fileicon   "config"     nil nil :height 0.85 :face 'all-the-icons-lblue)))))
+#+end_src
+
+**** STRT [#C] Display distinguishable name in refile targets
+I've accomplished by goal, but I don't like seeing the entire file path.
+Instead, I would like to see the file-level Org tag (e.g. "doom" for this file).
+
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (setq org-refile-use-outline-path 'full-file-path))
+#+end_src
+
+**** TODO [#C] Display weekly/daily agenda view properly
++ https://www.reddit.com/r/orgmode/comments/6ybjjw/aligned_agenda_view_anyway_to_make_this_more/
++ IIRC, this is called the "fancy diary"
+
+*** Uncategorized [6/14]
+**** DONE [#A] Indent source blocks
++ https://emacs.stackexchange.com/a/9483/21977
+
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (setq org-src-preserve-indentation nil
+        org-edit-src-content-indentation 0))
+#+end_src
+
+**** DONE [#A] Do not indent headlines
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (setq org-hide-leading-stars nil
+        org-startup-indented nil
+        org-adapt-indentation nil))
+#+end_src
+
+**** DONE [#B] Show edit buffer in the current window
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (setq org-src-window-setup 'current-window))
+#+end_src
+
+**** DONE [#B] Remove file links from personal org capture templates
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (setcar (nthcdr 4 (assoc "t" org-capture-templates)) "* TODO %?") ;; And replace "[ ]"
+  (setcar (nthcdr 4 (assoc "n" org-capture-templates)) "* %u %?")
+  (setcar (nthcdr 4 (assoc "j" org-capture-templates)) "* %U %?"))
+#+end_src
+
+**** DONE [#C] Insert notes into ~:LOGBOOK:~ drawer without logging state changes
+#+begin_src emacs-lisp :tangle yes
+;; REVIEW See if there is a cleaner way to temporarily set `org-log-into-drawer'
+(after! org
+  (defun my/org-add-note-advice (f &rest r)
+    (let ((restore org-log-into-drawer))
+      (setq org-log-into-drawer t)
+      (apply f r))
+      (setq org-log-into-drawer restore))
+  (advice-add #'org-add-note :around #'my/org-add-note-advice))
+#+end_src
+
+**** DONE [#C] Maintain proper spacing of footnotes
+I had to redefine the ~org-footnote-sort~ function to *not* insert a leading
+~\n~ before new footnote definitions.
+
+#+begin_src emacs-lisp :tangle yes
+(defun org-footnote-sort ()
+  "Rearrange footnote definitions in the current buffer.
+Sort footnote definitions so they match order of footnote
+references.  Also relocate definitions at the end of their
+relative section or within a single footnote section, according
+to `org-footnote-section'.  Inline definitions are ignored."
+  (let ((references (org-footnote--collect-references)))
+    (org-preserve-local-variables
+     (let ((definitions (org-footnote--collect-definitions 'delete)))
+       (org-with-wide-buffer
+        (org-footnote--clear-footnote-section)
+        ;; Insert footnote definitions at the appropriate location,
+        ;; separated by a blank line.  Each definition is inserted
+        ;; only once throughout the buffer.
+        (let (inserted)
+          (dolist (cell references)
+            (let ((label (car cell))
+                  (nested (not (nth 2 cell)))
+                  (inline (nth 3 cell)))
+              (unless (or (member label inserted) inline)
+                (push label inserted)
+                (unless (or org-footnote-section nested)
+                  ;; If `org-footnote-section' is non-nil, or
+                  ;; reference is nested, point is already at the
+                  ;; correct position.  Otherwise, move at the
+                  ;; appropriate location within the section
+                  ;; containing the reference.
+                  (goto-char (nth 1 cell))
+                  (org-footnote--goto-local-insertion-point))
+                (insert (or (cdr (assoc label definitions))
+                            (format "[fn:%s] DEFINITION NOT FOUND." label))
+                        "\n"))))
+          ;; Insert un-referenced footnote definitions at the end.
+          (pcase-dolist (`(,label . ,definition) definitions)
+            (unless (member label inserted)
+              (insert definition "\n")))))))))
+#+end_src
+
+**** STRT [#A] Insert new headings just how I like them
+This is mostly done, but I do not want there to be a blank line after drawers or
+scheduling information:
+
++ [ ] ~^:END:$~
++ [ ] ~^\\(?:DEADLINE\\|SCHEDULED\\):~
+
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (setcdr (assoc 'heading org-blank-before-new-entry) nil)
+  (defun my/org-insert-heading-spacing ()
+    "Surround an Org heading with appropriate whitespace.
+
+This is the general idea:
+
+,* A
+,* B
+Entry content
+
+,** B.1
+,** B.2
+:PROPERTIES:...
+
+,** B.3
+,* C (intentional blank line in entry)
+
+,* D
+"
+    ;; Delete all blank lines following the heading
+    (delete-blank-lines)
+    ;; Set spacing appropriately before the heading
+    (save-excursion
+      (forward-line -1)
+      ;; What immediately precedes the heading line?
+      (cond
+       ;; Another heading line (or same heading at beginning of buffer) => do nothing
+       ((org-at-heading-p) t)
+       ;; Blank line => squeeze consecutive blank lines
+       ((looking-at-p "[[:blank:]]*$") (delete-blank-lines))
+       ;; Non-blank non-heading line => insert a blank line before the heading
+       (t (forward-line 1) (newline)))))
+  (defun my/org-insert-heading-visibility ()
+    "Redisplay the previous Org heading.
+
+I cannot figure out where the visibility state is saved, so I
+just perform a complete cycle of `org-cycle'."
+    (save-window-excursion
+      (save-excursion
+        (org-previous-visible-heading 1)
+        ;; XXX Doom-specific
+        (when evil-mode (evil-normal-state))
+        (call-interactively #'org-cycle)
+        (call-interactively #'org-cycle))))
+  (defun my/org-insert-heading-evil-state ()
+    "End up with the cursor in 'insert mode' at the end of the Org heading"
+    ;; XXX Doom-specific
+    (when evil-mode (evil-org-append-line 1)))
+  (add-hook! org-insert-heading #'(my/org-insert-heading-spacing
+                                   my/org-insert-heading-visibility
+                                   my/org-insert-heading-evil-state)))
+#+end_src
+
+**** HOLD [#C] Allow 5 lines of emphasized text
+This appears to cause freezes. For now, I'll get by without.
+
+#+begin_src emacs-lisp :tangle no
+(after! org
+  (setcar (nthcdr 4 org-emphasis-regexp-components) 4))
+#+end_src
+
+**** TODO [#C] Use Org speed keys
+Just apply your old configuration.
+
+**** TODO [#C] Create headline sorting function
++ Sort by priority, then by by ~TODO~ keyword
++ Reference ~org-sort-entries~
+
+**** TODO [#C] Create integration between embedded ~TODO~ and project =todo.org=
+Something like this Atlassian VS Code plugin:
+https://support.atlassian.com/bitbucket-cloud/docs/jira-issues-in-vs-code/
+
++ Embedded ~TODO~ comments:
+  + https://github.com/tarsius/hl-todo
+  + ~hl-todo-keyword-faces~
+  + ~hl-todo-next~, ~hl-todo-previous~, ~hl-todo-occur~
++ Project =todo.org= list:
+  + ~org-capture-templates~
+  + ~counsel-projectile-org-capture-templates~
+  + ~counsel-projectile-org-capture~
++ Integration with Git:
+  + https://github.com/alphapapa/magit-todos
+  + ~magit-todos-list~
+
+**** TODO [#C] Figure out how to /easily/ insert screenshots into Org buffers
+Right now, the best way I know how is to take a screenshot using the macOS
+system keybinding (=Cmd-Shift-4=), save it as a file, and then drag and drop the
+file itself (from Finder) into an Org buffer via =+dragndrop=. This takes too
+long. What about ~org-screenshot-take~?
+
+**** TODO [#C] Ignore surrounding tildes for interactive help functions
+Doom's org markup convention is to surround elisp symbols with tildes. However,
+this makes it difficult to use commands such as ~counsel-describe-variable~
+(=SPC h v=), ~counsel-describe-function~ (=SPC h f=), and ~find-function~
+(custom-mapped to =C-h C-f=) for symbols under point.
+
+The current workaround is to select the "object" under point using =v i e= and
+then use the corresponding help command. This works well enough, but is an
+annoying extra step.
+
+**** TODO [#C] Create method to store Org links from =eshell= buffers
+Just store the current working directory.
+
+** python [1/2]
+:PROPERTIES:
+:CATEGORY: doom/python
+:END:
+*** DONE [#A] Develop and run a simple "Hello World" program
+More than a simple "Hello World":
++ [[file:~/src/life/secret-santa/][Secret Santa project]]
++ [[file:~/Documents/org/life/notes.org::*Developing with interpreted languages][Notes for developing with interpreted languages]]
+
+*** HOLD [#C] Set up debugging
++ Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
+
+** yaml [1/3]
+:PROPERTIES:
+:CATEGORY: doom/yaml
+:END:
+*** DONE [#A] Set the YAML LSP server to RedHat's implementation
++ https://developers.redhat.com/blog/2017/10/18/yaml-language-server-extension-vs-code/
+
+Every time I try to use LSP with ~yamlls~, this is what I get:
+: Server yamlls:4133 status:starting exited with status exit. Do you want to restart it? (y or n)
+
+Got it working. See the ~PREREQ~ lines for the =yaml= module in
+=$DOOMDIR/init.el=. Could use some cleanup.
+
+*** STRT [#A] Download the schema definitions if we don't have them already
+I /think/ this is working. However, I have a note from my "illiterate" config
+saying that the implementation of ~lsp-yaml-download-schema-store-db~ is buggy.
+
+#+begin_src emacs-lisp :tangle yes
+(after! lsp-yaml
+  (let ((f lsp-yaml-schema-store-local-db))
+    (unless (file-exists-p f)
+      (mkdir (file-name-directory f) t)
+      (lsp-yaml-download-schema-store-db))))
+#+end_src
+
+*** STRT [#B] Import the CloudFormation YAML schema
++ https://github.com/iquiw/lsp-yaml#lsp-yaml-schemas
+I don't know if this is working yet. Still need to test.
+
+#+begin_src emacs-lisp :tangle yes
+(setq lsp-yaml-schemas '(:cloudformation "/*.y*ml"))
+#+end_src
+
+** javascript [1/2]
+:PROPERTIES:
+:CATEGORY: doom/ts
+:END:
+The =lang/javascript= module is what powers TypeScript development. Currently, I
+am only using TypeScript -- not vanilla JavaScript -- so the ~:CATEGORY:~
+property for this subtree is set to ~doom/ts~.
+
+*** DONE [#B] Use gitignore-mode for .npmignore files
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
+#+end_src
+
+*** HOLD [#B] Set up debugging
++ Try ~dap-mode~ https://www.youtube.com/watch?v=0bilcQVSlbM
++ Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
+
+* :config
+** default [4/6]
+*** DONE [#A] Do not auto-insert pairs of quotes
+More than half the time, I do not want that behavior.
+
+#+begin_src emacs-lisp :tangle yes
+(sp-pair "\"" nil :actions :rem)
+(sp-pair "'"  nil :actions :rem)
+(sp-pair "`"  nil :actions :rem)
+#+end_src
+
+*** DONE [#A] Disable smartparens in the minibuffer, including the ~evil-ex~ prompt
+According to the documentation, each mode listed in ~sp-ignore-modes-list~ will
+have smartparens disabled when ~smartparens-global-mode~ is active. However,
+this does not appear to be functioning properly, at least for
+~minibuffer-inactive-mode~, so I get around this by overriding all the pair
+insertion rules for that specific mode.
+
+#+begin_src emacs-lisp :tangle yes
+(after! smartparens
+  (let* ((default-pairs (cdr (assoc t sp-pairs)))
+         (default-openers (mapcar (lambda (pair) (plist-get pair :open))
+                                  default-pairs)))
+    (dolist (opener default-openers)
+      (sp-local-pair 'minibuffer-inactive-mode opener nil :actions nil))))
+#+end_src
+
+*** DONE [#A] Adjust ~which-key~ timing
+The default delay of 1 second is too long for my taste.
+
+#+begin_src emacs-lisp :tangle yes
+(setq which-key-idle-delay 0.5
+      which-key-idle-secondary-delay 0.1)
+#+end_src
+
+*** DONE [#A] Improve builtin help
+In order to increase discoverability of keybindings, I created a function for
+describing where all invocations of a key sequence is.
+
+#+begin_src emacs-lisp :tangle yes
+(defun my/alternate-keys (key &optional insert)
+  "Print message listing equivalent alternate key sequences for KEY.
+KEY is a pair (SEQ . RAW-SEQ) of key sequences, where
+RAW-SEQ is the untranslated form of the key sequence SEQ.
+If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
+While reading KEY interactively, this command temporarily enables
+menu items or tool-bar buttons that are disabled to allow getting help
+on them."
+  (interactive
+   ;; Ignore mouse movement events because it's too easy to miss the
+   ;; message while moving the mouse.
+   (list (car (help--read-key-sequence 'no-mouse-movement)) current-prefix-arg))
+  (where-is (cadr (help--analyze-key (car key) (cdr key))) insert))
+(define-key! help-map
+  ;; replaces `view-emacs-FAQ' b/c I rarely use it
+  "C-f" #'find-function
+  ;; replaces `describe-language-environment'
+  "C-l" #'find-library
+  ;; replaces `describe-no-warranty' b/c I never use it
+  "C-w" #'my/alternate-keys)
+#+end_src
+
+*** STRT [#B] Configure line numbers
+When I first enable line numbers in a buffer that does not have line numbers on
+by default (e.g. Org buffers), line numbers are displayed as relative. I still
+need to fix this before I can mark this heading as ~DONE~.
+
+#+begin_src emacs-lisp :tangle yes
+;; Use absolute line numbers
+(setq display-line-numbers-type t)
+
+;; Do not display line numbers in text mode
+(remove-hook 'text-mode-hook #'display-line-numbers-mode)
+#+end_src
+
+*** STRT [#B] Add additional toggle keybindings
+I would still like to add additional toggle keybindings:
+
+| Label          | Function              |
+|----------------+-----------------------|
+| "Line"         | hl-line-mode          |
+| "Column"       | column-highlight-mode |
+| "Battery"      | display-battery-mode  |
+| "Visual Lines" | visual-line-mode      |
+
+#+begin_src emacs-lisp :tangle yes
+;; Function to toggle 1 or 2 spaces at the end of sentences
+(defun my/toggle-sentence-end-double-space ()
+  (interactive)
+  (if (not sentence-end-double-space)
+      (progn
+        (setq-local sentence-end-double-space t)
+        (message "Sentences end with 2 spaces"))
+    (setq-local sentence-end-double-space nil)
+    (message "Sentences end with 1 space")))
+
+;; REVIEW See if there is a better way to do this (e.g. with `map!')
+(define-key! doom-leader-toggle-map
+  "a" #'auto-fill-mode
+  "h" #'use-hard-newlines
+  "o" #'overwrite-mode
+  "p" #'page-break-lines-mode
+  "t" #'toggle-truncate-lines
+  "|" #'visual-fill-column-mode
+  "." #'my/toggle-sentence-end-double-space
+  "SPC" #'whitespace-mode)
+(after! which-key
+  (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
+    (cl-pushnew `((,(format "\\`%s t a\\'" prefix-re)) nil . "Auto fill")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t h\\'" prefix-re)) nil . "Hard newlines")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t o\\'" prefix-re)) nil . "Overwrite")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t p\\'" prefix-re)) nil . "Page break lines")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t t\\'" prefix-re)) nil . "Truncate lines")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t |\\'" prefix-re)) nil . "Visual fill column")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t \\.\\'" prefix-re)) nil . "Sentence spacing")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t SPC\\'" prefix-re)) nil . "Whitespace mode")
+                which-key-replacement-alist)))
+#+end_src
+
+* Miscellany
+:PROPERTIES:
+:CATEGORY: doom/misc
+:END:
+** DONE [#A] Give buffers unique names based on file path
+#+begin_src emacs-lisp :tangle yes
+(setq uniquify-buffer-name-style 'forward)
+#+end_src
+
+** DONE [#A] Enable all disabled commands
+#+begin_src emacs-lisp :tangle yes
+(setq disabled-command-function nil)
+#+end_src
+
+** DONE [#A] Configure line-feed behavior
+#+begin_src emacs-lisp :tangle yes
+;; Display ^L characters as horizontal lines
+(use-package! page-break-lines
+  :config (global-page-break-lines-mode))
+
+;; Have C-l send the current line to the top of the window
+(setq recenter-positions '(top bottom middle))
+
+;; Perform a line feed after jumping to a ^L character
+(defun my/recenter-top (&rest r) (recenter 0))
+(advice-add #'forward-page :after #'my/recenter-top)
+#+end_src
+
+** DONE [#C] Keep icons small by default
+#+begin_src emacs-lisp :tangle yes
+(setq all-the-icons-scale-factor 1.0)
+#+end_src
+
+** DONE [#C] Don't prompt about killing running processing when quitting
+#+begin_src emacs-lisp :tangle yes
+(setq confirm-kill-processes nil)
+#+end_src
+
+** DONE [#C] Don't suggest abbreviations for long command names
+#+begin_src emacs-lisp :tangle yes
+(setq extended-command-suggest-shorter nil)
+#+end_src
+
+** DONE [#C] Allow easy input of accented and special characters via =C-\=
+#+begin_src emacs-lisp :tangle yes
+(setq default-input-method "latin-postfix")
+#+end_src
+
+** STRT [#B] Truncate lines by default
+This doesn't appear to be working...
+
+#+begin_src emacs-lisp :tangle yes
+(setq-default truncate-lines t)
+#+end_src
+
+** STRT [#B] Remove =straight= package repos from =projectile=
+Unfortunately, the =~/.config/emacs/.local/straight/repos/*= are creeping back
+in, so this isn't finished yet.
+
+#+begin_src emacs-lisp :tangle yes
+;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
+(after! projectile
+  (eval
+   `(pushnew!
+     projectile-globally-ignored-directories
+     ,@(mapcan
+        (lambda (f)
+          (when (file-directory-p f)
+            (list (abbreviate-file-name f))))
+        (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
+                                   t "\\`[^.]")))))
+#+end_src
+
+** TODO [#B] Always trust file-location and directory-local variables
+At least for all files in allowed paths (e.g. my source code).
+
+** TODO [#B] Figure out the autosave and backup situation for Doom Emacs
+Compare with my old config and try to match it.
+
+** TODO [#C] Figure out how to use ~projectile-edit-dir-locals~ (=SPC p e=)
+https://www.emacswiki.org/emacs/SkeletonMode
+
+** TODO [#C] Replace =C-?= with backspace
+We already have =C-r=, so might as well replace this mostly-useless keybinding.
+
+** TODO [#C] Fix ImageMagick display of images
+** DONE [#A] Load custom config if present
+#+begin_src emacs-lisp :tangle yes
+(load! "custom" doom-private-dir t)
+#+end_src

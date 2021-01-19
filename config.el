@@ -4,6 +4,11 @@
 ;; sync' after modifying this file!
 
 
+;;; completion/company
+
+;; Never start completion automatically (require C-SPC)
+(setq company-idle-delay nil)
+
 ;;; completion/ivy
 
 ;; Make it easier to jump to headlines across Org buffers
@@ -35,6 +40,7 @@
 
 ;;; ui/hydra
 
+;; Add a hydra for games
 (defhydra hydra-game (:color blue :hint nil)
   "
 ^Arcade^      ^Puzzle^        ^Board^          ^Text^        ^Self-Playing^
@@ -186,9 +192,8 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 
 ;;; lang/javascript
 
-;; TESTME Use gitignore-mode for .npmignore files
-(after! javascript
-  (add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode)))
+;; Use gitignore-mode for .npmignore files
+(add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
 
 ;;; lang/markdown
 
@@ -198,9 +203,9 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 (add-to-list 'font-lock-extra-managed-props 'display)
 (font-lock-add-keywords
  'markdown-mode
- '(("<a name=\".*\"></a>" 0 '(face nil display "")) ; <a name=".*"></a> -> ""
-   ("\\(\\\\\\)[[().-]" 1 '(face nil display ""))   ; "\?"              -> "?"
-   ("&copy;" 0 '(face nil display "©"))))           ; "&copy;"          -> "©"
+ '(("\\(\\\\\\)[[().-]" 1 '(face nil display ""))
+   ("&copy;" 0 '(face nil display "©"))
+   ("<a name=\".*\"></a>" 0 '(face nil display ""))))
 
 ;;; lang/org
 
@@ -260,6 +265,10 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
   ;; <https://emacs.stackexchange.com/a/9483/21977>
   (setq org-src-preserve-indentation nil
         org-edit-src-content-indentation 0)
+
+  ;; REVIEW This appears to cause freezes
+  ;; Allow 5 lines of emphasized text
+  ;; (setcar (nthcdr 4 org-emphasis-regexp-components) 4)
 
   ;; TODO Use the file-level Org tag instead of the full path
   ;; Prefix refile targets with the directory name
@@ -405,6 +414,10 @@ to `org-footnote-section'.  Inline definitions are ignored."
       (mkdir (file-name-directory f) t)
       (lsp-yaml-download-schema-store-db))))
 
+;; TODO See if this is correct
+;; https://github.com/iquiw/lsp-yaml#lsp-yaml-schemas
+(setq lsp-yaml-schemas '(:cloudformation "/*.y*ml"))
+
 
 ;;; config/default
 
@@ -509,6 +522,7 @@ on them."
 ;; Keep icons small by default
 (setq all-the-icons-scale-factor 1.0)
 
+;; FIXME The ~/.config/emacs/.local/straight/repos/* are creeping back in
 ;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
 ;; Remove `straight' package repos from projectile
 (after! projectile
