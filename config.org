@@ -20,7 +20,7 @@ on its own.
 
 ** ivy [1/1]
 *** DONE [#A] Make it easier to jump to headlines across Org buffers
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
 (setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
 #+end_src
 
@@ -265,7 +265,7 @@ rm -rf ~/.config/emacs/.local/etc/ispell
 #+end_src
 
 I also ran the following, but I'm not sure if it made a difference:
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
 (setq ispell-dictionary "english")
 #+end_src
 
@@ -866,6 +866,23 @@ I would still like to add additional toggle keybindings:
     (cl-pushnew `((,(format "\\`%s t SPC\\'" prefix-re)) nil . "Whitespace mode")
                 which-key-replacement-alist)))
 #+end_src
+
+** literate [0/3]
+*** TODO [#B] Tangle ~sh~ blocks to =prereqs.sh=
++ [[file:~/.config/emacs/modules/config/literate/README.org::*Change where src blocks are tangled or prevent it entirely][Change where src blocks are tangled or prevent it entirely]]
+
+This should not only be done for existing ~sh~ blocks, but for ~PREREQ~ lines in
+=init.el=. So really, I should create more ~sh~ blocks.
+
+*** TODO [#B] Tangle to =packages.el=
+I would like to make =packages.el= literate instead of "illiterate". 😉
+
+*** HOLD [#C] Split up my literate config into separate files
++ [[file:~/.config/emacs/modules/config/literate/README.org::*Modularizing your literate config with ~#+INCLUDE~ directives][Modularizing your literate config with ~#+INCLUDE~ directives]]
+
+Doing so might make tangling faster, but currently I don't have any problems
+with performance. If and when I start to notice a problem, I'll revisit this
+item.
 
 * Miscellany
 :PROPERTIES:
