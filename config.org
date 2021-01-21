@@ -716,12 +716,12 @@ saying that the implementation of ~lsp-yaml-download-schema-store-db~ is buggy.
       (lsp-yaml-download-schema-store-db))))
 #+end_src
 
-*** STRT [#B] Import the CloudFormation YAML schema
+*** STRT [#B] Import the CloudFormation YAML schema :TESTME:
 + https://github.com/iquiw/lsp-yaml#lsp-yaml-schemas
 I don't know if this is working yet. Still need to test.
 
 #+begin_src emacs-lisp :tangle yes
-(setq lsp-yaml-schemas '(:cloudformation "/*.y*ml"))
+(setq lsp-yaml-schemas '(:cloudformation ["*.yaml" "*.yml"]))
 #+end_src
 
 ** javascript [1/2]
@@ -742,7 +742,7 @@ property for this subtree is set to ~doom/ts~.
 + Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
 
 * :config
-** default [4/6]
+** default [4/7]
 *** DONE [#A] Do not auto-insert pairs of quotes
 More than half the time, I do not want that behavior.
 
@@ -802,6 +802,13 @@ on them."
   ;; replaces `describe-no-warranty' b/c I never use it
   "C-w" #'my/alternate-keys)
 #+end_src
+
+*** TODO [#B] Prevent error related to ~'~ pairs
+Occasionally this comes up (not sure exactly how to reproduce):
+#+begin_example
+error in process sentinel: doom--handle-load-error: Error in a Doom module: "modules/config/default/config.el", (error "Pair ' was never defined, please specify closing delimiter in instead of passing ‘nil’")
+error in process sentinel: Error in a Doom module: "modules/config/default/config.el", (error "Pair ' was never defined, please specify closing delimiter in instead of passing ‘nil’")
+#+end_example
 
 *** STRT [#B] Configure line numbers
 When I first enable line numbers in a buffer that does not have line numbers on
@@ -867,7 +874,7 @@ I would still like to add additional toggle keybindings:
                 which-key-replacement-alist)))
 #+end_src
 
-** literate [0/3]
+** literate [0/4]
 *** TODO [#B] Tangle ~sh~ blocks to =prereqs.sh=
 + [[file:~/.config/emacs/modules/config/literate/README.org::*Change where src blocks are tangled or prevent it entirely][Change where src blocks are tangled or prevent it entirely]]
 
@@ -876,6 +883,9 @@ This should not only be done for existing ~sh~ blocks, but for ~PREREQ~ lines in
 
 *** TODO [#B] Tangle to =packages.el=
 I would like to make =packages.el= literate instead of "illiterate". 😉
+
+*** TODO [#C] Link tangled blocks back to source
+Refer to your old config.
 
 *** HOLD [#C] Split up my literate config into separate files
 + [[file:~/.config/emacs/modules/config/literate/README.org::*Modularizing your literate config with ~#+INCLUDE~ directives][Modularizing your literate config with ~#+INCLUDE~ directives]]

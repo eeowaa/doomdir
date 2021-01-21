@@ -198,7 +198,7 @@
        ;;ocaml             ; an objective camel
        ;; PREREQ brew install gnuplot pandoc graphviz pngpaste
        ;; PREREQ mkdir -p ~/Documents/org/roam
-       (org +dragndrop +gnuplot +jupyter +noter +pandoc +roam)
+       (org +dragndrop +gnuplot +jupyter +noter +pandoc +pomodoro +roam)
                          ; organize your plain life in plain text
        ;;php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
