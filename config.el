@@ -312,7 +312,24 @@ just perform a complete cycle of `org-cycle'."
       (mkdir (file-name-directory f) t)
       (lsp-yaml-download-schema-store-db))))
 
-(setq lsp-yaml-schemas '(:cloudformation ["*.yaml" "*.yml"]))
+(setq lsp-yaml-schemas
+      '((https://raw\.githubusercontent\.com/awslabs/goformation/v4\.15\.0/schema/cloudformation\.schema\.json
+         . ["*.yaml" "*.yml"])))
+
+(setq-hook! 'yaml-mode-hook lsp-diagnostic-package :none)
+
+(after! flycheck
+  (flycheck-define-checker cfn-lint
+    "A CloudFormation linter using cfn-lint."
+    :command ("cfn-lint" "-f" "parseable" source)
+    :error-patterns ((warning line-start (file-name) ":" line ":" column
+                              ":" (one-or-more digit) ":" (one-or-more digit) ":"
+                              (id "W" (one-or-more digit)) ":" (message) line-end)
+                     (error line-start (file-name) ":" line ":" column
+                            ":" (one-or-more digit) ":" (one-or-more digit) ":"
+                            (id "E" (one-or-more digit)) ":" (message) line-end))
+    :modes (yaml-mode))
+    (add-to-list 'flycheck-checkers 'cfn-lint))
 
 (add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
 

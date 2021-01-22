@@ -691,7 +691,7 @@ More than a simple "Hello World":
 *** HOLD [#C] Set up debugging
 + Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
 
-** yaml [1/3]
+** yaml [5/6]
 :PROPERTIES:
 :CATEGORY: doom/yaml
 :END:
@@ -704,7 +704,7 @@ Every time I try to use LSP with ~yamlls~, this is what I get:
 Got it working. See the ~PREREQ~ lines for the =yaml= module in
 =$DOOMDIR/init.el=. Could use some cleanup.
 
-*** STRT [#A] Download the schema definitions if we don't have them already
+*** DONE [#A] Download the schema definitions if we don't have them already
 I /think/ this is working. However, I have a note from my "illiterate" config
 saying that the implementation of ~lsp-yaml-download-schema-store-db~ is buggy.
 
@@ -716,13 +716,125 @@ saying that the implementation of ~lsp-yaml-download-schema-store-db~ is buggy.
       (lsp-yaml-download-schema-store-db))))
 #+end_src
 
-*** STRT [#B] Import the CloudFormation YAML schema :TESTME:
-+ https://github.com/iquiw/lsp-yaml#lsp-yaml-schemas
-I don't know if this is working yet. Still need to test.
+*** DONE [#B] Use CloudFormation YAML schema
+I use YAML almost entirely for CloudFormation, so I like to use CloudFormation
+YAML schema by default. This involves setting ~lsp-yaml-schemas~ appropriately,
+but unfortunately the documentation in that regard is quite lacking. I managed
+to get it right mostly by running =M-x lsp-yaml-select-buffer-schema= and then
+selecting the correct schema ("AWS CloudFormation") through interactive
+completion.
 
 #+begin_src emacs-lisp :tangle yes
-(setq lsp-yaml-schemas '(:cloudformation ["*.yaml" "*.yml"]))
+(setq lsp-yaml-schemas
+      '((https://raw\.githubusercontent\.com/awslabs/goformation/v4\.15\.0/schema/cloudformation\.schema\.json
+         . ["*.yaml" "*.yml"])))
 #+end_src
+
+Other references:
++ https://github.com/redhat-developer/yaml-language-server#using-yamlschemas-settings
++ Help for ~lsp-yaml-schemas~
++ File referenced by ~lsp-yaml-schema-store-local-db~
+
+*** DONE [#B] Disable LSP syntax checking
+Honestly, I don't really need syntax checking from RedHat's YAML language server
+when ~cfn-lint~ does a better job. In fact, it appears as though there are false
+alarms when using LSP syntax checking (and that's not even counting custom
+tags).
+
+#+begin_src emacs-lisp :tangle yes
+(setq-hook! 'yaml-mode-hook lsp-diagnostic-package :none)
+#+end_src
+
+References:
++ https://github.com/emacs-lsp/lsp-mode/issues/1810
++ [[file:~/.config/emacs/modules/lang/yaml/config.el]]
+
+*** DONE [#A] Integrate ~cfn-lint~ with Flycheck
+Again, since I'm only really using YAML for CloudFormation (at the moment), I
+feel OK about automatically integrating ~cfn-lint~ into Flycheck for all YAML
+files. This fills in the diagnostics gap left by RedHat's YAML language
+server implementation and corresponding Emacs mode.
+
+#+begin_src emacs-lisp :tangle yes
+(after! flycheck
+  (flycheck-define-checker cfn-lint
+    "A CloudFormation linter using cfn-lint."
+    :command ("cfn-lint" "-f" "parseable" source)
+    :error-patterns ((warning line-start (file-name) ":" line ":" column
+                              ":" (one-or-more digit) ":" (one-or-more digit) ":"
+                              (id "W" (one-or-more digit)) ":" (message) line-end)
+                     (error line-start (file-name) ":" line ":" column
+                            ":" (one-or-more digit) ":" (one-or-more digit) ":"
+                            (id "E" (one-or-more digit)) ":" (message) line-end))
+    :modes (yaml-mode))
+    (add-to-list 'flycheck-checkers 'cfn-lint))
+#+end_src
+
+A better way to do this would probably be through a project mode. (Refer to
+~+ansible-yaml-mode~ and ~def-project-mode!~ for more info.) However, when I
+tried doing this, I had some errors so decided to back out for now.
+
+Reference:
++ https://awk.space/blog/cfn-lint/
+
+*** HOLD [#C] Add custom CloudFormation tags :TESTME:
+This is the sort of thing that should probably be set per schema, but again,
+since I pretty much only use YAML for CloudFormation, defining custom tags
+globally should be OK. Unfortunately, I can't figure out how to get this to
+work. The following subtrees explain what I tried doing. Make sure to view the
+*Notes* subtree!
+
+**** List of strings
+#+begin_src emacs-lisp :tangle no
+(setq lsp-yaml-custom-tags
+      '("!Equals sequence"
+        "!FindInMap sequence"
+        "!GetAtt"
+        "!GetAZs"
+        "!ImportValue"
+        "!Join sequence"
+        "!Ref"
+        "!Select sequence"
+        "!Split sequence"
+        "!Sub"))
+#+end_src
+This causes the following error after opening a YAML file:
+: Error processing message (wrong-type-argument symbolp "!Equals sequence").
+
+**** Serialized JSON string
+#+begin_src emacs-lisp :tangle no
+(setq lsp-yaml-custom-tags
+      (json-serialize
+       ["!Equals sequence"
+        "!FindInMap sequence"
+        "!GetAtt"
+        "!GetAZs"
+        "!ImportValue"
+        "!Join sequence"
+        "!Ref"
+        "!Select sequence"
+        "!Split sequence"
+        "!Sub"]))
+#+end_src
+Unfortunately, invalid tags do not appear as Flycheck errors, and the following
+error occurs when attempting to complete anything in the YAML buffer with
+=C-SPC= (~+company/complete~) in Evil insert state:
+
+: Company: An error occurred in auto-begin
+: Company: backend company-capf error "Request textDocument/completion failed with message: customTags.filter is not a function" with args (candidates )
+
+**** Notes
+Looks like this is a problem stemming from RedHat's YAML LSP server
+implementation, and I might be able to get around it by using a
+CloudFormation-specific YAML LSP server (at least until I get around to using
+Ansible more). Unfortunately, it looks like there is no such integration with
+Emacs, but I've gathered some links on how I might be able to perform the
+integration myself.
+
+Reference:
++ https://stackoverflow.com/questions/53470329/aws-sam-yaml-template-unknown-tag-ref
++ https://emacs-lsp.github.io/lsp-mode/page/adding-new-language/
++ https://github.com/aws-cloudformation/aws-cfn-lint-visual-studio-code/blob/master/package.json
 
 ** javascript [1/2]
 :PROPERTIES:
@@ -874,8 +986,8 @@ I would still like to add additional toggle keybindings:
                 which-key-replacement-alist)))
 #+end_src
 
-** literate [0/5]
-*** STRT [#A] Clear instead of deleting target file :TESTME:
+** literate [1/6]
+*** DONE [#A] Clear instead of deleting target file
 ~org-babel-tangle~ deletes the existing target file before writing to it. This
 causes a problem when the target is a symlink, because the link is replaced with
 a normal file. The following code redefines ~org-babel-tangle~ by replacing
@@ -998,6 +1110,11 @@ matching a regular expression."
                 path-collector)
           (mapcar #'car path-collector))))))
 #+end_src
+
+*** TODO [#A] Tangle upon save
+Currently, I need to run =C-c C-v C-t= (~org-babel-tangle~) manually before
+=config.org= tangles to =config.el=, although according to the =literate= module
+documentation, this should be happening automatically upon save.
 
 *** TODO [#B] Tangle ~sh~ blocks to =prereqs.sh=
 + [[file:~/.config/emacs/modules/config/literate/README.org::*Change where src blocks are tangled or prevent it entirely][Change where src blocks are tangled or prevent it entirely]]
