@@ -1,5 +1,18 @@
 #+STARTUP:  overview
 #+FILETAGS: :doom:
+* Hints
+** DONE Trouble tangling
+Are you having trouble tangling this file with =C-c C-v C-t=
+(~org-babel-tangle~)? Have you recently updated Doom Emacs using ~doom upgrade~?
+Why don't you try =M-x pdf-tools-install= and try again? 😃
+
+** TODO ~error in process sentinel: Wrong type argument: number-or-marker-p, nil~
+I'm not sure if this will solve it, but you can try:
+#+begin_src sh :tangle no
+find ~/.config/doom -type f -name .DS_Store -exec rm '{}' \;
+doom purge
+#+end_src
+
 * :completion
 ** company [1/1]
 *** DONE [#B] Never start completion automatically (require =C-SPC=)
