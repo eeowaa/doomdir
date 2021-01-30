@@ -161,14 +161,14 @@
        ;; PREREQ brew install go gopls golangci-lint
        ;; PREREQ FIXME bash < <(curl -s https://raw.githubusercontent.com/rocky/ssa-interp/master/gub-installer)
        ;;        See https://github.com/rocky/ssa-interp
-       ;; PREREQ go get -u github.com/motemen/gore/cmd/gore
-       ;; PREREQ go get -u github.com/stamblerre/gocode
-       ;; PREREQ go get -u golang.org/x/tools/cmd/godoc
-       ;; PREREQ go get -u golang.org/x/tools/cmd/goimports
-       ;; PREREQ go get -u golang.org/x/tools/cmd/gorename
-       ;; PREREQ go get -u golang.org/x/tools/cmd/guru
-       ;; PREREQ go get -u github.com/cweill/gotests/...
-       ;; PREREQ go get -u github.com/fatih/gomodifytags
+       ;; PREREQ go get -v -u github.com/motemen/gore/cmd/gore
+       ;; PREREQ go get -v -u github.com/stamblerre/gocode
+       ;; PREREQ go get -v -u golang.org/x/tools/cmd/godoc
+       ;; PREREQ go get -v -u golang.org/x/tools/cmd/goimports
+       ;; PREREQ go get -v -u golang.org/x/tools/cmd/gorename
+       ;; PREREQ go get -v -u golang.org/x/tools/cmd/guru
+       ;; PREREQ go get -v -u github.com/cweill/gotests/...
+       ;; PREREQ go get -v -u github.com/fatih/gomodifytags
        (go +lsp)         ; the hipster dialect
        ;;(haskell +dante)  ; a language that's lazier than I am
        ;;hy                ; readability of scheme w/ speed of python
