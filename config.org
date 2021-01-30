@@ -368,7 +368,7 @@ doing and how to use Keychain with other Emacs facilities.
 + [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::defun markdown-toggle-markup-hiding (&optional arg][(defun markdown-toggle-markup-hiding]]
 + [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][;;; Markup Hiding]]
 
-** org [10/21]
+** org [10/22]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -480,7 +480,7 @@ Instead, I would like to see the file-level Org tag (e.g. "doom" for this file).
 + https://www.reddit.com/r/orgmode/comments/6ybjjw/aligned_agenda_view_anyway_to_make_this_more/
 + IIRC, this is called the "fancy diary"
 
-*** Uncategorized [6/14]
+*** Uncategorized [6/15]
 **** DONE [#A] Indent source blocks
 + https://emacs.stackexchange.com/a/9483/21977
 
@@ -678,6 +678,36 @@ annoying extra step.
 
 **** TODO [#C] Create method to store Org links from =eshell= buffers
 Just store the current working directory.
+
+**** TODO [#C] Fix emoji display in Org column mode
+:PROPERTIES:
+:COLUMNS: %TODO %ITEM %attentive(👂) %diligent(🚜) %inventive(🔧) %astute(🎯) %curious(🔭) %nurturing(💯) %uncompromising(🎖) %visionary(🌎) %daring(🏈) %frugal(💵) %trustworthy(🤝) %probing(🔎) %assertive(☝) %productive(📦)
+:END:
+| Icon | Property       | Amazon Leadership Principle        |
+|------+----------------+------------------------------------|
+| 👂   | attentive      | Customer Obsession                 |
+| 🚜   | diligent       | Ownership                          |
+| 🔧   | inventive      | Invent and Simplify                |
+| 🎯   | astute         | Are Right, A Lot                   |
+| 🔭   | curious        | Learn and Be Curious               |
+| 💯   | nurturing      | Hire and Develop the Best          |
+| 🎖   | uncompromising | Insist on the Highest Standards    |
+| 🌎   | visionary      | Think Big                          |
+| 🏈   | daring         | Bias for Action                    |
+| 💵   | frugal         | Frugality                          |
+| 🤝   | trustworthy    | Earn Trust                         |
+| 🔎   | probing        | Dive Deep                          |
+| ☝   | assertive      | Have Backbone; Disagree and Commit |
+| 📦   | productive     | Deliver Results                    |
+
+For whatever reason, only the emoji for "uncompromising" and "assertive" are
+showing in Org column view when invoked by =C-c C-x C-c= (~org-columns~).
+Additionally, the cursor jumps one column to the right when moving to the lines
+in the table that contain either of those emoji, somewhat suggesting that they
+are one character wider than the others. Unfortunately, when replacing those
+"two-character-wide" emoji with alternative "one-character-wide" emoji to
+achieve consistent "character width", what happens is that no emoji are
+displayed at all.
 
 ** python [1/2]
 :PROPERTIES:
