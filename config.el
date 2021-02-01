@@ -107,6 +107,11 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 
 (setq ispell-dictionary "english")
 
+(setq magit-repository-directories
+      '(("~/Documents/src" . 2)
+        ("~/Documents/ref" . 1)
+        ("~/stow-dotfiles" . 1)))
+
 (when IS-MAC
   (setq ;; Comfortable keys that work most of the time
         mac-command-modifier 'control

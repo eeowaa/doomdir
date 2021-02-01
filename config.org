@@ -327,7 +327,7 @@ I've done everything that the Doom documentation told me to do, but things
 aren't working very well. Just try it out for yourself and see. Might want to
 open a PR or two.
 
-** lsp [0/1]
+** lsp [0/2]
 *** TODO [#A] Fix the size of the popup buffer invoked by =M-x lsp=
 /Note that ~lsp~ is invoked when you enter a buffer, as well/.
 
@@ -335,6 +335,15 @@ When the frame is too small (e.g. its default size), the first few menu items in
 the popup window are cut off, and all you see are options to exclude the file
 from the LSP workspace. Unless you know about the other available options, LSP
 won't work for you. Unfortunately, resizing the frame does not help.
+
+** magit [1/1]
+*** DONE [#C] Configure list of repositories
+#+begin_src emacs-lisp :tangle yes
+(setq magit-repository-directories
+      '(("~/Documents/src" . 2)
+        ("~/Documents/ref" . 1)
+        ("~/stow-dotfiles" . 1)))
+#+end_src
 
 * :os
 ** macos [1/2]
