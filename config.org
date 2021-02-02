@@ -397,7 +397,7 @@ doing and how to use Keychain with other Emacs facilities.
 + [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::defun markdown-toggle-markup-hiding (&optional arg][(defun markdown-toggle-markup-hiding]]
 + [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][;;; Markup Hiding]]
 
-** org [10/22]
+** org [11/23]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -509,7 +509,7 @@ Instead, I would like to see the file-level Org tag (e.g. "doom" for this file).
 + https://www.reddit.com/r/orgmode/comments/6ybjjw/aligned_agenda_view_anyway_to_make_this_more/
 + IIRC, this is called the "fancy diary"
 
-*** Uncategorized [6/15]
+*** Uncategorized [7/16]
 **** DONE [#A] Indent source blocks
 + https://emacs.stackexchange.com/a/9483/21977
 
@@ -594,6 +594,18 @@ to `org-footnote-section'.  Inline definitions are ignored."
           (pcase-dolist (`(,label . ,definition) definitions)
             (unless (member label inserted)
               (insert definition "\n")))))))))
+#+end_src
+
+**** DONE [#C] Add ~ditaa~ JAR path
+You need ~ditaa~ installed for this to work:
+#+begin_src sh :tangle no
+brew install ditaa
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(setq org-ditaa-jar-path
+      (cond (IS-MAC
+             (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))))
 #+end_src
 
 **** STRT [#A] Insert new headings just how I like them

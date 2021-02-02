@@ -258,6 +258,10 @@ to `org-footnote-section'.  Inline definitions are ignored."
             (unless (member label inserted)
               (insert definition "\n")))))))))
 
+(setq org-ditaa-jar-path
+      (cond (IS-MAC
+             (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))))
+
 (after! org
   (setcdr (assoc 'heading org-blank-before-new-entry) nil)
   (defun my/org-insert-heading-spacing ()
