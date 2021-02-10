@@ -552,6 +552,21 @@ matching a regular expression."
 (defun my/recenter-top (&rest r) (recenter 0))
 (advice-add #'forward-page :after #'my/recenter-top)
 
+(defun my/toggle-window-dedicated ()
+  "Control whether or not Emacs is allowed to display another
+buffer in current window."
+  (interactive)
+  (message
+   (if (let (window (get-buffer-window (current-buffer)))
+         (set-window-dedicated-p window (not (window-dedicated-p window))))
+       "%s: Can't touch this!"
+     "%s is up for grabs.")
+   (current-buffer)))
+
+(define-key! evil-window-map
+  ;; replaces `+workspace/close-window-or-workspace'
+  "d" #'my/toggle-window-dedicated)
+
 (setq all-the-icons-scale-factor 1.0)
 
 (setq confirm-kill-processes nil)

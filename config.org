@@ -1234,6 +1234,24 @@ item.
 (advice-add #'forward-page :after #'my/recenter-top)
 #+end_src
 
+** DONE [#B] Dedicate windows
+#+begin_src emacs-lisp :tangle yes
+(defun my/toggle-window-dedicated ()
+  "Control whether or not Emacs is allowed to display another
+buffer in current window."
+  (interactive)
+  (message
+   (if (let (window (get-buffer-window (current-buffer)))
+         (set-window-dedicated-p window (not (window-dedicated-p window))))
+       "%s: Can't touch this!"
+     "%s is up for grabs.")
+   (current-buffer)))
+
+(define-key! evil-window-map
+  ;; replaces `+workspace/close-window-or-workspace'
+  "d" #'my/toggle-window-dedicated)
+#+end_src
+
 ** DONE [#C] Keep icons small by default
 #+begin_src emacs-lisp :tangle yes
 (setq all-the-icons-scale-factor 1.0)
