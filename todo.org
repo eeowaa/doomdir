@@ -4,7 +4,7 @@
 :PROPERTIES:
 :CATEGORY: doom/inbox
 :END:
-* Upstream [0/6]
+* Upstream [0/7]
 :PROPERTIES:
 :CATEGORY: doom/upstream
 :END:
@@ -45,6 +45,30 @@ message. At that point, touch the side of the YubiKey.
 cd ~/.config/emacs
 git remote add eeowaa git@github.com:eeowaa/doom-emacs.git
 git fetch eeowaa
+#+end_src
+
+** TODO [#A] Use relative symlinks for straight
+If a user moves from =$HOME/.emacs.d= to =$XDG_CONFIG_HOME/emacs=, symlinks for
+=straight= will be broken, because they are absolute:
+
+#+begin_example
+$ pwd
+/Users/user/.config/emacs/.local/straight/build-28.0.50/straight
+$ ls -l
+total 256
+-rw-r--r-- 1 user group  15842 Feb  8 16:57 straight-autoloads.el
+lrwxr-xr-x 1 user group     72 Feb  8 16:57 straight-x.el -> /Users/user/.emacs.d/.local/straight/repos/straight.el/straight-x.el
+-rw-r--r-- 1 user group   6435 Feb  8 16:57 straight-x.elc
+lrwxr-xr-x 1 user group     70 Feb  8 16:57 straight.el -> /Users/user/.emacs.d/.local/straight/repos/straight.el/straight.el
+-rw-r--r-- 1 user group 234899 Feb  8 16:57 straight.elc
+#+end_example
+
+The fix:
+#+begin_src sh :eval no
+cd ~/.config/emacs/.local/straight/build-28.0.50/straight
+rm straight-x.el straight.el
+ln -s ../../repos/straight.el/straight.el straight.el
+ln -s ../../repos/straight.el/straight-x.el straight-x.el
 #+end_src
 
 ** TODO [#B] Submit a PR for =lsp-yaml=
