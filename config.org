@@ -155,7 +155,20 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 I am no longer seeing this issue as of [2021-01-11 Mon].
 
 * :editor
-** evil [1/2]
+** evil [1/3]
+*** TODO [#A] Fix ~evil-visual-block~ in =org= buffers
+Oddly, this is a problem I've only encountered in =org= buffers, but when I use
+=C-v= in ~normal~ state (/not/ =C-x SPC= in ~emacs~ state) the visual block
+extends up and/or down further than what I've actually selected. This doesn't
+appear to just be a visual artifact, either, since sometimes (but not always),
+the action that I take on what I've actually selected extends to at least some
+of the visually-highlighted text that I did not select.
+
+To attempt to fix this problem, I performed a fresh install of Doom Emacs and
+all its packages. However, it looks like maybe I need to install a different
+version of Emacs (I have ~HEAD~ of Emacs 28), or just wait until =evil=, =org=
+(or =evil-org=?) gets updated.
+
 *** DONE [#B] Define modes that should always come up in Emacs state
 #+begin_src emacs-lisp :tangle yes
 (pushnew! evil-emacs-state-modes 'noaa-mode)
@@ -1310,6 +1323,9 @@ https://www.emacswiki.org/emacs/SkeletonMode
 We already have =C-r=, so might as well replace this mostly-useless keybinding.
 
 ** TODO [#C] Fix ImageMagick display of images
+** TODO [#C] Suppress warning for ~Package cl is deprecated~
+https://github.com/hlissner/doom-emacs/issues/3372
+
 ** DONE [#A] Load custom config if present
 #+begin_src emacs-lisp :tangle yes
 (load! "custom" doom-private-dir t)
