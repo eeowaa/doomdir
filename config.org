@@ -1249,6 +1249,24 @@ item.
 (advice-add #'forward-page :after #'my/recenter-top)
 #+end_src
 
+** DONE [#A] Configure native compilation
+#+begin_src emacs-lisp :tangle yes
+(when (and (featurep 'nativecomp)
+           (native-comp-available-p))
+  (setq comp-speed 2
+        package-native-compile t))
+#+end_src
+
+The conditional was taken from ~comp-ensure-native-compiler~, which was /not/
+used for two reasons:
+
+1. The =comp= package defines ~comp-ensure-native-compiler~, but I don't know
+   when the =comp= package is loaded. However, ~featurep~ and
+   ~native-comp-available-p~ are both C constructs.
+2. Rather than return ~t~ when native compilation is built-in and available,
+   ~comp-ensure-native-compiler~ always returns ~nil~ and just spits an error
+   in the negative case.
+
 ** DONE [#B] Dedicate windows
 #+begin_src emacs-lisp :tangle yes
 (defun my/toggle-window-dedicated ()

@@ -552,6 +552,11 @@ matching a regular expression."
 (defun my/recenter-top (&rest r) (recenter 0))
 (advice-add #'forward-page :after #'my/recenter-top)
 
+(when (and (featurep 'nativecomp)
+           (native-comp-available-p))
+  (setq comp-speed 2
+        package-native-compile t))
+
 (defun my/toggle-window-dedicated ()
   "Control whether or not Emacs is allowed to display another
 buffer in current window."
