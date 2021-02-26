@@ -4,7 +4,7 @@
 :PROPERTIES:
 :CATEGORY: doom/inbox
 :END:
-* Upstream [0/7]
+* Upstream [0/8]
 :PROPERTIES:
 :CATEGORY: doom/upstream
 :END:
@@ -104,6 +104,17 @@ pdf-info-check-epdfinfo: pdf-info-epdfinfo-program is not executable
 
 This happens when =+pdf= is enabled but before ~epdfinfo~ is built (which
 usually happens after visiting a PDF for the first time).
+
+** TODO [#B] Create an Arduino module
+Combine and configure the following packages:
+
+| Package          | Version       | Status    | Archive | Description                         | Website                                        |
+|------------------+---------------+-----------+---------+-------------------------------------+------------------------------------------------|
+| arduino-cli-mode | 20210119.1200 | available | melpa   | Arduino-CLI command wrapper         | https://github.com/motform/arduino-cli-mode    |
+| arduino-mode     | 20210216.926  | available | melpa   | Major mode for editing Arduino code | https://github.com/stardiviner/arduino-mode    |
+| company-arduino  | 20160306.1739 | available | melpa   | company-mode for Arduino            | https://github.com/yuutayamada/company-arduino |
+|------------------+---------------+-----------+---------+-------------------------------------+------------------------------------------------|
+|                  | <l>           |           |         |                                     |                                                |
 
 ** TODO [#C] Fix documentation for session persistence
 This just doesn't make any sense:
