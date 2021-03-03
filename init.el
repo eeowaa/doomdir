@@ -99,7 +99,7 @@
        ;; REVIEW https://stackoverflow.com/questions/18423124/please-check-gdb-is-codesigned-see-taskgated8-how-to-get-gdb-installed-w
        ;;(debugger +lsp)   ; FIXME stepping through code, to help you add bugs
        ;; PREREQ brew install direnv
-       direnv
+       ;; direnv           ; FIXME see why this prevents environment variables from propagating between buffers
        ;; PREREQ brew install docker
        ;; PREREQ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
        ;; PREREQ npm install -g dockerfile-language-server-nodejs

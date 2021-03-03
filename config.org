@@ -150,7 +150,15 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 #+end_src
 
 *** TODO [#C] Modify popup behavior for Customize buffers
-** treemacs [1/1]
+** treemacs [2/2]
+*** DONE [#B] Fix ace-window keybindings
+This slows down startup a bit, but whatever (I'm not obsessed with startup):
+#+begin_src emacs-lisp :tangle yes
+(require 'ace-window)
+#+end_src
+
+Reference: https://github.com/hlissner/doom-emacs/issues/4555
+
 *** KILL [#B] Fix size of NPM logo
 I am no longer seeing this issue as of [2021-01-11 Mon].
 

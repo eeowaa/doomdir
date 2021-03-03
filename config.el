@@ -63,6 +63,8 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 
 (setq Man-notify-method 'pushy)
 
+(require 'ace-window)
+
 (pushnew! evil-emacs-state-modes 'noaa-mode)
 
 (global-undo-tree-mode)
