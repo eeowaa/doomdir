@@ -196,6 +196,25 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 (after! org
   (setq org-refile-use-outline-path 'full-file-path))
 
+(require 'org-pomodoro)
+
+(when (equal org-pomodoro-audio-player "/usr/bin/afplay")
+  (let ((args '("-v" "0.125")))
+    (setq org-pomodoro-start-sound-args args
+          org-pomodoro-finished-sound-args args
+          org-pomodoro-overtime-sound-args args
+          org-pomodoro-ticking-sound-args args
+          org-pomodoro-killed-sound-args args
+          org-pomodoro-short-break-sound-args args
+          org-pomodoro-long-break-sound-args args)))
+
+(map! :map org-mode-map
+      :localleader
+      (:when (featurep! :lang org +pomodoro)
+       (:prefix ("c" . "clock")
+        "p" #'org-pomodoro
+        "P" #'org-pomodoro-extend-last-clock)))
+
 (after! org
   (setq org-src-preserve-indentation nil
         org-edit-src-content-indentation 0))

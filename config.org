@@ -6,7 +6,7 @@ Are you having trouble tangling this file with =C-c C-v C-t=
 (~org-babel-tangle~)? Have you recently updated Doom Emacs using ~doom upgrade~?
 Why don't you try =M-x pdf-tools-install= and try again? 😃
 
-** TODO ~error in process sentinel: Wrong type argument: number-or-marker-p, nil~
+** HOLD ~error in process sentinel: Wrong type argument: number-or-marker-p, nil~
 I'm not sure if this will solve it, but you can try:
 #+begin_src sh :tangle no
 find ~/.config/doom -type f -name .DS_Store -exec rm '{}' \;
@@ -423,7 +423,7 @@ doing and how to use Keychain with other Emacs facilities.
 + [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::defun markdown-toggle-markup-hiding (&optional arg][(defun markdown-toggle-markup-hiding]]
 + [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][;;; Markup Hiding]]
 
-** org [11/23]
+** org [11/26]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -534,6 +534,40 @@ Instead, I would like to see the file-level Org tag (e.g. "doom" for this file).
 **** TODO [#C] Display weekly/daily agenda view properly
 + https://www.reddit.com/r/orgmode/comments/6ybjjw/aligned_agenda_view_anyway_to_make_this_more/
 + IIRC, this is called the "fancy diary"
+
+*** Pomodoro [0/3]
+**** STRT [#A] Always load =org-pomodoro=
+#+begin_src emacs-lisp :tangle yes
+(require 'org-pomodoro)
+#+end_src
+
+**** STRT [#B] Change the chime for =org-pomodoro=
+It is obnoxiously loud and shrill. For now, I'm OK with just decreasing the
+volume. To do this, the various ~org-pomodoro-*-sound-args~ variables should be
+set to whatever command-line options(s) should be passed to
+~org-pomodoro-audio-player~ (=/usr/bin/afplay= on macOS).
+
+#+begin_src emacs-lisp :tangle yes
+(when (equal org-pomodoro-audio-player "/usr/bin/afplay")
+  (let ((args '("-v" "0.125")))
+    (setq org-pomodoro-start-sound-args args
+          org-pomodoro-finished-sound-args args
+          org-pomodoro-overtime-sound-args args
+          org-pomodoro-ticking-sound-args args
+          org-pomodoro-killed-sound-args args
+          org-pomodoro-short-break-sound-args args
+          org-pomodoro-long-break-sound-args args)))
+#+end_src
+
+**** STRT [#B] Add keybindings for ~org-pomodoro~ and ~org-pomodoro-extend-last-clock~
+#+begin_src emacs-lisp :tangle yes
+(map! :map org-mode-map
+      :localleader
+      (:when (featurep! :lang org +pomodoro)
+       (:prefix ("c" . "clock")
+        "p" #'org-pomodoro
+        "P" #'org-pomodoro-extend-last-clock)))
+#+end_src
 
 *** Uncategorized [7/16]
 **** DONE [#A] Indent source blocks
