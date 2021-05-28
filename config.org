@@ -38,23 +38,26 @@ on its own.
 #+end_src
 
 * :ui
-** doom [1/1]
-*** DONE [#C] Set the font and theme
-Terminus is also a good font but must be installed first:
+** doom [2/2]
+*** DONE [#C] Set the font
+Terminus is a good font but must be installed first:
 #+begin_src sh :tangle no
 brew install font-terminus
 #+end_src
 
-#+TITLE: Terminus (enabled)
-#+begin_src emacs-lisp :tangle yes
-(setq doom-font (font-spec :family "Terminus (TTF)" :size 16)
-      doom-theme 'doom-henna)
+#+TITLE: Terminus (disabled)
+#+begin_src emacs-lisp :tangle no
+(setq doom-font (font-spec :family "Terminus (TTF)" :size 16))
 #+end_src
 
-#+TITLE: Menlo
+#+TITLE: Menlo (disabled)
 #+begin_src emacs-lisp :tangle no
-(setq doom-font (font-spec :family "Menlo" :size 16)
-      doom-theme 'doom-henna)
+(setq doom-font (font-spec :family "Menlo" :size 16))
+#+end_src
+
+*** DONE [#C] Set the theme
+#+begin_src emacs-lisp :tangle yes
+(setq doom-theme 'doom-henna)
 #+end_src
 
 ** emoji [1/1]

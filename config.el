@@ -2,8 +2,7 @@
 
 (setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
 
-(setq doom-font (font-spec :family "Terminus (TTF)" :size 16)
-      doom-theme 'doom-henna)
+(setq doom-theme 'doom-henna)
 
 (remove-hook! '(text-mode-hook prog-mode-hook conf-mode-hook)
               #'+fill-column-enable-h)
