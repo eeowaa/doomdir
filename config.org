@@ -293,11 +293,47 @@ into another buffer, you can see the "o".
 ** syntax [0/1]
 *** TODO [#B] Disable flycheck in Emacs Lisp mode
 It just ends up getting in my way.
+** spell [1/2]
+*** DONE [#A] Prevent ~spell-fu-mode~ from being enabled by default
+I like having the option, but I would prefer to enable it manually per buffer.
 
-**** TODO How is it getting enabled?
-Is LSP to blame? If so, I don't want LSP to be enabled for Emacs Lisp.
+#+begin_src emacs-lisp :tangle yes
+(when (and (featurep! :checkers spell)
+           (not (featurep! :checkers spell +flyspell)))
+  (remove-hook 'text-mode-hook 'spell-fu-mode))
+#+end_src
 
-** spell [0/1]
+**** COMMENT My initial stab at this
+:LOGBOOK:
+- Note taken on [2021-05-28 Fri 15:22] \\
+  This was very convoluted and unnecessary, but I learned a lot during this
+  process, so I want to save my work for future reference.
+:END:
+Unfortunately, ~use-package-hook!~ cannot be used to remove ~spell-fu-mode~ from
+~text-mode-hook~ as set in the ~:hook~ section of the ~use-package!~ declaration
+for =spell-fu= in the =checkers/spell= Doom module. (See [[https://emacs.stackexchange.com/questions/64395/how-to-override-the-hook-section-of-a-use-package-declaration][this post on Emacs
+StackExchange]] for confirmation.)
+
+Instead, I have decided to advise the ~add-hook~ function to prevent specific
+functions from being added to specific hooks.
+
+Note that I tangle to =early-init.el= (which I ~load!~ at the start of
+=init.el=) so that the ~add-hook~ advice can be in place before the ~doom!~
+block loads the =checkers/spell= module, which is what sets the hook.
+
+: #+begin_src emacs-lisp :tangle early-init.el
+#+begin_src emacs-lisp :tangle no
+(setq my/hook-deny-list
+      '((text-mode-hook . spell-fu-mode)))
+
+(defun my/hook-denied-p (&rest r)
+  (let ((hook (car r))
+        (func (cadr r)))
+    (member (cons hook func) my/hook-deny-list))
+
+(advice-add #'add-hook :before-until #'my/hook-denied-p)
+#+end_src
+
 *** TODO [#B] Fix spelling correction
 ~+spell/correct~ (=z ==) spits the following error:
 #+begin_quote

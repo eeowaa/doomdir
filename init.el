@@ -14,6 +14,9 @@
 ;;      Alternatively, press 'gd' (or 'C-c c d') on a module to browse its
 ;;      directory (for easy access to its source code).
 
+;; HACK Load file containing `use-package-hook!' forms
+(load! "early-init.el" doom-private-dir t)
+
 (doom! :input
        ;;chinese
        ;;japanese

@@ -106,6 +106,10 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
     (evil-collection-define-key 'insert 'vterm-mode-map
       (kbd key) 'vterm--self-insert)))
 
+(when (and (featurep! :checkers spell)
+           (not (featurep! :checkers spell +flyspell)))
+  (remove-hook 'text-mode-hook 'spell-fu-mode))
+
 (setq ispell-dictionary "english")
 
 (setq magit-repository-directories
