@@ -106,6 +106,18 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
     (evil-collection-define-key 'insert 'vterm-mode-map
       (kbd key) 'vterm--self-insert)))
 
+(mapc (lambda (config-file-dir)
+        (add-to-list '+emacs-lisp-disable-flycheck-in-dirs config-file-dir))
+      ;; Unique directory components of canonical config file paths
+      (delete-dups
+       (mapcar (lambda (config-file)
+                 (file-name-directory (file-chase-links config-file)))
+               ;; Config file paths in canonical config directories
+               (mapcan (lambda (config-dir)
+                         (directory-files config-dir t "\\.el"))
+                       (list (file-truename doom-emacs-dir)
+                             (file-truename doom-private-dir))))))
+
 (when (and (featurep! :checkers spell)
            (not (featurep! :checkers spell +flyspell)))
   (remove-hook 'text-mode-hook 'spell-fu-mode))

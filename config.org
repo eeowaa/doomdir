@@ -290,9 +290,22 @@ I say "hidden" instead of "truncated" because if you kill the line and yank it
 into another buffer, you can see the "o".
 
 * :checkers
-** syntax [0/1]
-*** TODO [#B] Disable flycheck in Emacs Lisp mode
-It just ends up getting in my way.
+** syntax [1/2]
+*** DONE [#B] Disable flycheck in Emacs Lisp config files
+#+begin_src emacs-lisp :tangle yes
+(mapc (lambda (config-file-dir)
+        (add-to-list '+emacs-lisp-disable-flycheck-in-dirs config-file-dir))
+      ;; Unique directory components of canonical config file paths
+      (delete-dups
+       (mapcar (lambda (config-file)
+                 (file-name-directory (file-chase-links config-file)))
+               ;; Config file paths in canonical config directories
+               (mapcan (lambda (config-dir)
+                         (directory-files config-dir t "\\.el"))
+                       (list (file-truename doom-emacs-dir)
+                             (file-truename doom-private-dir))))))
+#+end_src
+
 ** spell [1/2]
 *** DONE [#A] Prevent ~spell-fu-mode~ from being enabled by default
 I like having the option, but I would prefer to enable it manually per buffer.
