@@ -1034,7 +1034,7 @@ property for this subtree is set to ~doom/ts~.
 + Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
 
 * :config
-** default [4/7]
+** default [6/8]
 *** DONE [#A] Do not auto-insert pairs of quotes
 More than half the time, I do not want that behavior.
 
@@ -1095,25 +1095,54 @@ on them."
   "C-w" #'my/alternate-keys)
 #+end_src
 
-*** TODO [#B] Prevent error related to ~'~ pairs
+*** DONE [#B] Do not display line numbers in text mode
+#+begin_src emacs-lisp :tangle yes
+(remove-hook 'text-mode-hook #'display-line-numbers-mode)
+#+end_src
+
+*** DONE [#B] Normalize the behavior of toggling line numbers
+~doom/toggle-line-numbers~ is inconsistent with how it cycles through line
+numbers, depending on whether the function has been called in the current buffer
+yet. I believe this is due to how ~doom--line-number-style~ is assigned ~t~ by
+default, yet gets set to ~display-line-numbers-type~ upon the first call of
+~doom/toggle-line-numbers~.
+
+I work around this issue by defining my own line-number-toggling function and
+aliasing ~doom/toggle-line-numbers~ to it.
+
+#+begin_src emacs-lisp :tangle yes
+(defun my/toggle-line-numbers ()
+  "Toggle line numbers.
+
+Cycles through regular, relative and no line numbers. If you're
+using Emacs 26+, and `visual-line-mode' is on, this skips relative
+and uses visual instead."
+  (interactive)
+  (cond
+   ((not display-line-numbers)
+    (setq display-line-numbers t)
+    (message "Switched to normal line numbers"))
+   ((memq display-line-numbers '(visual relative))
+    (setq display-line-numbers nil)
+    (message "Switched to disabled line numbers"))
+   (visual-line-mode
+    (setq display-line-numbers 'visual)
+    (message "Switched to visual line numbers"))
+   (t
+    (setq display-line-numbers 'relative)
+    (message "Switched to relative line numbers"))))
+
+(define-key! doom-leader-toggle-map
+  ;; replaces `doom/toggle-line-numbers'
+  "l" #'my/toggle-line-numbers)
+#+end_src
+
+*** HOLD [#B] Prevent error related to ~'~ pairs
 Occasionally this comes up (not sure exactly how to reproduce):
 #+begin_example
 error in process sentinel: doom--handle-load-error: Error in a Doom module: "modules/config/default/config.el", (error "Pair ' was never defined, please specify closing delimiter in instead of passing ‘nil’")
 error in process sentinel: Error in a Doom module: "modules/config/default/config.el", (error "Pair ' was never defined, please specify closing delimiter in instead of passing ‘nil’")
 #+end_example
-
-*** STRT [#B] Configure line numbers
-When I first enable line numbers in a buffer that does not have line numbers on
-by default (e.g. Org buffers), line numbers are displayed as relative. I still
-need to fix this before I can mark this heading as ~DONE~.
-
-#+begin_src emacs-lisp :tangle yes
-;; Use absolute line numbers
-(setq display-line-numbers-type t)
-
-;; Do not display line numbers in text mode
-(remove-hook 'text-mode-hook #'display-line-numbers-mode)
-#+end_src
 
 *** STRT [#B] Add additional toggle keybindings
 I would still like to add additional toggle keybindings:

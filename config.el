@@ -413,11 +413,32 @@ on them."
   ;; replaces `describe-no-warranty' b/c I never use it
   "C-w" #'my/alternate-keys)
 
-;; Use absolute line numbers
-(setq display-line-numbers-type t)
-
-;; Do not display line numbers in text mode
 (remove-hook 'text-mode-hook #'display-line-numbers-mode)
+
+(defun my/toggle-line-numbers ()
+  "Toggle line numbers.
+
+Cycles through regular, relative and no line numbers. If you're
+using Emacs 26+, and `visual-line-mode' is on, this skips relative
+and uses visual instead."
+  (interactive)
+  (cond
+   ((not display-line-numbers)
+    (setq display-line-numbers t)
+    (message "Switched to normal line numbers"))
+   ((memq display-line-numbers '(visual relative))
+    (setq display-line-numbers nil)
+    (message "Switched to disabled line numbers"))
+   (visual-line-mode
+    (setq display-line-numbers 'visual)
+    (message "Switched to visual line numbers"))
+   (t
+    (setq display-line-numbers 'relative)
+    (message "Switched to relative line numbers"))))
+
+(define-key! doom-leader-toggle-map
+  ;; replaces `doom/toggle-line-numbers'
+  "l" #'my/toggle-line-numbers)
 
 ;; Function to toggle 1 or 2 spaces at the end of sentences
 (defun my/toggle-sentence-end-double-space ()
