@@ -137,7 +137,7 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 (setq column-number-indicator-zero-based nil)
 #+end_src
 
-** popup [2/3]
+** popup [3/4]
 *** DONE [#C] Do not open (Wo)Man buffers in a popup window
 #+begin_src emacs-lisp :tangle yes
 (setq +popup--display-buffer-alist
@@ -151,6 +151,17 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 #+begin_src emacs-lisp :tangle yes
 (setq Man-notify-method 'pushy)
 #+end_src
+
+*** DONE [#C] Do not restrict (Wo)Man buffer width
+#+begin_src emacs-lisp :tangle yes
+(setq Man-width-max nil
+      woman-fill-frame t)
+#+end_src
+
+To redisplay with new width, call ~Man-update-manpage~ in a =Man= buffer (or
+just wait a few seconds after resizing a window for it to get called
+automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
+=R= in Emacs evil state).
 
 *** TODO [#C] Modify popup behavior for Customize buffers
 ** treemacs [2/2]

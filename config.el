@@ -62,6 +62,9 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 
 (setq Man-notify-method 'pushy)
 
+(setq Man-width-max nil
+      woman-fill-frame t)
+
 (require 'ace-window)
 
 (pushnew! evil-emacs-state-modes 'noaa-mode)
