@@ -203,6 +203,10 @@ version of Emacs (I have ~HEAD~ of Emacs 28), or just wait until =evil=, =org=
 for when a value changes). Currently, I need to switch to Emacs state via =C-z=
 and then hit =g=, finally switching back to Normal state via =C-z=.
 
+Options to look at:
++ ~evil-collection-helpful-maps~
++ ~helpful-mode-map~
+
 * :emacs
 ** undo [0/1]
 *** STRT [#A] Enable ~undo-tree~
@@ -216,7 +220,7 @@ Sometimes this doesn't seem to work.
 :PROPERTIES:
 :CATEGORY: doom/term
 :END:
-** eshell [2/5]
+** eshell [3/5]
 *** DONE [#B] Do not scroll after every command
 #+begin_src emacs-lisp :tangle yes
 (setq eshell-scroll-show-maximum-output nil)
@@ -254,12 +258,11 @@ Sometimes this doesn't seem to work.
   "f"   "cd $1 && ls")
 #+end_src
 
-*** TODO [#B] Export ~$EDITOR~ to =eshell=
-Unlike with =vterm=, we currently do not export ~$EDITOR~ to =eshell=. This is
-to avoid a dangerous situation in which =C-c C-k= not only returns an error code
-to =eshell=, it forcefully clears the file on disk.
-
-*** TODO [#B] Fix ANSI escape codes
+*** KILL [#B] Fix ANSI escape codes
+:LOGBOOK:
+- Note taken on [2021-06-07 Mon 16:19] \\
+  This resolved itself after an update.
+:END:
 Last two lines from ~doom doctor~:
 #+begin_example
 [33mThere are 4 warnings![0m
@@ -269,6 +272,11 @@ Last two lines from ~doom doctor~:
 You can also try ~rg~ or ~fd~ somewhere in =~/.config/emacs= and you'll
 eventually see the escape codes instead of colors being output. The only
 workaround I know of now is to use =vterm= instead of =eshell=.
+
+*** TODO [#B] Export ~$EDITOR~ to =eshell=
+Unlike with =vterm=, we currently do not export ~$EDITOR~ to =eshell=. This is
+to avoid a dangerous situation in which =C-c C-k= not only returns an error code
+to =eshell=, it forcefully clears the file on disk.
 
 *** TODO [#B] Fix terminal type
 Sometimes ~git~ will spit the following:
@@ -298,10 +306,11 @@ $ git graph
 #+end_example
 
 I say "hidden" instead of "truncated" because if you kill the line and yank it
-into another buffer, you can see the "o".
+into another buffer, you can see the "o". *Note that this is only a problem in
+GUI Emacs, not terminal Emacs*.
 
 * :checkers
-** syntax [1/2]
+** syntax [1/1]
 *** DONE [#B] Disable flycheck in Emacs Lisp config files
 #+begin_src emacs-lisp :tangle yes
 (mapc (lambda (config-file-dir)
