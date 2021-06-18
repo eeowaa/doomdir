@@ -13,6 +13,111 @@
                   ("PREREQ" font-lock-doc-face bold))
                 hl-todo-keyword-faces)))
 
+(global-set-key (kbd "C-c t") 'hydra-table/body)
+(defhydra hydra-table ()
+  "table.el"
+  ("n" hydra-table-navigate/body "Navigate" :exit t)
+  ("i" hydra-table-insert/body "Insert" :exit t)
+  ("d" hydra-table-delete/body "Delete" :exit t)
+  ("s" hydra-table-span-or-split/body "Span or Split" :exit t)
+  ("r" hydra-table-resize/body "Resize" :exit t)
+  ("j" hydra-table-justify/body "Justify" :exit t)
+  ("e" hydra-table-export/body "Export" :exit t)
+  ("SPC" ignore nil :color red))
+
+(defhydra hydra-table-navigate ()
+  "Navigation"
+  ("1" (progn (table-goto-top-left-corner)
+              (forward-char) (next-line)))
+  ("2" (progn (table-goto-top-right-corner)
+              (backward-char) (next-line)))
+  ("3" (progn (table-goto-bottom-left-corner)
+              (forward-char) (previous-line)))
+  ("4" (progn (table-goto-bottom-right-corner)
+              (backward-char) (previous-line)))
+  ("f" table-forward-cell)
+  ("b" table-backward-cell)
+  ("SPC" hydra-table/body "Menu" :exit 1))
+
+(defhydra hydra-table-insert ()
+  "Insert"
+  ("t" table-insert "table")
+  ("r" table-insert-row "row")
+  ("c" table-insert-column "column")
+  ("s" table-insert-sequence "sequence")
+  ("SPC" hydra-table/body "Menu" :exit 1))
+
+(defhydra hydra-table-delete ()
+  "Delete"
+  ("r" table-delete-row "row")
+  ("c" table-delete-column "column")
+  ("SPC" hydra-table/body "Menu" :exit 1))
+
+(defhydra hydra-table-span-or-split ()
+  "Span or Split"
+  ("h" (table-span-cell 'left))
+  ("j" (table-span-cell 'below))
+  ("k" (table-span-cell 'above))
+  ("l" (table-span-cell 'right))
+  ("|" table-split-cell-horizontally)
+  ("-" table-split-cell-vertically)
+  ("SPC" hydra-table/body "Menu" :exit 1))
+
+(defhydra hydra-table-resize ()
+  "Resize"
+  ("}" table-heighten-cell "heighten")
+  ("{" table-shorten-cell "shorten")
+  (">" table-widen-cell "widen")
+  ("<" table-narrow-cell "narrow")
+  ("SPC" hydra-table/body "Menu" :exit 1))
+
+(defhydra hydra-table-justify ()
+  "Justify"
+  ("a" hydra-table-justify-cell/body "Cell" :exit t)
+  ("r" hydra-table-justify-row/body "Row" :exit t)
+  ("c" hydra-table-justify-column/body "Column" :exit t)
+  ("SPC" hydra-table/body "Menu" :exit 1))
+
+(defhydra hydra-table-justify-cell ()
+  "Justify Cell"
+  ("h" (table-justify-cell 'left))
+  ("j" (table-justify-cell 'bottom))
+  ("k" (table-justify-cell 'top))
+  ("l" (table-justify-cell 'right))
+  ("c" (table-justify-cell 'center) "center")
+  ("m" (table-justify-cell 'middle) "middle")
+  ("n" (table-justify-cell 'none) "none")
+  ("SPC" hydra-table/body "Menu" :exit 1))
+
+(defhydra hydra-table-justify-row ()
+  "Justify Row"
+  ("h" (table-justify-row 'left))
+  ("j" (table-justify-row 'bottom))
+  ("k" (table-justify-row 'top))
+  ("l" (table-justify-row 'right))
+  ("c" (table-justify-row 'center) "center")
+  ("m" (table-justify-row 'middle) "middle")
+  ("n" (table-justify-row 'none) "none")
+  ("SPC" hydra-table/body "Menu" :exit 1))
+
+(defhydra hydra-table-justify-column ()
+  "Justify Column"
+  ("h" (table-justify-column 'left))
+  ("j" (table-justify-column 'bottom))
+  ("k" (table-justify-column 'top))
+  ("l" (table-justify-column 'right))
+  ("c" (table-justify-column 'center) "center")
+  ("m" (table-justify-column 'middle) "middle")
+  ("n" (table-justify-column 'none) "none")
+  ("SPC" hydra-table/body "Menu" :exit 1))
+
+(defhydra hydra-table-export ()
+  "Export to"
+  ("h" (table-generate-source 'html) "HTML")
+  ("l" (table-generate-source 'latex) "LaTeX")
+  ("c" (table-generate-source 'cals) "CALS")
+  ("SPC" hydra-table/body "Menu" :exit 1))
+
 (defhydra hydra-game (:color blue :hint nil)
   "
 ^Arcade^      ^Puzzle^        ^Board^          ^Text^        ^Self-Playing^
