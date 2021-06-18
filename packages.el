@@ -11,6 +11,7 @@
 
 ;; Programming
 (package! sed-mode)
+(package! jenkinsfile-mode)
 
 ;; UI
 (package! page-break-lines)
