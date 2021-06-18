@@ -137,7 +137,53 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 (setq column-number-indicator-zero-based nil)
 #+end_src
 
-** popup [3/4]
+** popup [4/6]
+*** DONE [#B] Configure Man for AWS CLI man pages
+#+begin_src emacs-lisp :tangle yes
+;; Allow any letter to be used a manual section for Man (AWS CLI uses "a")
+(setq Man-section-regexp "[a-zA-Z0-9+]+")
+
+;; Consider "AVAILABLE.*" page sections to be "SEE ALSO"
+(setq Man-see-also-regexp
+      (format "\\(%s\\)"
+              (string-join '("SEE ALSO"
+                             "VOIR AUSSI"
+                             "SIEHE AUCH"
+                             "VÉASE TAMBIÉN"
+                             "VEJA TAMBÉM"
+                             "VEDERE ANCHE"
+                             "ZOBACZ TAKŻE"
+                             "İLGİLİ BELGELER"
+                             "参照"
+                             "参见 SEE ALSO"
+                             "參見 SEE ALSO"
+                             "AVAILABLE.*") ;; For AWS CLI man pages
+                           "\\|")))
+
+;; Allow buttons to be properly overlayed on AWS CLI man page references
+(after! man
+  (setq
+   Man-reference-regexp
+   (concat
+    ;; Ignore bullet points
+    "\\(?:^\\.IP \\\\(bu 2\\n\\|o \\)?"
+    ;; This is the <name> part
+    "\\(" Man-name-regexp
+         "\\("
+              ;; This allow line-continuations for long man page names
+              ;;
+              ;; SEE ALSO
+              ;;     foo(1), bar(1), line-
+              ;;     continuation(1)
+              ;;
+              "\\([-‐]\n\\)?"
+              "[ \t]+" Man-name-regexp
+         "\\)*"
+    "\\)"
+    ;; This is the (<section>) part
+    "[ \t]*(\\(" Man-section-regexp "\\))")))
+#+end_src
+
 *** DONE [#C] Do not open (Wo)Man buffers in a popup window
 #+begin_src emacs-lisp :tangle yes
 (setq +popup--display-buffer-alist
@@ -147,7 +193,7 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
   (setq display-buffer-alist +popup--display-buffer-alist))
 #+end_src
 
-*** DONE [#C] Open manpages in the current window
+*** DONE [#C] Open man pages in the current window
 #+begin_src emacs-lisp :tangle yes
 (setq Man-notify-method 'pushy)
 #+end_src
@@ -163,6 +209,7 @@ just wait a few seconds after resizing a window for it to get called
 automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
 =R= in Emacs evil state).
 
+*** TODO [#B] Configure WoMan for AWS CLI man pages
 *** TODO [#C] Modify popup behavior for Customize buffers
 ** treemacs [2/2]
 *** DONE [#B] Fix ace-window keybindings
