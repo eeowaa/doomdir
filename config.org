@@ -673,7 +673,7 @@ I'm already doing this with =forge=, but I'd like to better document what I'm
 doing and how to use Keychain with other Emacs facilities.
 
 * :lang
-** markdown [1/2]
+** markdown [3/4]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
@@ -698,166 +698,33 @@ doing and how to use Keychain with other Emacs facilities.
    ("<a name=\".*\"></a>" 0 '(face nil display ""))))
 #+end_src
 
-*** TODO [#C] Replace =font-lock= hiding with native =markdown-mode= hiding
-+ [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::defun markdown-toggle-markup-hiding (&optional arg][(defun markdown-toggle-markup-hiding]]
-+ [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][;;; Markup Hiding]]
+*** DONE [#C] Add filename associations for =markdown-mode=
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'auto-mode-alist '("\\.mdx\\'" . markdown-mode))
+#+end_src
 
-** org [11/26]
+*** DONE [#B] Preview Markdown buffers in an external browser
+Regardless of what I've set ~browse-url-browser-function~ to, I would like to
+preview Markdown rendering in the system browser.
+
+#+begin_src emacs-lisp :tangle yes
+(after! markdown
+  (defun my/markdown-preview (f &rest r)
+    (let ((browse-url-browser-function #'browse-url-default-browser))
+      (apply f r)))
+  (advice-add #'markdown-preview :around #'my/markdown-preview))
+#+end_src
+
+*** TODO [#C] Replace =font-lock= hiding with native =markdown-mode= hiding
++ Open link: [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::defun markdown-toggle-markup-hiding (&optional arg][(defun markdown-toggle-markup-hiding]]
++ Open link: [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][;;; Markup Hiding]]
+
+** org [12/29]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
 :END:
-*** Agenda [4/7]
-**** DONE [#A] Establish agenda file layout
-Relevant variables:
-+ ~org-directory~
-+ ~org-agenda-files~
-+ ~org-attach-directory~
-+ ~org-mobile-directory~
-
-| Candidates          | Buffer or File             | Headline          | Text              |
-|---------------------+----------------------------+-------------------+-------------------|
-| Current buffer      |                            | org: =SPC m .=    | global: =SPC s s= |
-| Org buffers         | org: =SPC m ,=             | org: =SPC m /=    |                   |
-| Agenda files        | org: =SPC u SPC u SPC m ,= | global: =SPC n S= |                   |
-| Org directory files | global: =SPC n f=          |                   | global: =SPC n s= |
-
-The following is a prerequisite for my organization:
-#+begin_src sh :tangle no
-mkdir -p ~/Documents/org && ln -s ~/Documents/org ~/org
-#+end_src
-
-#+begin_src emacs-lisp :tangle yes
-(setq
-      ;; Top-level directory (used by `+default/find-in-notes', etc.)
-      org-directory "~/org"
-
-      ;; Directories to search for agenda files
-      my/org-directories `("work" "life" ,doom-private-dir)
-      org-agenda-files (mapcar (lambda (f)
-                                 (if (file-name-absolute-p f) f
-                                   (expand-file-name f org-directory)))
-                               `("" ,@my/org-directories))
-
-      ;; Only "todo.org" files hold agenda items
-      org-agenda-file-regexp "\\`todo.org\\'")
-#+end_src
-
-**** DONE [#A] Widen the agenda prefix and indent subtasks
-#+begin_src emacs-lisp :tangle yes
-(setq org-agenda-prefix-format
-      '((agenda  . " %i  %l%-16:c%?-12t% s")
-        (todo    . " %i  %l%-16:c")
-        (tags    . " %i  %l%-16:c")))
-#+end_src
-
-**** DONE [#A] Inherit priority so that subtasks appear under their parents in the agenda
-#+begin_src emacs-lisp :tangle yes
-(after! org
-  (defun my/org-inherited-priority (s)
-    (cond
-     ;; Priority cookie in this heading
-     ((string-match org-priority-regexp s)
-      (* 1000 (- org-priority-lowest
-                 (org-priority-to-value (match-string 2 s)))))
-     ;; No priority cookie, but already at highest level
-     ((not (org-up-heading-safe))
-      (* 1000 (- org-priority-lowest org-priority-default)))
-     ;; Look for the parent's priority
-     (t
-      (my/org-inherited-priority (org-get-heading)))))
-  (setq org-priority-get-priority-function #'my/org-inherited-priority))
-#+end_src
-
-**** DONE [#B] Do not display file tags in the agenda
-#+begin_src emacs-lisp :tangle yes
-(setq org-agenda-hide-tags-regexp "\\`work\\|life\\|doom\\|todo\\'")
-#+end_src
-
-**** STRT [#B] Set icons for agenda prefix
-#+begin_src emacs-lisp :tangle yes
-(setq org-agenda-category-icon-alist
-      `(("/inbox\\'"           (,(all-the-icons-faicon     "inbox"      nil nil :height 1.00 :face 'all-the-icons-dred)))
-        ;; work/*
-        ("\\`work/admin\\'"    (,(all-the-icons-faicon     "fax"        nil nil :height 0.85 :face 'all-the-icons-lred)))
-        ("\\`work/oncall\\'"   (,(all-the-icons-faicon     "users"      nil nil :height 0.80 :face 'all-the-icons-lyellow)))
-        ("\\`work/cots\\'"     (,(all-the-icons-faicon     "server"     nil nil :height 0.85 :face 'all-the-icons-dorange)))
-        ("\\`work/metrics\\'"  (,(all-the-icons-faicon     "eye"        nil nil :height 0.85 :face 'all-the-icons-dmaroon)))
-        ("\\`work/infra\\'"    (,(all-the-icons-faicon     "cubes"      nil nil :height 0.65 :face 'all-the-icons-lorange)))
-        ("\\`work/sdlc\\'"     (,(all-the-icons-faicon     "pencil"     nil nil :height 0.95 :face 'all-the-icons-orange)))
-        ;; life/*
-        ("\\`life/family\\'"   (,(all-the-icons-faicon     "heart"      nil nil :height 0.85 :face 'all-the-icons-red)))
-        ("\\`life/money\\'"    (,(all-the-icons-faicon     "money"      nil nil :height 0.80 :face 'all-the-icons-dgreen)))
-        ("\\`life/tech\\'"     (,(all-the-icons-faicon     "laptop"     nil nil :height 0.80 :face 'all-the-icons-dsilver)))
-        ;; doom/*
-        ("\\`doom/upstream\\'" (,(all-the-icons-alltheicon "git"        nil nil :height 0.85 :face 'all-the-icons-lred)))
-        ("\\`doom/config\\'"   (,(all-the-icons-fileicon   "emacs"      nil nil :height 0.85 :face 'all-the-icons-purple)))
-        ("\\`doom/org\\'"      (,(all-the-icons-fileicon   "org"        nil nil :height 0.90 :face 'all-the-icons-lgreen)))
-        ("\\`doom/markdown\\'" (,(all-the-icons-octicon    "markdown"   nil nil :height 0.85 :face 'all-the-icons-maroon)))
-        ("\\`doom/yaml\\'"     (,(all-the-icons-faicon     "cogs"       nil nil :height 0.80 :face 'all-the-icons-lsilver)))
-        ("\\`doom/python\\'"   (,(all-the-icons-alltheicon "python"     nil nil :height 0.85 :face 'all-the-icons-dblue)))
-        ("\\`doom/ts\\'"       (,(all-the-icons-fileicon   "typescript" nil nil :height 0.85 :face 'all-the-icons-blue)))
-        ("\\`doom/term\\'"     (,(all-the-icons-faicon     "terminal"   nil nil :height 0.95 :face 'all-the-icons-dgreen)))
-        ("\\`doom/misc\\'"     (,(all-the-icons-fileicon   "config"     nil nil :height 0.85 :face 'all-the-icons-lblue)))))
-#+end_src
-
-**** STRT [#C] Display distinguishable name in refile targets
-I've accomplished by goal, but I don't like seeing the entire file path.
-Instead, I would like to see the file-level Org tag (e.g. "doom" for this file).
-
-#+begin_src emacs-lisp :tangle yes
-(after! org
-  (setq org-refile-use-outline-path 'full-file-path))
-#+end_src
-
-**** TODO [#C] Display weekly/daily agenda view properly
-+ https://www.reddit.com/r/orgmode/comments/6ybjjw/aligned_agenda_view_anyway_to_make_this_more/
-+ IIRC, this is called the "fancy diary"
-
-*** Pomodoro [0/3]
-**** STRT [#A] Always load =org-pomodoro=
-#+begin_src emacs-lisp :tangle yes
-(require 'org-pomodoro)
-#+end_src
-
-**** STRT [#B] Change the chime for =org-pomodoro=
-It is obnoxiously loud and shrill. For now, I'm OK with just decreasing the
-volume. To do this, the various ~org-pomodoro-*-sound-args~ variables should be
-set to whatever command-line options(s) should be passed to
-~org-pomodoro-audio-player~ (=/usr/bin/afplay= on macOS).
-
-#+begin_src emacs-lisp :tangle yes
-(when (equal org-pomodoro-audio-player "/usr/bin/afplay")
-  (let ((args '("-v" "0.125")))
-    (setq org-pomodoro-start-sound-args args
-          org-pomodoro-finished-sound-args args
-          org-pomodoro-overtime-sound-args args
-          org-pomodoro-ticking-sound-args args
-          org-pomodoro-killed-sound-args args
-          org-pomodoro-short-break-sound-args args
-          org-pomodoro-long-break-sound-args args)))
-#+end_src
-
-**** STRT [#B] Add keybindings for ~org-pomodoro~ and ~org-pomodoro-extend-last-clock~
-#+begin_src emacs-lisp :tangle yes
-(map! :map org-mode-map
-      :localleader
-      (:when (featurep! :lang org +pomodoro)
-       (:prefix ("c" . "clock")
-        "p" #'org-pomodoro
-        "P" #'org-pomodoro-extend-last-clock)))
-#+end_src
-
-*** Uncategorized [7/16]
-**** DONE [#A] Indent source blocks
-+ https://emacs.stackexchange.com/a/9483/21977
-
-#+begin_src emacs-lisp :tangle yes
-(after! org
-  (setq org-src-preserve-indentation nil
-        org-edit-src-content-indentation 0))
-#+end_src
-
+*** Document Structure [1/3]
 **** DONE [#A] Do not indent headlines
 #+begin_src emacs-lisp :tangle yes
 (after! org
@@ -866,88 +733,7 @@ set to whatever command-line options(s) should be passed to
         org-adapt-indentation nil))
 #+end_src
 
-**** DONE [#B] Show edit buffer in the current window
-#+begin_src emacs-lisp :tangle yes
-(after! org
-  (setq org-src-window-setup 'current-window))
-#+end_src
-
-**** DONE [#B] Remove file links from personal org capture templates
-#+begin_src emacs-lisp :tangle yes
-(after! org
-  (setcar (nthcdr 4 (assoc "t" org-capture-templates)) "* TODO %?") ;; And replace "[ ]"
-  (setcar (nthcdr 4 (assoc "n" org-capture-templates)) "* %u %?")
-  (setcar (nthcdr 4 (assoc "j" org-capture-templates)) "* %U %?"))
-#+end_src
-
-**** DONE [#C] Insert notes into ~:LOGBOOK:~ drawer without logging state changes
-#+begin_src emacs-lisp :tangle yes
-;; REVIEW See if there is a cleaner way to temporarily set `org-log-into-drawer'
-(after! org
-  (defun my/org-add-note-advice (f &rest r)
-    (let ((restore org-log-into-drawer))
-      (setq org-log-into-drawer t)
-      (apply f r))
-      (setq org-log-into-drawer restore))
-  (advice-add #'org-add-note :around #'my/org-add-note-advice))
-#+end_src
-
-**** DONE [#C] Maintain proper spacing of footnotes
-I had to redefine the ~org-footnote-sort~ function to *not* insert a leading
-~\n~ before new footnote definitions.
-
-#+begin_src emacs-lisp :tangle yes
-(defun org-footnote-sort ()
-  "Rearrange footnote definitions in the current buffer.
-Sort footnote definitions so they match order of footnote
-references.  Also relocate definitions at the end of their
-relative section or within a single footnote section, according
-to `org-footnote-section'.  Inline definitions are ignored."
-  (let ((references (org-footnote--collect-references)))
-    (org-preserve-local-variables
-     (let ((definitions (org-footnote--collect-definitions 'delete)))
-       (org-with-wide-buffer
-        (org-footnote--clear-footnote-section)
-        ;; Insert footnote definitions at the appropriate location,
-        ;; separated by a blank line.  Each definition is inserted
-        ;; only once throughout the buffer.
-        (let (inserted)
-          (dolist (cell references)
-            (let ((label (car cell))
-                  (nested (not (nth 2 cell)))
-                  (inline (nth 3 cell)))
-              (unless (or (member label inserted) inline)
-                (push label inserted)
-                (unless (or org-footnote-section nested)
-                  ;; If `org-footnote-section' is non-nil, or
-                  ;; reference is nested, point is already at the
-                  ;; correct position.  Otherwise, move at the
-                  ;; appropriate location within the section
-                  ;; containing the reference.
-                  (goto-char (nth 1 cell))
-                  (org-footnote--goto-local-insertion-point))
-                (insert (or (cdr (assoc label definitions))
-                            (format "[fn:%s] DEFINITION NOT FOUND." label))
-                        "\n"))))
-          ;; Insert un-referenced footnote definitions at the end.
-          (pcase-dolist (`(,label . ,definition) definitions)
-            (unless (member label inserted)
-              (insert definition "\n")))))))))
-#+end_src
-
-**** DONE [#C] Add ~ditaa~ JAR path
-You need ~ditaa~ installed for this to work:
-#+begin_src sh :tangle no
-brew install ditaa
-#+end_src
-
-#+begin_src emacs-lisp :tangle yes
-(setq org-ditaa-jar-path
-      (cond (IS-MAC
-             (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))))
-#+end_src
-
-**** STRT [#A] Insert new headings just how I like them
+**** STRT [#A] Insert new headlines just how I like them
 This is mostly done, but I do not want there to be a blank line after drawers or
 scheduling information:
 
@@ -1009,20 +795,53 @@ just perform a complete cycle of `org-cycle'."
                                    my/org-insert-heading-evil-state)))
 #+end_src
 
-**** HOLD [#C] Allow 5 lines of emphasized text
-This appears to cause freezes. For now, I'll get by without.
-
-#+begin_src emacs-lisp :tangle no
-(after! org
-  (setcar (nthcdr 4 org-emphasis-regexp-components) 4))
-#+end_src
-
-**** TODO [#C] Use Org speed keys
-Just apply your old configuration.
-
 **** TODO [#C] Create headline sorting function
 + Sort by priority, then by by ~TODO~ keyword
 + Reference ~org-sort-entries~
+
+*** Tables [0/0]
+*** Hyperlinks [0/2]
+**** TODO [#B] Open specific URLs in specific browsers
+#+begin_src emacs-lisp :tangle yes
+(after! browse-url
+  (setq browse-url-handlers
+        '((".*amazon\\.com.*" . #'browse-url-firefox)
+          ("awsapps\\.com" . #'browse-url-chrome))))
+#+end_src
+
+**** TODO [#C] Create method to store Org links from =eshell= buffers
+Just store the current working directory.
+
+*** Todo Items [2/3]
+**** DONE [#A] Inherit priority so that subtasks appear under their parents in the agenda
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (defun my/org-inherited-priority (s)
+    (cond
+     ;; Priority cookie in this heading
+     ((string-match org-priority-regexp s)
+      (* 1000 (- org-priority-lowest
+                 (org-priority-to-value (match-string 2 s)))))
+     ;; No priority cookie, but already at highest level
+     ((not (org-up-heading-safe))
+      (* 1000 (- org-priority-lowest org-priority-default)))
+     ;; Look for the parent's priority
+     (t
+      (my/org-inherited-priority (org-get-heading)))))
+  (setq org-priority-get-priority-function #'my/org-inherited-priority))
+#+end_src
+
+**** DONE [#C] Insert notes into ~:LOGBOOK:~ drawer without logging state changes
+#+begin_src emacs-lisp :tangle yes
+;; REVIEW See if there is a cleaner way to temporarily set `org-log-into-drawer'
+(after! org
+  (defun my/org-add-note-advice (f &rest r)
+    (let ((restore org-log-into-drawer))
+      (setq org-log-into-drawer t)
+      (apply f r))
+      (setq org-log-into-drawer restore))
+  (advice-add #'org-add-note :around #'my/org-add-note-advice))
+#+end_src
 
 **** TODO [#C] Create integration between embedded ~TODO~ and project =todo.org=
 Something like this Atlassian VS Code plugin:
@@ -1040,25 +859,8 @@ https://support.atlassian.com/bitbucket-cloud/docs/jira-issues-in-vs-code/
   + https://github.com/alphapapa/magit-todos
   + ~magit-todos-list~
 
-**** TODO [#C] Figure out how to /easily/ insert screenshots into Org buffers
-Right now, the best way I know how is to take a screenshot using the macOS
-system keybinding (=Cmd-Shift-4=), save it as a file, and then drag and drop the
-file itself (from Finder) into an Org buffer via =+dragndrop=. This takes too
-long. What about ~org-screenshot-take~?
-
-**** TODO [#C] Ignore surrounding tildes for interactive help functions
-Doom's org markup convention is to surround elisp symbols with tildes. However,
-this makes it difficult to use commands such as ~counsel-describe-variable~
-(=SPC h v=), ~counsel-describe-function~ (=SPC h f=), and ~find-function~
-(custom-mapped to =C-h C-f=) for symbols under point.
-
-The current workaround is to select the "object" under point using =v i e= and
-then use the corresponding help command. This works well enough, but is an
-annoying extra step.
-
-**** TODO [#C] Create method to store Org links from =eshell= buffers
-Just store the current working directory.
-
+*** Tags [0/0]
+*** Properties and Columns [0/1]
 **** TODO [#C] Fix emoji display in Org column mode
 :PROPERTIES:
 :COLUMNS: %TODO %ITEM %attentive(👂) %diligent(🚜) %inventive(🔧) %astute(🎯) %curious(🔭) %nurturing(💯) %uncompromising(🎖) %visionary(🌎) %daring(🏈) %frugal(💵) %trustworthy(🤝) %probing(🔎) %assertive(☝) %productive(📦)
@@ -1088,6 +890,269 @@ are one character wider than the others. Unfortunately, when replacing those
 "two-character-wide" emoji with alternative "one-character-wide" emoji to
 achieve consistent "character width", what happens is that no emoji are
 displayed at all.
+
+*** Dates and Times [0/0]
+*** Refiling and Archiving [0/1]
+**** STRT [#C] Display distinguishable name in refile targets
+I've accomplished by goal, but I don't like seeing the entire file path.
+Instead, I would like to see the file-level Org tag (e.g. "doom" for this file).
+
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (setq org-refile-use-outline-path 'full-file-path))
+#+end_src
+
+*** Capture and Attachments [1/1]
+**** DONE [#A] Establish agenda file layout
+Relevant variables:
++ ~org-directory~
++ ~org-agenda-files~
++ ~org-attach-directory~
++ ~org-mobile-directory~
+
+| Candidates          | Buffer or File             | Headline          | Text              |
+|---------------------+----------------------------+-------------------+-------------------|
+| Current buffer      |                            | org: =SPC m .=    | global: =SPC s s= |
+| Org buffers         | org: =SPC m ,=             | org: =SPC m /=    |                   |
+| Agenda files        | org: =SPC u SPC u SPC m ,= | global: =SPC n S= |                   |
+| Org directory files | global: =SPC n f=          |                   | global: =SPC n s= |
+
+The following is a prerequisite for my organization:
+#+begin_src sh :tangle no
+mkdir -p ~/Documents/org && ln -s ~/Documents/org ~/org
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(setq
+      ;; Top-level directory (used by `+default/find-in-notes', etc.)
+      org-directory "~/org"
+
+      ;; Directories to search for agenda files
+      my/org-directories `("work" "life" ,doom-private-dir)
+      org-agenda-files (mapcar (lambda (f)
+                                 (if (file-name-absolute-p f) f
+                                   (expand-file-name f org-directory)))
+                               `("" ,@my/org-directories))
+
+      ;; Only "todo.org" files hold agenda items
+      org-agenda-file-regexp "\\`todo.org\\'")
+#+end_src
+
+**** DONE [#B] Remove file links from personal org capture templates
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (setcar (nthcdr 4 (assoc "t" org-capture-templates)) "* TODO %?") ;; And replace "[ ]"
+  (setcar (nthcdr 4 (assoc "n" org-capture-templates)) "* %u %?")
+  (setcar (nthcdr 4 (assoc "j" org-capture-templates)) "* %U %?"))
+#+end_src
+
+*** Agenda Views [2/4]
+**** DONE [#A] Widen the agenda prefix and indent subtasks
+#+begin_src emacs-lisp :tangle yes
+(setq org-agenda-prefix-format
+      '((agenda  . " %i  %l%-16:c%?-12t% s")
+        (todo    . " %i  %l%-16:c")
+        (tags    . " %i  %l%-16:c")))
+#+end_src
+
+**** DONE [#B] Do not display file tags in the agenda
+#+begin_src emacs-lisp :tangle yes
+(setq org-agenda-hide-tags-regexp "\\`work\\|life\\|doom\\|todo\\'")
+#+end_src
+
+**** STRT [#B] Set icons for agenda prefix
+#+begin_src emacs-lisp :tangle yes
+(setq org-agenda-category-icon-alist
+      `(("/inbox\\'"           (,(all-the-icons-faicon     "inbox"      nil nil :height 1.00 :face 'all-the-icons-dred)))
+        ;; work/*
+        ("\\`work/admin\\'"    (,(all-the-icons-faicon     "fax"        nil nil :height 0.85 :face 'all-the-icons-lred)))
+        ("\\`work/oncall\\'"   (,(all-the-icons-faicon     "users"      nil nil :height 0.80 :face 'all-the-icons-lyellow)))
+        ("\\`work/cots\\'"     (,(all-the-icons-faicon     "server"     nil nil :height 0.85 :face 'all-the-icons-dorange)))
+        ("\\`work/metrics\\'"  (,(all-the-icons-faicon     "eye"        nil nil :height 0.85 :face 'all-the-icons-dmaroon)))
+        ("\\`work/infra\\'"    (,(all-the-icons-faicon     "cubes"      nil nil :height 0.65 :face 'all-the-icons-lorange)))
+        ("\\`work/sdlc\\'"     (,(all-the-icons-faicon     "pencil"     nil nil :height 0.95 :face 'all-the-icons-orange)))
+        ;; life/*
+        ("\\`life/family\\'"   (,(all-the-icons-faicon     "heart"      nil nil :height 0.85 :face 'all-the-icons-red)))
+        ("\\`life/money\\'"    (,(all-the-icons-faicon     "money"      nil nil :height 0.80 :face 'all-the-icons-dgreen)))
+        ("\\`life/tech\\'"     (,(all-the-icons-faicon     "laptop"     nil nil :height 0.80 :face 'all-the-icons-dsilver)))
+        ;; doom/*
+        ("\\`doom/upstream\\'" (,(all-the-icons-alltheicon "git"        nil nil :height 0.85 :face 'all-the-icons-lred)))
+        ("\\`doom/config\\'"   (,(all-the-icons-fileicon   "emacs"      nil nil :height 0.85 :face 'all-the-icons-purple)))
+        ("\\`doom/org\\'"      (,(all-the-icons-fileicon   "org"        nil nil :height 0.90 :face 'all-the-icons-lgreen)))
+        ("\\`doom/markdown\\'" (,(all-the-icons-octicon    "markdown"   nil nil :height 0.85 :face 'all-the-icons-maroon)))
+        ("\\`doom/yaml\\'"     (,(all-the-icons-faicon     "cogs"       nil nil :height 0.80 :face 'all-the-icons-lsilver)))
+        ("\\`doom/python\\'"   (,(all-the-icons-alltheicon "python"     nil nil :height 0.85 :face 'all-the-icons-dblue)))
+        ("\\`doom/ts\\'"       (,(all-the-icons-fileicon   "typescript" nil nil :height 0.85 :face 'all-the-icons-blue)))
+        ("\\`doom/term\\'"     (,(all-the-icons-faicon     "terminal"   nil nil :height 0.95 :face 'all-the-icons-dgreen)))
+        ("\\`doom/misc\\'"     (,(all-the-icons-fileicon   "config"     nil nil :height 0.85 :face 'all-the-icons-lblue)))))
+#+end_src
+
+**** TODO [#C] Display weekly/daily agenda view properly
++ https://www.reddit.com/r/orgmode/comments/6ybjjw/aligned_agenda_view_anyway_to_make_this_more/
++ IIRC, this is called the "fancy diary"
+
+*** Markup for Rich Contents [1/3]
+**** DONE [#C] Maintain proper spacing of footnotes
+I had to override the ~org-footnote-sort~ function to *not* insert a leading
+~\n~ before new footnote definitions.
+
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (defun my/org-footnote-sort ()
+    "Rearrange footnote definitions in the current buffer.
+Sort footnote definitions so they match order of footnote
+references.  Also relocate definitions at the end of their
+relative section or within a single footnote section, according
+to `org-footnote-section'.  Inline definitions are ignored."
+    (let ((references (org-footnote--collect-references)))
+      (org-preserve-local-variables
+       (let ((definitions (org-footnote--collect-definitions 'delete)))
+         (org-with-wide-buffer
+          (org-footnote--clear-footnote-section)
+          ;; Insert footnote definitions at the appropriate location,
+          ;; separated by a blank line.  Each definition is inserted
+          ;; only once throughout the buffer.
+          (let (inserted)
+            (dolist (cell references)
+              (let ((label (car cell))
+                    (nested (not (nth 2 cell)))
+                    (inline (nth 3 cell)))
+                (unless (or (member label inserted) inline)
+                  (push label inserted)
+                  (unless (or org-footnote-section nested)
+                    ;; If `org-footnote-section' is non-nil, or
+                    ;; reference is nested, point is already at the
+                    ;; correct position.  Otherwise, move at the
+                    ;; appropriate location within the section
+                    ;; containing the reference.
+                    (goto-char (nth 1 cell))
+                    (org-footnote--goto-local-insertion-point))
+                  (insert (or (cdr (assoc label definitions))
+                              (format "[fn:%s] DEFINITION NOT FOUND." label))
+                          "\n"))))
+            ;; Insert un-referenced footnote definitions at the end.
+            (pcase-dolist (`(,label . ,definition) definitions)
+              (unless (member label inserted)
+                (insert definition "\n")))))))))
+  (advice-add #'org-footnote-sort :override #'my/org-footnote-sort))
+#+end_src
+
+**** HOLD [#C] Allow 5 lines of emphasized text
+This appears to cause freezes. For now, I'll get by without.
+
+#+begin_src emacs-lisp :tangle no
+(after! org
+  (setcar (nthcdr 4 org-emphasis-regexp-components) 4))
+#+end_src
+
+**** TODO [#C] Ignore surrounding tildes for interactive help functions
+Doom's org markup convention is to surround elisp symbols with tildes. However,
+this makes it difficult to use commands such as ~counsel-describe-variable~
+(=SPC h v=), ~counsel-describe-function~ (=SPC h f=), and ~find-function~
+(custom-mapped to =C-h C-f=) for symbols under point.
+
+The current workaround is to select the "object" under point using =v i e= and
+then use the corresponding help command. This works well enough, but is an
+annoying extra step.
+
+*** Exporting [0/0]
+*** Publishing [0/0]
+*** Working with Source Code [2/2]
+**** DONE [#A] Indent source blocks
++ https://emacs.stackexchange.com/a/9483/21977
+
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (setq org-src-preserve-indentation nil
+        org-edit-src-content-indentation 0))
+#+end_src
+
+**** DONE [#B] Show edit buffer in the current window
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (setq org-src-window-setup 'current-window))
+#+end_src
+
+*** Miscellaneous [0/1]
+**** TODO [#C] Use Org speed keys
+Just apply your old configuration.
+
+*** Contrib [2/3]
+**** DONE [#C] Add ~ditaa~ JAR path
+You need ~ditaa~ installed for this to work:
+#+begin_src sh :tangle no
+brew install ditaa
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(setq org-ditaa-jar-path
+      (cond (IS-MAC
+             (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))))
+#+end_src
+
+**** TODO [#C] Configure screenshot attachment
+By default, =+dragndrop= configures =org-download= to store image links as
+attachments rather than hyperlinks. Even after searching on the web, I do not
+understand what concrete advantages attachments have over hyperlinks besides
+offering more management tools. I would rather be consistent and stick with
+hyperlinks for now.
+
+#+begin_src emacs-lisp :tangle yes
+(setq org-download-method 'directory
+      org-download-image-dir "images")
+#+end_src
+
+Note that the following keybindings are very helpful:
++ =SPC m a c= (~org-download-screenshot~) takes a new screenshot and attaches it
++ =SPC m a p= (~org-download-clipboard~) attaches an image from the clipboard
+
+**** DONE [#C] Add ~ditaa~ JAR path
+You need ~ditaa~ installed for this to work:
+#+begin_src sh :tangle no
+brew install ditaa
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(setq org-ditaa-jar-path
+      (cond (IS-MAC
+             (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))))
+#+end_src
+
+*** Pomodoro [0/3]
+**** STRT [#A] Always load =org-pomodoro=
+Would be better to lazy-load this.
+
+#+begin_src emacs-lisp :tangle yes
+(require 'org-pomodoro)
+#+end_src
+
+**** STRT [#B] Change the chime for =org-pomodoro=
+It is obnoxiously loud and shrill. For now, I'm OK with just decreasing the
+volume. To do this, the various ~org-pomodoro-*-sound-args~ variables should be
+set to whatever command-line options(s) should be passed to
+~org-pomodoro-audio-player~ (=/usr/bin/afplay= on macOS).
+
+#+begin_src emacs-lisp :tangle yes
+(when (equal org-pomodoro-audio-player "/usr/bin/afplay")
+  (let ((args '("-v" "0.125")))
+    (setq org-pomodoro-start-sound-args args
+          org-pomodoro-finished-sound-args args
+          org-pomodoro-overtime-sound-args args
+          org-pomodoro-ticking-sound-args args
+          org-pomodoro-killed-sound-args args
+          org-pomodoro-short-break-sound-args args
+          org-pomodoro-long-break-sound-args args)))
+#+end_src
+
+**** STRT [#B] Add keybindings for ~org-pomodoro~ and ~org-pomodoro-extend-last-clock~
+#+begin_src emacs-lisp :tangle yes
+(map! :map org-mode-map
+      :localleader
+      (:when (featurep! :lang org +pomodoro)
+       (:prefix ("c" . "clock")
+        "p" #'org-pomodoro
+        "P" #'org-pomodoro-extend-last-clock)))
+#+end_src
 
 ** python [1/2]
 :PROPERTIES:
@@ -1264,7 +1329,7 @@ property for this subtree is set to ~doom/ts~.
 + Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
 
 * :config
-** default [6/8]
+** default [7/9]
 *** DONE [#A] Do not auto-insert pairs of quotes
 More than half the time, I do not want that behavior.
 
@@ -1316,13 +1381,12 @@ on them."
    ;; message while moving the mouse.
    (list (car (help--read-key-sequence 'no-mouse-movement)) current-prefix-arg))
   (where-is (cadr (help--analyze-key (car key) (cdr key))) insert))
+
 (define-key! help-map
-  ;; replaces `view-emacs-FAQ' b/c I rarely use it
-  "C-f" #'find-function
-  ;; replaces `describe-language-environment'
-  "C-l" #'find-library
-  ;; replaces `describe-no-warranty' b/c I never use it
-  "C-w" #'my/alternate-keys)
+  "C-f" #'find-function      ;; replaces `view-emacs-FAQ' b/c I rarely use it
+  "C-l" #'find-library       ;; replaces `describe-language-environment'
+  "C-v" #'find-variable
+  "C-w" #'my/alternate-keys) ;; replaces `describe-no-warranty' b/c I never use it
 #+end_src
 
 *** DONE [#B] Do not display line numbers in text mode
@@ -1456,13 +1520,13 @@ I would still like to add additional toggle keybindings:
 *** DONE [#A] Clear instead of deleting target file
 ~org-babel-tangle~ deletes the existing target file before writing to it. This
 causes a problem when the target is a symlink, because the link is replaced with
-a normal file. The following code redefines ~org-babel-tangle~ by replacing
+a normal file. The following code overrides ~org-babel-tangle~ by replacing
 ~(delete-file file-name)~ with ~(with-temp-file file-name t)~, essentially
 clearing the target file instead of deleting it.
 
 #+begin_src emacs-lisp :tangle yes
 (after! org-babel
-  (defun org-babel-tangle (&optional arg target-file lang-re)
+  (defun my/org-babel-tangle (&optional arg target-file lang-re)
     "Write code blocks to source-specific files.
 Extract the bodies of all source code blocks from the current
 file into their own source-specific files.
@@ -1574,7 +1638,8 @@ matching a regular expression."
           (mapc (lambda (pair)
                   (when (cdr pair) (set-file-modes (car pair) (cdr pair))))
                 path-collector)
-          (mapcar #'car path-collector))))))
+          (mapcar #'car path-collector)))))
+  (advice-add #'org-babel-tangle :override #'my/org-babel-tangle))
 #+end_src
 
 *** TODO [#A] Tangle upon save
@@ -1605,11 +1670,6 @@ item.
 :PROPERTIES:
 :CATEGORY: doom/misc
 :END:
-** DONE [#A] Give buffers unique names based on file path
-#+begin_src emacs-lisp :tangle yes
-(setq uniquify-buffer-name-style 'forward)
-#+end_src
-
 ** DONE [#A] Enable all disabled commands
 #+begin_src emacs-lisp :tangle yes
 (setq disabled-command-function nil)

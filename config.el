@@ -300,154 +300,18 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
    ("&copy;" 0 '(face nil display "©"))
    ("<a name=\".*\"></a>" 0 '(face nil display ""))))
 
-(setq
-      ;; Top-level directory (used by `+default/find-in-notes', etc.)
-      org-directory "~/org"
+(add-to-list 'auto-mode-alist '("\\.mdx\\'" . markdown-mode))
 
-      ;; Directories to search for agenda files
-      my/org-directories `("work" "life" ,doom-private-dir)
-      org-agenda-files (mapcar (lambda (f)
-                                 (if (file-name-absolute-p f) f
-                                   (expand-file-name f org-directory)))
-                               `("" ,@my/org-directories))
-
-      ;; Only "todo.org" files hold agenda items
-      org-agenda-file-regexp "\\`todo.org\\'")
-
-(setq org-agenda-prefix-format
-      '((agenda  . " %i  %l%-16:c%?-12t% s")
-        (todo    . " %i  %l%-16:c")
-        (tags    . " %i  %l%-16:c")))
-
-(after! org
-  (defun my/org-inherited-priority (s)
-    (cond
-     ;; Priority cookie in this heading
-     ((string-match org-priority-regexp s)
-      (* 1000 (- org-priority-lowest
-                 (org-priority-to-value (match-string 2 s)))))
-     ;; No priority cookie, but already at highest level
-     ((not (org-up-heading-safe))
-      (* 1000 (- org-priority-lowest org-priority-default)))
-     ;; Look for the parent's priority
-     (t
-      (my/org-inherited-priority (org-get-heading)))))
-  (setq org-priority-get-priority-function #'my/org-inherited-priority))
-
-(setq org-agenda-hide-tags-regexp "\\`work\\|life\\|doom\\|todo\\'")
-
-(setq org-agenda-category-icon-alist
-      `(("/inbox\\'"           (,(all-the-icons-faicon     "inbox"      nil nil :height 1.00 :face 'all-the-icons-dred)))
-        ;; work/*
-        ("\\`work/admin\\'"    (,(all-the-icons-faicon     "fax"        nil nil :height 0.85 :face 'all-the-icons-lred)))
-        ("\\`work/oncall\\'"   (,(all-the-icons-faicon     "users"      nil nil :height 0.80 :face 'all-the-icons-lyellow)))
-        ("\\`work/cots\\'"     (,(all-the-icons-faicon     "server"     nil nil :height 0.85 :face 'all-the-icons-dorange)))
-        ("\\`work/metrics\\'"  (,(all-the-icons-faicon     "eye"        nil nil :height 0.85 :face 'all-the-icons-dmaroon)))
-        ("\\`work/infra\\'"    (,(all-the-icons-faicon     "cubes"      nil nil :height 0.65 :face 'all-the-icons-lorange)))
-        ("\\`work/sdlc\\'"     (,(all-the-icons-faicon     "pencil"     nil nil :height 0.95 :face 'all-the-icons-orange)))
-        ;; life/*
-        ("\\`life/family\\'"   (,(all-the-icons-faicon     "heart"      nil nil :height 0.85 :face 'all-the-icons-red)))
-        ("\\`life/money\\'"    (,(all-the-icons-faicon     "money"      nil nil :height 0.80 :face 'all-the-icons-dgreen)))
-        ("\\`life/tech\\'"     (,(all-the-icons-faicon     "laptop"     nil nil :height 0.80 :face 'all-the-icons-dsilver)))
-        ;; doom/*
-        ("\\`doom/upstream\\'" (,(all-the-icons-alltheicon "git"        nil nil :height 0.85 :face 'all-the-icons-lred)))
-        ("\\`doom/config\\'"   (,(all-the-icons-fileicon   "emacs"      nil nil :height 0.85 :face 'all-the-icons-purple)))
-        ("\\`doom/org\\'"      (,(all-the-icons-fileicon   "org"        nil nil :height 0.90 :face 'all-the-icons-lgreen)))
-        ("\\`doom/markdown\\'" (,(all-the-icons-octicon    "markdown"   nil nil :height 0.85 :face 'all-the-icons-maroon)))
-        ("\\`doom/yaml\\'"     (,(all-the-icons-faicon     "cogs"       nil nil :height 0.80 :face 'all-the-icons-lsilver)))
-        ("\\`doom/python\\'"   (,(all-the-icons-alltheicon "python"     nil nil :height 0.85 :face 'all-the-icons-dblue)))
-        ("\\`doom/ts\\'"       (,(all-the-icons-fileicon   "typescript" nil nil :height 0.85 :face 'all-the-icons-blue)))
-        ("\\`doom/term\\'"     (,(all-the-icons-faicon     "terminal"   nil nil :height 0.95 :face 'all-the-icons-dgreen)))
-        ("\\`doom/misc\\'"     (,(all-the-icons-fileicon   "config"     nil nil :height 0.85 :face 'all-the-icons-lblue)))))
-
-(after! org
-  (setq org-refile-use-outline-path 'full-file-path))
-
-(require 'org-pomodoro)
-
-(when (equal org-pomodoro-audio-player "/usr/bin/afplay")
-  (let ((args '("-v" "0.125")))
-    (setq org-pomodoro-start-sound-args args
-          org-pomodoro-finished-sound-args args
-          org-pomodoro-overtime-sound-args args
-          org-pomodoro-ticking-sound-args args
-          org-pomodoro-killed-sound-args args
-          org-pomodoro-short-break-sound-args args
-          org-pomodoro-long-break-sound-args args)))
-
-(map! :map org-mode-map
-      :localleader
-      (:when (featurep! :lang org +pomodoro)
-       (:prefix ("c" . "clock")
-        "p" #'org-pomodoro
-        "P" #'org-pomodoro-extend-last-clock)))
-
-(after! org
-  (setq org-src-preserve-indentation nil
-        org-edit-src-content-indentation 0))
+(after! markdown
+  (defun my/markdown-preview (f &rest r)
+    (let ((browse-url-browser-function #'browse-url-default-browser))
+      (apply f r)))
+  (advice-add #'markdown-preview :around #'my/markdown-preview))
 
 (after! org
   (setq org-hide-leading-stars nil
         org-startup-indented nil
         org-adapt-indentation nil))
-
-(after! org
-  (setq org-src-window-setup 'current-window))
-
-(after! org
-  (setcar (nthcdr 4 (assoc "t" org-capture-templates)) "* TODO %?") ;; And replace "[ ]"
-  (setcar (nthcdr 4 (assoc "n" org-capture-templates)) "* %u %?")
-  (setcar (nthcdr 4 (assoc "j" org-capture-templates)) "* %U %?"))
-
-;; REVIEW See if there is a cleaner way to temporarily set `org-log-into-drawer'
-(after! org
-  (defun my/org-add-note-advice (f &rest r)
-    (let ((restore org-log-into-drawer))
-      (setq org-log-into-drawer t)
-      (apply f r))
-      (setq org-log-into-drawer restore))
-  (advice-add #'org-add-note :around #'my/org-add-note-advice))
-
-(defun org-footnote-sort ()
-  "Rearrange footnote definitions in the current buffer.
-Sort footnote definitions so they match order of footnote
-references.  Also relocate definitions at the end of their
-relative section or within a single footnote section, according
-to `org-footnote-section'.  Inline definitions are ignored."
-  (let ((references (org-footnote--collect-references)))
-    (org-preserve-local-variables
-     (let ((definitions (org-footnote--collect-definitions 'delete)))
-       (org-with-wide-buffer
-        (org-footnote--clear-footnote-section)
-        ;; Insert footnote definitions at the appropriate location,
-        ;; separated by a blank line.  Each definition is inserted
-        ;; only once throughout the buffer.
-        (let (inserted)
-          (dolist (cell references)
-            (let ((label (car cell))
-                  (nested (not (nth 2 cell)))
-                  (inline (nth 3 cell)))
-              (unless (or (member label inserted) inline)
-                (push label inserted)
-                (unless (or org-footnote-section nested)
-                  ;; If `org-footnote-section' is non-nil, or
-                  ;; reference is nested, point is already at the
-                  ;; correct position.  Otherwise, move at the
-                  ;; appropriate location within the section
-                  ;; containing the reference.
-                  (goto-char (nth 1 cell))
-                  (org-footnote--goto-local-insertion-point))
-                (insert (or (cdr (assoc label definitions))
-                            (format "[fn:%s] DEFINITION NOT FOUND." label))
-                        "\n"))))
-          ;; Insert un-referenced footnote definitions at the end.
-          (pcase-dolist (`(,label . ,definition) definitions)
-            (unless (member label inserted)
-              (insert definition "\n")))))))))
-
-(setq org-ditaa-jar-path
-      (cond (IS-MAC
-             (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))))
 
 (after! org
   (setcdr (assoc 'heading org-blank-before-new-entry) nil)
@@ -501,6 +365,164 @@ just perform a complete cycle of `org-cycle'."
   (add-hook! org-insert-heading #'(my/org-insert-heading-spacing
                                    my/org-insert-heading-visibility
                                    my/org-insert-heading-evil-state)))
+
+(after! browse-url
+  (setq browse-url-handlers
+        '((".*amazon\\.com.*" . #'browse-url-firefox)
+          ("awsapps\\.com" . #'browse-url-chrome))))
+
+(after! org
+  (defun my/org-inherited-priority (s)
+    (cond
+     ;; Priority cookie in this heading
+     ((string-match org-priority-regexp s)
+      (* 1000 (- org-priority-lowest
+                 (org-priority-to-value (match-string 2 s)))))
+     ;; No priority cookie, but already at highest level
+     ((not (org-up-heading-safe))
+      (* 1000 (- org-priority-lowest org-priority-default)))
+     ;; Look for the parent's priority
+     (t
+      (my/org-inherited-priority (org-get-heading)))))
+  (setq org-priority-get-priority-function #'my/org-inherited-priority))
+
+;; REVIEW See if there is a cleaner way to temporarily set `org-log-into-drawer'
+(after! org
+  (defun my/org-add-note-advice (f &rest r)
+    (let ((restore org-log-into-drawer))
+      (setq org-log-into-drawer t)
+      (apply f r))
+      (setq org-log-into-drawer restore))
+  (advice-add #'org-add-note :around #'my/org-add-note-advice))
+
+(after! org
+  (setq org-refile-use-outline-path 'full-file-path))
+
+(setq
+      ;; Top-level directory (used by `+default/find-in-notes', etc.)
+      org-directory "~/org"
+
+      ;; Directories to search for agenda files
+      my/org-directories `("work" "life" ,doom-private-dir)
+      org-agenda-files (mapcar (lambda (f)
+                                 (if (file-name-absolute-p f) f
+                                   (expand-file-name f org-directory)))
+                               `("" ,@my/org-directories))
+
+      ;; Only "todo.org" files hold agenda items
+      org-agenda-file-regexp "\\`todo.org\\'")
+
+(after! org
+  (setcar (nthcdr 4 (assoc "t" org-capture-templates)) "* TODO %?") ;; And replace "[ ]"
+  (setcar (nthcdr 4 (assoc "n" org-capture-templates)) "* %u %?")
+  (setcar (nthcdr 4 (assoc "j" org-capture-templates)) "* %U %?"))
+
+(setq org-agenda-prefix-format
+      '((agenda  . " %i  %l%-16:c%?-12t% s")
+        (todo    . " %i  %l%-16:c")
+        (tags    . " %i  %l%-16:c")))
+
+(setq org-agenda-hide-tags-regexp "\\`work\\|life\\|doom\\|todo\\'")
+
+(setq org-agenda-category-icon-alist
+      `(("/inbox\\'"           (,(all-the-icons-faicon     "inbox"      nil nil :height 1.00 :face 'all-the-icons-dred)))
+        ;; work/*
+        ("\\`work/admin\\'"    (,(all-the-icons-faicon     "fax"        nil nil :height 0.85 :face 'all-the-icons-lred)))
+        ("\\`work/oncall\\'"   (,(all-the-icons-faicon     "users"      nil nil :height 0.80 :face 'all-the-icons-lyellow)))
+        ("\\`work/cots\\'"     (,(all-the-icons-faicon     "server"     nil nil :height 0.85 :face 'all-the-icons-dorange)))
+        ("\\`work/metrics\\'"  (,(all-the-icons-faicon     "eye"        nil nil :height 0.85 :face 'all-the-icons-dmaroon)))
+        ("\\`work/infra\\'"    (,(all-the-icons-faicon     "cubes"      nil nil :height 0.65 :face 'all-the-icons-lorange)))
+        ("\\`work/sdlc\\'"     (,(all-the-icons-faicon     "pencil"     nil nil :height 0.95 :face 'all-the-icons-orange)))
+        ;; life/*
+        ("\\`life/family\\'"   (,(all-the-icons-faicon     "heart"      nil nil :height 0.85 :face 'all-the-icons-red)))
+        ("\\`life/money\\'"    (,(all-the-icons-faicon     "money"      nil nil :height 0.80 :face 'all-the-icons-dgreen)))
+        ("\\`life/tech\\'"     (,(all-the-icons-faicon     "laptop"     nil nil :height 0.80 :face 'all-the-icons-dsilver)))
+        ;; doom/*
+        ("\\`doom/upstream\\'" (,(all-the-icons-alltheicon "git"        nil nil :height 0.85 :face 'all-the-icons-lred)))
+        ("\\`doom/config\\'"   (,(all-the-icons-fileicon   "emacs"      nil nil :height 0.85 :face 'all-the-icons-purple)))
+        ("\\`doom/org\\'"      (,(all-the-icons-fileicon   "org"        nil nil :height 0.90 :face 'all-the-icons-lgreen)))
+        ("\\`doom/markdown\\'" (,(all-the-icons-octicon    "markdown"   nil nil :height 0.85 :face 'all-the-icons-maroon)))
+        ("\\`doom/yaml\\'"     (,(all-the-icons-faicon     "cogs"       nil nil :height 0.80 :face 'all-the-icons-lsilver)))
+        ("\\`doom/python\\'"   (,(all-the-icons-alltheicon "python"     nil nil :height 0.85 :face 'all-the-icons-dblue)))
+        ("\\`doom/ts\\'"       (,(all-the-icons-fileicon   "typescript" nil nil :height 0.85 :face 'all-the-icons-blue)))
+        ("\\`doom/term\\'"     (,(all-the-icons-faicon     "terminal"   nil nil :height 0.95 :face 'all-the-icons-dgreen)))
+        ("\\`doom/misc\\'"     (,(all-the-icons-fileicon   "config"     nil nil :height 0.85 :face 'all-the-icons-lblue)))))
+
+(after! org
+  (defun my/org-footnote-sort ()
+    "Rearrange footnote definitions in the current buffer.
+Sort footnote definitions so they match order of footnote
+references.  Also relocate definitions at the end of their
+relative section or within a single footnote section, according
+to `org-footnote-section'.  Inline definitions are ignored."
+    (let ((references (org-footnote--collect-references)))
+      (org-preserve-local-variables
+       (let ((definitions (org-footnote--collect-definitions 'delete)))
+         (org-with-wide-buffer
+          (org-footnote--clear-footnote-section)
+          ;; Insert footnote definitions at the appropriate location,
+          ;; separated by a blank line.  Each definition is inserted
+          ;; only once throughout the buffer.
+          (let (inserted)
+            (dolist (cell references)
+              (let ((label (car cell))
+                    (nested (not (nth 2 cell)))
+                    (inline (nth 3 cell)))
+                (unless (or (member label inserted) inline)
+                  (push label inserted)
+                  (unless (or org-footnote-section nested)
+                    ;; If `org-footnote-section' is non-nil, or
+                    ;; reference is nested, point is already at the
+                    ;; correct position.  Otherwise, move at the
+                    ;; appropriate location within the section
+                    ;; containing the reference.
+                    (goto-char (nth 1 cell))
+                    (org-footnote--goto-local-insertion-point))
+                  (insert (or (cdr (assoc label definitions))
+                              (format "[fn:%s] DEFINITION NOT FOUND." label))
+                          "\n"))))
+            ;; Insert un-referenced footnote definitions at the end.
+            (pcase-dolist (`(,label . ,definition) definitions)
+              (unless (member label inserted)
+                (insert definition "\n")))))))))
+  (advice-add #'org-footnote-sort :override #'my/org-footnote-sort))
+
+(after! org
+  (setq org-src-preserve-indentation nil
+        org-edit-src-content-indentation 0))
+
+(after! org
+  (setq org-src-window-setup 'current-window))
+
+(setq org-ditaa-jar-path
+      (cond (IS-MAC
+             (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))))
+
+(setq org-download-method 'directory
+      org-download-image-dir "images")
+
+(setq org-ditaa-jar-path
+      (cond (IS-MAC
+             (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))))
+
+(require 'org-pomodoro)
+
+(when (equal org-pomodoro-audio-player "/usr/bin/afplay")
+  (let ((args '("-v" "0.125")))
+    (setq org-pomodoro-start-sound-args args
+          org-pomodoro-finished-sound-args args
+          org-pomodoro-overtime-sound-args args
+          org-pomodoro-ticking-sound-args args
+          org-pomodoro-killed-sound-args args
+          org-pomodoro-short-break-sound-args args
+          org-pomodoro-long-break-sound-args args)))
+
+(map! :map org-mode-map
+      :localleader
+      (:when (featurep! :lang org +pomodoro)
+       (:prefix ("c" . "clock")
+        "p" #'org-pomodoro
+        "P" #'org-pomodoro-extend-last-clock)))
 
 (after! lsp-yaml
   (let ((f lsp-yaml-schema-store-local-db))
@@ -556,13 +578,12 @@ on them."
    ;; message while moving the mouse.
    (list (car (help--read-key-sequence 'no-mouse-movement)) current-prefix-arg))
   (where-is (cadr (help--analyze-key (car key) (cdr key))) insert))
+
 (define-key! help-map
-  ;; replaces `view-emacs-FAQ' b/c I rarely use it
-  "C-f" #'find-function
-  ;; replaces `describe-language-environment'
-  "C-l" #'find-library
-  ;; replaces `describe-no-warranty' b/c I never use it
-  "C-w" #'my/alternate-keys)
+  "C-f" #'find-function      ;; replaces `view-emacs-FAQ' b/c I rarely use it
+  "C-l" #'find-library       ;; replaces `describe-language-environment'
+  "C-v" #'find-variable
+  "C-w" #'my/alternate-keys) ;; replaces `describe-no-warranty' b/c I never use it
 
 (remove-hook 'text-mode-hook #'display-line-numbers-mode)
 
@@ -651,7 +672,7 @@ and uses visual instead."
                 which-key-replacement-alist)))
 
 (after! org-babel
-  (defun org-babel-tangle (&optional arg target-file lang-re)
+  (defun my/org-babel-tangle (&optional arg target-file lang-re)
     "Write code blocks to source-specific files.
 Extract the bodies of all source code blocks from the current
 file into their own source-specific files.
@@ -763,9 +784,8 @@ matching a regular expression."
           (mapc (lambda (pair)
                   (when (cdr pair) (set-file-modes (car pair) (cdr pair))))
                 path-collector)
-          (mapcar #'car path-collector))))))
-
-(setq uniquify-buffer-name-style 'forward)
+          (mapcar #'car path-collector)))))
+  (advice-add #'org-babel-tangle :override #'my/org-babel-tangle))
 
 (setq disabled-command-function nil)
 
