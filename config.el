@@ -591,6 +591,26 @@ and uses visual instead."
   ;; replaces `doom/toggle-line-numbers'
   "l" #'my/toggle-line-numbers)
 
+(defun my/doom-help-search-source (&optional initial-input)
+  "Perform a text search across all files in `doom-emacs-dir'."
+  (interactive)
+  (+ivy-file-search
+    :query initial-input
+    :in doom-emacs-dir
+    :prompt (format "Search source for: ")))
+
+(defun my/doom-help-search-modules (&optional initial-input)
+  "Perform a text search across all files in `doom-modules-dir'."
+  (interactive)
+  (+ivy-file-search
+    :query initial-input
+    :in doom-modules-dir
+    :prompt "Search modules for: "))
+
+(define-key! help-map
+  "de" #'my/doom-help-search-source
+  "dM" #'my/doom-help-search-modules)
+
 ;; Function to toggle 1 or 2 spaces at the end of sentences
 (defun my/toggle-sentence-end-double-space ()
   (interactive)

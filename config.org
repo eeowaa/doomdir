@@ -13,6 +13,17 @@ find ~/.config/doom -type f -name .DS_Store -exec rm '{}' \;
 doom purge
 #+end_src
 
+** STRT Finding a good subtree for configuration
+This Org file has been organized to mirror the structure [[file:init.el][init.el]], which in turn
+mirrors the structure of =~/.emacs.d/modules=. Configuration for options, hooks,
+etc. in this file should be done in the subtree which corresponds to the Doom
+module that performs configuration on related options, hooks, etc.
+
+Use =SPC h d e= (~my/doom-help-search-source~) and =SPC h d M=
+(~my/doom-help-search-modules~) to find the module that contains configuration
+for (or in some cases, is at least /intended/ to contain configuration for) the
+option, hook, etc. that you want to configure.
+
 * :completion
 ** company [1/1]
 *** DONE [#B] Never start completion automatically (require =C-SPC=)
@@ -1350,6 +1361,29 @@ and uses visual instead."
 (define-key! doom-leader-toggle-map
   ;; replaces `doom/toggle-line-numbers'
   "l" #'my/toggle-line-numbers)
+#+end_src
+
+*** DONE [#B] Define additional Doom search functions
+#+begin_src emacs-lisp :tangle yes
+(defun my/doom-help-search-source (&optional initial-input)
+  "Perform a text search across all files in `doom-emacs-dir'."
+  (interactive)
+  (+ivy-file-search
+    :query initial-input
+    :in doom-emacs-dir
+    :prompt (format "Search source for: ")))
+
+(defun my/doom-help-search-modules (&optional initial-input)
+  "Perform a text search across all files in `doom-modules-dir'."
+  (interactive)
+  (+ivy-file-search
+    :query initial-input
+    :in doom-modules-dir
+    :prompt "Search modules for: "))
+
+(define-key! help-map
+  "de" #'my/doom-help-search-source
+  "dM" #'my/doom-help-search-modules)
 #+end_src
 
 *** HOLD [#B] Prevent error related to ~'~ pairs
