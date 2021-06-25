@@ -573,7 +573,11 @@ block loads the =checkers/spell= module, which is what sets the hook.
 (advice-add #'add-hook :before-until #'my/hook-denied-p)
 #+end_src
 
-*** TODO [#B] Fix spelling correction
+*** HOLD [#B] Fix spelling correction
+:LOGBOOK:
+- Note taken on [2021-06-25 Fri 11:13] \\
+  I am no longer seeing this error and cannot replicate it.
+:END:
 ~+spell/correct~ (=z ==) spits the following error:
 #+begin_quote
 Starting new Ispell process aspell with english dictionary...done
@@ -1387,6 +1391,10 @@ and uses visual instead."
 #+end_src
 
 *** HOLD [#B] Prevent error related to ~'~ pairs
+:LOGBOOK:
+- Note taken on [2021-06-25 Fri 13:07] \\
+  Cannot reproduce.
+:END:
 Occasionally this comes up (not sure exactly how to reproduce):
 #+begin_example
 error in process sentinel: doom--handle-load-error: Error in a Doom module: "modules/config/default/config.el", (error "Pair ' was never defined, please specify closing delimiter in instead of passing ‘nil’")
