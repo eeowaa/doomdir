@@ -532,7 +532,7 @@ GUI Emacs, not terminal Emacs*.
                              (file-truename doom-private-dir))))))
 #+end_src
 
-** spell [1/2]
+** spell [2/3]
 *** DONE [#A] Prevent ~spell-fu-mode~ from being enabled by default
 I like having the option, but I would prefer to enable it manually per buffer.
 
@@ -571,6 +571,27 @@ block loads the =checkers/spell= module, which is what sets the hook.
     (member (cons hook func) my/hook-deny-list))
 
 (advice-add #'add-hook :before-until #'my/hook-denied-p)
+#+end_src
+
+*** DONE [#B] Prevent =which-key= errors related to =spell-fu=
+If I press =]= before =spell-fu= has been loaded and wait for a =which-key=
+popup, I get the following error:
+
+: Error running timer ‘which-key--update’: (void-function +spell/next-error)
+
+Considering that the function /should/ be autoloaded in =+spell-fu.el= (see code
+snippet below), I don't know why I'm getting that error.
+
+#+begin_src emacs-lisp :tangle no
+;;;###autoload (defalias '+spell/next-error #'spell-fu-goto-next-error)
+#+end_src
+
+Regardless, I just want to fix the issue. A manual workaround is to execute
+=SPC t s= (~spell-fu-mode~) twice: the first time to load =spell-fu= and the
+second time to disable it. For now, I'll just always require it:
+
+#+begin_src emacs-lisp :tangle yes
+(require 'spell-fu)
 #+end_src
 
 *** HOLD [#B] Fix spelling correction

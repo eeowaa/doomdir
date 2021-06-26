@@ -273,6 +273,8 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
            (not (featurep! :checkers spell +flyspell)))
   (remove-hook 'text-mode-hook 'spell-fu-mode))
 
+(require 'spell-fu)
+
 (setq ispell-dictionary "english")
 
 (setq magit-repository-directories
