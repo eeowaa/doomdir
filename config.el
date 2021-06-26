@@ -295,6 +295,8 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
         mac-option-modifier 'super
         mac-right-option-modifier 'hyper))
 
+(add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
+
 (add-to-list 'font-lock-extra-managed-props 'display)
 (font-lock-add-keywords
  'markdown-mode
@@ -551,8 +553,6 @@ to `org-footnote-section'.  Inline definitions are ignored."
     :modes (yaml-mode))
     (add-to-list 'flycheck-checkers 'cfn-lint))
 
-(add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
-
 (sp-pair "\"" nil :actions :rem)
 (sp-pair "'"  nil :actions :rem)
 (sp-pair "`"  nil :actions :rem)
@@ -791,6 +791,13 @@ matching a regular expression."
 
 (setq disabled-command-function nil)
 
+(when (and (featurep 'nativecomp)
+           (native-comp-available-p))
+  (setq comp-speed 2
+        package-native-compile t))
+
+(setq confirm-kill-processes nil)
+
 ;; Display ^L characters as horizontal lines
 (use-package! page-break-lines
   :config (global-page-break-lines-mode))
@@ -802,10 +809,9 @@ matching a regular expression."
 (defun my/recenter-top (&rest r) (recenter 0))
 (advice-add #'forward-page :after #'my/recenter-top)
 
-(when (and (featurep 'nativecomp)
-           (native-comp-available-p))
-  (setq comp-speed 2
-        package-native-compile t))
+(setq-default truncate-lines t)
+
+(setq default-input-method "latin-postfix")
 
 (defun my/toggle-window-dedicated ()
   "Control whether or not Emacs is allowed to display another
@@ -824,13 +830,7 @@ buffer in current window."
 
 (setq all-the-icons-scale-factor 1.0)
 
-(setq confirm-kill-processes nil)
-
 (setq extended-command-suggest-shorter nil)
-
-(setq default-input-method "latin-postfix")
-
-(setq-default truncate-lines t)
 
 ;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
 (after! projectile

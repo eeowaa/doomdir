@@ -24,7 +24,16 @@ Use =SPC h d e= (~my/doom-help-search-source~) and =SPC h d M=
 for (or in some cases, is at least /intended/ to contain configuration for) the
 option, hook, etc. that you want to configure.
 
+* :input
+** chinese [0/0] :ARCHIVE:
+** japanese [0/0] :ARCHIVE:
+** layout [0/0] :ARCHIVE:
 * :completion
+#+begin_quote
+Modules that provide new interfaces or frameworks for completion, including code
+completion.
+#+end_quote
+
 ** company [1/1]
 *** DONE [#B] Never start completion automatically (require =C-SPC=)
 #+begin_src emacs-lisp :tangle yes
@@ -42,6 +51,8 @@ invoke using =C-SPC= (~+company/complete~), but not something that just pops up
 on its own.
 #+end_quote
 
+** helm [0/0] :ARCHIVE:
+** ido [0/0] :ARCHIVE:
 ** ivy [1/1]
 *** DONE [#A] Make it easier to jump to headlines across Org buffers
 #+begin_src emacs-lisp :tangle yes
@@ -49,6 +60,11 @@ on its own.
 #+end_src
 
 * :ui
+#+begin_quote
+Aesthetic modules that affect the Emacs interface or user experience.
+#+end_quote
+
+** deft [0/0] :ARCHIVE:
 ** doom [2/2]
 *** DONE [#C] Set the font
 Terminus is a good font but must be installed first:
@@ -71,6 +87,8 @@ brew install font-terminus
 (setq doom-theme 'doom-henna)
 #+end_src
 
+** doom-dashboard [0/0] :ARCHIVE:
+** doom-quit [0/0] :ARCHIVE:
 ** emoji [1/1]
 *** DONE [#C] Enable emojis (just for =SPC i e=)
 This is done in =doom/init.el=.
@@ -284,18 +302,23 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 (global-set-key (kbd "C-c g") #'hydra-game/body)
 #+end_src
 
+** indent-guides [0/0] :ARCHIVE:
 ** ligatures [1/1]
 *** DONE [#C] Only enable extra ligatures in Org mode (for now)
 #+begin_src emacs-lisp :tangle yes
 (setq +ligatures-extras-in-modes '(org-mode))
 #+end_src
 
+** minimap [0/0]
 ** modeline [1/1]
 *** DONE [#C] Use 1-based column numbering in modeline
 #+begin_src emacs-lisp :tangle yes
 (setq column-number-indicator-zero-based nil)
 #+end_src
 
+** nav-flash [0/0] :ARCHIVE:
+** neotree [0/0] :ARCHIVE:
+** ophints [0/0]
 ** popup [4/6]
 *** DONE [#B] Configure Man for AWS CLI man pages
 #+begin_src emacs-lisp :tangle yes
@@ -370,6 +393,7 @@ automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
 
 *** TODO [#B] Configure WoMan for AWS CLI man pages
 *** TODO [#C] Modify popup behavior for Customize buffers
+** tabs [0/0] :ARCHIVE:
 ** treemacs [2/2]
 *** DONE [#B] Fix ace-window keybindings
 This slows down startup a bit, but whatever (I'm not obsessed with startup):
@@ -382,7 +406,26 @@ Reference: https://github.com/hlissner/doom-emacs/issues/4555
 *** KILL [#B] Fix size of NPM logo
 I am no longer seeing this issue as of [2021-01-11 Mon].
 
+** unicode [0/0] :ARCHIVE:
+** vc-gutter [0/1]
+*** TODO [#B] Enable toggling of vcs diff in the fringe
+Unfortunately, when the =vc-gutter= module is enabled, I have found no way to
+persistently disable =git-gutter= in a buffer.
+
+** vi-tilde-fringe [0/0]
+** window-select [0/1]
+*** TODO [#C] Add an =ace-window= keybinding to close windows
+Currently, I can use =C-w C-w e <window> C-w c= to close a window, but the
+cursor may switch to another window after this operation. I would rather create
+a keybinding like =C-w C-w x <window>= that closes the window that I select
+/without/ moving the cursor.
+
+** zen [0/0]
 * :editor
+#+begin_quote
+Modules that affect and augment your ability to manipulate or insert text.
+#+end_quote
+
 ** evil [2/3]
 *** DONE [#A] Fix ~evil-visual-block~ in =org= buffers
 Oddly, this is a problem I've only encountered in =org= buffers, but when I use
@@ -413,7 +456,82 @@ Options to look at:
 + ~evil-collection-helpful-maps~
 + ~helpful-mode-map~
 
+** file-templates [0/0]
+** fold [0/2]
+I do not know exactly hosw Doom implements folding, but I know that Emacs has a
+lot of different packages available for folding, for example:
+
++ =hideshow=
++ =yafolding=
++ =origami=
++ =outline-minor-mode=
++ =vimish-fold=
+
+*** TODO [#A] Enable fine-grained folding for YAML mode
+Play around with folding in the following code block and just /try/ to suppress
+your annoyance:
+
+#+begin_src yaml :tangle no
+foo:
+  bar:
+    - 1
+    - 2
+    - 3
+  baz:
+    - 4
+    - 5
+    - 6
+quz:
+  - hello
+  - goodbye
+#+end_src
+
+My mind can't even comprehend how broken this is.
+
+*** TODO [#A] Enable fine-grained folding for JSON mode
+Play around with folding in the following code block and just /try/ to suppress
+your annoyance:
+
+#+begin_src json :tangle no
+{
+  "foo": {
+    "bar": [
+      1,
+      2,
+      3
+    ]
+    "baz": [
+      4,
+      5,
+      6
+    ]
+  },
+  "quz": [
+    "hello",
+    "goodbye"
+  ]
+}
+#+end_src
+
+My mind can't even comprehend how broken this is.
+
+** format [0/0] :ARCHIVE:
+** god [0/0] :ARCHIVE:
+** lispy [0/0] :ARCHIVE:
+** multiple-cursors [0/0] :ARCHIVE:
+** objed [0/0] :ARCHIVE:
+** parinfer [0/0] :ARCHIVE:
+** rotate-text [0/0] :ARCHIVE:
+** snippets [0/0]
+** word-wrap [0/0]
 * :emacs
+#+begin_quote
+Modules that reconfigure or augment packages or features built into Emacs.
+#+end_quote
+
+** dired [0/0]
+** electric [0/0]
+** ibuffer [0/0]
 ** undo [0/1]
 *** STRT [#A] Enable ~undo-tree~
 Sometimes this doesn't seem to work.
@@ -422,10 +540,15 @@ Sometimes this doesn't seem to work.
 (global-undo-tree-mode)
 #+end_src
 
+** vc [0/0]
 * :term
 :PROPERTIES:
 :CATEGORY: doom/term
 :END:
+#+begin_quote
+Modules that offer terminal emulation.
+#+end_quote
+
 ** eshell [3/5]
 *** DONE [#B] Do not scroll after every command
 #+begin_src emacs-lisp :tangle yes
@@ -490,6 +613,8 @@ Sometimes ~git~ will spit the following:
 tput: unknown terminal "eterm-color"
 #+end_example
 
+** shell [0/0] :ARCHIVE:
+** term [0/0] :ARCHIVE:
 ** vterm [2/3]
 *** DONE [#B] Export ~$EDITOR~ to =vterm=
 #+begin_src emacs-lisp :tangle yes
@@ -625,8 +750,14 @@ provides corrections. For example, the word "fluctuant" is highlighted as a
 spelling error by the =spell= module but is a completion for "flu" (just type
 =C-SPC= in Evil insert state with the cursor positioned after the "u" in "flu").
 
+** grammar [0/0] :ARCHIVE:
 * :tools
-** debugger [0/1]
+#+begin_quote
+Small modules that give Emacs access to external tools & services.
+#+end_quote
+
+** ansible [0/0]
+** debugger [0/1] :ARCHIVE:
 *** TODO [#A] Fix DAP mode error message
 I get this error when I visit a file that invokes ~lsp!~:
 #+begin_example
@@ -647,6 +778,13 @@ that prevents errors. Worst case, I could disable =debugger=.
 disable =debugger= for the time being (it's not super-important for me right
 now, anyway).
 
+** direnv [0/1] :ARCHIVE:
+*** TODO [#A] See why =direnv= prevents environment variables from propagating between buffers
+** docker [0/0]
+** editorconfig [0/0]
+** ein [0/0]
+** evay [0/0]
+** gist [0/0] :ARCHIVE:
 ** lookup [0/1]
 *** HOLD [#C] Add dictionary and thesaurus backends for =SPC s t/T=
 I've done everything that the Doom documentation told me to do, but things
@@ -671,7 +809,20 @@ won't work for you. Unfortunately, resizing the frame does not help.
         ("~/stow-dotfiles" . 1)))
 #+end_src
 
+** make [0/0]
+** pass [0/0] :ARCHIVE:
+** pdf [0/0]
+** prodigy [0/0] :ARCHIVE:
+** rgb [0/0] :ARCHIVE:
+** taskrunner [0/0] :ARCHIVE:
+** terraform [0/0]
+** tmux [0/0] :ARCHIVE:
+** upload [0/0] :ARCHIVE:
 * :os
+#+begin_quote
+Modules to improve integration into your OS, system, or devices.
+#+end_quote
+
 ** macos [1/2]
 *** DONE [#A] Remap keys for macOS
 #+begin_src emacs-lisp :tangle yes
@@ -693,7 +844,60 @@ won't work for you. Unfortunately, resizing the frame does not help.
 I'm already doing this with =forge=, but I'd like to better document what I'm
 doing and how to use Keychain with other Emacs facilities.
 
+** tty [0/0] :ARCHIVE:
 * :lang
+#+begin_quote
+Modules that bring support for a language or group of languages to Emacs.
+#+end_quote
+
+** agda [0/0] :ARCHIVE:
+** cc [0/0]
+** clojure [0/0] :ARCHIVE:
+** common-lisp [0/0] :ARCHIVE:
+** coq [0/0] :ARCHIVE:
+** crystal [0/0] :ARCHIVE:
+** csharp [0/0] :ARCHIVE:
+** data [0/0]
+** dart [0/0] :ARCHIVE:
+** elixer [0/0] :ARCHIVE:
+** elm [0/0] :ARCHIVE:
+** emacs-lisp [0/0]
+** erlang [0/0] :ARCHIVE:
+** ess [0/0] :ARCHIVE:
+** faust [0/0] :ARCHIVE:
+** fsharp [0/0] :ARCHIVE:
+** fstar [0/0] :ARCHIVE:
+** gdscript [0/0] :ARCHIVE:
+** go [0/0]
+** haskell [0/0] :ARCHIVE:
+** hy [0/0] :ARCHIVE:
+** idris [0/0] :ARCHIVE:
+** json [0/0]
+** java [0/0] :ARCHIVE:
+** javascript [1/2]
+:PROPERTIES:
+:CATEGORY: doom/ts
+:END:
+The =lang/javascript= module is what powers TypeScript development. Currently, I
+am only using TypeScript -- not vanilla JavaScript -- so the ~:CATEGORY:~
+property for this subtree is set to ~doom/ts~.
+
+*** DONE [#B] Use gitignore-mode for .npmignore files
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
+#+end_src
+
+*** HOLD [#B] Set up debugging
++ Try ~dap-mode~ https://www.youtube.com/watch?v=0bilcQVSlbM
++ Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
+
+** julia [0/0] :ARCHIVE:
+** kotlin [0/0] :ARCHIVE:
+** latex [0/0]
+** lean [0/0] :ARCHIVE:
+** factor [0/0] :ARCHIVE:
+** ledger [0/0] :ARCHIVE:
+** lua [0/0] :ARCHIVE:
 ** markdown [3/4]
 :PROPERTIES:
 :CATEGORY: doom/markdown
@@ -740,6 +944,9 @@ preview Markdown rendering in the system browser.
 + Open link: [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::defun markdown-toggle-markup-hiding (&optional arg][(defun markdown-toggle-markup-hiding]]
 + Open link: [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][;;; Markup Hiding]]
 
+** nim [0/0] :ARCHIVE:
+** nix [0/0] :ARCHIVE:
+** ocaml [0/0] :ARCHIVE:
 ** org [12/29]
 :PROPERTIES:
 :CATEGORY: doom/org
@@ -1175,6 +1382,9 @@ set to whatever command-line options(s) should be passed to
         "P" #'org-pomodoro-extend-last-clock)))
 #+end_src
 
+** php [0/0] :ARCHIVE:
+** plantuml [0/0] :ARCHIVE:
+** purescript [0/0] :ARCHIVE:
 ** python [1/2]
 :PROPERTIES:
 :CATEGORY: doom/python
@@ -1187,6 +1397,21 @@ More than a simple "Hello World":
 *** HOLD [#C] Set up debugging
 + Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
 
+** qt [0/0] :ARCHIVE:
+** racket [0/0] :ARCHIVE:
+** raku [0/0] :ARCHIVE:
+** rest [0/0]
+** rst [0/0]
+** ruby [0/0] :ARCHIVE:
+** rust [0/0] :ARCHIVE:
+** scala [0/0] :ARCHIVE:
+** sceme [0/0] :ARCHIVE:
+** sh [0/0]
+** sml [0/0] :ARCHIVE:
+** solidity [0/0] :ARCHIVE:
+** swift [0/0] :ARCHIVE:
+** terra [0/0] :ARCHIVE:
+** web [0/0]
 ** yaml [5/6]
 :PROPERTIES:
 :CATEGORY: doom/yaml
@@ -1332,25 +1557,36 @@ Reference:
 + https://emacs-lsp.github.io/lsp-mode/page/adding-new-language/
 + https://github.com/aws-cloudformation/aws-cfn-lint-visual-studio-code/blob/master/package.json
 
-** javascript [1/2]
-:PROPERTIES:
-:CATEGORY: doom/ts
-:END:
-The =lang/javascript= module is what powers TypeScript development. Currently, I
-am only using TypeScript -- not vanilla JavaScript -- so the ~:CATEGORY:~
-property for this subtree is set to ~doom/ts~.
+* :email
+** mu4e [0/1]
+*** TODO [#B] Set up mu4e with work email
+This should probably be done in a separate gitignored file (=custom.el=) for
+security's sake.
 
-*** DONE [#B] Use gitignore-mode for .npmignore files
-#+begin_src emacs-lisp :tangle yes
-(add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
-#+end_src
+** notmuch [0/0] :ARCHIVE:
+** wanderlust [0/0] :ARCHIVE:
+* :app
+#+begin_quote
+Application modules are complex and opinionated modules that transform Emacs
+toward a specific purpose. They may have additional dependencies and *should be
+loaded last*, before =:config= modules.
+#+end_quote
 
-*** HOLD [#B] Set up debugging
-+ Try ~dap-mode~ https://www.youtube.com/watch?v=0bilcQVSlbM
-+ Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
+** calendar [0/0] :ARCHIVE:
+** irc [0/1] :ARCHIVE:
+**** TODO [#C] Configure =circe= for Freenode and/or Libera.Chat
+This should probably be done in a separate gitignored file (=custom.el=) for
+security's sake.
 
+** rss [0/0] :ARCHIVE:
+** twitter [0/0] :ARCHIVE:
 * :config
-** default [7/9]
+#+begin_quote
+Modules that configure Emacs one way or another, or focus on making it easier
+for you to customize it yourself. It is best to load these last.
+#+end_quote
+
+** default [7/11]
 *** DONE [#A] Do not auto-insert pairs of quotes
 More than half the time, I do not want that behavior.
 
@@ -1691,26 +1927,13 @@ item.
 :PROPERTIES:
 :CATEGORY: doom/misc
 :END:
-** DONE [#A] Enable all disabled commands
+** emacs
+*** DONE [#A] Enable all disabled commands
 #+begin_src emacs-lisp :tangle yes
 (setq disabled-command-function nil)
 #+end_src
 
-** DONE [#A] Configure line-feed behavior
-#+begin_src emacs-lisp :tangle yes
-;; Display ^L characters as horizontal lines
-(use-package! page-break-lines
-  :config (global-page-break-lines-mode))
-
-;; Have C-l send the current line to the top of the window
-(setq recenter-positions '(top bottom middle))
-
-;; Perform a line feed after jumping to a ^L character
-(defun my/recenter-top (&rest r) (recenter 0))
-(advice-add #'forward-page :after #'my/recenter-top)
-#+end_src
-
-** DONE [#A] Configure native compilation
+*** DONE [#A] Configure native compilation
 #+begin_src emacs-lisp :tangle yes
 (when (and (featurep 'nativecomp)
            (native-comp-available-p))
@@ -1728,7 +1951,49 @@ used for two reasons:
    ~comp-ensure-native-compiler~ always returns ~nil~ and just spits an error
    in the negative case.
 
-** DONE [#B] Dedicate windows
+*** DONE [#C] Don't prompt about killing running processing when quitting
+#+begin_src emacs-lisp :tangle yes
+(setq confirm-kill-processes nil)
+#+end_src
+
+*** TODO [#B] Always trust file-location and directory-local variables
+At least for all files in allowed paths (e.g. my source code).
+
+*** TODO [#B] Figure out the autosave and backup situation for Doom Emacs
+Compare with my old config and try to match it.
+
+*** TODO [#C] Suppress warning for ~Package cl is deprecated~
+https://github.com/hlissner/doom-emacs/issues/3372
+
+** editor
+*** DONE [#A] Configure line-feed behavior
+#+begin_src emacs-lisp :tangle yes
+;; Display ^L characters as horizontal lines
+(use-package! page-break-lines
+  :config (global-page-break-lines-mode))
+
+;; Have C-l send the current line to the top of the window
+(setq recenter-positions '(top bottom middle))
+
+;; Perform a line feed after jumping to a ^L character
+(defun my/recenter-top (&rest r) (recenter 0))
+(advice-add #'forward-page :after #'my/recenter-top)
+#+end_src
+
+*** STRT [#B] Truncate lines by default
+This doesn't appear to be working...
+
+#+begin_src emacs-lisp :tangle yes
+(setq-default truncate-lines t)
+#+end_src
+
+*** DONE [#C] Allow easy input of accented and special characters via =C-\=
+#+begin_src emacs-lisp :tangle yes
+(setq default-input-method "latin-postfix")
+#+end_src
+
+** ui
+*** DONE [#B] Dedicate windows
 #+begin_src emacs-lisp :tangle yes
 (defun my/toggle-window-dedicated ()
   "Control whether or not Emacs is allowed to display another
@@ -1746,34 +2011,18 @@ buffer in current window."
   "d" #'my/toggle-window-dedicated)
 #+end_src
 
-** DONE [#C] Keep icons small by default
+*** DONE [#C] Keep icons small by default
 #+begin_src emacs-lisp :tangle yes
 (setq all-the-icons-scale-factor 1.0)
 #+end_src
 
-** DONE [#C] Don't prompt about killing running processing when quitting
-#+begin_src emacs-lisp :tangle yes
-(setq confirm-kill-processes nil)
-#+end_src
-
-** DONE [#C] Don't suggest abbreviations for long command names
+*** DONE [#C] Don't suggest abbreviations for long command names
 #+begin_src emacs-lisp :tangle yes
 (setq extended-command-suggest-shorter nil)
 #+end_src
 
-** DONE [#C] Allow easy input of accented and special characters via =C-\=
-#+begin_src emacs-lisp :tangle yes
-(setq default-input-method "latin-postfix")
-#+end_src
-
-** STRT [#B] Truncate lines by default
-This doesn't appear to be working...
-
-#+begin_src emacs-lisp :tangle yes
-(setq-default truncate-lines t)
-#+end_src
-
-** STRT [#B] Remove =straight= package repos from =projectile=
+** config
+*** STRT [#B] Remove =straight= package repos from =projectile=
 Unfortunately, the =~/.config/emacs/.local/straight/repos/*= are creeping back
 in, so this isn't finished yet.
 
@@ -1791,23 +2040,13 @@ in, so this isn't finished yet.
                                    t "\\`[^.]")))))
 #+end_src
 
-** TODO [#B] Always trust file-location and directory-local variables
-At least for all files in allowed paths (e.g. my source code).
-
-** TODO [#B] Figure out the autosave and backup situation for Doom Emacs
-Compare with my old config and try to match it.
-
-** TODO [#C] Figure out how to use ~projectile-edit-dir-locals~ (=SPC p e=)
+*** TODO [#C] Figure out how to use ~projectile-edit-dir-locals~ (=SPC p e=)
 https://www.emacswiki.org/emacs/SkeletonMode
 
-** TODO [#C] Replace =C-?= with backspace
+*** TODO [#C] Replace =C-?= with backspace
 We already have =C-r=, so might as well replace this mostly-useless keybinding.
 
-** TODO [#C] Fix ImageMagick display of images
-** TODO [#C] Suppress warning for ~Package cl is deprecated~
-https://github.com/hlissner/doom-emacs/issues/3372
-
-** DONE [#A] Load custom config if present
+*** DONE [#A] Load custom config if present
 #+begin_src emacs-lisp :tangle yes
 (load! "custom" doom-private-dir t)
 #+end_src
