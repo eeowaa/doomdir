@@ -625,7 +625,11 @@ Modules that reconfigure or augment packages or features built into Emacs.
 Sometimes this doesn't seem to work.
 
 #+begin_src emacs-lisp :tangle yes
+;; This should already be enabled by emacs/undo/config.el
 (global-undo-tree-mode)
+
+;; Not sure what the best way is to add this hook
+(add-hook 'evil-local-mode-hook #'turn-on-undo-tree-mode)
 #+end_src
 
 ** vc [0/0]

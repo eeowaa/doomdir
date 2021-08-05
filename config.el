@@ -217,7 +217,11 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 
 (pushnew! evil-emacs-state-modes 'noaa-mode)
 
+;; This should already be enabled by emacs/undo/config.el
 (global-undo-tree-mode)
+
+;; Not sure what the best way is to add this hook
+(add-hook 'evil-local-mode-hook #'turn-on-undo-tree-mode)
 
 (setq eshell-scroll-show-maximum-output nil)
 
