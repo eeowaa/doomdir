@@ -528,6 +528,10 @@ to `org-footnote-section'.  Inline definitions are ignored."
         "p" #'org-pomodoro
         "P" #'org-pomodoro-extend-last-clock)))
 
+(add-hook! python-mode
+  (setq fill-column 79)
+  (+fill-column/toggle 1))
+
 (after! lsp-yaml
   (let ((f lsp-yaml-schema-store-local-db))
     (unless (file-exists-p f)

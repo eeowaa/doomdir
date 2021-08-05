@@ -1473,7 +1473,7 @@ set to whatever command-line options(s) should be passed to
 ** php [0/0] :ARCHIVE:
 ** plantuml [0/0] :ARCHIVE:
 ** purescript [0/0] :ARCHIVE:
-** python [1/2]
+** python [2/3]
 :PROPERTIES:
 :CATEGORY: doom/python
 :END:
@@ -1481,6 +1481,13 @@ set to whatever command-line options(s) should be passed to
 More than a simple "Hello World":
 + [[file:~/src/life/secret-santa/][Secret Santa project]]
 + [[file:~/Documents/org/life/notes.org::*Developing with interpreted languages][Notes for developing with interpreted languages]]
+
+*** DONE [#B] Set up fill column for PEP 8 compliance
+#+begin_src emacs-lisp :tangle yes
+(add-hook! python-mode
+  (setq fill-column 79)
+  (+fill-column/toggle 1))
+#+end_src
 
 *** HOLD [#C] Set up debugging
 + Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
