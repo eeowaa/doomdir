@@ -679,20 +679,14 @@ Modules that offer terminal emulation.
   "f"   "cd $1 && ls")
 #+end_src
 
-*** KILL [#B] Fix ANSI escape codes
-:LOGBOOK:
-- Note taken on [2021-06-07 Mon 16:19] \\
-  This resolved itself after an update.
-:END:
-Last two lines from ~doom doctor~:
+*** TODO [#B] Fix ANSI escape codes
+When there is a lot of colorized output (for example, the output of ~git log -p~
+on a big repo), eventually ANSI escape codes do not get interpreted. Here is an
+example from ~doom doctor~:
 #+begin_example
 [33mThere are 4 warnings![0m
 [32m✓ Finished in 7.4969s[0m
 #+end_example
-
-You can also try ~rg~ or ~fd~ somewhere in =~/.config/emacs= and you'll
-eventually see the escape codes instead of colors being output. The only
-workaround I know of now is to use =vterm= instead of =eshell=.
 
 *** TODO [#B] Export ~$EDITOR~ to =eshell=
 Unlike with =vterm=, we currently do not export ~$EDITOR~ to =eshell=. This is
