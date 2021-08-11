@@ -255,6 +255,9 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 (after! eshell
   (setq eshell-scroll-show-maximum-output nil))
 
+(after! eshell
+  (advice-add #'eshell/clear :override #'recenter-top-bottom))
+
 (add-hook! vterm-mode #'with-editor-export-editor)
 
 (after! evil-collection-vterm

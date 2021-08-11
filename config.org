@@ -641,7 +641,7 @@ Sometimes this doesn't seem to work.
 Modules that offer terminal emulation.
 #+end_quote
 
-** eshell [3/5]
+** eshell [3/6]
 *** DONE [#B] Define aliases
 #+begin_src emacs-lisp :tangle yes
 (set-eshell-alias!
@@ -678,6 +678,15 @@ Modules that offer terminal emulation.
 #+begin_src emacs-lisp :tangle yes
 (after! eshell
   (setq eshell-scroll-show-maximum-output nil))
+#+end_src
+
+*** DONE [#B] Make ^L simply scroll (not insert a bunch of blank lines
+As long as the first element of ~recenter-positions~ is ~top~ (which is
+how I have things configured), the following works great.
+
+#+begin_src emacs-lisp :tangle yes
+(after! eshell
+  (advice-add #'eshell/clear :override #'recenter-top-bottom))
 #+end_src
 
 *** TODO [#B] Fix ANSI escape codes
