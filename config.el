@@ -223,8 +223,6 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 ;; Not sure what the best way is to add this hook
 (add-hook 'evil-local-mode-hook #'turn-on-undo-tree-mode)
 
-(setq eshell-scroll-show-maximum-output nil)
-
 (set-eshell-alias!
   ;; C-x [0123]
   "0" "delete-window"
@@ -253,6 +251,9 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
   ;; shell commands
   "git" "TERM=eterm-color git --no-pager -c color.ui=always -c interactive.singleKey=false $*"
   "f"   "cd $1 && ls")
+
+(after! eshell
+  (setq eshell-scroll-show-maximum-output nil))
 
 (add-hook! vterm-mode #'with-editor-export-editor)
 

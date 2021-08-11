@@ -642,11 +642,6 @@ Modules that offer terminal emulation.
 #+end_quote
 
 ** eshell [3/5]
-*** DONE [#B] Do not scroll after every command
-#+begin_src emacs-lisp :tangle yes
-(setq eshell-scroll-show-maximum-output nil)
-#+end_src
-
 *** DONE [#B] Define aliases
 #+begin_src emacs-lisp :tangle yes
 (set-eshell-alias!
@@ -677,6 +672,12 @@ Modules that offer terminal emulation.
   ;; shell commands
   "git" "TERM=eterm-color git --no-pager -c color.ui=always -c interactive.singleKey=false $*"
   "f"   "cd $1 && ls")
+#+end_src
+
+*** DONE [#B] Do not scroll after every command
+#+begin_src emacs-lisp :tangle yes
+(after! eshell
+  (setq eshell-scroll-show-maximum-output nil))
 #+end_src
 
 *** TODO [#B] Fix ANSI escape codes
