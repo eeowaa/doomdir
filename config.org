@@ -353,7 +353,22 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 ** nav-flash [0/0] :ARCHIVE:
 ** neotree [0/0] :ARCHIVE:
 ** ophints [0/0]
-** popup [4/6]
+** popup [4/7]
+*** TODO [#B] Add a terminal-friendly keybinding for ~+popup/raise~
+I've defined a global keybinding for this:
+#+begin_src emacs-lisp :tangle yes
+(map! :leader
+      :desc "Raise popup"
+      "^" #'+popup/raise)
+#+end_src
+
+Ideally, I'd just modify the ~popup-mode~ keymap, but the following doesn't seem
+to work:
+#+begin_src emacs-lisp :tangle no
+(map! :map +popup-buffer-mode-map
+      "SPC ^" #'+popup/raise)
+#+end_src
+
 *** DONE [#B] Configure Man for AWS CLI man pages
 #+begin_src emacs-lisp :tangle yes
 ;; Allow any letter to be used a manual section for Man (AWS CLI uses "a")

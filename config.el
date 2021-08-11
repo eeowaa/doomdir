@@ -162,6 +162,10 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 
 (setq column-number-indicator-zero-based nil)
 
+(map! :leader
+      :desc "Raise popup"
+      "^" #'+popup/raise)
+
 ;; Allow any letter to be used a manual section for Man (AWS CLI uses "a")
 (setq Man-section-regexp "[a-zA-Z0-9+]+")
 
