@@ -65,7 +65,41 @@ Aesthetic modules that affect the Emacs interface or user experience.
 #+end_quote
 
 ** deft [0/0] :ARCHIVE:
-** doom [2/2]
+** doom [3/3]
+*** DONE [#A] Never hide the modeline
+Without a modeline, the only way to see a clear distinction between the bottom
+of a window without a modeline and the top of another window is by using certain
+themes in GUI Emacs.
+
+#+begin_src emacs-lisp :tangle yes
+;; `always' is just a no-op that returns `t'
+(advice-add #'hide-mode-line-mode :override #'always)
+#+end_src
+
+**** COMMENT Other ways to disable modeline hiding
+In the end, I prefer the heavy-handed approach and like to see modelines beneath
+all windows. The consistently clear distinction between windows is worth the
+exchange of screen real estate.
+
+#+CAPTION: Disable modeline hiding in all popup buffers
+#+begin_src emacs-lisp :tangle no
+(remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
+#+end_src
+
+#+CAPTION: Disable modeline hiding by default in popup buffers:
+#+begin_src emacs-lisp :tangle no
+(plist-put +popup-defaults :modeline t)
+#+end_src
+#+CAPTION: Disable modeline hiding in specific modes
+#+begin_src emacs-lisp :tangle no
+;; Not an exhuastive list of hooks
+(remove-hook! '(shell-mode-hook
+                term-mode-hook
+                vterm-mode-hook
+                eshell-mode-hook)
+              #'hide-mode-line-mode)
+#+end_src
+
 *** DONE [#C] Set the font
 Terminus is a good font but must be installed first:
 #+begin_src sh :tangle no

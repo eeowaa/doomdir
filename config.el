@@ -2,6 +2,9 @@
 
 (setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
 
+;; `always' is just a no-op that returns `t'
+(advice-add #'hide-mode-line-mode :override #'always)
+
 (setq doom-theme 'doom-henna)
 
 (remove-hook! '(text-mode-hook prog-mode-hook conf-mode-hook)
