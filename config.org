@@ -119,8 +119,23 @@ brew install font-terminus
 #+end_src
 
 *** DONE [#C] Set the theme
+There are literally only two custom themes (~doom-badger~ and ~doom-rouge~) that
+satisfy the following requirements /without modification/ when running in a
+256-color terminal:
+
+1. Files and directories have different colors in Treemacs
+2. Buffers and modelines have noticeably different background colors even in
+   unselected windows
+3. The background color of the current selection in ~ivy~ is never the same as
+   the foreground color of any part of the selection
+
+While ~doom-badger~ is OK, I prefer ~doom-henna~. Unfortunately, it does not
+satisfy the 3rd requirement, so I made a patched copy of the theme called
+~eeowaa-henna~ which fixes the problem.
+
 #+begin_src emacs-lisp :tangle yes
-(setq doom-theme 'doom-henna)
+;; Use a modified `doom-henna' theme which fixes `ivy-current-match'
+(setq doom-theme 'eeowaa-henna)
 #+end_src
 
 ** doom-dashboard [0/0] :ARCHIVE:

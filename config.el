@@ -6,7 +6,8 @@
 (advice-add 'hide-mode-line-mode :override #'always)
 (advice-add 'doom-themes-hide-modeline :override #'always)
 
-(setq doom-theme 'doom-henna)
+;; Use a modified `doom-henna' theme which fixes `ivy-current-match'
+(setq doom-theme 'eeowaa-henna)
 
 (remove-hook! '(text-mode-hook prog-mode-hook conf-mode-hook)
               #'+fill-column-enable-h)
