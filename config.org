@@ -460,7 +460,7 @@ automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
 *** TODO [#B] Configure WoMan for AWS CLI man pages
 *** TODO [#C] Modify popup behavior for Customize buffers
 ** tabs [0/0] :ARCHIVE:
-** treemacs [2/2]
+** treemacs [3/4]
 *** DONE [#B] Fix ace-window keybindings :hack:
 This slows down startup a bit, but whatever (I'm not obsessed with startup):
 #+begin_src emacs-lisp :tangle yes
@@ -471,6 +471,31 @@ Reference: https://github.com/hlissner/doom-emacs/issues/4555
 
 *** KILL [#B] Fix size of NPM logo
 I am no longer seeing this issue as of [2021-01-11 Mon].
+
+*** DONE [#C] Add keybindings to visit adjacent files
+I'd prefer my functions to use ~treemacs-peek~ instead of
+~treemacs-visit-node-no-split~, but for whatever reason, ~treemacs-peek~ does
+not work in the lisp functions.
+
+#+begin_src emacs-lisp :tangle yes
+(after! treemacs-evil
+  (defun my/treemacs-visit-next ()
+    "Open the next node in another window."
+    (interactive)
+    (treemacs-next-line 1)
+    (treemacs-visit-node-no-split 1))
+  (defun my/treemacs-visit-previous ()
+    "Open the previous node in another window."
+    (interactive)
+    (treemacs-previous-line 1)
+    (treemacs-visit-node-no-split 1))
+  (define-key! evil-treemacs-state-map
+    "J" #'my/treemacs-visit-next
+    "K" #'my/treemacs-visit-previous))
+#+end_src
+
+*** TODO [#B] Display "+" and "-" icons in tty emacs
+https://github.com/hlissner/emacs-doom-themes/issues/489
 
 ** unicode [0/0] :ARCHIVE:
 ** vc-gutter [0/1]
