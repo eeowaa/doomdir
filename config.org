@@ -73,7 +73,7 @@ themes in GUI Emacs.
 
 #+begin_src emacs-lisp :tangle yes
 ;; `always' is just a no-op that returns `t'
-(advice-add #'hide-mode-line-mode :override #'always)
+(advice-add 'hide-mode-line-mode :override #'always)
 #+end_src
 
 **** COMMENT Other ways to disable modeline hiding
@@ -90,6 +90,7 @@ exchange of screen real estate.
 #+begin_src emacs-lisp :tangle no
 (plist-put +popup-defaults :modeline t)
 #+end_src
+
 #+CAPTION: Disable modeline hiding in specific modes
 #+begin_src emacs-lisp :tangle no
 ;; Not an exhuastive list of hooks
@@ -353,8 +354,8 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 ** nav-flash [0/0] :ARCHIVE:
 ** neotree [0/0] :ARCHIVE:
 ** ophints [0/0]
-** popup [4/7]
-*** TODO [#B] Add a terminal-friendly keybinding for ~+popup/raise~
+** popup [5/7]
+*** DONE [#B] Add a terminal-friendly keybinding for ~+popup/raise~
 I've defined a global keybinding for this:
 #+begin_src emacs-lisp :tangle yes
 (map! :leader
@@ -444,7 +445,7 @@ automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
 *** TODO [#C] Modify popup behavior for Customize buffers
 ** tabs [0/0] :ARCHIVE:
 ** treemacs [2/2]
-*** DONE [#B] Fix ace-window keybindings
+*** DONE [#B] Fix ace-window keybindings :hack:
 This slows down startup a bit, but whatever (I'm not obsessed with startup):
 #+begin_src emacs-lisp :tangle yes
 (require 'ace-window)
@@ -735,7 +736,7 @@ how I have things configured), the following works great.
 
 #+begin_src emacs-lisp :tangle yes
 (after! eshell
-  (advice-add #'eshell/clear :override #'recenter-top-bottom))
+  (advice-add 'eshell/clear :override #'recenter-top-bottom))
 #+end_src
 
 *** TODO [#B] Fix ANSI escape codes
@@ -840,10 +841,10 @@ block loads the =checkers/spell= module, which is what sets the hook.
         (func (cadr r)))
     (member (cons hook func) my/hook-deny-list))
 
-(advice-add #'add-hook :before-until #'my/hook-denied-p)
+(advice-add 'add-hook :before-until #'my/hook-denied-p)
 #+end_src
 
-*** DONE [#B] Prevent =which-key= errors related to =spell-fu=
+*** DONE [#B] Prevent =which-key= errors related to =spell-fu= :hack:
 If I press =]= before =spell-fu= has been loaded and wait for a =which-key=
 popup, I get the following error:
 
@@ -1082,7 +1083,7 @@ preview Markdown rendering in the system browser.
   (defun my/markdown-preview (f &rest r)
     (let ((browse-url-browser-function #'browse-url-default-browser))
       (apply f r)))
-  (advice-add #'markdown-preview :around #'my/markdown-preview))
+  (advice-add 'markdown-preview :around #'my/markdown-preview))
 #+end_src
 
 *** TODO [#C] Replace =font-lock= hiding with native =markdown-mode= hiding
@@ -1092,7 +1093,7 @@ preview Markdown rendering in the system browser.
 ** nim [0/0] :ARCHIVE:
 ** nix [0/0] :ARCHIVE:
 ** ocaml [0/0] :ARCHIVE:
-** org [12/29]
+** org [13/29]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -1213,7 +1214,7 @@ Just store the current working directory.
       (setq org-log-into-drawer t)
       (apply f r))
       (setq org-log-into-drawer restore))
-  (advice-add #'org-add-note :around #'my/org-add-note-advice))
+  (advice-add 'org-add-note :around #'my/org-add-note-advice))
 #+end_src
 
 **** TODO [#C] Create integration between embedded ~TODO~ and project =todo.org=
@@ -1407,7 +1408,7 @@ to `org-footnote-section'.  Inline definitions are ignored."
             (pcase-dolist (`(,label . ,definition) definitions)
               (unless (member label inserted)
                 (insert definition "\n")))))))))
-  (advice-add #'org-footnote-sort :override #'my/org-footnote-sort))
+  (advice-add 'org-footnote-sort :override #'my/org-footnote-sort))
 #+end_src
 
 **** HOLD [#C] Allow 5 lines of emphasized text
@@ -1491,8 +1492,8 @@ brew install ditaa
              (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))))
 #+end_src
 
-*** Pomodoro [0/3]
-**** STRT [#A] Always load =org-pomodoro=
+*** Pomodoro [1/3]
+**** DONE [#A] Always load =org-pomodoro= :hack:
 Would be better to lazy-load this.
 
 #+begin_src emacs-lisp :tangle yes
@@ -2048,7 +2049,7 @@ matching a regular expression."
                   (when (cdr pair) (set-file-modes (car pair) (cdr pair))))
                 path-collector)
           (mapcar #'car path-collector)))))
-  (advice-add #'org-babel-tangle :override #'my/org-babel-tangle))
+  (advice-add 'org-babel-tangle :override #'my/org-babel-tangle))
 #+end_src
 
 *** TODO [#A] Tangle upon save
@@ -2129,7 +2130,7 @@ https://github.com/hlissner/doom-emacs/issues/3372
 
 ;; Perform a line feed after jumping to a ^L character
 (defun my/recenter-top (&rest r) (recenter 0))
-(advice-add #'forward-page :after #'my/recenter-top)
+(advice-add 'forward-page :after #'my/recenter-top)
 #+end_src
 
 *** STRT [#B] Truncate lines by default
@@ -2199,6 +2200,23 @@ https://www.emacswiki.org/emacs/SkeletonMode
 We already have =C-r=, so might as well replace this mostly-useless keybinding.
 
 *** DONE [#A] Load custom config if present
+=~/.config/doom/custom.el= should look something like this:
+
+#+begin_src emacs-lisp :tangle no
+;;; Manual
+
+;; Identifying information
+(setq user-full-name "John Doe"
+      user-mail-address "johndoe@example.com")
+
+;; Geographic location
+(setq calendar-latitude 35.0933
+      calendar-longitude -98.2632
+      calendar-location-name "Nowhere, OK")
+
+;;; Customize
+#+end_src
+
 #+begin_src emacs-lisp :tangle yes
 (load! "custom" doom-private-dir t)
 #+end_src

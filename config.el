@@ -3,7 +3,7 @@
 (setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
 
 ;; `always' is just a no-op that returns `t'
-(advice-add #'hide-mode-line-mode :override #'always)
+(advice-add 'hide-mode-line-mode :override #'always)
 
 (setq doom-theme 'doom-henna)
 
@@ -263,7 +263,7 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
   (setq eshell-scroll-show-maximum-output nil))
 
 (after! eshell
-  (advice-add #'eshell/clear :override #'recenter-top-bottom))
+  (advice-add 'eshell/clear :override #'recenter-top-bottom))
 
 (add-hook! vterm-mode #'with-editor-export-editor)
 
@@ -325,7 +325,7 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
   (defun my/markdown-preview (f &rest r)
     (let ((browse-url-browser-function #'browse-url-default-browser))
       (apply f r)))
-  (advice-add #'markdown-preview :around #'my/markdown-preview))
+  (advice-add 'markdown-preview :around #'my/markdown-preview))
 
 (after! org
   (setq org-hide-leading-stars nil
@@ -412,7 +412,7 @@ just perform a complete cycle of `org-cycle'."
       (setq org-log-into-drawer t)
       (apply f r))
       (setq org-log-into-drawer restore))
-  (advice-add #'org-add-note :around #'my/org-add-note-advice))
+  (advice-add 'org-add-note :around #'my/org-add-note-advice))
 
 (after! org
   (setq org-refile-use-outline-path 'full-file-path))
@@ -504,7 +504,7 @@ to `org-footnote-section'.  Inline definitions are ignored."
             (pcase-dolist (`(,label . ,definition) definitions)
               (unless (member label inserted)
                 (insert definition "\n")))))))))
-  (advice-add #'org-footnote-sort :override #'my/org-footnote-sort))
+  (advice-add 'org-footnote-sort :override #'my/org-footnote-sort))
 
 (after! org
   (setq org-src-preserve-indentation nil
@@ -806,7 +806,7 @@ matching a regular expression."
                   (when (cdr pair) (set-file-modes (car pair) (cdr pair))))
                 path-collector)
           (mapcar #'car path-collector)))))
-  (advice-add #'org-babel-tangle :override #'my/org-babel-tangle))
+  (advice-add 'org-babel-tangle :override #'my/org-babel-tangle))
 
 (setq disabled-command-function nil)
 
@@ -826,7 +826,7 @@ matching a regular expression."
 
 ;; Perform a line feed after jumping to a ^L character
 (defun my/recenter-top (&rest r) (recenter 0))
-(advice-add #'forward-page :after #'my/recenter-top)
+(advice-add 'forward-page :after #'my/recenter-top)
 
 (setq-default truncate-lines t)
 
