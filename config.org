@@ -1785,16 +1785,7 @@ Modules that configure Emacs one way or another, or focus on making it easier
 for you to customize it yourself. It is best to load these last.
 #+end_quote
 
-** default [7/11]
-*** DONE [#A] Do not auto-insert pairs of quotes
-More than half the time, I do not want that behavior.
-
-#+begin_src emacs-lisp :tangle yes
-(sp-pair "\"" nil :actions :rem)
-(sp-pair "'"  nil :actions :rem)
-(sp-pair "`"  nil :actions :rem)
-#+end_src
-
+** default [6/9]
 *** DONE [#A] Disable smartparens in the minibuffer, including the ~evil-ex~ prompt
 According to the documentation, each mode listed in ~sp-ignore-modes-list~ will
 have smartparens disabled when ~smartparens-global-mode~ is active. However,
@@ -1908,6 +1899,15 @@ and uses visual instead."
 (define-key! help-map
   "de" #'my/doom-help-search-source
   "dM" #'my/doom-help-search-modules)
+#+end_src
+
+*** STRT [#A] Do not auto-insert pairs of quotes
+More than half the time, I do not want that behavior.
+
+#+begin_src emacs-lisp :tangle no
+(sp-pair "\"" nil :actions :rem)
+(sp-pair "'"  nil :actions :rem)
+(sp-pair "`"  nil :actions :rem)
 #+end_src
 
 *** HOLD [#B] Prevent error related to ~'~ pairs

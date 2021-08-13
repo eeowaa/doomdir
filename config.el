@@ -591,10 +591,6 @@ to `org-footnote-section'.  Inline definitions are ignored."
     :modes (yaml-mode))
     (add-to-list 'flycheck-checkers 'cfn-lint))
 
-(sp-pair "\"" nil :actions :rem)
-(sp-pair "'"  nil :actions :rem)
-(sp-pair "`"  nil :actions :rem)
-
 (after! smartparens
   (let* ((default-pairs (cdr (assoc t sp-pairs)))
          (default-openers (mapcar (lambda (pair) (plist-get pair :open))
