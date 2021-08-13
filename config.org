@@ -1023,7 +1023,12 @@ Modules that bring support for a language or group of languages to Emacs.
 ** dart [0/0] :ARCHIVE:
 ** elixer [0/0] :ARCHIVE:
 ** elm [0/0] :ARCHIVE:
-** emacs-lisp [0/0]
+** emacs-lisp [1/1]
+*** DONE Filename-mode associations
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'auto-mode-alist '("Cask\\'" . lisp-data-mode))
+#+end_src
+
 ** erlang [0/0] :ARCHIVE:
 ** ess [0/0] :ARCHIVE:
 ** faust [0/0] :ARCHIVE:

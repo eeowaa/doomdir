@@ -312,6 +312,8 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
         mac-option-modifier 'super
         mac-right-option-modifier 'hyper))
 
+(add-to-list 'auto-mode-alist '("Cask\\'" . lisp-data-mode))
+
 (add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
 
 (add-to-list 'font-lock-extra-managed-props 'display)
