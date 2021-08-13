@@ -74,6 +74,7 @@ themes in GUI Emacs.
 #+begin_src emacs-lisp :tangle yes
 ;; `always' is just a no-op that returns `t'
 (advice-add 'hide-mode-line-mode :override #'always)
+(advice-add 'doom-themes-hide-modeline :override #'always)
 #+end_src
 
 **** COMMENT Other ways to disable modeline hiding

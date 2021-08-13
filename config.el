@@ -4,6 +4,7 @@
 
 ;; `always' is just a no-op that returns `t'
 (advice-add 'hide-mode-line-mode :override #'always)
+(advice-add 'doom-themes-hide-modeline :override #'always)
 
 (setq doom-theme 'doom-henna)
 
