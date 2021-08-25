@@ -247,6 +247,8 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 ;; Not sure what the best way is to add this hook
 (add-hook 'evil-local-mode-hook #'turn-on-undo-tree-mode)
 
+(add-to-list 'auto-mode-alist '("/git/config\\.d/.+" . gitconfig-mode))
+
 (set-eshell-alias!
   ;; C-x [0123]
   "0" "delete-window"
@@ -565,6 +567,8 @@ to `org-footnote-section'.  Inline definitions are ignored."
 (add-hook! python-mode
   (setq fill-column 79)
   (+fill-column/toggle 1))
+
+(add-to-list 'auto-mode-alist '("pylint" . conf-mode))
 
 (after! lsp-yaml
   (let ((f lsp-yaml-schema-store-local-db))

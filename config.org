@@ -723,7 +723,12 @@ Sometimes this doesn't seem to work.
 (add-hook 'evil-local-mode-hook #'turn-on-undo-tree-mode)
 #+end_src
 
-** vc [0/0]
+** vc [1/1]
+*** DONE [#C] Filename-mode associations
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'auto-mode-alist '("/git/config\\.d/.+" . gitconfig-mode))
+#+end_src
+
 * :term
 :PROPERTIES:
 :CATEGORY: doom/term
@@ -1049,7 +1054,7 @@ Modules that bring support for a language or group of languages to Emacs.
 ** elixer [0/0] :ARCHIVE:
 ** elm [0/0] :ARCHIVE:
 ** emacs-lisp [1/1]
-*** DONE Filename-mode associations
+*** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
 (add-to-list 'auto-mode-alist '("Cask\\'" . lisp-data-mode))
 #+end_src
@@ -1074,7 +1079,7 @@ The =lang/javascript= module is what powers TypeScript development. Currently, I
 am only using TypeScript -- not vanilla JavaScript -- so the ~:CATEGORY:~
 property for this subtree is set to ~doom/ts~.
 
-*** DONE [#B] Use gitignore-mode for .npmignore files
+*** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
 (add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
 #+end_src
@@ -1115,7 +1120,7 @@ property for this subtree is set to ~doom/ts~.
    ("<a name=\".*\"></a>" 0 '(face nil display ""))))
 #+end_src
 
-*** DONE [#C] Add filename associations for =markdown-mode=
+*** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
 (add-to-list 'auto-mode-alist '("\\.mdx\\'" . markdown-mode))
 #+end_src
@@ -1577,7 +1582,7 @@ set to whatever command-line options(s) should be passed to
 ** php [0/0] :ARCHIVE:
 ** plantuml [0/0] :ARCHIVE:
 ** purescript [0/0] :ARCHIVE:
-** python [2/3]
+** python [3/4]
 :PROPERTIES:
 :CATEGORY: doom/python
 :END:
@@ -1593,6 +1598,11 @@ More than a simple "Hello World":
   (+fill-column/toggle 1))
 #+end_src
 
+*** DONE [#C] Filename-mode associations
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'auto-mode-alist '("pylint" . conf-mode))
+#+end_src
+
 *** HOLD [#C] Set up debugging
 + Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
 
@@ -1605,7 +1615,15 @@ More than a simple "Hello World":
 ** rust [0/0] :ARCHIVE:
 ** scala [0/0] :ARCHIVE:
 ** sceme [0/0] :ARCHIVE:
-** sh [0/0]
+** sh [1/1]
+*** DONE [#C] Filename-mode associations
+#+begin_src emacs-lisp
+(dolist (re '("/.config/\\(shell\\|bash\\)/.+"
+              "\\.cygport\\'"))
+  (add-to-list 'auto-mode-alist
+               `(,re . shell-script-mode)))
+#+end_src
+
 ** sml [0/0] :ARCHIVE:
 ** solidity [0/0] :ARCHIVE:
 ** swift [0/0] :ARCHIVE:
