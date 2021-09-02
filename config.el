@@ -406,11 +406,6 @@ just perform a complete cycle of `org-cycle'."
                                    my/org-insert-heading-visibility
                                    my/org-insert-heading-evil-state)))
 
-(after! browse-url
-  (setq browse-url-handlers
-        '((".*amazon\\.com.*" . #'browse-url-firefox)
-          ("awsapps\\.com" . #'browse-url-chrome))))
-
 (after! org
   (defun my/org-inherited-priority (s)
     (cond

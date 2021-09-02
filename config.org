@@ -1227,12 +1227,24 @@ just perform a complete cycle of `org-cycle'."
 *** Tables [0/0]
 *** Hyperlinks [0/2]
 **** TODO [#B] Open specific URLs in specific browsers
-#+begin_src emacs-lisp :tangle yes
+Currently not tangled, as it breaks certain functionality.
+
+#+begin_src emacs-lisp :tangle no
 (after! browse-url
   (setq browse-url-handlers
         '((".*amazon\\.com.*" . #'browse-url-firefox)
           ("awsapps\\.com" . #'browse-url-chrome))))
 #+end_src
+
+For example, the following form will error out:
+
+#+begin_src emacs-lisp :tangle no
+(browse-url "https://aws.amazon.com/about-aws/whats-new/2021/09/aws-lambda-privatelink-zones/")
+#+end_src
+
+#+begin_quote
+browse-url: No suitable browser for URL https://aws.amazon.com/about-aws/whats-new/2021/09/aws-lambda-privatelink-zones/
+#+end_quote
 
 **** TODO [#C] Create method to store Org links from =eshell= buffers
 Just store the current working directory.
