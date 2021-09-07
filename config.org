@@ -146,16 +146,6 @@ satisfy the 3rd requirement, so I made a patched copy of the theme called
 *** DONE [#C] Enable emojis (just for =SPC i e=)
 This is done in =doom/init.el=.
 
-** fill-column [0/1]
-*** STRT [#C] Do not display fill column indicator by default
-Most of the time, this works, but sometimes the fill column indicator is
-displayed, regardless.
-
-#+begin_src emacs-lisp :tangle yes
-(remove-hook! '(text-mode-hook prog-mode-hook conf-mode-hook)
-              #'+fill-column-enable-h)
-#+end_src
-
 ** hl-todo [1/1]
 *** DONE [#B] Add a couple different tags to highlight in programming major-modes
 #+begin_src emacs-lisp :tangle yes
@@ -1612,7 +1602,7 @@ More than a simple "Hello World":
 #+begin_src emacs-lisp :tangle yes
 (add-hook! python-mode
   (setq fill-column 79)
-  (+fill-column/toggle 1))
+  (display-fill-column-indicator-mode))
 #+end_src
 
 *** DONE [#C] Filename-mode associations

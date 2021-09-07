@@ -9,9 +9,6 @@
 ;; Use a modified `doom-henna' theme which fixes `ivy-current-match'
 (setq doom-theme 'eeowaa-henna)
 
-(remove-hook! '(text-mode-hook prog-mode-hook conf-mode-hook)
-              #'+fill-column-enable-h)
-
 (after! hl-todo
   (setq hl-todo-keyword-faces
         (append '(("TESTME" font-lock-constant-face bold)
@@ -561,7 +558,7 @@ to `org-footnote-section'.  Inline definitions are ignored."
 
 (add-hook! python-mode
   (setq fill-column 79)
-  (+fill-column/toggle 1))
+  (display-fill-column-indicator-mode))
 
 (add-to-list 'auto-mode-alist '("pylint" . conf-mode))
 
