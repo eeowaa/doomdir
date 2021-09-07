@@ -28,6 +28,7 @@
        ;;helm              ; the *other* search engine for love and life
        ;;ido               ; the other *other* search engine...
        (ivy +icons)      ; a search engine for love and life
+       ;;vertico           ; the search engine of the future
 
        :ui
        ;;deft              ; notational velocity for Emacs
@@ -140,6 +141,7 @@
 
        :lang
        ;;agda              ; types of types of types of types...
+       ;;beancount         ; mind the GAAP
        ;; PREREQ brew install ccls gdb glslang
        ;; NOTE `+eglot' adds commands for displaying inheritance type hierarchies
        (cc +lsp)         ; C/C++/Obj-C madness
@@ -151,11 +153,13 @@
        ;; PREREQ curl --create-dirs -o ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.13.1-uber.jar https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.13.1/org.eclipse.lemminx-0.13.1-uber.jar
        data              ; config/data formats
        ;;(dart +flutter)   ; paint ui and not much else
+       ;;yhall
        ;;elixir            ; erlang done right
        ;;elm               ; care for a cup of TEA?
        emacs-lisp        ; drown in parentheses
        ;;erlang            ; an elegant language for a more civilized age
        ;;ess               ; emacs speaks statistics
+       ;;factor
        ;;faust             ; dsp, but you get to keep your soul
        ;;fsharp            ; ML stands for Microsoft's Language
        ;;fstar             ; (dependent) types and (monadic) effects and Z3
@@ -245,6 +249,7 @@
        ;; PREREQ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
        ;; PREREQ npm install -g yaml-language-server
        (yaml +lsp)         ; JSON, but readable
+       ;;zig               ; C, but simpler
 
        :email
        ;;(mu4e +gmail)
@@ -253,6 +258,8 @@
 
        :app
        ;;calendar
+       ;;emms
+       ;;everywhere        ; *leave* Emacs!? You must be joking
        ;;irc               ; how neckbeards socialize
        ;;(rss +org)        ; emacs as an RSS reader
        ;;twitter           ; twitter client https://twitter.com/vnought

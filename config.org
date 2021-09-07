@@ -59,6 +59,8 @@ on its own.
 (setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
 #+end_src
 
+** vertico [0/1] :ARCHIVE:
+*** TODO Replace =ivy= with =vertico=
 * :ui
 #+begin_quote
 Aesthetic modules that affect the Emacs interface or user experience.
@@ -1043,6 +1045,7 @@ Modules that bring support for a language or group of languages to Emacs.
 #+end_quote
 
 ** agda [0/0] :ARCHIVE:
+** beancount [0/0] :ARCHIVE:
 ** cc [0/0]
 ** clojure [0/0] :ARCHIVE:
 ** common-lisp [0/0] :ARCHIVE:
@@ -1051,6 +1054,7 @@ Modules that bring support for a language or group of languages to Emacs.
 ** csharp [0/0] :ARCHIVE:
 ** data [0/0]
 ** dart [0/0] :ARCHIVE:
+** dhall [0/0] :ARCHIVE:
 ** elixer [0/0] :ARCHIVE:
 ** elm [0/0] :ARCHIVE:
 ** emacs-lisp [1/1]
@@ -1061,6 +1065,7 @@ Modules that bring support for a language or group of languages to Emacs.
 
 ** erlang [0/0] :ARCHIVE:
 ** ess [0/0] :ARCHIVE:
+** factor [0/0] :ARCHIVE:
 ** faust [0/0] :ARCHIVE:
 ** fsharp [0/0] :ARCHIVE:
 ** fstar [0/0] :ARCHIVE:
@@ -1786,6 +1791,7 @@ Reference:
 + https://emacs-lsp.github.io/lsp-mode/page/adding-new-language/
 + https://github.com/aws-cloudformation/aws-cfn-lint-visual-studio-code/blob/master/package.json
 
+** zig [0/0] :ARCHIVE:
 * :email
 ** mu4e [0/1]
 *** TODO [#B] Set up mu4e with work email
@@ -1802,6 +1808,8 @@ loaded last*, before =:config= modules.
 #+end_quote
 
 ** calendar [0/0] :ARCHIVE:
+** emms [0/0] :ARCHIVE:
+** everywhere [0/0] :ARCHIVE:
 ** irc [0/1] :ARCHIVE:
 **** TODO [#C] Configure =circe= for Freenode and/or Libera.Chat
 This should probably be done in a separate gitignored file (=custom.el=) for
