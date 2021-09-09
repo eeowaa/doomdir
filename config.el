@@ -562,6 +562,11 @@ to `org-footnote-section'.  Inline definitions are ignored."
 
 (add-to-list 'auto-mode-alist '("pylint" . conf-mode))
 
+(dolist (re '("/.config/\\(shell\\|bash\\)/.+"
+              "\\.cygport\\'"))
+  (add-to-list 'auto-mode-alist
+               `(,re . shell-script-mode)))
+
 (after! lsp-yaml
   (let ((f lsp-yaml-schema-store-local-db))
     (unless (file-exists-p f)

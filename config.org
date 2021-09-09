@@ -1624,7 +1624,7 @@ More than a simple "Hello World":
 ** sceme [0/0] :ARCHIVE:
 ** sh [1/1]
 *** DONE [#C] Filename-mode associations
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
 (dolist (re '("/.config/\\(shell\\|bash\\)/.+"
               "\\.cygport\\'"))
   (add-to-list 'auto-mode-alist
