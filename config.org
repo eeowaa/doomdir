@@ -1805,7 +1805,13 @@ loaded last*, before =:config= modules.
 This should probably be done in a separate gitignored file (=custom.el=) for
 security's sake.
 
-** rss [0/0] :ARCHIVE:
+** rss [0/1]
+*** STRT [#A] Automatically update feed when opening =elfeed=
+#+BEGIN_SRC emacs-lisp :tangle yes
+(after! elfeed
+  (add-hook! 'elfeed-search-mode-hook #'elfeed-update))
+#+END_SRC
+
 ** twitter [0/0] :ARCHIVE:
 * :config
 #+begin_quote
@@ -2287,6 +2293,10 @@ We already have =C-r=, so might as well replace this mostly-useless keybinding.
 (setq calendar-latitude 35.0933
       calendar-longitude -98.2632
       calendar-location-name "Nowhere, OK")
+
+;; RSS feeds
+(setq elfeed-feeds
+      '("https://example.com/rss.xml"))
 
 ;;; Customize
 #+end_src

@@ -587,6 +587,9 @@ to `org-footnote-section'.  Inline definitions are ignored."
     :modes (yaml-mode))
     (add-to-list 'flycheck-checkers 'cfn-lint))
 
+(after! elfeed
+  (add-hook! 'elfeed-search-mode-hook #'elfeed-update))
+
 (after! smartparens
   (let* ((default-pairs (cdr (assoc t sp-pairs)))
          (default-openers (mapcar (lambda (pair) (plist-get pair :open))
