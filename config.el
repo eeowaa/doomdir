@@ -524,7 +524,12 @@ to `org-footnote-section'.  Inline definitions are ignored."
         org-edit-src-content-indentation 0))
 
 (after! org
-  (setq org-src-window-setup 'current-window))
+  (setq org-src-window-setup 'current-window)
+  (setq +popup--display-buffer-alist
+        (delq (assoc "^\\*Org Src" +popup--display-buffer-alist)
+              +popup--display-buffer-alist))
+  (when (bound-and-true-p +popup-mode)
+    (setq display-buffer-alist +popup--display-buffer-alist)))
 
 (setq org-ditaa-jar-path
       (cond (IS-MAC

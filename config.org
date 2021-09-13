@@ -1502,7 +1502,12 @@ annoying extra step.
 **** DONE [#B] Show edit buffer in the current window
 #+begin_src emacs-lisp :tangle yes
 (after! org
-  (setq org-src-window-setup 'current-window))
+  (setq org-src-window-setup 'current-window)
+  (setq +popup--display-buffer-alist
+        (delq (assoc "^\\*Org Src" +popup--display-buffer-alist)
+              +popup--display-buffer-alist))
+  (when (bound-and-true-p +popup-mode)
+    (setq display-buffer-alist +popup--display-buffer-alist)))
 #+end_src
 
 *** Miscellaneous [0/1]
