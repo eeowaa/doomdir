@@ -22,6 +22,13 @@
 ;; Weather
 (package! noaa)
 
+;; Slack
+(package! slack
+  ;; This is a fork of yuya373/emacs-slack that fixes xoxc tokens
+  :recipe (:host github
+           :repo "aculich/emacs-slack"
+           :branch "cookie"))
+
 ;; To install a package directly from a remote git repo, you must specify a
 ;; `:recipe'. You'll find documentation on what `:recipe' accepts here:
 ;; https://github.com/raxod502/straight.el#the-recipe-format

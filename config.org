@@ -2259,6 +2259,48 @@ buffer in current window."
 (setq extended-command-suggest-shorter nil)
 #+end_src
 
+** app
+*** STRT [#C] Configure Slack
+Need to test this setup.
+
+#+begin_src emacs-lisp :tangle yes
+(use-package! slack
+  :commands (slack-start)
+  :init
+  (setq slack-buffer-emojify t
+        slack-prefer-current-team t)
+  :config
+  ;; Keybindings recommended by the emacs-slack maintainers
+  (evil-define-key 'normal slack-info-mode-map
+    ",u" 'slack-room-update-messages)
+  (evil-define-key 'normal slack-mode-map
+    ",c" 'slack-buffer-kill
+    ",ra" 'slack-message-add-reaction
+    ",rr" 'slack-message-remove-reaction
+    ",rs" 'slack-message-show-reaction-users
+    ",pl" 'slack-room-pins-list
+    ",pa" 'slack-message-pins-add
+    ",pr" 'slack-message-pins-remove
+    ",mm" 'slack-message-write-another-buffer
+    ",me" 'slack-message-edit
+    ",md" 'slack-message-delete
+    ",u" 'slack-room-update-messages
+    ",2" 'slack-message-embed-mention
+    ",3" 'slack-message-embed-channel
+    "\C-n" 'slack-buffer-goto-next-message
+    "\C-p" 'slack-buffer-goto-prev-message)
+   (evil-define-key 'normal slack-edit-message-mode-map
+    ",k" 'slack-message-cancel-edit
+    ",s" 'slack-message-send-from-buffer
+    ",2" 'slack-message-embed-mention
+    ",3" 'slack-message-embed-channel))
+
+(use-package! alert
+  :commands (alert)
+  :init
+  (setq alert-default-style 'notifier))
+#+end_src
+
 ** config
 *** STRT [#B] Remove =straight= package repos from =projectile=
 Unfortunately, the =~/.config/emacs/.local/straight/repos/*= are creeping back
@@ -2302,6 +2344,37 @@ We already have =C-r=, so might as well replace this mostly-useless keybinding.
 ;; RSS feeds
 (setq elfeed-feeds
       '("https://example.com/rss.xml"))
+
+;; Slack (corresponds to entry in macOS keychain):
+(after! slack
+  ;; Corresponds to macOS keychain entries created with the following commands:
+  ;;
+  ;;   security add-internet-password \
+  ;;     -s 'myteam.slack.com' \
+  ;;     -p 'myteam.slack.com' \
+  ;;     -a 'johndoe@example.com' \
+  ;;     -w '<password>' \
+  ;;     "$HOME/Library/Keychains/login.keychain-db"
+  ;;
+  ;;   security add-internet-password \
+  ;;     -s 'myteam.slack.com' \
+  ;;     -p 'myteam.slack.com' \
+  ;;     -a 'johndoe@example.com^cookie' \
+  ;;     -w '<cookie>' \
+  ;;     "$HOME/Library/Keychains/login.keychain-db"
+  ;;
+  ;; See <https://github.com/aculich/emacs-slack/tree/cookie#how-to-get-token-and-cookie>
+  ;; for how to get the password and cookie.
+  (slack-register-team
+   :name "myteam"
+   :default t
+   :token (auth-source-pick-first-password
+           :host "myteam.slack.com"
+           :user "johndoe@example.com")
+   :cookie (auth-source-pick-first-password
+           :host "myteam.slack.com"
+           :user "johndoe@example.com^cookie")
+   :subscribed-channels '((channel1 channel2)))
 
 ;;; Customize
 #+end_src
