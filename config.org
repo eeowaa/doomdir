@@ -26,8 +26,21 @@ option, hook, etc. that you want to configure.
 
 * :input
 ** chinese [0/0] :ARCHIVE:
+#+begin_quote
+This module adds support for traditional Chinese script by introducing two input
+methods: Pinyin and Wubi.
+#+end_quote
+
 ** japanese [0/0] :ARCHIVE:
+#+begin_quote
+This module adds support for Japanese script.
+#+end_quote
+
 ** layout [0/0] :ARCHIVE:
+#+begin_quote
+This module provides barebones support for using Doom with non-qwerty layouts.
+#+end_quote
+
 * :completion
 #+begin_quote
 Modules that provide new interfaces or frameworks for completion, including code
@@ -35,6 +48,11 @@ completion.
 #+end_quote
 
 ** company [1/1]
+#+begin_quote
+This module provides code completion, powered by [[https://github.com/company-mode/company-mode][company-mode]]. It is required
+for code completion in many of Doom's :lang modules.
+#+end_quote
+
 *** DONE [#B] Never start completion automatically (require =C-SPC=)
 #+begin_src emacs-lisp :tangle yes
 (setq company-idle-delay nil)
@@ -52,14 +70,29 @@ on its own.
 #+end_quote
 
 ** helm [0/0] :ARCHIVE:
+#+begin_quote
+This module provides Helm integration for a variety of Emacs commands, as well as
+a unified interface for project search and replace, powered by ripgrep.
+#+end_quote
+
 ** ido [0/0] :ARCHIVE:
 ** ivy [1/1]
+#+begin_quote
+This module provides Ivy integration for a variety of Emacs commands, as well as
+a unified interface for project search and replace, powered by [[https://github.com/BurntSushi/ripgrep/][ripgrep]].
+#+end_quote
+
 *** DONE [#A] Make it easier to jump to headlines across Org buffers
 #+begin_src emacs-lisp :tangle yes
 (setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
 #+end_src
 
 ** vertico [0/1] :ARCHIVE:
+#+begin_quote
+This module enhances the Emacs search and completion experience, and also
+provides a united interface for project search and replace, powered by [[https://github.com/BurntSushi/ripgrep/][ripgrep]].
+#+end_quote
+
 *** TODO Replace =ivy= with =vertico=
 * :ui
 #+begin_quote
@@ -67,7 +100,17 @@ Aesthetic modules that affect the Emacs interface or user experience.
 #+end_quote
 
 ** deft [0/0] :ARCHIVE:
+#+begin_quote
+[[https://jblevins.org/projects/deft/][Deft]] is a major mode for browsing and filtering notes written in plain text
+formats, such as org-mode, markdown, and LaTeX.
+#+end_quote
+
 ** doom [3/3]
+#+begin_quote
+This module gives Doom its signature look: powered by the =doom-one= theme
+(inspired by Atom's One Dark theme) and =solaire-mode=.
+#+end_quote
+
 *** DONE [#A] Never hide the modeline
 Without a modeline, the only way to see a clear distinction between the bottom
 of a window without a modeline and the top of another window is by using certain
@@ -141,12 +184,31 @@ satisfy the 3rd requirement, so I made a patched copy of the theme called
 #+end_src
 
 ** doom-dashboard [0/0] :ARCHIVE:
+#+begin_quote
+This module adds a minimalistic, Atom-inspired dashboard to Emacs.
+#+end_quote
+
 ** doom-quit [0/0] :ARCHIVE:
+#+begin_quote
+A silly module that prompts you with messages when you try to quit, like DOOM
+did. Some quotes are from Doom's quit-message list. Others are random, nerdy
+references that no decent human being has any business recognising.
+#+end_quote
+
 ** emoji [1/1]
+#+begin_quote
+Displays and inserts emojis (ASCII, Github style, unicode).
+#+end_quote
+
 *** DONE [#C] Enable emojis (just for =SPC i e=)
 This is done in =doom/init.el=.
 
-** hl-todo [1/1]
+** hl-todo [1/2]
+#+begin_quote
+This module adds syntax highlighting for TODO/FIXME/NOTE tags in programming
+major-modes.
+#+end_quote
+
 *** DONE [#B] Add a couple different tags to highlight in programming major-modes
 #+begin_src emacs-lisp :tangle yes
 (after! hl-todo
@@ -157,6 +219,11 @@ This is done in =doom/init.el=.
 #+end_src
 
 ** hydra [1/2]
+#+begin_quote
+This module adds hydra to Doom Emacs, as well as a few custom built hydras to
+start with.
+#+end_quote
+
 *** STRT [#B] Add a hydra for table.el
 #+BEGIN_SRC emacs-lisp :tangle yes
 (global-set-key (kbd "C-c t") 'hydra-table/body)
@@ -347,22 +414,59 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 
 ** indent-guides [0/0] :ARCHIVE:
 ** ligatures [1/1]
+#+begin_quote
+This module enables ligatures and arbitrary symbol substitutions with
+~mac-auto-operator-composition-mode~ (on supported macOS systems) or composition
+tables (harfbuzz on Emacs 28), falling back on ~prettify-symbols-mode~
+otherwise.
+#+end_quote
+
 *** DONE [#C] Only enable extra ligatures in Org mode (for now)
 #+begin_src emacs-lisp :tangle yes
 (setq +ligatures-extras-in-modes '(org-mode))
 #+end_src
 
 ** minimap [0/0]
+#+begin_quote
+This module adds a minimap to the right side of Emacs, similar to the feature
+found in many other editors.
+#+end_quote
+
 ** modeline [1/1]
+#+begin_quote
+This module provides an Atom-inspired, minimalistic modeline for Doom Emacs,
+powered by [[https://github.com/seagle0128/doom-modeline][the doom-modeline package]] (where you can find screenshots).
+#+end_quote
+
 *** DONE [#C] Use 1-based column numbering in modeline
 #+begin_src emacs-lisp :tangle yes
 (setq column-number-indicator-zero-based nil)
 #+end_src
 
 ** nav-flash [0/0] :ARCHIVE:
+#+begin_quote
+This module flashes the line around the cursor after any significant motion, to
+make it easy to follow after big operations.
+#+end_quote
+
 ** neotree [0/0] :ARCHIVE:
+#+begin_quote
+This module brings a side panel for browsing project files, inspired by vim's
+NERDTree.
+#+end_quote
+
 ** ophints [0/0]
+#+begin_quote
+This module provides op-hints (operation hinting), i.e. visual feedback for
+certain operations. It highlights regions of text that the last operation (like
+yank) acted on.
+#+end_quote
+
 ** popup [5/7]
+#+begin_quote
+This module provides a customizable popup window management system.
+#+end_quote
+
 *** DONE [#B] Add a terminal-friendly keybinding for ~+popup/raise~
 I've defined a global keybinding for this:
 #+begin_src emacs-lisp :tangle yes
@@ -452,7 +556,19 @@ automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
 *** TODO [#B] Configure WoMan for AWS CLI man pages
 *** TODO [#C] Modify popup behavior for Customize buffers
 ** tabs [0/0] :ARCHIVE:
+#+begin_quote
+This module adds an Atom-esque tab bar to the Emacs UI.
+#+end_quote
+
 ** treemacs [3/4]
+#+begin_quote
+[[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
+but largely inspired by the Project Explorer in Eclipse. It shows the file
+system outlines of your projects in a simple tree layout allowing quick
+navigation and exploration, while also possessing basic file management
+utilities.
+#+end_quote
+
 *** DONE [#B] Fix ace-window keybindings :hack:
 This slows down startup a bit, but whatever (I'm not obsessed with startup):
 #+begin_src emacs-lisp :tangle yes
@@ -490,13 +606,28 @@ not work in the lisp functions.
 https://github.com/hlissner/emacs-doom-themes/issues/489
 
 ** unicode [0/0] :ARCHIVE:
+#+begin_quote
+This module extends Doom's ability to display non-English unicode. It is
+primarily useful for non-English Emacs users, for whom Doom's built-in unicode
+support in insufficient.
+#+end_quote
+
 ** vc-gutter [0/1]
 *** TODO [#B] Enable toggling of vcs diff in the fringe
 Unfortunately, when the =vc-gutter= module is enabled, I have found no way to
 persistently disable =git-gutter= in a buffer.
 
 ** vi-tilde-fringe [0/0]
+#+begin_quote
+Displays a tilde(~) in the left fringe to indicate an empty line, similar to Vi.
+#+end_quote
+
 ** window-select [0/1]
+#+begin_quote
+This module provides several methods for selecting windows without the use of
+the mouse or spatial navigation (e.g. =C-w {h,j,k,l}=).
+#+end_quote
+
 *** TODO [#C] Add an =ace-window= keybinding to close windows
 Currently, I can use =C-w C-w e <window> C-w c= to close a window, but the
 cursor may switch to another window after this operation. I would rather create
@@ -504,6 +635,11 @@ a keybinding like =C-w C-w x <window>= that closes the window that I select
 /without/ moving the cursor.
 
 ** workspaces [1/1]
+#+begin_quote
+This module adds support for workspaces, powered by persp_mode, as well as a API
+for manipulating them.
+#+end_quote
+
 *** KILL Uniquify buffer names using file paths
 This is done by setting the ~uniquify-buffer-name-style~ variable to ~forward~,
 which Doom does by default in =core/core-ui.el=. However, when the =workspaces=
@@ -513,12 +649,23 @@ buffer names, as it breaks =persp-mode= (what powers the =workspaces= module).
 Visit the source code of ~+workspaces-init-persp-mode-h~ for more detail.
 
 ** zen [0/0]
+#+begin_quote
+This module provides two minor modes that make Emacs into a more comfortable
+writing or coding environment. Folks familiar with "distraction-free" or "zen"
+modes from other editors -- or [[https://github.com/rnkn/olivetti][olivetti]], [[https://github.com/zk-phi/sublimity][sublimity]], and [[https://github.com/IdoMagal/Tabula-Rasa][tabula-rasa]] (Emacs
+plugins) -- will feel right at home.
+#+end_quote
+
 * :editor
 #+begin_quote
 Modules that affect and augment your ability to manipulate or insert text.
 #+end_quote
 
 ** evil [2/3]
+#+begin_quote
+This holy module brings the vim experience to Emacs.
+#+end_quote
+
 *** DONE [#A] Fix ~evil-visual-block~ in =org= buffers
 Oddly, this is a problem I've only encountered in =org= buffers, but when I use
 =C-v= in ~normal~ state (/not/ =C-x SPC= in ~emacs~ state) the visual block
@@ -570,14 +717,20 @@ $0
 #+end_src
 
 ** fold [0/2]
-I do not know exactly how Doom implements folding, but I know that Emacs has a
-lot of different packages available for folding, for example:
+#+begin_quote
+This module marries hideshow, vimish-fold and outline-minor-mode to bring you
+marker, indent and syntax-based code folding for as many languages as possible.
+#+end_quote
+
+Emacs has a lot of different packages available for folding, for example:
 
 + =hideshow=
 + =yafolding=
 + =origami=
 + =outline-minor-mode=
 + =vimish-fold=
+
+I'm not convinced that Doom utilizes Emacs folding to its full potential.
 
 *** Vim help text for folding :noexport:
 This only contains the relevant commands and nothing Vim-internal.
@@ -716,23 +869,64 @@ your annoyance:
 My mind can't even comprehend how broken this is.
 
 ** format [0/0] :ARCHIVE:
+#+begin_quote
+This module integrates code formatters into Emacs.
+#+end_quote
+
 ** god [0/0] :ARCHIVE:
 ** lispy [0/0] :ARCHIVE:
+#+begin_quote
+This module adds [[https://github.com/noctuid/lispyville][lispy]] key functionality in Lisp languages.
+#+end_quote
+
 ** multiple-cursors [0/0] :ARCHIVE:
 ** objed [0/0] :ARCHIVE:
+#+begin_quote
+This modules adds [[https://github.com/clemera/objed][objed]], a global minor-mode for navigating and manipulating
+text objects. It combines the ideas of versor-mode and other editors like Vim or
+Kakoune and tries to align them with regular Emacs conventions.
+#+end_quote
+
 ** parinfer [0/0] :ARCHIVE:
+#+begin_quote
+Parinfer is a proof-of-concept editor mode for Lisp programming languages. It
+will infer some changes to keep Parens and Indentation inline with one another.
+#+end_quote
+
 ** rotate-text [0/0] :ARCHIVE:
 ** snippets [0/0]
+#+begin_quote
+This module adds snippets to Emacs, powered by yasnippet.
+#+end_quote
+
 ** word-wrap [0/0]
+#+begin_quote
+This module adds a minor-mode ~+word-wrap-mode~, which intelligently wraps long
+lines in the buffer without modifying the buffer content.
+#+end_quote
+
 * :emacs
 #+begin_quote
 Modules that reconfigure or augment packages or features built into Emacs.
 #+end_quote
 
 ** dired [0/0]
+#+begin_quote
+This module provides configuration for dired.
+#+end_quote
+
 ** electric [0/0]
 ** ibuffer [0/0]
+#+begin_quote
+This module augments ibuffer.
+#+end_quote
+
 ** undo [0/1]
+#+begin_quote
+This module augments Emacs' built-in undo system to be more intuitive and to
+persist across Emacs sessions.
+#+end_quote
+
 *** STRT [#A] Enable ~undo-tree~
 Sometimes this doesn't seem to work.
 
@@ -745,6 +939,11 @@ Sometimes this doesn't seem to work.
 #+end_src
 
 ** vc [1/1]
+#+begin_quote
+This module augments Emacs builtin version control support and provides better
+integration with git.
+#+end_quote
+
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
 (add-to-list 'auto-mode-alist '("/git/config\\.d/.+" . gitconfig-mode))
@@ -759,6 +958,10 @@ Modules that offer terminal emulation.
 #+end_quote
 
 ** eshell [3/6]
+#+begin_quote
+This module provides additional features for the built-in [[https://www.gnu.org/software/emacs/manual/html_mono/eshell.html][Emacs Shell]].
+#+end_quote
+
 *** DONE [#B] Define aliases
 #+begin_src emacs-lisp :tangle yes
 (set-eshell-alias!
@@ -829,6 +1032,11 @@ tput: unknown terminal "eterm-color"
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
 ** vterm [2/3]
+#+begin_quote
+This module provides a terminal emulator powered by libvterm. It is still in
+alpha and requires a component be compiled (=vterm-module.so=).
+#+end_quote
+
 *** DONE [#B] Export ~$EDITOR~ to =vterm=
 #+begin_src emacs-lisp :tangle yes
 (add-hook! vterm-mode #'with-editor-export-editor)
@@ -871,6 +1079,10 @@ GUI Emacs, not terminal Emacs*.
 #+end_src
 
 ** spell [2/3]
+#+begin_quote
+This modules provides spellchecking powered by =aspell=, =hunspell= or =enchant=.
+#+end_quote
+
 *** DONE [#A] Prevent ~spell-fu-mode~ from being enabled by default
 I like having the option, but I would prefer to enable it manually per buffer.
 
@@ -964,6 +1176,11 @@ spelling error by the =spell= module but is a completion for "flu" (just type
 =C-SPC= in Evil insert state with the cursor positioned after the "u" in "flu").
 
 ** grammar [0/0] :ARCHIVE:
+#+begin_quote
+This module adds grammar checking to Emacs to aid your writing by combining
+=lang-tool= and =writegood-mode=.
+#+end_quote
+
 * :tools
 #+begin_quote
 Small modules that give Emacs access to external tools & services.
@@ -992,10 +1209,29 @@ disable =debugger= for the time being (it's not super-important for me right
 now, anyway).
 
 ** direnv [0/1] :ARCHIVE:
+#+begin_quote
+This module integrates direnv into Emacs.
+#+end_quote
+
 *** TODO [#A] See why =direnv= prevents environment variables from propagating between buffers
 ** docker [0/0]
+#+begin_quote
+This module allows you to manipulate Docker images, containers & more from
+Emacs.
+#+end_quote
+
 ** editorconfig [0/0]
+#+begin_quote
+This module integrates [[https://editorconfig.org/][EditorConfig]] into Emacs, allowing users to dictate code
+style on a per-project basis with an =.editorconfig= file ([[https://editorconfig-specification.readthedocs.io/][formal
+specification]]).
+#+end_quote
+
 ** ein [0/0]
+#+begin_quote
+Adds Jupyter notebook integration into emacs.
+#+end_quote
+
 ** evay [0/0]
 ** gist [0/0] :ARCHIVE:
 ** lookup [0/1]
@@ -1064,44 +1300,148 @@ Modules that bring support for a language or group of languages to Emacs.
 #+end_quote
 
 ** agda [0/0] :ARCHIVE:
+#+begin_quote
+This module adds support for the [[http://wiki.portal.chalmers.se/agda/pmwiki.php][agda]] programming language. The Emacs support
+exists directly in the agda repository but not in melpa.
+#+end_quote
+
 ** beancount [0/0] :ARCHIVE:
+#+begin_quote
+This module adds support for [[https://beancount.github.io/][Beancount]] to Emacs. Beancount, like ledger, lets
+you [[https://plaintextaccounting.org/][manage your money in plain text]].
+#+end_quote
+
 ** cc [0/0]
+#+begin_quote
+This module adds support for the C-family of languages: C, C++, and Objective-C.
+#+end_quote
+
 ** clojure [0/0] :ARCHIVE:
+#+begin_quote
+This module adds support for the Clojure(Script) language.
+#+end_quote
+
 ** common-lisp [0/0] :ARCHIVE:
 ** coq [0/0] :ARCHIVE:
+#+begin_quote
+This module adds [[https://coq.inria.fr][coq]] support, powered by [[https://proofgeneral.github.io][Proof General]].
+#+end_quote
+
 ** crystal [0/0] :ARCHIVE:
+#+begin_quote
+This modules adds [[https://crystal-lang.org/][crystal]] support.
+#+end_quote
+
 ** csharp [0/0] :ARCHIVE:
+#+begin_quote
+This module adds C# support to Emacs. Powered by omnisharp (directly or through
+LSP).
+#+end_quote
+
 ** data [0/0]
 ** dart [0/0] :ARCHIVE:
+#+begin_quote
+[[https://dart.dev/][Dart]] is a client-optimized language by Google for fast apps on any platform.
+It is fast and optimized for UI, famous for the [[https://flutter.io/][Flutter]] framework, also
+made by Google. Both Flutter and Dart are free and open-source.
+#+end_quote
+
 ** dhall [0/0] :ARCHIVE:
 ** elixer [0/0] :ARCHIVE:
+#+begin_quote
+This module provides support for [[https://elixir-lang.org/][Elixir programming language]] via [[https://github.com/tonini/alchemist.el][alchemist.el]]
+or [[https://github.com/elixir-lsp/elixir-ls/][elixir-ls]].
+#+end_quote
+
 ** elm [0/0] :ARCHIVE:
 ** emacs-lisp [1/1]
+#+begin_quote
+This module extends support for Emacs Lisp in Doom Emacs.
+#+end_quote
+
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
 (add-to-list 'auto-mode-alist '("Cask\\'" . lisp-data-mode))
 #+end_src
 
 ** erlang [0/0] :ARCHIVE:
+#+begin_quote
+This module provides support [[https://www.erlang.org/][Erlang programming language]]. Support for the
+[[https://github.com/erlang/sourcer][sourcer]] language server is optional.
+#+end_quote
+
 ** ess [0/0] :ARCHIVE:
+#+begin_quote
+This module adds support for various statistics languages, including R, S-Plus,
+SAS, Julia and Stata.
+#+end_quote
+
 ** factor [0/0] :ARCHIVE:
+#+begin_quote
+This module adds support to the [[https://github.com/factor/factor][factor]] programming language and its associated
+_fuel_ emacs plugin.
+#+end_quote
+
 ** faust [0/0] :ARCHIVE:
+#+begin_quote
+Add support to Faust language inside emacs.
+#+end_quote
+
 ** fsharp [0/0] :ARCHIVE:
+#+begin_quote
+This module adds [[https://fsharp.org/][F#]] support.
+#+end_quote
+
 ** fstar [0/0] :ARCHIVE:
+#+begin_quote
+This module adds [[https://fstar-lang.org/][F*]] support, powered by [[https://github.com/FStarLang/fstar-mode.el][fstar-mode.el]].
+#+end_quote
+
 ** gdscript [0/0] :ARCHIVE:
+#+begin_quote
+This module adds support for GDScript, the scripting language of the [[http://godotengine.org/][Godot]] game
+engine, to Doom Emacs, powered by [[https://github.com/GDQuest/emacs-gdscript-mode][gdscript-mode]].
+#+end_quote
+
 ** go [0/0]
+#+begin_quote
+This module adds [[https://golang.org][Go]] support, with optional (but recommended) LSP support via
+[[https://github.com/golang/tools/blob/master/gopls/README.md][gopls]].
+#+end_quote
+
 ** haskell [0/0] :ARCHIVE:
+#+begin_quote
+This module adds [[https://www.haskell.org/][Haskell]] support, powered by either [[https://github.com/jyp/dante][dante]] (the default) or LSP
+(haskell-language-server or ghcide).
+#+end_quote
+
 ** hy [0/0] :ARCHIVE:
 ** idris [0/0] :ARCHIVE:
+#+begin_quote
+This module adds rudimentary Idris support.
+#+end_quote
+
 ** json [0/0]
+#+begin_quote
+This module provides JSON support.
+#+end_quote
+
 ** java [0/0] :ARCHIVE:
+#+begin_quote
+This module adds [[https://www.java.com][java]] support to Doom Emacs, including =android-mode= and
+=groovy-mode=.
+#+end_quote
+
 ** javascript [1/2]
 :PROPERTIES:
 :CATEGORY: doom/ts
 :END:
-The =lang/javascript= module is what powers TypeScript development. Currently, I
-am only using TypeScript -- not vanilla JavaScript -- so the ~:CATEGORY:~
-property for this subtree is set to ~doom/ts~.
+#+begin_quote
+This module adds JavaScript and TypeScript support.
+#+end_quote
+
+Currently, I am only using TypeScript -- not vanilla JavaScript -- so the
+~:CATEGORY:~ property for this subtree is set to ~doom/ts~.
 
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
@@ -1113,16 +1453,40 @@ property for this subtree is set to ~doom/ts~.
 + Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
 
 ** julia [0/0] :ARCHIVE:
+#+begin_quote
+This module adds support for [[https://julialang.org/][the Julia language]] to Doom Emacs.
+#+end_quote
+
 ** kotlin [0/0] :ARCHIVE:
+#+begin_quote
+This module adds Kotlin support to Emacs.
+#+end_quote
+
 ** latex [0/0]
+#+begin_quote
+Provide a helping hand when working with LaTeX documents.
+#+end_quote
+
 ** lean [0/0] :ARCHIVE:
-** factor [0/0] :ARCHIVE:
 ** ledger [0/0] :ARCHIVE:
+#+begin_quote
+This module adds support for [[https://www.ledger-cli.org/][ledger]] files. Ledger is a command line double-entry
+accounting system that works with simple text files holding transactions.
+#+end_quote
+
 ** lua [0/0] :ARCHIVE:
+#+begin_quote
+Adds Lua support to Doom Emacs
+#+end_quote
+
 ** markdown [3/4]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
+#+begin_quote
+This module provides Markdown support for Emacs.
+#+end_quote
+
 *** DONE [#B] Improve Markdown readability
 + https://emacs.stackexchange.com/questions/3753/prettify-symbols-mode-character-replacement-regex
 
@@ -1166,13 +1530,31 @@ preview Markdown rendering in the system browser.
 + Open link: [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][;;; Markup Hiding]]
 
 ** nim [0/0] :ARCHIVE:
+#+begin_quote
+This module adds [[https://nim-lang.org][Nim]] support to Emacs.
+#+end_quote
+
 ** nix [0/0] :ARCHIVE:
+#+begin_quote
+Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Doom users.
+#+end_quote
+
 ** ocaml [0/0] :ARCHIVE:
+#+begin_quote
+This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
+#+end_quote
+
 ** org [13/29]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
 :END:
+#+begin_quote
+This module adds org-mode support to Doom Emacs, along with a number of
+adjustments, extensions and reasonable defaults to make it more performant and
+intuitive out of the box.
+#+end_quote
+
 *** Document Structure [1/3]
 **** DONE [#A] Do not indent headlines
 #+begin_src emacs-lisp :tangle yes
@@ -1621,12 +2003,20 @@ set to whatever command-line options(s) should be passed to
 #+end_src
 
 ** php [0/0] :ARCHIVE:
+#+begin_quote
+This module adds support for PHP 5.3+ (including PHP7).
+#+end_quote
+
 ** plantuml [0/0] :ARCHIVE:
 ** purescript [0/0] :ARCHIVE:
 ** python [3/4]
 :PROPERTIES:
 :CATEGORY: doom/python
 :END:
+#+begin_quote
+Adds Python support to Doom Emacs.
+#+end_quote
+
 *** DONE [#A] Develop and run a simple "Hello World" program
 More than a simple "Hello World":
 + [[file:~/src/life/secret-santa/][Secret Santa project]]
@@ -1648,15 +2038,53 @@ More than a simple "Hello World":
 + Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
 
 ** qt [0/0] :ARCHIVE:
+#+begin_quote
+This module provides language functionality for [[https://qt.io][Qt]] specific files.
+#+end_quote
+
 ** racket [0/0] :ARCHIVE:
+#+begin_quote
+This module provides integration for [[https://github.com/greghendershott/racket-mode][racket-mode]].
+#+end_quote
+
 ** raku [0/0] :ARCHIVE:
+#+begin_quote
+This module adds a major mode and flycheck for Raku.
+#+end_quote
+
 ** rest [0/0]
+#+begin_quote
+This module adds [[https://en.wikipedia.org/wiki/Representational_state_transfer][REST]] support.
+#+end_quote
+
 ** rst [0/0]
 ** ruby [0/0] :ARCHIVE:
+#+begin_quote
+This module add Ruby and optional Ruby on Rails support to Emacs.
+#+end_quote
+
 ** rust [0/0] :ARCHIVE:
+#+begin_quote
+This module adds support for the Rust language and integration for its tools,
+e.g. ~cargo~.
+#+end_quote
+
 ** scala [0/0] :ARCHIVE:
+#+begin_quote
+This module adds [[https://www.scala-lang.org][scala]] and [[https://www.scala-sbt.org/][sbt]] support to Doom Emacs.
+#+end_quote
+
 ** sceme [0/0] :ARCHIVE:
+#+begin_quote
+This module provides an environment for hacking and having fun in scheme. It is
+powered by [[https://www.nongnu.org/geiser/geiser_1.html#introduction][geiser]].
+#+end_quote
+
 ** sh [1/1]
+#+begin_quote
+This module adds support for shell scripting languages.
+#+end_quote
+
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
 (dolist (re '("/.config/\\(shell\\|bash\\)/.+"
@@ -1666,7 +2094,15 @@ More than a simple "Hello World":
 #+end_src
 
 ** sml [0/0] :ARCHIVE:
+#+begin_quote
+This module has no description yet.
+#+end_quote
+
 ** solidity [0/0] :ARCHIVE:
+#+begin_quote
+This module adds [[https://github.com/ethereum/solidity][Solidity]] support through [[https://github.com/ethereum/emacs-solidity][solidity-mode]]
+#+end_quote
+
 ** swift [0/0] :ARCHIVE:
 ** terra [0/0] :ARCHIVE:
 ** web [0/0]
@@ -1674,6 +2110,10 @@ More than a simple "Hello World":
 :PROPERTIES:
 :CATEGORY: doom/yaml
 :END:
+#+begin_quote
+This module provides support for the [[https://yaml.org/][YAML file format]].
+#+end_quote
+
 *** DONE [#A] Set the YAML LSP server to RedHat's implementation
 + https://developers.redhat.com/blog/2017/10/18/yaml-language-server-extension-vs-code/
 
@@ -1816,13 +2256,27 @@ Reference:
 + https://github.com/aws-cloudformation/aws-cfn-lint-visual-studio-code/blob/master/package.json
 
 ** zig [0/0] :ARCHIVE:
+#+begin_quote
+This module adds [[https://ziglang.org/][Zig]] support, with optional (but recommended) LSP support via
+[[https://github.com/zigtools/zls][zls]].
+#+end_quote
+
 * :email
 ** mu4e [0/1]
+#+begin_quote
+
+This module makes Emacs an email client, using ~mu4e~.
+#+end_quote
+
 *** TODO [#B] Set up mu4e with work email
 This should probably be done in a separate gitignored file (=custom.el=) for
 security's sake.
 
 ** notmuch [0/0] :ARCHIVE:
+#+begin_quote
+This module turns Emacs into an email client using ~notmuch~.
+#+end_quote
+
 ** wanderlust [0/0] :ARCHIVE:
 * :app
 #+begin_quote
@@ -1832,14 +2286,36 @@ loaded last*, before =:config= modules.
 #+end_quote
 
 ** calendar [0/0] :ARCHIVE:
+#+begin_quote
+This module adds a calendar view for Emacs, with org and google calendar sync
+support.
+#+end_quote
+
 ** emms [0/0] :ARCHIVE:
+#+begin_quote
+This module enables Emacs to be used as a music player. It uses [[https://www.musicpd.org/][mpd]] as a backend
+server and [[https://musicpd.org/clients/mpc/][mpc]] to update your music database.
+#+end_quote
+
 ** everywhere [0/0] :ARCHIVE:
+#+begin_quote
+This module adds system-wide popup Emacs windows for quick edits.
+#+end_quote
+
 ** irc [0/1] :ARCHIVE:
+#+begin_quote
+This module turns Emacs into an IRC client, capable of OS notifications.
+#+end_quote
+
 **** TODO [#C] Configure =circe= for Freenode and/or Libera.Chat
 This should probably be done in a separate gitignored file (=custom.el=) for
 security's sake.
 
 ** rss [0/1]
+#+begin_quote
+Read RSS feeds in the comfort of DOOM (Emacs)
+#+end_quote
+
 *** STRT [#A] Automatically update feed when opening =elfeed=
 #+BEGIN_SRC emacs-lisp :tangle yes
 (after! elfeed
@@ -1847,13 +2323,175 @@ security's sake.
 #+END_SRC
 
 ** twitter [0/0] :ARCHIVE:
+#+begin_quote
+Enjoy twitter from emacs.
+#+end_quote
+
 * :config
 #+begin_quote
 Modules that configure Emacs one way or another, or focus on making it easier
 for you to customize it yourself. It is best to load these last.
 #+end_quote
 
+** literate [1/6]
+#+begin_quote
+This module enables support for a literate config.
+#+end_quote
+
+*** DONE [#A] Clear instead of deleting target file
+~org-babel-tangle~ deletes the existing target file before writing to it. This
+causes a problem when the target is a symlink, because the link is replaced with
+a normal file. The following code overrides ~org-babel-tangle~ by replacing
+~(delete-file file-name)~ with ~(with-temp-file file-name t)~, essentially
+clearing the target file instead of deleting it.
+
+#+begin_src emacs-lisp :tangle yes
+(after! org-babel
+  (defun my/org-babel-tangle (&optional arg target-file lang-re)
+    "Write code blocks to source-specific files.
+Extract the bodies of all source code blocks from the current
+file into their own source-specific files.
+With one universal prefix argument, only tangle the block at point.
+When two universal prefix arguments, only tangle blocks for the
+tangle file of the block at point.
+Optional argument TARGET-FILE can be used to specify a default
+export file for all source blocks.  Optional argument LANG-RE can
+be used to limit the exported source code blocks by languages
+matching a regular expression."
+    (interactive "P")
+    (run-hooks 'org-babel-pre-tangle-hook)
+    ;; Possibly Restrict the buffer to the current code block
+    (save-restriction
+      (save-excursion
+        (when (equal arg '(4))
+          (let ((head (org-babel-where-is-src-block-head)))
+            (if head
+                (goto-char head)
+              (user-error "Point is not in a source code block"))))
+        (let ((block-counter 0)
+              (org-babel-default-header-args
+               (if target-file
+                   (org-babel-merge-params org-babel-default-header-args
+                                           (list (cons :tangle target-file)))
+                 org-babel-default-header-args))
+              (tangle-file
+               (when (equal arg '(16))
+                 (or (cdr (assq :tangle (nth 2 (org-babel-get-src-block-info 'light))))
+                     (user-error "Point is not in a source code block"))))
+              path-collector)
+          (mapc ;; map over all languages
+           (lambda (by-lang)
+             (let* ((lang (car by-lang))
+                    (specs (cdr by-lang))
+                    (ext (or (cdr (assoc lang org-babel-tangle-lang-exts)) lang))
+                    (lang-f (org-src-get-lang-mode lang))
+                    she-banged)
+               (mapc
+                (lambda (spec)
+                  (let ((get-spec (lambda (name) (cdr (assoc name (nth 4 spec))))))
+                    (let* ((tangle (funcall get-spec :tangle))
+                           (she-bang (let ((sheb (funcall get-spec :shebang)))
+                                       (when (> (length sheb) 0) sheb)))
+                           (tangle-mode (funcall get-spec :tangle-mode))
+                           (base-name (cond
+                                       ((string= "yes" tangle)
+                                        (file-name-sans-extension
+                                         (nth 1 spec)))
+                                       ((string= "no" tangle) nil)
+                                       ((> (length tangle) 0) tangle)))
+                           (file-name (when base-name
+                                        ;; decide if we want to add ext to base-name
+                                        (if (and ext (string= "yes" tangle))
+                                            (concat base-name "." ext) base-name))))
+                      (when file-name
+                        ;; Possibly create the parent directories for file.
+                        (let ((m (funcall get-spec :mkdirp))
+                              (fnd (file-name-directory file-name)))
+                          (and m fnd (not (string= m "no"))
+                               (make-directory fnd 'parents)))
+                        ;; HACK Clear any old versions of file
+                        (and (file-exists-p file-name)
+                             (not (member file-name (mapcar #'car path-collector)))
+                             (with-temp-file file-name t)) ;; NOTE This is what changed
+                        ;; drop source-block to file
+                        (with-temp-buffer
+                          (when (fboundp lang-f) (ignore-errors (funcall lang-f)))
+                          (when (and she-bang (not (member file-name she-banged)))
+                            (insert (concat she-bang "\n"))
+                            (setq she-banged (cons file-name she-banged)))
+                          (org-babel-spec-to-string spec)
+                          ;; We avoid append-to-file as it does not work with tramp.
+                          (let ((content (buffer-string)))
+                            (with-temp-buffer
+                              (when (file-exists-p file-name)
+                                (insert-file-contents file-name))
+                              (goto-char (point-max))
+                              ;; Handle :padlines unless first line in file
+                              (unless (or (string= "no" (cdr (assq :padline (nth 4 spec))))
+                                          (= (point) (point-min)))
+                                (insert "\n"))
+                              (insert content)
+                              (write-region nil nil file-name))))
+                        ;; if files contain she-bangs, then make the executable
+                        (when she-bang
+                          (unless tangle-mode (setq tangle-mode #o755)))
+                        ;; update counter
+                        (setq block-counter (+ 1 block-counter))
+                        (unless (assoc file-name path-collector)
+                          (push (cons file-name tangle-mode) path-collector))))))
+                specs)))
+           (if (equal arg '(4))
+               (org-babel-tangle-single-block 1 t)
+             (org-babel-tangle-collect-blocks lang-re tangle-file)))
+          (message "Tangled %d code block%s from %s" block-counter
+                   (if (= block-counter 1) "" "s")
+                   (file-name-nondirectory
+                    (buffer-file-name
+                     (or (buffer-base-buffer) (current-buffer)))))
+          ;; run `org-babel-post-tangle-hook' in all tangled files
+          (when org-babel-post-tangle-hook
+            (mapc
+             (lambda (file)
+               (org-babel-with-temp-filebuffer file
+                 (run-hooks 'org-babel-post-tangle-hook)))
+             (mapcar #'car path-collector)))
+          ;; set permissions on tangled files
+          (mapc (lambda (pair)
+                  (when (cdr pair) (set-file-modes (car pair) (cdr pair))))
+                path-collector)
+          (mapcar #'car path-collector)))))
+  (advice-add 'org-babel-tangle :override #'my/org-babel-tangle))
+#+end_src
+
+*** TODO [#A] Tangle upon save
+Currently, I need to run =C-c C-v C-t= (~org-babel-tangle~) manually before
+=config.org= tangles to =config.el=, although according to the =literate= module
+documentation, this should be happening automatically upon save.
+
+*** TODO [#B] Tangle ~sh~ blocks to =prereqs.sh=
++ [[file:~/.config/emacs/modules/config/literate/README.org::*Change where src blocks are tangled or prevent it entirely][Change where src blocks are tangled or prevent it entirely]]
+
+This should not only be done for existing ~sh~ blocks, but for ~PREREQ~ lines in
+=init.el=. So really, I should create more ~sh~ blocks.
+
+*** TODO [#B] Tangle to =packages.el=
+I would like to make =packages.el= literate instead of "illiterate". 😉
+
+*** TODO [#C] Link tangled blocks back to source
+Refer to your old config.
+
+*** HOLD [#C] Split up my literate config into separate files
++ [[file:~/.config/emacs/modules/config/literate/README.org::*Modularizing your literate config with ~#+INCLUDE~ directives][Modularizing your literate config with ~#+INCLUDE~ directives]]
+
+Doing so might make tangling faster, but currently I don't have any problems
+with performance. If and when I start to notice a problem, I'll revisit this
+item.
+
 ** default [6/9]
+#+begin_quote
+This module provides a set of reasonable defaults.
+#+end_quote
+
 *** DONE [#A] Disable smartparens in the minibuffer, including the ~evil-ex~ prompt
 According to the documentation, each mode listed in ~sp-ignore-modes-list~ will
 have smartparens disabled when ~smartparens-global-mode~ is active. However,
@@ -2039,156 +2677,6 @@ I would still like to add additional toggle keybindings:
     (cl-pushnew `((,(format "\\`%s t SPC\\'" prefix-re)) nil . "Whitespace mode")
                 which-key-replacement-alist)))
 #+end_src
-
-** literate [1/6]
-*** DONE [#A] Clear instead of deleting target file
-~org-babel-tangle~ deletes the existing target file before writing to it. This
-causes a problem when the target is a symlink, because the link is replaced with
-a normal file. The following code overrides ~org-babel-tangle~ by replacing
-~(delete-file file-name)~ with ~(with-temp-file file-name t)~, essentially
-clearing the target file instead of deleting it.
-
-#+begin_src emacs-lisp :tangle yes
-(after! org-babel
-  (defun my/org-babel-tangle (&optional arg target-file lang-re)
-    "Write code blocks to source-specific files.
-Extract the bodies of all source code blocks from the current
-file into their own source-specific files.
-With one universal prefix argument, only tangle the block at point.
-When two universal prefix arguments, only tangle blocks for the
-tangle file of the block at point.
-Optional argument TARGET-FILE can be used to specify a default
-export file for all source blocks.  Optional argument LANG-RE can
-be used to limit the exported source code blocks by languages
-matching a regular expression."
-    (interactive "P")
-    (run-hooks 'org-babel-pre-tangle-hook)
-    ;; Possibly Restrict the buffer to the current code block
-    (save-restriction
-      (save-excursion
-        (when (equal arg '(4))
-          (let ((head (org-babel-where-is-src-block-head)))
-            (if head
-                (goto-char head)
-              (user-error "Point is not in a source code block"))))
-        (let ((block-counter 0)
-              (org-babel-default-header-args
-               (if target-file
-                   (org-babel-merge-params org-babel-default-header-args
-                                           (list (cons :tangle target-file)))
-                 org-babel-default-header-args))
-              (tangle-file
-               (when (equal arg '(16))
-                 (or (cdr (assq :tangle (nth 2 (org-babel-get-src-block-info 'light))))
-                     (user-error "Point is not in a source code block"))))
-              path-collector)
-          (mapc ;; map over all languages
-           (lambda (by-lang)
-             (let* ((lang (car by-lang))
-                    (specs (cdr by-lang))
-                    (ext (or (cdr (assoc lang org-babel-tangle-lang-exts)) lang))
-                    (lang-f (org-src-get-lang-mode lang))
-                    she-banged)
-               (mapc
-                (lambda (spec)
-                  (let ((get-spec (lambda (name) (cdr (assoc name (nth 4 spec))))))
-                    (let* ((tangle (funcall get-spec :tangle))
-                           (she-bang (let ((sheb (funcall get-spec :shebang)))
-                                       (when (> (length sheb) 0) sheb)))
-                           (tangle-mode (funcall get-spec :tangle-mode))
-                           (base-name (cond
-                                       ((string= "yes" tangle)
-                                        (file-name-sans-extension
-                                         (nth 1 spec)))
-                                       ((string= "no" tangle) nil)
-                                       ((> (length tangle) 0) tangle)))
-                           (file-name (when base-name
-                                        ;; decide if we want to add ext to base-name
-                                        (if (and ext (string= "yes" tangle))
-                                            (concat base-name "." ext) base-name))))
-                      (when file-name
-                        ;; Possibly create the parent directories for file.
-                        (let ((m (funcall get-spec :mkdirp))
-                              (fnd (file-name-directory file-name)))
-                          (and m fnd (not (string= m "no"))
-                               (make-directory fnd 'parents)))
-                        ;; HACK Clear any old versions of file
-                        (and (file-exists-p file-name)
-                             (not (member file-name (mapcar #'car path-collector)))
-                             (with-temp-file file-name t)) ;; NOTE This is what changed
-                        ;; drop source-block to file
-                        (with-temp-buffer
-                          (when (fboundp lang-f) (ignore-errors (funcall lang-f)))
-                          (when (and she-bang (not (member file-name she-banged)))
-                            (insert (concat she-bang "\n"))
-                            (setq she-banged (cons file-name she-banged)))
-                          (org-babel-spec-to-string spec)
-                          ;; We avoid append-to-file as it does not work with tramp.
-                          (let ((content (buffer-string)))
-                            (with-temp-buffer
-                              (when (file-exists-p file-name)
-                                (insert-file-contents file-name))
-                              (goto-char (point-max))
-                              ;; Handle :padlines unless first line in file
-                              (unless (or (string= "no" (cdr (assq :padline (nth 4 spec))))
-                                          (= (point) (point-min)))
-                                (insert "\n"))
-                              (insert content)
-                              (write-region nil nil file-name))))
-                        ;; if files contain she-bangs, then make the executable
-                        (when she-bang
-                          (unless tangle-mode (setq tangle-mode #o755)))
-                        ;; update counter
-                        (setq block-counter (+ 1 block-counter))
-                        (unless (assoc file-name path-collector)
-                          (push (cons file-name tangle-mode) path-collector))))))
-                specs)))
-           (if (equal arg '(4))
-               (org-babel-tangle-single-block 1 t)
-             (org-babel-tangle-collect-blocks lang-re tangle-file)))
-          (message "Tangled %d code block%s from %s" block-counter
-                   (if (= block-counter 1) "" "s")
-                   (file-name-nondirectory
-                    (buffer-file-name
-                     (or (buffer-base-buffer) (current-buffer)))))
-          ;; run `org-babel-post-tangle-hook' in all tangled files
-          (when org-babel-post-tangle-hook
-            (mapc
-             (lambda (file)
-               (org-babel-with-temp-filebuffer file
-                 (run-hooks 'org-babel-post-tangle-hook)))
-             (mapcar #'car path-collector)))
-          ;; set permissions on tangled files
-          (mapc (lambda (pair)
-                  (when (cdr pair) (set-file-modes (car pair) (cdr pair))))
-                path-collector)
-          (mapcar #'car path-collector)))))
-  (advice-add 'org-babel-tangle :override #'my/org-babel-tangle))
-#+end_src
-
-*** TODO [#A] Tangle upon save
-Currently, I need to run =C-c C-v C-t= (~org-babel-tangle~) manually before
-=config.org= tangles to =config.el=, although according to the =literate= module
-documentation, this should be happening automatically upon save.
-
-*** TODO [#B] Tangle ~sh~ blocks to =prereqs.sh=
-+ [[file:~/.config/emacs/modules/config/literate/README.org::*Change where src blocks are tangled or prevent it entirely][Change where src blocks are tangled or prevent it entirely]]
-
-This should not only be done for existing ~sh~ blocks, but for ~PREREQ~ lines in
-=init.el=. So really, I should create more ~sh~ blocks.
-
-*** TODO [#B] Tangle to =packages.el=
-I would like to make =packages.el= literate instead of "illiterate". 😉
-
-*** TODO [#C] Link tangled blocks back to source
-Refer to your old config.
-
-*** HOLD [#C] Split up my literate config into separate files
-+ [[file:~/.config/emacs/modules/config/literate/README.org::*Modularizing your literate config with ~#+INCLUDE~ directives][Modularizing your literate config with ~#+INCLUDE~ directives]]
-
-Doing so might make tangling faster, but currently I don't have any problems
-with performance. If and when I start to notice a problem, I'll revisit this
-item.
 
 * Miscellany
 :PROPERTIES:
