@@ -110,7 +110,7 @@
        ;; PREREQ brew install editorconfig
        editorconfig      ; let someone else argue about tabs vs spaces
        ;; PREREQ brew install python
-       ;; PREREQ pip install jupyter
+       ;; PREREQ pipx install --include-deps jupyter
        ein               ; tame Jupyter notebooks with emacs
        (eval +overlay)     ; run code, run (also, repls)
        ;;gist              ; interacting with github gists
@@ -210,7 +210,13 @@
        ;;plantuml          ; diagrams for confusing people more
        ;;purescript        ; javascript, but functional
        ;; PREREQ brew install python
-       ;; PREREQ pip install pylint flake8 pytest nose pyflakes isort ipython jupyter
+       ;; PREREQ pipx install pylint
+       ;; PREREQ pipx install flake8
+       ;; PREREQ pipx install pytest
+       ;; PREREQ pipx install nose
+       ;; PREREQ pipx install pyflakes
+       ;; PREREQ pipx install isort
+       ;; PREREQ pipx install --include-deps jupyter
        ;; PREREQ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
        ;; PREREQ npm install -g pyright
        (python +lsp +pyright)
