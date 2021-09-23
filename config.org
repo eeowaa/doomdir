@@ -738,8 +738,33 @@ Options to look at:
 + ~evil-collection-helpful-maps~
 + ~helpful-mode-map~
 
-** file-templates [1/1]
-*** DONE [#B] Simplify the file template for =sh-mode=
+** file-templates [0/2]
+#+begin_quote
+This module adds file templates for blank files, powered by yasnippet.
+#+end_quote
+
+*** STRT [#A] Figure out how to override existing templates
+The function ~+file-templates-check-h~ determines if the current buffer is a
+candidate for file template expansion, so its source code is probably the best
+place to determine how this works.
+
+Digging deeper, it looks like the following form in ~+file-templates-check-h~ is
+what actually determines which, if any, template applies to the current buffer:
+
+#+begin_src emacs-lisp :tangle no
+(when-let (rule (cl-find-if #'+file-template-p +file-templates-alist))
+  (apply #'+file-templates--expand rule))
+#+end_src
+
+For a buffer visiting a file named =foo.sh=, the ~rule~ symbol in the ~when-let~
+form in the above code block would be assigned the value ~(sh-mode)~, a member
+of ~+file-templates-alist~.
+
+Now the important thing is how ~+file-templates--expand~ actually works.
+*Potentially-important note*: ~yas_snippets-dirs~ contains ~+snippets-dir~, which
+evaluates to =$DOOMDIR/snippets/=.
+
+*** STRT [#B] Simplify the file template for =sh-mode=
 Doom Emacs' builtin file template for =sh-mode= is not suitable for portable
 shell scripts:
 
@@ -751,12 +776,17 @@ $0
 #+end_src
 
 I just created a new file template as follows and stored it in
-=$DOOMDIR/templates/sh-mode/__=, which means that it automatically gets picked
-up by new =sh-mode= buffers:
-
+=$DOOMDIR/snippets/sh-mode/__=,
 #+begin_src snippet :tangle no
 #!/bin/sh
 $0
+#+end_src
+
+From https://tecosaur.github.io/emacs-config/config.html#file-templates:
+#+begin_src emacs-lisp :tangle no
+(set-file-template! "\\.tex$" :trigger "__" :mode 'latex-mode)
+(set-file-template! "\\.org$" :trigger "__" :mode 'org-mode)
+(set-file-template! "/LICEN[CS]E$" :trigger '+file-templates/insert-license)
 #+end_src
 
 ** fold [0/2]
