@@ -1450,7 +1450,7 @@ brew install terraform
 Modules to improve integration into your OS, system, or devices.
 #+end_quote
 
-** macos [1/2]
+** macos [2/2]
 *** DONE [#A] Remap keys for macOS
 #+begin_src emacs-lisp :tangle yes
 (when IS-MAC
@@ -1467,9 +1467,42 @@ Modules to improve integration into your OS, system, or devices.
         mac-right-option-modifier 'hyper))
 #+end_src
 
-*** STRT [#B] Experiment with Keychain as a member of ~auth-sources~
-I'm already doing this with =forge=, but I'd like to better document what I'm
-doing and how to use Keychain with other Emacs facilities.
+*** DONE [#B] Experiment with Keychain as a member of ~auth-sources~
+The following example applies to =forge=, but works the same way with other
+Emacs facilities.
+
+#+CAPTION: Command to create Keychain entry
+#+begin_src sh :tangle no
+security add-internet-password -U \
+    -s 'api.github.com' \
+    -D 'Internet password' \
+    -a 'eeowaa^forge' \
+    -r 'htps' \
+    -w '********' \
+    "$HOME/Library/Keychains/login.keychain-db"
+#+end_src
+
+#+RESULTS:
+
+#+CAPTION: Entry as viewed in "Keychain Access" app
+| Field    | Value                  |
+|----------+------------------------|
+| Name     | api.github.com         |
+| Type     | Internet password      |
+| Account  | eeowaa^forge           |
+| Where    | https://api.github.com |
+| Password | ********               |
+
+#+CAPTION: Elisp to retrieve the password
+#+begin_src emacs-lisp :tangle no
+(auth-source-pick-first-password
+ :host "api.github.com"
+ :user "eeowaa^forge")
+#+end_src
+
+See also:
++ ~auth-source-search~ (details the argument spec for ~:host~, ~:user~, etc.)
++ ~auth-sources~ (specifies a list of backing secret stores)
 
 ** tty [0/0] :ARCHIVE:
 * :lang
