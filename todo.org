@@ -158,7 +158,7 @@ keybindings.
   ;;   presentations or streaming.
   #+end_quote
 
-* Config [3/8]
+* Config [4/8]
 :PROPERTIES:
 :CATEGORY: doom/config
 :END:
@@ -218,23 +218,21 @@ I have noticed a few patterns:
 + Tables of contents always use ~-~
 
 *** DONE Rewrite the document
-** TODO [#B] Write =$DOOMDIR/README.org=
-Interestingly, when I first opened the file, it was pre-populated (probably by
-the =:editor file-templates= module) to look like documentation for a Doom
-module. IIRC, the private user configuration in =$DOOMDIR= is a module itself,
-so I suppose it makes sense. But certain things do *not* make sense:
+** DONE [#C] Make ~PREREQ~ lines OS-independent
+:LOGBOOK:
+- Note taken on [2021-09-23 Thu 08:43] \\
+  I ended up taking a different approach: I moved the ~PREREQ~ comments into
+  source blocks in =config.org= and tangled them to =install/macos.sh=.
 
-+ [ ] Does the =$DOOMDIR= module have a formal name?
-+ [ ] Does the =$DOOMDIR= module have module flags?
-  - [ ] If so, where are they specified?
-+ [ ] Is =$DOOMDIR/init.el= a member of the =$DOOMDIR= module?
+  In the future, when adding support for different operating systems, I can just
+  add separate source blocks that tangle to different shell scripts, e.g.,
+  =install/fedora.sh=. This solves the issue of OS-independence.
 
-** TODO [#B] Reorganize =config.el= so that ~after!~ blocks are utilized correctly
-I don't really even know what the end result will look like or why it will look
-the way it will (I don't know what I don't know, i.e., there are unknown
-unknowns at this point, which is precisely why I have this listed as an issue)
-
-** TODO [#C] Make ~PREREQ~ lines OS-independent
+  To solve the issue of running prerequisite setup only for enabled modules, the
+  subtrees in =config.org= that correspond to disabled modules have been
+  archived. Therefore, the prerequisite-installation source blocks for disabled
+  modules are not tangled to the =install/*.sh= files.
+:END:
 Currently, the ~PREREQ~ comments just explain what prerequisite commands need to
 be run for macOS. I would like to refactor these comments into a script or set
 of scripts to install prerequisites based on the host OS. For the module
@@ -260,6 +258,22 @@ doom info | sed -n \
 #+end_src
 
 Which doesn't miss anything, and seems more idiomatic.
+
+** TODO [#B] Write =$DOOMDIR/README.org=
+Interestingly, when I first opened the file, it was pre-populated (probably by
+the =:editor file-templates= module) to look like documentation for a Doom
+module. IIRC, the private user configuration in =$DOOMDIR= is a module itself,
+so I suppose it makes sense. But certain things do *not* make sense:
+
++ [ ] Does the =$DOOMDIR= module have a formal name?
++ [ ] Does the =$DOOMDIR= module have module flags?
+  - [ ] If so, where are they specified?
++ [ ] Is =$DOOMDIR/init.el= a member of the =$DOOMDIR= module?
+
+** TODO [#B] Reorganize =config.el= so that ~after!~ blocks are utilized correctly
+I don't really even know what the end result will look like or why it will look
+the way it will (I don't know what I don't know, i.e., there are unknown
+unknowns at this point, which is precisely why I have this listed as an issue)
 
 ** TODO [#C] Figure out how to patch specific functions in Doom
 + =el-patch= looks great: https://github.com/raxod502/el-patch

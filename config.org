@@ -76,11 +76,17 @@ a unified interface for project search and replace, powered by ripgrep.
 #+end_quote
 
 ** ido [0/0] :ARCHIVE:
-** ivy [1/1]
+** ivy [2/2]
 #+begin_quote
 This module provides Ivy integration for a variety of Emacs commands, as well as
 a unified interface for project search and replace, powered by [[https://github.com/BurntSushi/ripgrep/][ripgrep]].
 #+end_quote
+
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `completion/ivy` module
+brew install ripgrep
+#+end_src
 
 *** DONE [#A] Make it easier to jump to headlines across Org buffers
 #+begin_src emacs-lisp :tangle yes
@@ -590,7 +596,7 @@ automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
 This module adds an Atom-esque tab bar to the Emacs UI.
 #+end_quote
 
-** treemacs [3/4]
+** treemacs [4/5]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -598,6 +604,12 @@ system outlines of your projects in a simple tree layout allowing quick
 navigation and exploration, while also possessing basic file management
 utilities.
 #+end_quote
+
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `ui/treemacs` module
+brew install python3
+#+end_src
 
 *** DONE [#B] Fix ace-window keybindings :hack:
 This slows down startup a bit, but whatever (I'm not obsessed with startup):
@@ -940,10 +952,16 @@ lines in the buffer without modifying the buffer content.
 Modules that reconfigure or augment packages or features built into Emacs.
 #+end_quote
 
-** dired [0/0]
+** dired [1/1]
 #+begin_quote
 This module provides configuration for dired.
 #+end_quote
+
+*** DONE Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `emacs/dired` module
+brew install coreutils
+#+end_src
 
 ** electric [0/0]
 ** ibuffer [0/0]
@@ -987,10 +1005,16 @@ integration with git.
 Modules that offer terminal emulation.
 #+end_quote
 
-** eshell [3/6]
+** eshell [4/7]
 #+begin_quote
 This module provides additional features for the built-in [[https://www.gnu.org/software/emacs/manual/html_mono/eshell.html][Emacs Shell]].
 #+end_quote
+
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `term/eshell` module
+brew install fish
+#+end_src
 
 *** DONE [#B] Define aliases
 #+begin_src emacs-lisp :tangle yes
@@ -1061,11 +1085,17 @@ tput: unknown terminal "eterm-color"
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [2/3]
+** vterm [3/4]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
 #+end_quote
+
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `term/vterm` module
+brew install libvterm cmake
+#+end_src
 
 *** DONE [#B] Export ~$EDITOR~ to =vterm=
 #+begin_src emacs-lisp :tangle yes
@@ -1083,6 +1113,12 @@ alpha and requires a component be compiled (=vterm-module.so=).
 *** TODO [#C] Prevent ~git-graph~ cutoff
 The last character ("o" in this case) gets hidden:
 #+begin_example
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `checkers/spell` module
+brew install aspell
+#+end_src
+
 $ git graph
 ,* 65a8a6b6da9176bea78eb78c604120714207bcc5 Initial commit  eeowaa   3 weeks ag
 #+end_example
@@ -1108,10 +1144,16 @@ GUI Emacs, not terminal Emacs*.
                              (file-truename doom-private-dir))))))
 #+end_src
 
-** spell [2/3]
+** spell [3/4]
 #+begin_quote
 This modules provides spellchecking powered by =aspell=, =hunspell= or =enchant=.
 #+end_quote
+
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `checkers/spell` module
+brew install aspell
+#+end_src
 
 *** DONE [#A] Prevent ~spell-fu-mode~ from being enabled by default
 I like having the option, but I would prefer to enable it manually per buffer.
@@ -1205,19 +1247,39 @@ provides corrections. For example, the word "fluctuant" is highlighted as a
 spelling error by the =spell= module but is a completion for "flu" (just type
 =C-SPC= in Evil insert state with the cursor positioned after the "u" in "flu").
 
-** grammar [0/0] :ARCHIVE:
+** grammar [1/1] :ARCHIVE:
 #+begin_quote
 This module adds grammar checking to Emacs to aid your writing by combining
 =lang-tool= and =writegood-mode=.
 #+end_quote
+
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `checkers/grammar` module
+brew install languagetool
+sudo ln -sfn /usr/local/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk
+#+end_src
 
 * :tools
 #+begin_quote
 Small modules that give Emacs access to external tools & services.
 #+end_quote
 
-** ansible [0/0]
-** debugger [0/1] :ARCHIVE:
+** ansible [1/1]
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `tools/ansible` module
+brew install ansible
+#+end_src
+
+** debugger [0/2] :ARCHIVE:
+*** STRT [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `tools/debugger` module
+# https://stackoverflow.com/questions/18423124/please-check-gdb-is-codesigned-see-taskgated8-how-to-get-gdb-installed-w
+brew install gdb
+#+end_src
+
 *** TODO [#A] Fix DAP mode error message
 I get this error when I visit a file that invokes ~lsp!~:
 #+begin_example
@@ -1238,33 +1300,68 @@ that prevents errors. Worst case, I could disable =debugger=.
 disable =debugger= for the time being (it's not super-important for me right
 now, anyway).
 
-** direnv [0/1] :ARCHIVE:
+** direnv [1/2] :ARCHIVE:
 #+begin_quote
 This module integrates direnv into Emacs.
 #+end_quote
 
-*** TODO [#A] See why =direnv= prevents environment variables from propagating between buffers
-** docker [0/0]
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `tools/direnv` module
+brew install direnv
+#+end_src
+
+*** TODO [#A] See why =direnv= prevents envvars from propagating between buffers
+I have this module disabled for this sole reason.
+
+** docker [1/1]
 #+begin_quote
 This module allows you to manipulate Docker images, containers & more from
 Emacs.
 #+end_quote
 
-** editorconfig [0/0]
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `tools/docker` module
+brew install docker
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+npm install -g dockerfile-language-server-nodejs
+#+end_src
+
+** editorconfig [1/1]
 #+begin_quote
 This module integrates [[https://editorconfig.org/][EditorConfig]] into Emacs, allowing users to dictate code
 style on a per-project basis with an =.editorconfig= file ([[https://editorconfig-specification.readthedocs.io/][formal
 specification]]).
 #+end_quote
 
-** ein [0/0]
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `tools/editorconfig` module
+brew install editorconfig
+#+end_src
+
+** ein [1/1]
 #+begin_quote
 Adds Jupyter notebook integration into emacs.
 #+end_quote
 
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `tools/ein` module
+brew install python
+pipx install --include-deps jupyter
+#+end_src
+
 ** evay [0/0]
 ** gist [0/0] :ARCHIVE:
-** lookup [0/1]
+** lookup [1/2]
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `tools/lookup` module
+brew install ripgrep sqlite3
+#+end_src
+
 *** HOLD [#C] Add dictionary and thesaurus backends for =SPC s t/T=
 I've done everything that the Doom documentation told me to do, but things
 aren't working very well. Just try it out for yourself and see. Might want to
@@ -1279,7 +1376,15 @@ the popup window are cut off, and all you see are options to exclude the file
 from the LSP workspace. Unless you know about the other available options, LSP
 won't work for you. Unfortunately, resizing the frame does not help.
 
-** magit [1/1]
+** magit [2/2]
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `tools/magit` module
+cd ~/stow-dotfiles && make perl
+brew install perl git-absorb
+cpan install App::Git::Autofixup
+#+end_src
+
 *** DONE [#C] Configure list of repositories
 #+begin_src emacs-lisp :tangle yes
 (setq magit-repository-directories
@@ -1290,11 +1395,23 @@ won't work for you. Unfortunately, resizing the frame does not help.
 
 ** make [0/0]
 ** pass [0/0] :ARCHIVE:
-** pdf [0/0]
+** pdf [1/1]
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `tools/pdf` module
+brew install pkg-config poppler automake
+#+end_src
+
 ** prodigy [0/0] :ARCHIVE:
 ** rgb [0/0] :ARCHIVE:
 ** taskrunner [0/0] :ARCHIVE:
-** terraform [0/0]
+** terraform [1/1]
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `tools/terraform` module
+brew install terraform
+#+end_src
+
 ** tmux [0/0] :ARCHIVE:
 ** upload [0/0] :ARCHIVE:
 * :os
@@ -1341,10 +1458,16 @@ This module adds support for [[https://beancount.github.io/][Beancount]] to Emac
 you [[https://plaintextaccounting.org/][manage your money in plain text]].
 #+end_quote
 
-** cc [0/0]
+** cc [1/1]
 #+begin_quote
 This module adds support for the C-family of languages: C, C++, and Objective-C.
 #+end_quote
+
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/cc` module
+brew install ccls gdb glslang
+#+end_src
 
 ** clojure [0/0] :ARCHIVE:
 #+begin_quote
@@ -1368,7 +1491,15 @@ This module adds C# support to Emacs. Powered by omnisharp (directly or through
 LSP).
 #+end_quote
 
-** data [0/0]
+** data [1/1]
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/data` module
+curl --create-dirs \
+    -o ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.13.1-uber.jar \
+    https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.13.1/org.eclipse.lemminx-0.13.1-uber.jar
+#+end_src
+
 ** dart [0/0] :ARCHIVE:
 #+begin_quote
 [[https://dart.dev/][Dart]] is a client-optimized language by Google for fast apps on any platform.
@@ -1433,11 +1564,28 @@ This module adds support for GDScript, the scripting language of the [[http://go
 engine, to Doom Emacs, powered by [[https://github.com/GDQuest/emacs-gdscript-mode][gdscript-mode]].
 #+end_quote
 
-** go [0/0]
+** go [0/1]
 #+begin_quote
 This module adds [[https://golang.org][Go]] support, with optional (but recommended) LSP support via
 [[https://github.com/golang/tools/blob/master/gopls/README.md][gopls]].
 #+end_quote
+
+*** STRT [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/go` module
+cd ~/stow-dotfiles && make go
+brew install go gopls golangci-lint
+# FIXME bash < <(curl -s https://raw.githubusercontent.com/rocky/ssa-interp/master/gub-installer)
+# See https://github.com/rocky/ssa-interp
+go get -v -u github.com/motemen/gore/cmd/gore
+go get -v -u github.com/stamblerre/gocode
+go get -v -u golang.org/x/tools/cmd/godoc
+go get -v -u golang.org/x/tools/cmd/goimports
+go get -v -u golang.org/x/tools/cmd/gorename
+go get -v -u golang.org/x/tools/cmd/guru
+go get -v -u github.com/cweill/gotests/...
+go get -v -u github.com/fatih/gomodifytags
+#+end_src
 
 ** haskell [0/0] :ARCHIVE:
 #+begin_quote
@@ -1451,10 +1599,18 @@ This module adds [[https://www.haskell.org/][Haskell]] support, powered by eithe
 This module adds rudimentary Idris support.
 #+end_quote
 
-** json [0/0]
+** json [1/1]
 #+begin_quote
 This module provides JSON support.
 #+end_quote
+
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/json` module
+brew install jq
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+npm install -g vscode-json-languageserver
+#+end_src
 
 ** java [0/0] :ARCHIVE:
 #+begin_quote
@@ -1462,7 +1618,7 @@ This module adds [[https://www.java.com][java]] support to Doom Emacs, including
 =groovy-mode=.
 #+end_quote
 
-** javascript [1/2]
+** javascript [1/3]
 :PROPERTIES:
 :CATEGORY: doom/ts
 :END:
@@ -1472,6 +1628,14 @@ This module adds JavaScript and TypeScript support.
 
 Currently, I am only using TypeScript -- not vanilla JavaScript -- so the
 ~:CATEGORY:~ property for this subtree is set to ~doom/ts~.
+
+*** STRT [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/javascript` module
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+npm install -g typescript javascript-typescript-langserver eslint trepan-ni
+# TODO What about installing eslint and the language server for that?
+#+end_src
 
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
@@ -1492,10 +1656,16 @@ This module adds support for [[https://julialang.org/][the Julia language]] to D
 This module adds Kotlin support to Emacs.
 #+end_quote
 
-** latex [0/0]
+** latex [1/1]
 #+begin_quote
 Provide a helping hand when working with LaTeX documents.
 #+end_quote
+
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/latex` module
+brew install mactex texlab wget
+#+end_src
 
 ** lean [0/0] :ARCHIVE:
 ** ledger [0/0] :ARCHIVE:
@@ -1509,13 +1679,20 @@ accounting system that works with simple text files holding transactions.
 Adds Lua support to Doom Emacs
 #+end_quote
 
-** markdown [3/4]
+** markdown [4/5]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
 #+begin_quote
 This module provides Markdown support for Emacs.
 #+end_quote
+
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/markdown` module
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+npm install -g markdownlint marked
+#+end_src
 
 *** DONE [#B] Improve Markdown readability
 + https://emacs.stackexchange.com/questions/3753/prettify-symbols-mode-character-replacement-regex
@@ -1574,7 +1751,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [13/29]
+** org [14/30]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -1584,6 +1761,13 @@ This module adds org-mode support to Doom Emacs, along with a number of
 adjustments, extensions and reasonable defaults to make it more performant and
 intuitive out of the box.
 #+end_quote
+
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/org` module
+brew install gnuplot pandoc graphviz pngpaste
+mkdir -p ~/org/roam
+#+end_src
 
 *** Document Structure [1/3]
 **** DONE [#A] Do not indent headlines
@@ -2039,13 +2223,28 @@ This module adds support for PHP 5.3+ (including PHP7).
 
 ** plantuml [0/0] :ARCHIVE:
 ** purescript [0/0] :ARCHIVE:
-** python [3/4]
+** python [4/5]
 :PROPERTIES:
 :CATEGORY: doom/python
 :END:
 #+begin_quote
 Adds Python support to Doom Emacs.
 #+end_quote
+
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/python` module
+brew install python
+pipx install pylint
+pipx install flake8
+pipx install pytest
+pipx install nose
+pipx install pyflakes
+pipx install isort
+pipx install --include-deps jupyter
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+npm install -g pyright
+#+end_src
 
 *** DONE [#A] Develop and run a simple "Hello World" program
 More than a simple "Hello World":
@@ -2110,10 +2309,18 @@ This module provides an environment for hacking and having fun in scheme. It is
 powered by [[https://www.nongnu.org/geiser/geiser_1.html#introduction][geiser]].
 #+end_quote
 
-** sh [1/1]
+** sh [2/2]
 #+begin_quote
 This module adds support for shell scripting languages.
 #+end_quote
+
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/sh` module
+brew install bash zsh fish powershell bashdb zshdb shellcheck
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+npm install -g bash-language-server
+#+end_src
 
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
@@ -2135,14 +2342,29 @@ This module adds [[https://github.com/ethereum/solidity][Solidity]] support thro
 
 ** swift [0/0] :ARCHIVE:
 ** terra [0/0] :ARCHIVE:
-** web [0/0]
-** yaml [5/6]
+** web [1/1]
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/web` module
+brew install tidy-html5
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+npm install -g js-beautify stylelint
+#+end_src
+
+** yaml [6/7]
 :PROPERTIES:
 :CATEGORY: doom/yaml
 :END:
 #+begin_quote
 This module provides support for the [[https://yaml.org/][YAML file format]].
 #+end_quote
+
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/yaml` module
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+npm install -g yaml-language-server
+#+end_src
 
 *** DONE [#A] Set the YAML LSP server to RedHat's implementation
 + https://developers.redhat.com/blog/2017/10/18/yaml-language-server-extension-vs-code/
