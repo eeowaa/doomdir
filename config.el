@@ -628,122 +628,6 @@ to `org-footnote-section'.  Inline definitions are ignored."
 (after! elfeed
   (add-hook! 'elfeed-search-mode-hook #'elfeed-update))
 
-(after! smartparens
-  (let* ((default-pairs (cdr (assoc t sp-pairs)))
-         (default-openers (mapcar (lambda (pair) (plist-get pair :open))
-                                  default-pairs)))
-    (dolist (opener default-openers)
-      (sp-local-pair 'minibuffer-inactive-mode opener nil :actions nil))))
-
-(setq which-key-idle-delay 0.5
-      which-key-idle-secondary-delay 0.1)
-
-(defun my/alternate-keys (key &optional insert)
-  "Print message listing equivalent alternate key sequences for KEY.
-KEY is a pair (SEQ . RAW-SEQ) of key sequences, where
-RAW-SEQ is the untranslated form of the key sequence SEQ.
-If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
-While reading KEY interactively, this command temporarily enables
-menu items or tool-bar buttons that are disabled to allow getting help
-on them."
-  (interactive
-   ;; Ignore mouse movement events because it's too easy to miss the
-   ;; message while moving the mouse.
-   (list (car (help--read-key-sequence 'no-mouse-movement)) current-prefix-arg))
-  (where-is (cadr (help--analyze-key (car key) (cdr key))) insert))
-
-(define-key! help-map
-  "C-f" #'find-function      ;; replaces `view-emacs-FAQ' b/c I rarely use it
-  "C-l" #'find-library       ;; replaces `describe-language-environment'
-  "C-v" #'find-variable
-  "C-w" #'my/alternate-keys) ;; replaces `describe-no-warranty' b/c I never use it
-
-(remove-hook 'text-mode-hook #'display-line-numbers-mode)
-
-(defun my/toggle-line-numbers ()
-  "Toggle line numbers.
-
-Cycles through regular, relative and no line numbers. If you're
-using Emacs 26+, and `visual-line-mode' is on, this skips relative
-and uses visual instead."
-  (interactive)
-  (cond
-   ((not display-line-numbers)
-    (setq display-line-numbers t)
-    (message "Switched to normal line numbers"))
-   ((memq display-line-numbers '(visual relative))
-    (setq display-line-numbers nil)
-    (message "Switched to disabled line numbers"))
-   (visual-line-mode
-    (setq display-line-numbers 'visual)
-    (message "Switched to visual line numbers"))
-   (t
-    (setq display-line-numbers 'relative)
-    (message "Switched to relative line numbers"))))
-
-(define-key! doom-leader-toggle-map
-  ;; replaces `doom/toggle-line-numbers'
-  "l" #'my/toggle-line-numbers)
-
-(defun my/doom-help-search-source (&optional initial-input)
-  "Perform a text search across all files in `doom-emacs-dir'."
-  (interactive)
-  (+ivy-file-search
-    :query initial-input
-    :in doom-emacs-dir
-    :prompt (format "Search source for: ")))
-
-(defun my/doom-help-search-modules (&optional initial-input)
-  "Perform a text search across all files in `doom-modules-dir'."
-  (interactive)
-  (+ivy-file-search
-    :query initial-input
-    :in doom-modules-dir
-    :prompt "Search modules for: "))
-
-(define-key! help-map
-  "de" #'my/doom-help-search-source
-  "dM" #'my/doom-help-search-modules)
-
-;; Function to toggle 1 or 2 spaces at the end of sentences
-(defun my/toggle-sentence-end-double-space ()
-  (interactive)
-  (if (not sentence-end-double-space)
-      (progn
-        (setq-local sentence-end-double-space t)
-        (message "Sentences end with 2 spaces"))
-    (setq-local sentence-end-double-space nil)
-    (message "Sentences end with 1 space")))
-
-;; REVIEW See if there is a better way to do this (e.g. with `map!')
-(define-key! doom-leader-toggle-map
-  "a" #'auto-fill-mode
-  "h" #'use-hard-newlines
-  "o" #'overwrite-mode
-  "p" #'page-break-lines-mode
-  "t" #'toggle-truncate-lines
-  "|" #'visual-fill-column-mode
-  "." #'my/toggle-sentence-end-double-space
-  "SPC" #'whitespace-mode)
-(after! which-key
-  (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
-    (cl-pushnew `((,(format "\\`%s t a\\'" prefix-re)) nil . "Auto fill")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t h\\'" prefix-re)) nil . "Hard newlines")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t o\\'" prefix-re)) nil . "Overwrite")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t p\\'" prefix-re)) nil . "Page break lines")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t t\\'" prefix-re)) nil . "Truncate lines")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t |\\'" prefix-re)) nil . "Visual fill column")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t \\.\\'" prefix-re)) nil . "Sentence spacing")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t SPC\\'" prefix-re)) nil . "Whitespace mode")
-                which-key-replacement-alist)))
-
 (after! org-babel
   (defun my/org-babel-tangle (&optional arg target-file lang-re)
     "Write code blocks to source-specific files.
@@ -859,6 +743,122 @@ matching a regular expression."
                 path-collector)
           (mapcar #'car path-collector)))))
   (advice-add 'org-babel-tangle :override #'my/org-babel-tangle))
+
+(after! smartparens
+  (let* ((default-pairs (cdr (assoc t sp-pairs)))
+         (default-openers (mapcar (lambda (pair) (plist-get pair :open))
+                                  default-pairs)))
+    (dolist (opener default-openers)
+      (sp-local-pair 'minibuffer-inactive-mode opener nil :actions nil))))
+
+(setq which-key-idle-delay 0.5
+      which-key-idle-secondary-delay 0.1)
+
+(defun my/alternate-keys (key &optional insert)
+  "Print message listing equivalent alternate key sequences for KEY.
+KEY is a pair (SEQ . RAW-SEQ) of key sequences, where
+RAW-SEQ is the untranslated form of the key sequence SEQ.
+If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
+While reading KEY interactively, this command temporarily enables
+menu items or tool-bar buttons that are disabled to allow getting help
+on them."
+  (interactive
+   ;; Ignore mouse movement events because it's too easy to miss the
+   ;; message while moving the mouse.
+   (list (car (help--read-key-sequence 'no-mouse-movement)) current-prefix-arg))
+  (where-is (cadr (help--analyze-key (car key) (cdr key))) insert))
+
+(define-key! help-map
+  "C-f" #'find-function      ;; replaces `view-emacs-FAQ' b/c I rarely use it
+  "C-l" #'find-library       ;; replaces `describe-language-environment'
+  "C-v" #'find-variable
+  "C-w" #'my/alternate-keys) ;; replaces `describe-no-warranty' b/c I never use it
+
+(remove-hook 'text-mode-hook #'display-line-numbers-mode)
+
+(defun my/toggle-line-numbers ()
+  "Toggle line numbers.
+
+Cycles through regular, relative and no line numbers. If you're
+using Emacs 26+, and `visual-line-mode' is on, this skips relative
+and uses visual instead."
+  (interactive)
+  (cond
+   ((not display-line-numbers)
+    (setq display-line-numbers t)
+    (message "Switched to normal line numbers"))
+   ((memq display-line-numbers '(visual relative))
+    (setq display-line-numbers nil)
+    (message "Switched to disabled line numbers"))
+   (visual-line-mode
+    (setq display-line-numbers 'visual)
+    (message "Switched to visual line numbers"))
+   (t
+    (setq display-line-numbers 'relative)
+    (message "Switched to relative line numbers"))))
+
+(define-key! doom-leader-toggle-map
+  ;; replaces `doom/toggle-line-numbers'
+  "l" #'my/toggle-line-numbers)
+
+(defun my/doom-help-search-source (&optional initial-input)
+  "Perform a text search across all files in `doom-emacs-dir'."
+  (interactive)
+  (+ivy-file-search
+    :query initial-input
+    :in doom-emacs-dir
+    :prompt (format "Search source for: ")))
+
+(defun my/doom-help-search-modules (&optional initial-input)
+  "Perform a text search across all files in `doom-modules-dir'."
+  (interactive)
+  (+ivy-file-search
+    :query initial-input
+    :in doom-modules-dir
+    :prompt "Search modules for: "))
+
+(define-key! help-map
+  "de" #'my/doom-help-search-source
+  "dM" #'my/doom-help-search-modules)
+
+;; Function to toggle 1 or 2 spaces at the end of sentences
+(defun my/toggle-sentence-end-double-space ()
+  (interactive)
+  (if (not sentence-end-double-space)
+      (progn
+        (setq-local sentence-end-double-space t)
+        (message "Sentences end with 2 spaces"))
+    (setq-local sentence-end-double-space nil)
+    (message "Sentences end with 1 space")))
+
+;; REVIEW See if there is a better way to do this (e.g. with `map!')
+(define-key! doom-leader-toggle-map
+  "a" #'auto-fill-mode
+  "h" #'use-hard-newlines
+  "o" #'overwrite-mode
+  "p" #'page-break-lines-mode
+  "t" #'toggle-truncate-lines
+  "|" #'visual-fill-column-mode
+  "." #'my/toggle-sentence-end-double-space
+  "SPC" #'whitespace-mode)
+(after! which-key
+  (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
+    (cl-pushnew `((,(format "\\`%s t a\\'" prefix-re)) nil . "Auto fill")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t h\\'" prefix-re)) nil . "Hard newlines")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t o\\'" prefix-re)) nil . "Overwrite")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t p\\'" prefix-re)) nil . "Page break lines")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t t\\'" prefix-re)) nil . "Truncate lines")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t |\\'" prefix-re)) nil . "Visual fill column")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t \\.\\'" prefix-re)) nil . "Sentence spacing")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t SPC\\'" prefix-re)) nil . "Whitespace mode")
+                which-key-replacement-alist)))
 
 (setq disabled-command-function nil)
 
