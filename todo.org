@@ -158,7 +158,7 @@ keybindings.
   ;;   presentations or streaming.
   #+end_quote
 
-* Config [4/8]
+* Config [4/9]
 :PROPERTIES:
 :CATEGORY: doom/config
 :END:
@@ -258,6 +258,11 @@ doom info | sed -n \
 #+end_src
 
 Which doesn't miss anything, and seems more idiomatic.
+
+** TODO [#A] Tangle =$DOOMDIR/init.el= from =$DOOMDIR/config.org=
+This doesn't seem too difficult. All I will need is a set of source blocks that
+tangle to =init.el=. There will need to be some boilerplate at the top and
+bottom, but the rest should sit nicely in the =config.org= document structure.
 
 ** TODO [#B] Write =$DOOMDIR/README.org=
 Interestingly, when I first opened the file, it was pre-populated (probably by

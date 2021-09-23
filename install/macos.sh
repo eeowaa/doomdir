@@ -1,3 +1,11 @@
+#!/bin/sh
+
+# Install Homebrew
+curl -Lo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
+
+# Install NVM
+curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh | bash
+
 # Install prerequisites for `completion/ivy` module
 brew install ripgrep
 
@@ -16,12 +24,14 @@ brew install libvterm cmake
 # Install prerequisites for `checkers/spell` module
 brew install aspell
 
+# Install prerequisites for `checkers/spell` module
+brew install aspell
+
 # Install prerequisites for `tools/ansible` module
 brew install ansible
 
 # Install prerequisites for `tools/docker` module
 brew install docker
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 npm install -g dockerfile-language-server-nodejs
 
 # Install prerequisites for `tools/editorconfig` module
@@ -56,8 +66,8 @@ curl --create-dirs \
 # Install prerequisites for `lang/go` module
 cd ~/stow-dotfiles && make go
 brew install go gopls golangci-lint
-# FIXME bash < <(curl -s https://raw.githubusercontent.com/rocky/ssa-interp/master/gub-installer)
-# See https://github.com/rocky/ssa-interp
+# FIXME (see https://github.com/rocky/ssa-interp)
+# curl -Lo- https://raw.githubusercontent.com/rocky/ssa-interp/HEAD/gub-installer | bash
 go get -v -u github.com/motemen/gore/cmd/gore
 go get -v -u github.com/stamblerre/gocode
 go get -v -u golang.org/x/tools/cmd/godoc
@@ -69,19 +79,15 @@ go get -v -u github.com/fatih/gomodifytags
 
 # Install prerequisites for `lang/json` module
 brew install jq
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 npm install -g vscode-json-languageserver
 
 # Install prerequisites for `lang/javascript` module
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 npm install -g typescript javascript-typescript-langserver eslint trepan-ni
-# TODO What about installing eslint and the language server for that?
 
 # Install prerequisites for `lang/latex` module
 brew install mactex texlab wget
 
 # Install prerequisites for `lang/markdown` module
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 npm install -g markdownlint marked
 
 # Install prerequisites for `lang/org` module
@@ -97,19 +103,15 @@ pipx install nose
 pipx install pyflakes
 pipx install isort
 pipx install --include-deps jupyter
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 npm install -g pyright
 
 # Install prerequisites for `lang/sh` module
 brew install bash zsh fish powershell bashdb zshdb shellcheck
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 npm install -g bash-language-server
 
 # Install prerequisites for `lang/web` module
 brew install tidy-html5
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 npm install -g js-beautify stylelint
 
 # Install prerequisites for `lang/yaml` module
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 npm install -g yaml-language-server

@@ -24,6 +24,18 @@ Use =SPC h d e= (~my/doom-help-search-source~) and =SPC h d M=
 for (or in some cases, is at least /intended/ to contain configuration for) the
 option, hook, etc. that you want to configure.
 
+* Prerequisites
+** DONE macOS
+#+begin_src sh :tangle install/macos.sh
+#!/bin/sh
+
+# Install Homebrew
+curl -Lo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
+
+# Install NVM
+curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh | bash
+#+end_src
+
 * :input
 ** chinese [0/0] :ARCHIVE:
 #+begin_quote
@@ -1355,7 +1367,6 @@ Emacs.
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/docker` module
 brew install docker
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 npm install -g dockerfile-language-server-nodejs
 #+end_src
 
@@ -1639,8 +1650,8 @@ This module adds [[https://golang.org][Go]] support, with optional (but recommen
 # Install prerequisites for `lang/go` module
 cd ~/stow-dotfiles && make go
 brew install go gopls golangci-lint
-# FIXME bash < <(curl -s https://raw.githubusercontent.com/rocky/ssa-interp/master/gub-installer)
-# See https://github.com/rocky/ssa-interp
+# FIXME (see https://github.com/rocky/ssa-interp)
+# curl -Lo- https://raw.githubusercontent.com/rocky/ssa-interp/HEAD/gub-installer | bash
 go get -v -u github.com/motemen/gore/cmd/gore
 go get -v -u github.com/stamblerre/gocode
 go get -v -u golang.org/x/tools/cmd/godoc
@@ -1672,7 +1683,6 @@ This module provides JSON support.
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/json` module
 brew install jq
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 npm install -g vscode-json-languageserver
 #+end_src
 
@@ -1696,9 +1706,7 @@ Currently, I am only using TypeScript -- not vanilla JavaScript -- so the
 *** STRT [#A] Install prerequisites
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/javascript` module
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 npm install -g typescript javascript-typescript-langserver eslint trepan-ni
-# TODO What about installing eslint and the language server for that?
 #+end_src
 
 *** DONE [#C] Filename-mode associations
@@ -1754,7 +1762,6 @@ This module provides Markdown support for Emacs.
 *** DONE [#A] Install prerequisites
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/markdown` module
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 npm install -g markdownlint marked
 #+end_src
 
@@ -2023,7 +2030,7 @@ Instead, I would like to see the file-level Org tag (e.g. "doom" for this file).
   (setq org-refile-use-outline-path 'full-file-path))
 #+end_src
 
-*** Capture and Attachments [1/1]
+*** Capture and Attachments [2/2]
 **** DONE [#A] Establish agenda file layout
 Relevant variables:
 + ~org-directory~
@@ -2040,7 +2047,7 @@ Relevant variables:
 
 The following is a prerequisite for my organization:
 #+begin_src sh :tangle no
-mkdir -p ~/Documents/org && ln -s ~/Documents/org ~/org
+mkdir -p ~/org
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
@@ -2306,7 +2313,6 @@ pipx install nose
 pipx install pyflakes
 pipx install isort
 pipx install --include-deps jupyter
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 npm install -g pyright
 #+end_src
 
@@ -2382,7 +2388,6 @@ This module adds support for shell scripting languages.
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/sh` module
 brew install bash zsh fish powershell bashdb zshdb shellcheck
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 npm install -g bash-language-server
 #+end_src
 
@@ -2411,7 +2416,6 @@ This module adds [[https://github.com/ethereum/solidity][Solidity]] support thro
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/web` module
 brew install tidy-html5
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 npm install -g js-beautify stylelint
 #+end_src
 
@@ -2426,7 +2430,6 @@ This module provides support for the [[https://yaml.org/][YAML file format]].
 *** DONE [#A] Install prerequisites
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/yaml` module
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 npm install -g yaml-language-server
 #+end_src
 
