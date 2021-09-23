@@ -209,18 +209,19 @@ Displays and inserts emojis (ASCII, Github style, unicode).
 *** DONE [#C] Enable emojis (just for =SPC i e=)
 This is done in =doom/init.el=.
 
-** hl-todo [1/2]
+** hl-todo [1/1]
 #+begin_quote
 This module adds syntax highlighting for TODO/FIXME/NOTE tags in programming
 major-modes.
 #+end_quote
 
-*** DONE [#B] Add a couple different tags to highlight in programming major-modes
+*** DONE [#B] Add a few different tags to highlight in programming major-modes
 #+begin_src emacs-lisp :tangle yes
 (after! hl-todo
   (setq hl-todo-keyword-faces
         (append '(("TESTME" font-lock-constant-face bold)
-                  ("PREREQ" font-lock-doc-face bold))
+                  ("PREREQ" font-lock-doc-face bold)
+                  ("DEBUG" font-lock-preprocessor-face bold))
                 hl-todo-keyword-faces)))
 #+end_src
 

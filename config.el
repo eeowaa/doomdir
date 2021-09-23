@@ -12,7 +12,8 @@
 (after! hl-todo
   (setq hl-todo-keyword-faces
         (append '(("TESTME" font-lock-constant-face bold)
-                  ("PREREQ" font-lock-doc-face bold))
+                  ("PREREQ" font-lock-doc-face bold)
+                  ("DEBUG" font-lock-preprocessor-face bold))
                 hl-todo-keyword-faces)))
 
 (global-set-key (kbd "C-c t") 'hydra-table/body)
