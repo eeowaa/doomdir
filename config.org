@@ -218,7 +218,7 @@ major-modes.
                 hl-todo-keyword-faces)))
 #+end_src
 
-** hydra [1/2]
+** hydra [2/3]
 #+begin_quote
 This module adds hydra to Doom Emacs, as well as a few custom built hydras to
 start with.
@@ -410,6 +410,36 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
   ;; Other
   ("q" nil))
 (global-set-key (kbd "C-c g") #'hydra-game/body)
+#+end_src
+
+*** DONE [#C] Add a hydra for counsel-spotify
+#+begin_src emacs-lisp :tangle yes
+(global-set-key (kbd "C-c s") 'hydra-spotify/body)
+(defhydra hydra-spotify (:color red :hint nil)
+  "
+^Playback control^   ^Collection search^   ^Song search^
+^---^----------------^-^-------------------^-^--------------
+_SPC_: Play/Pause    _l_: Playlist         _s_: By name
+  _n_: Next          _a_: Artist           _A_: By artist
+  _p_: Previous      _r_: Record           _R_: By record
+"
+  ;; Playback Control
+  ("SPC" counsel-spotify-toggle-play-pause)
+  ("n" counsel-spotify-next)
+  ("p" counsel-spotify-previous)
+
+  ;; Collection Search
+  ("l" counsel-spotify-search-playlist)
+  ("a" counsel-spotify-search-artist)
+  ("r" counsel-spotify-search-album)
+
+  ;; Song Search
+  ("s" counsel-spotify-search-track)
+  ("A" counsel-spotify-search-tracks-by-artist)
+  ("R" counsel-spotify-search-tracks-by-album)
+
+  ;; Other
+  ("q" nil))
 #+end_src
 
 ** indent-guides [0/0] :ARCHIVE:
@@ -2819,6 +2849,11 @@ We already have =C-r=, so might as well replace this mostly-useless keybinding.
 ;; RSS feeds
 (setq elfeed-feeds
       '("https://example.com/rss.xml"))
+
+;; Spotify (see https://developer.spotify.com/my-applications)
+;; Could also use `auth-source' library to retrieve the credentials
+(setq counsel-spotify-client-id "00000000000000000000000000000000"
+      counsel-spotify-client-secret "00000000000000000000000000000000")
 
 ;;; Customize
 #+end_src

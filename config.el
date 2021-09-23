@@ -157,6 +157,33 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
   ("q" nil))
 (global-set-key (kbd "C-c g") #'hydra-game/body)
 
+(global-set-key (kbd "C-c s") 'hydra-spotify/body)
+(defhydra hydra-spotify (:color red :hint nil)
+  "
+^Playback control^   ^Collection search^   ^Song search^
+^---^----------------^-^-------------------^-^--------------
+_SPC_: Play/Pause    _l_: Playlist         _s_: By name
+  _n_: Next          _a_: Artist           _A_: By artist
+  _p_: Previous      _r_: Record           _R_: By record
+"
+  ;; Playback Control
+  ("SPC" counsel-spotify-toggle-play-pause)
+  ("n" counsel-spotify-next)
+  ("p" counsel-spotify-previous)
+
+  ;; Collection Search
+  ("l" counsel-spotify-search-playlist)
+  ("a" counsel-spotify-search-artist)
+  ("r" counsel-spotify-search-album)
+
+  ;; Song Search
+  ("s" counsel-spotify-search-track)
+  ("A" counsel-spotify-search-tracks-by-artist)
+  ("R" counsel-spotify-search-tracks-by-album)
+
+  ;; Other
+  ("q" nil))
+
 (setq +ligatures-extras-in-modes '(org-mode))
 
 (setq column-number-indicator-zero-based nil)
