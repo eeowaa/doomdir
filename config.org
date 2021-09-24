@@ -1156,12 +1156,6 @@ brew install libvterm cmake
 *** TODO [#C] Prevent ~git-graph~ cutoff
 The last character ("o" in this case) gets hidden:
 #+begin_example
-*** DONE [#A] Install prerequisites
-#+begin_src sh :tangle install/macos.sh
-# Install prerequisites for `checkers/spell` module
-brew install aspell
-#+end_src
-
 $ git graph
 ,* 65a8a6b6da9176bea78eb78c604120714207bcc5 Initial commit  eeowaa   3 weeks ag
 #+end_example

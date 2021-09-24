@@ -24,9 +24,6 @@ brew install libvterm cmake
 # Install prerequisites for `checkers/spell` module
 brew install aspell
 
-# Install prerequisites for `checkers/spell` module
-brew install aspell
-
 # Install prerequisites for `tools/ansible` module
 brew install ansible
 
