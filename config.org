@@ -434,28 +434,36 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 *** DONE [#C] Add a hydra for counsel-spotify
 #+begin_src emacs-lisp :tangle yes
 (global-set-key (kbd "C-c s") 'hydra-spotify/body)
-(defhydra hydra-spotify (:color red :hint nil)
+(defhydra hydra-spotify (:color blue :hint nil)
   "
-^Playback control^   ^Collection search^   ^Song search^
-^---^----------------^-^-------------------^-^--------------
-_SPC_: Play/Pause    _l_: Playlist         _s_: By name
-  _n_: Next          _a_: Artist           _A_: By artist
-  _p_: Previous      _r_: Record           _R_: By record
+^Playback control^   ^Collection^     ^Song^           ^Open Spotify^
+^---^----------------^-^--------------^-^-------------------------------
+_SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
+  _n_: Next          _a_: Artist      _A_: By artist   _w_: Web player
+  _p_: Previous      _r_: Record      _R_: By record   _i_: Integrations
 "
   ;; Playback Control
-  ("SPC" counsel-spotify-toggle-play-pause)
-  ("n" counsel-spotify-next)
-  ("p" counsel-spotify-previous)
+  ("SPC" counsel-spotify-toggle-play-pause :color red)
+  ("n" counsel-spotify-next :color red)
+  ("p" counsel-spotify-previous :color red)
 
-  ;; Collection Search
+  ;; Collection
   ("l" counsel-spotify-search-playlist)
   ("a" counsel-spotify-search-artist)
   ("r" counsel-spotify-search-album)
 
-  ;; Song Search
+  ;; Song
   ("s" counsel-spotify-search-track)
   ("A" counsel-spotify-search-tracks-by-artist)
   ("R" counsel-spotify-search-tracks-by-album)
+
+  ;; Open Spotify
+  ("o" (cond
+        (IS-MAC (call-process "open" nil nil nil "-a" "spotify"))
+        (IS-LINUX (call-process "xdg-open" nil nil nil "spotify"))
+        (t (user-error! "Unsupported operating system"))))
+  ("w" (browse-url "https://open.spotify.com"))
+  ("i" (browse-url "https://developer.spotify.com/my-applications"))
 
   ;; Other
   ("q" nil))
