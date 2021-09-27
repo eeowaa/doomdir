@@ -839,10 +839,14 @@ and uses visual instead."
     (setq-local sentence-end-double-space nil)
     (message "Sentences end with 1 space")))
 
-;; REVIEW See if there is a better way to do this (e.g. with `map!')
+;; REVIEW See if there is a better way to do this (e.g. with `map!' or a custom macro)
 (define-key! doom-leader-toggle-map
   "a" #'auto-fill-mode
+  "B" #'display-battery-mode
+  "c" #'display-fill-column-indicator-mode
+  "C" #'column-highlight-mode
   "h" #'use-hard-newlines
+  "L" #'hl-line-mode
   "o" #'overwrite-mode
   "p" #'page-break-lines-mode
   "t" #'toggle-truncate-lines
@@ -853,7 +857,15 @@ and uses visual instead."
   (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
     (cl-pushnew `((,(format "\\`%s t a\\'" prefix-re)) nil . "Auto fill")
                 which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t B\\'" prefix-re)) nil . "Battery indicator")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t c\\'" prefix-re)) nil . "Fill column indicator")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t C\\'" prefix-re)) nil . "Column highlight")
+                which-key-replacement-alist)
     (cl-pushnew `((,(format "\\`%s t h\\'" prefix-re)) nil . "Hard newlines")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t L\\'" prefix-re)) nil . "Line highlight")
                 which-key-replacement-alist)
     (cl-pushnew `((,(format "\\`%s t o\\'" prefix-re)) nil . "Overwrite")
                 which-key-replacement-alist)

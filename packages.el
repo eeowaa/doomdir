@@ -14,6 +14,7 @@
 (package! jenkinsfile-mode)
 
 ;; UI
+(package! col-highlight)
 (package! page-break-lines)
 
 ;; Music
