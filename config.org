@@ -3065,6 +3065,9 @@ used for two reasons:
 (setq confirm-kill-processes nil)
 #+end_src
 
+*** TODO [#B] Add BitWarden as ~auth-source~ backend
+https://github.com/seanfarley/emacs-bitwarden
+
 *** TODO [#B] Always trust file-location and directory-local variables
 At least for all files in allowed paths (e.g. my source code).
 
