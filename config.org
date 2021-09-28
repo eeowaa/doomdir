@@ -1,3 +1,4 @@
+#+TITLE: Doom Emacs Literate Config
 #+STARTUP:  overview
 #+FILETAGS: :doom:
 * Hints
@@ -2638,7 +2639,6 @@ brew install gnutls
 This should probably be done in a separate gitignored file (=custom.el=) for
 security's sake.
 
-** rss [0/1]
 *** DONE [#B] Find some interesting channels
 + Emacs
   - ~#emacs~
@@ -2682,15 +2682,20 @@ I would much prefer a single =circe= command to do this rather than that whole
 song and dance. See also: https://libera.chat/guides/findingchannels
 
 *** TODO [#C] Figure out how to display inline images
+** rss [1/2]
 #+begin_quote
 Read RSS feeds in the comfort of DOOM (Emacs)
 #+end_quote
 
-*** STRT [#A] Automatically update feed when opening =elfeed=
+*** DONE [#A] Automatically update feed when opening =elfeed=
 #+BEGIN_SRC emacs-lisp :tangle yes
 (after! elfeed
   (add-hook! 'elfeed-search-mode-hook #'elfeed-update))
 #+END_SRC
+
+*** TODO [#B] Allow widening of the description column
+Descriptions get truncated even when there is enough screen space to display
+everything.
 
 ** twitter [0/0] :ARCHIVE:
 #+begin_quote
