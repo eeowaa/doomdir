@@ -112,3 +112,6 @@ npm install -g js-beautify stylelint
 
 # Install prerequisites for `lang/yaml` module
 npm install -g yaml-language-server
+
+# Install prerequisites for `app/irc` module
+brew install gnutls

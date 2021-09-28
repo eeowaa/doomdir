@@ -2623,16 +2623,65 @@ server and [[https://musicpd.org/clients/mpc/][mpc]] to update your music databa
 This module adds system-wide popup Emacs windows for quick edits.
 #+end_quote
 
-** irc [0/1] :ARCHIVE:
+** irc [3/5]
 #+begin_quote
 This module turns Emacs into an IRC client, capable of OS notifications.
 #+end_quote
 
-**** TODO [#C] Configure =circe= for Freenode and/or Libera.Chat
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `app/irc` module
+brew install gnutls
+#+end_src
+
+*** DONE [#A] Configure =circe= for Libera.Chat
 This should probably be done in a separate gitignored file (=custom.el=) for
 security's sake.
 
 ** rss [0/1]
+*** DONE [#B] Find some interesting channels
++ Emacs
+  - ~#emacs~
+  - ~#org-mode~
+  - ~#org-roam~
+  - ~#systemcrafters~
+  - ~#systemcrafters-help~
++ Linux
+  - ~#gnu~
+  - ~#linux~
+  - ~#fedora~
+  - ~#systemd~
+  - ~#rpm-ecosystem~
++ Programming
+  - ~##programming~
+  - ~##typescript~
+  - ~#python~
+  - ~#bash~
+  - ~#git~
++ Infrastructure
+  - ~##infra-talk~
+  - ~##aws~
+  - ~#ansible~
+  - ~#docker~
+  - ~#networking~
+
+*** TODO [#B] Find an easier way to search for channels
+This is my current method of searching:
+
+1. Manually enter the following query in a Circe Server buffer:
+   : /msg alis LIST *searchterm*
+
+2. Switch over to the newly-created ~alis@irc.libera.chat~ buffer to view
+   results. From there, I can enter simple queries like this:
+   : LIST *searchterm*
+
+3. Use =SPC , alis RET= to return to that buffer when I want to perform another
+   search. Back and forth...
+
+I would much prefer a single =circe= command to do this rather than that whole
+song and dance. See also: https://libera.chat/guides/findingchannels
+
+*** TODO [#C] Figure out how to display inline images
 #+begin_quote
 Read RSS feeds in the comfort of DOOM (Emacs)
 #+end_quote
@@ -3019,6 +3068,17 @@ We already have =C-r=, so might as well replace this mostly-useless keybinding.
 ;; Could also use `auth-source' library to retrieve the credentials
 (setq counsel-spotify-client-id "00000000000000000000000000000000"
       counsel-spotify-client-secret "00000000000000000000000000000000")
+
+;; IRC
+(set-irc-server! "irc.libera.chat"
+  `(:tls t
+    :port 6697
+    :nick "johndoe"
+    :sasl-password (auth-source-pick-first-password
+                    :host "libera.chat"
+                    :user "johndoe")
+    :channels ("#emacs"
+               "#")))
 
 ;;; Customize
 #+end_src
