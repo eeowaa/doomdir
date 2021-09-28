@@ -2619,10 +2619,115 @@ This module enables Emacs to be used as a music player. It uses [[https://www.mu
 server and [[https://musicpd.org/clients/mpc/][mpc]] to update your music database.
 #+end_quote
 
-** everywhere [0/0] :ARCHIVE:
+** everywhere [0/1]
 #+begin_quote
 This module adds system-wide popup Emacs windows for quick edits.
 #+end_quote
+
+*** WAIT [#A] Install prerequisites
+**** WAIT Create an automator service to run a command
+***** DONE Manual instructions
+https://support.apple.com/guide/automator/use-a-shell-script-action-in-a-workflow-autbbd4cc11c/mac
+#+begin_quote
+_Use a shell script action in an Automator workflow on Mac_
+
+You can extend the power of Automator on Mac by using shell commands within a
+workflow. For example, you can string several bash shell commands together to
+perform complex tasks, and then pass the results to a window.
+
+1. Choose File > New.
+2. Select a document type, then click Choose.
+3. Type Run Shell Script in the search field, then select Run Shell Script in
+   the search results.
+4. Drag the Run Shell Script action into your workflow.
+5. Click the Shell pop-up menu, then choose the shell environment.
+6. Enter your shell commands in the command field.
+7. Test your workflow before saving it.
+#+end_quote
+
+***** WAIT Use AppleScript to create an Automator Workflow
+:LOGBOOK:
+- Note taken on [2021-09-28 Tue 11:31] \\
+  Waiting for a response on this StackExchange question that I just posted:
+  https://apple.stackexchange.com/questions/428066/how-to-create-a-new-automator-workflow-via-applescript
+:END:
+https://support.apple.com/guide/automator/control-automator-with-scripts-autf238a3e24/2.10/mac/11.0
+#+begin_quote
+_Control Automator with scripts on Mac_
+
+Automator is a “scriptable” application and can be controlled by AppleScript and
+JavaScript for Automation commands. You can execute workflows, create new
+workflows, add actions to workflows, get the values that are set within actions,
+and much more.
+
+To see Automator commands available to scripts, use Script Editor, included with
+macOS.
+
+1. In the Finder, open the Utilities folder in the Applications folder.
+2. The Script Editor icon appears in the Utilities folder.
+3. Open another Finder window, then open the Applications folder.
+4. The Automator icon appears in the Applications folder.
+5. Drag the Automator icon onto the Script Editor icon to open the ScriptEditor
+   dictionary for Automator.
+#+end_quote
+
+Start of my idea for the AppleScript:
+#+begin_src applescript :tangle no
+on CreateShellScriptAutomatorWorkflow(shell, script, name)
+    -- Need to start with Automator closed.
+    if running of application "Automator" then
+        try
+            tell application "Automator" to quit
+        on error
+            do shell script "killall Automator"
+        end try
+    end if
+    repeat while running of application "Automator" is true
+        delay 0.1
+    end repeat
+    -- Open Automator.
+    tell application "Automator"
+        activate
+        (*
+            Now what?
+        ,*)
+    end tell
+end CreateShellScriptAutomatorWorkflow
+#+end_src
+
+The following code block should produce the contents of the ~#!/bin/sh~ script:
+#+begin_src emacs-lisp :tangle no
+(let* ((emacsclient (executable-find "emacsclient"))
+       (server-flag (if server-use-tcp "-f" "-s"))
+       (server-dir (if server-use-tcp server-auth-dir server-socket-dir))
+       (server-file (expand-file-name server-name server-dir)))
+  (format "%s %s %s -e '(emacs-everywhere)'" emacsclient server-flag server-file))
+#+end_src
+
+**** HOLD Bind the service to a keybinding
+***** DONE Manual instructions
+https://www.howtogeek.com/286332/how-to-run-any-mac-terminal-command-with-a-keyboard-shortcut/
+#+begin_quote
+_How to Run Any Mac Terminal Command With a Keyboard Shortcut_
+(...)
+Save your workflow with a name you’ll recognize, and we’re done with Automator.
+
+Next, head to System Preferences > Keyboard > Shortcuts. In the left panel click
+“Services,” and scroll down until you see the service you just created—it should
+be under the “General” section.
+#+end_quote
+
+***** HOLD Use AppleScript to assign the Workflow to a keybinding
+****** DONE Create a script to do this
+https://github.com/eeowaa/stow-dotfiles/blob/main/macos/.local/bin/service-shortcut
+
+****** HOLD Call the script
+Should eventually tangle to =install/macos.sh= once I have created the Workflow
+via AppleScript:
+
+#+begin_src sh :tangle no
+service-shortcut 'Emacs everywhere' 4 e # Command+Option+E
+#+end_src
 
 ** irc [3/5]
 #+begin_quote

@@ -12,6 +12,9 @@
 ;; Programming
 (package! sed-mode)
 (package! jenkinsfile-mode)
+(when IS-MAC
+  (package! applescript-mode)
+  (package! ob-applescript))
 
 ;; UI
 (package! col-highlight)
