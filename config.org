@@ -2654,146 +2654,17 @@ Modules that configure Emacs one way or another, or focus on making it easier
 for you to customize it yourself. It is best to load these last.
 #+end_quote
 
-** literate [1/6]
+** literate [1/4]
 #+begin_quote
 This module enables support for a literate config.
 #+end_quote
 
-*** DONE [#A] Clear instead of deleting target file
-~org-babel-tangle~ deletes the existing target file before writing to it. This
-causes a problem when the target is a symlink, because the link is replaced with
-a normal file. The following code overrides ~org-babel-tangle~ by replacing
-~(delete-file file-name)~ with ~(with-temp-file file-name t)~, essentially
-clearing the target file instead of deleting it.
+*** DONE [#A] Disable tangle upon save
+It just takes too long. 🙁
 
 #+begin_src emacs-lisp :tangle yes
-(after! org-babel
-  (defun my/org-babel-tangle (&optional arg target-file lang-re)
-    "Write code blocks to source-specific files.
-Extract the bodies of all source code blocks from the current
-file into their own source-specific files.
-With one universal prefix argument, only tangle the block at point.
-When two universal prefix arguments, only tangle blocks for the
-tangle file of the block at point.
-Optional argument TARGET-FILE can be used to specify a default
-export file for all source blocks.  Optional argument LANG-RE can
-be used to limit the exported source code blocks by languages
-matching a regular expression."
-    (interactive "P")
-    (run-hooks 'org-babel-pre-tangle-hook)
-    ;; Possibly Restrict the buffer to the current code block
-    (save-restriction
-      (save-excursion
-        (when (equal arg '(4))
-          (let ((head (org-babel-where-is-src-block-head)))
-            (if head
-                (goto-char head)
-              (user-error "Point is not in a source code block"))))
-        (let ((block-counter 0)
-              (org-babel-default-header-args
-               (if target-file
-                   (org-babel-merge-params org-babel-default-header-args
-                                           (list (cons :tangle target-file)))
-                 org-babel-default-header-args))
-              (tangle-file
-               (when (equal arg '(16))
-                 (or (cdr (assq :tangle (nth 2 (org-babel-get-src-block-info 'light))))
-                     (user-error "Point is not in a source code block"))))
-              path-collector)
-          (mapc ;; map over all languages
-           (lambda (by-lang)
-             (let* ((lang (car by-lang))
-                    (specs (cdr by-lang))
-                    (ext (or (cdr (assoc lang org-babel-tangle-lang-exts)) lang))
-                    (lang-f (org-src-get-lang-mode lang))
-                    she-banged)
-               (mapc
-                (lambda (spec)
-                  (let ((get-spec (lambda (name) (cdr (assoc name (nth 4 spec))))))
-                    (let* ((tangle (funcall get-spec :tangle))
-                           (she-bang (let ((sheb (funcall get-spec :shebang)))
-                                       (when (> (length sheb) 0) sheb)))
-                           (tangle-mode (funcall get-spec :tangle-mode))
-                           (base-name (cond
-                                       ((string= "yes" tangle)
-                                        (file-name-sans-extension
-                                         (nth 1 spec)))
-                                       ((string= "no" tangle) nil)
-                                       ((> (length tangle) 0) tangle)))
-                           (file-name (when base-name
-                                        ;; decide if we want to add ext to base-name
-                                        (if (and ext (string= "yes" tangle))
-                                            (concat base-name "." ext) base-name))))
-                      (when file-name
-                        ;; Possibly create the parent directories for file.
-                        (let ((m (funcall get-spec :mkdirp))
-                              (fnd (file-name-directory file-name)))
-                          (and m fnd (not (string= m "no"))
-                               (make-directory fnd 'parents)))
-                        ;; HACK Clear any old versions of file
-                        (and (file-exists-p file-name)
-                             (not (member file-name (mapcar #'car path-collector)))
-                             (with-temp-file file-name t)) ;; NOTE This is what changed
-                        ;; drop source-block to file
-                        (with-temp-buffer
-                          (when (fboundp lang-f) (ignore-errors (funcall lang-f)))
-                          (when (and she-bang (not (member file-name she-banged)))
-                            (insert (concat she-bang "\n"))
-                            (setq she-banged (cons file-name she-banged)))
-                          (org-babel-spec-to-string spec)
-                          ;; We avoid append-to-file as it does not work with tramp.
-                          (let ((content (buffer-string)))
-                            (with-temp-buffer
-                              (when (file-exists-p file-name)
-                                (insert-file-contents file-name))
-                              (goto-char (point-max))
-                              ;; Handle :padlines unless first line in file
-                              (unless (or (string= "no" (cdr (assq :padline (nth 4 spec))))
-                                          (= (point) (point-min)))
-                                (insert "\n"))
-                              (insert content)
-                              (write-region nil nil file-name))))
-                        ;; if files contain she-bangs, then make the executable
-                        (when she-bang
-                          (unless tangle-mode (setq tangle-mode #o755)))
-                        ;; update counter
-                        (setq block-counter (+ 1 block-counter))
-                        (unless (assoc file-name path-collector)
-                          (push (cons file-name tangle-mode) path-collector))))))
-                specs)))
-           (if (equal arg '(4))
-               (org-babel-tangle-single-block 1 t)
-             (org-babel-tangle-collect-blocks lang-re tangle-file)))
-          (message "Tangled %d code block%s from %s" block-counter
-                   (if (= block-counter 1) "" "s")
-                   (file-name-nondirectory
-                    (buffer-file-name
-                     (or (buffer-base-buffer) (current-buffer)))))
-          ;; run `org-babel-post-tangle-hook' in all tangled files
-          (when org-babel-post-tangle-hook
-            (mapc
-             (lambda (file)
-               (org-babel-with-temp-filebuffer file
-                 (run-hooks 'org-babel-post-tangle-hook)))
-             (mapcar #'car path-collector)))
-          ;; set permissions on tangled files
-          (mapc (lambda (pair)
-                  (when (cdr pair) (set-file-modes (car pair) (cdr pair))))
-                path-collector)
-          (mapcar #'car path-collector)))))
-  (advice-add 'org-babel-tangle :override #'my/org-babel-tangle))
+(remove-hook 'org-mode-hook #'+literate-enable-recompile-h)
 #+end_src
-
-*** TODO [#A] Tangle upon save
-Currently, I need to run =C-c C-v C-t= (~org-babel-tangle~) manually before
-=config.org= tangles to =config.el=, although according to the =literate= module
-documentation, this should be happening automatically upon save.
-
-*** TODO [#B] Tangle ~sh~ blocks to =prereqs.sh=
-+ [[file:~/.config/emacs/modules/config/literate/README.org::*Change where src blocks are tangled or prevent it entirely][Change where src blocks are tangled or prevent it entirely]]
-
-This should not only be done for existing ~sh~ blocks, but for ~PREREQ~ lines in
-=init.el=. So really, I should create more ~sh~ blocks.
 
 *** TODO [#B] Tangle to =packages.el=
 I would like to make =packages.el= literate instead of "illiterate". 😉
