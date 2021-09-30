@@ -344,6 +344,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
 (setq ispell-dictionary "english")
 
+(after! lsp
+  (setq lsp-restart 'auto-restart))
+
 (setq magit-repository-directories
       '(("~/Documents/src" . 2)
         ("~/Documents/ref" . 1)
