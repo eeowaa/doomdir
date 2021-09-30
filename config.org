@@ -2420,6 +2420,7 @@ This module adds [[https://github.com/ethereum/solidity][Solidity]] support thro
 # Install prerequisites for `lang/web` module
 brew install tidy-html5
 npm install -g js-beautify stylelint
+npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 #+end_src
 
 ** yaml [6/7]

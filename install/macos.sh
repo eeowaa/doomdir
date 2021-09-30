@@ -109,6 +109,7 @@ npm install -g bash-language-server
 # Install prerequisites for `lang/web` module
 brew install tidy-html5
 npm install -g js-beautify stylelint
+npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 
 # Install prerequisites for `lang/yaml` module
 npm install -g yaml-language-server
