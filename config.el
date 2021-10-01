@@ -6,8 +6,10 @@
 (advice-add 'hide-mode-line-mode :override #'always)
 (advice-add 'doom-themes-hide-modeline :override #'always)
 
-;; Use a modified `doom-henna' theme which fixes `ivy-current-match'
-(setq doom-theme 'eeowaa-henna)
+(setq doom-theme
+      (if initial-window-system
+          'doom-outrun-electric
+        'eeowaa-henna))
 
 (after! hl-todo
   (setq hl-todo-keyword-faces
@@ -606,8 +608,10 @@ to `org-footnote-section'.  Inline definitions are ignored."
 
 (add-to-list 'auto-mode-alist '("pylint" . conf-mode))
 
-(dolist (re '("/.config/\\(shell\\|bash\\)/.+"
-              "\\.cygport\\'"))
+(setq-default sh-shell-file "/bin/sh")
+
+(dolist (re '("/\\.config/\\(shell\\|bash\\)/.+"
+              "\\.\\(env\\|cygport\\)\\'"))
   (add-to-list 'auto-mode-alist
                `(,re . shell-script-mode)))
 

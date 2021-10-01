@@ -195,11 +195,16 @@ satisfy the following requirements /without modification/ when running in a
 
 While ~doom-badger~ is OK, I prefer ~doom-henna~. Unfortunately, it does not
 satisfy the 3rd requirement, so I made a patched copy of the theme called
-~eeowaa-henna~ which fixes the problem.
+~eeowaa-henna~ which fixes the problem with ~ivy-current-match~.
+
+As for GUI Emacs, I like ~doom-outrun-electric~ for its clear separation between
+windows and for its cool color palette.
 
 #+begin_src emacs-lisp :tangle yes
-;; Use a modified `doom-henna' theme which fixes `ivy-current-match'
-(setq doom-theme 'eeowaa-henna)
+(setq doom-theme
+      (if initial-window-system
+          'doom-outrun-electric
+        'eeowaa-henna))
 #+end_src
 
 ** doom-dashboard [0/0] :ARCHIVE:
@@ -2388,7 +2393,7 @@ This module provides an environment for hacking and having fun in scheme. It is
 powered by [[https://www.nongnu.org/geiser/geiser_1.html#introduction][geiser]].
 #+end_quote
 
-** sh [2/2]
+** sh [3/3]
 #+begin_quote
 This module adds support for shell scripting languages.
 #+end_quote
@@ -2400,10 +2405,15 @@ brew install bash zsh fish powershell bashdb zshdb shellcheck
 npm install -g bash-language-server
 #+end_src
 
+*** DONE [#A] Assume Bourne Shell by default
+#+begin_src emacs-lisp :tangle yes
+(setq-default sh-shell-file "/bin/sh")
+#+end_src
+
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
-(dolist (re '("/.config/\\(shell\\|bash\\)/.+"
-              "\\.cygport\\'"))
+(dolist (re '("/\\.config/\\(shell\\|bash\\)/.+"
+              "\\.\\(env\\|cygport\\)\\'"))
   (add-to-list 'auto-mode-alist
                `(,re . shell-script-mode)))
 #+end_src
