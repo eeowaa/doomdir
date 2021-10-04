@@ -7,14 +7,7 @@ Are you having trouble tangling this file with =C-c C-v C-t=
 (~org-babel-tangle~)? Have you recently updated Doom Emacs using ~doom upgrade~?
 Why don't you try =M-x pdf-tools-install= and try again? 😃
 
-** HOLD ~error in process sentinel: Wrong type argument: number-or-marker-p, nil~
-I'm not sure if this will solve it, but you can try:
-#+begin_src sh :tangle no
-find ~/.config/doom -type f -name .DS_Store -exec rm '{}' \;
-doom purge
-#+end_src
-
-** STRT Finding a good subtree for configuration
+** DONE Finding a good subtree for configuration
 This Org file has been organized to mirror the structure [[file:init.el][init.el]], which in turn
 mirrors the structure of =~/.emacs.d/modules=. Configuration for options, hooks,
 etc. in this file should be done in the subtree which corresponds to the Doom
@@ -25,6 +18,118 @@ Use =SPC h d e= (~my/doom-help-search-source~) and =SPC h d M=
 for (or in some cases, is at least /intended/ to contain configuration for) the
 option, hook, etc. that you want to configure.
 
+** TODO Project development in Doom Emacs [2/5]
+:PROPERTIES:
+:CATEGORY: doom/misc
+:END:
+These actually apply to all sorts of projects, not just Python.
+
+*** DONE Starting a new project
+1. Create the project directory using =M-x mkdir=
+2. Register the project using =SPC p a= (~projectile-add-known-project~)
+3. Initialize the git repo using =SPC g c r= (~magit-init~)
+
+*** DONE Contextualizing the work
+1. Create a simple =README.org= using =SPC f f= (~counsel-find-file~)
+   - Briefly describe the project objective
+   - Define the scope of the first iteration
+
+2. Similarly, create a =todo.org= and list a few tasks that come to mind
+   - Feel free to use this very file as a template
+   - Add categories and tags to organize your work:
+     | File          | Heading               |
+     |---------------+-----------------------|
+     | ~#+CATEGORY:~ | ~:CATEGORY:~ property |
+     | ~#+FILETAGS:~ | standard tag          |
+
+3. Add the tasks to your Org Agenda
+   - If you want the tasks to appear alongside the rest of your projects, run
+     =C-c [= (~org-agenda-file-to-front~), which will add =todo.org= to
+     ~org-agenda-files~ by the Customize interface and stored in the file
+     specified by ~custom-file~.
+
+   - On the other hand, if you'd rather focus in on the project and/or not deal
+     with Customize, you can use =SPC u C-c C-x <= (~org-set-restriction-lock~)
+     to restrict the agenda to tasks in =todo.org=. Relevant keybindings:
+     | Binding           | Description         |
+     |-------------------+---------------------|
+     | =SPC u C-c C-x <= | restrict to file    |
+     | =C-c C-x <=       | restrict to subtree |
+     | =C-c C-x >=       | remove restriction  |
+
+*** TODO Configure git
+1. If you would like to set your author name and email to something other than
+   the global default, either edit the local gitconfig file using =SPC g f g=
+   (~magit-find-git-config-file~) or just use shell commands:
+   #+begin_src sh
+   # For commit messages
+   git config user.name eeowaa
+   git config user.email 7460185+eeowaa@users.noreply.github.com
+   # For forge commands
+   git config github.user eeowaa
+   #+end_src
+2. If using =:tools magit +forge= to interact with a git remote such as GitHub,
+   you will need to set up an auth token.
+   - [ ] How is this done?
+   - [ ] macOS keychain vs. =~/.authinfo.gpg=
+3. Make your first commit via the menu invoked by =SPC g g= (~magit-status~)
+   - Add files to =.gitignore= using =i= (~magit-gitignore~)
+
+**** HOLD Explain how to configure and use the =forge= commands
+:LOGBOOK:
+- Note taken on [2021-10-04 Mon 10:50] \\
+  I currently have =:tools magit +forge= disabled.
+:END:
+- Allows you to use an issue tracker (e.g. GitHub Issues) instead of =todo.org=
+- Bound to =SPC g '=
+
+*** TODO Language-specific boilerplate
+**** TODO Install interpreter
+Make sure to match the local version with the version you are going to run in
+production.
+
+**** TODO Install debugger (optional)
+**** TODO Install offline documentation
+- =M-x dash-docs-install-docset=
+  - Do for whatever language(s) you're working with
+  - [ ] Where are they installed?
+- [ ] Texinfo for Python?
+  - [ ] brew command?
+- [ ] Boto3?
+  - There is an ~AWS_Javascript~ Dash docset but I don't see one for Boto3
+
+**** TODO Set up environment (e.g. =.env=)
+**** TODO Write the =.editorconfig= and optionally the =.dir-locals.el=
+Example =.dir-locals.el=:
+#+begin_src lisp-data
+((nil (projectile-project-run-cmd . "python3.8 -m lambda_function")
+      (compilation-read-command)))
+#+end_src
+
+*** TODO Running the project
+To "run a project" means to execute an entrypoint command. Use =SPC p R=
+(~projectile-run-project~) to be prompted for such a command. Once you've run
+the command once, it will be saved in the projectile cache so you can retrieve
+it with =M-p= (~previous-history-element~) in the minibuffer.
+
+To skip the minibuffer prompt altogether, you can use =SPC p C=
+(~projectile-repeat-last-command~), assuming you haven't run any other
+command-executing projectile commands such as =SPC p T=
+(~projectile-test-project~) since the last time you used =SPC p R=.
+
+If the project entrypoint command is static, you can store it in the
+~projectile-project-run-cmd~ variable in the project's =.dir-locals.el=. This
+way, you can use =SPC p R= to run the project without ever seeing a minibuffer
+prompt. This is more consistent than using =SPC p C= after =SPC p R= and is
+guaranteed to work every time. To edit the =.dir-locals.el=, use =SPC p e=
+(~projectile-edit-dir-locals~).
+
+*THE ABOVE PARAGRAPH IS NOT TRUE*. You will still be prompted for a command.
+Unfortunately, just setting ~compilation-read-command~ to ~nil~ means that other
+commands such as ~projectile-test-project~ will not prompt, either.
+
+**** TODO Explain how to use ~projectile-edit-dir-locals~
+**** TODO Explain how to run project in an interactive shell
 * Prerequisites
 ** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -2308,7 +2413,7 @@ This module adds support for PHP 5.3+ (including PHP7).
 
 ** plantuml [0/0] :ARCHIVE:
 ** purescript [0/0] :ARCHIVE:
-** python [4/5]
+** python [4/7]
 :PROPERTIES:
 :CATEGORY: doom/python
 :END:
@@ -2332,8 +2437,8 @@ npm install -g pyright
 
 *** DONE [#A] Develop and run a simple "Hello World" program
 More than a simple "Hello World":
-+ [[file:~/src/life/secret-santa/][Secret Santa project]]
-+ [[file:~/Documents/org/life/notes.org::*Developing with interpreted languages][Notes for developing with interpreted languages]]
++ [[file:~/Documents/src/life/secret-santa/][Secret Santa project]]
++ [[file:~/org/life/notes.org::*Developing with interpreted languages][Notes for developing with interpreted languages]]
 
 *** DONE [#B] Set up fill column for PEP 8 compliance
 #+begin_src emacs-lisp :tangle yes
@@ -2346,6 +2451,91 @@ More than a simple "Hello World":
 #+begin_src emacs-lisp :tangle yes
 (add-to-list 'auto-mode-alist '("pylint" . conf-mode))
 #+end_src
+
+*** STRT [#A] Document Python workflow in Doom Emacs [0/4]
+Probably best to define ~projectile-project-run-cmd~ in =.dir-locals.el= for
+ease of use, and then use =SPC p != (~projectile-run-shell-command-in-root~)
+when there is some variation.
+
+**** STRT Running the project
++ If you have a code block like this:
+  #+begin_src python
+  if __name__ == "__main__":
+      ...
+  #+end_src
+  Then you can run like this:
+  #+begin_src sh
+  python3 lambda_function.py # option 1
+  python3 -m lambda_function # option 2 (equivalent)
+  #+end_src
+
+**** STRT Testing specific functions
+This re-evaluates the entire module before executing the function:
+#+begin_src python
+python3.8 -m lambda_function -c 'lambda_handler(None, None)'
+#+end_src
+
+**** STRT Using the interpreter
+Open the REPL using =SPC o r= (~+eval/open-repl-other-window~). To load the
+definitions your script file (e.g. =lambda_function.py=) so that you can run
+code in the REPL just like in the script file (i.e. same namespace):
+
+#+begin_src python
+from lambda_function import *
+#+end_src
+
+If you've redefined a function in a file-visited buffer and would like for the
+change to take effect in the REPL, just select the function using =vif= and send
+it to the REPL with =gr= (~+eval:region~).
+
+You can also re-evaluate the entire buffer using =gR= (~+eval/buffer~)
+
+**** STRT Virtual environments
+The following standard procedure works OK, but does not integrate with Doom
+Emacs at all:
+
+#+begin_src sh :eval no
+virtualenv .venv
+. ./.venv/bin/activate
+pip install -r requirements.txt
+#+end_src
+
+Instead, the =python= module in Doom Emacs comes with the =pipenv= package,
+which provides commands that wrap ~pipenv~, a package manager that replaces the
+standard ~pip~ and ~virtualenv~. Reference: https://realpython.com/pipenv-guide/
+
+1. Create a new virtualenv and install packages
+   + If you are fine with using the current system Python version, =SPC m e i=
+     /in a python buffer/ (~pipenv-install~) can be used to set things up
+     a. Specify package(s) to install when prompted
+     b. Watch for a =Pipfile= and =Pipfile.lock= to appear in the project root
+        + =Pipfile= will contain a specification of requirements
+          - Commit this file just like you would =requirements.txt=
+        + =Pipfile.lock= will contain a manifest of dependencies
+          - Commit this file if you want [[https://github.com/pypa/pipenv/issues/598][reproducible builds]]
+   + If you want a specific Python version, run the following shell command
+     instead of using ~pipenv-install~ from Emacs:
+     : pipenv (--python <version> | --three | --two) install <package>...
+   + By default, the virtualenv will be created under
+     =$XDG_DATA_HOME/virtualenvs=, but the ~PIPENV_VENV_IN_PROJECT~ option can
+     be set to create a =.venv= subdirectory in your project instead
+2. Activate the virtualenv in Emacs using =SPC m e a= /in a python buffer/
+   (~pipenv-activate~)
+   a. Watch for the ~venv:<virtualenv>~ lighter to appear in your modeline
+   b. Now use =SPC h b i pipenv RET= to view keybindings for =pipenv=
+      + =SPC m e i= (~pipenv-install~), =SPC m e u= (~pipenv-uninstall~), and
+        =SPC m e l= (~pipenv-lock~) can be used to *manage packages*
+      + =SPC m e r= (~pipenv-run~) can be used as an *ad-hoc command runner*
+        instead of =SPC p != (~projectile-run-command-in-root~)
+        - The ~pipenv run~ shell command can still be used when outside of the
+          virtualenv (e.g. ~projectile-run-project~ from =README.org=)
+      + =SPC m e o= (~pipenv-open~) can be used to open package modules
+        installed in the virtualenv
+      + The only keybinding I'd actively avoid is =SPC m e s= (~pipenv-shell~),
+        which opens a ~shell-mode~ buffer instead of a terminal popup buffer;
+        just run the ~pipenv shell~ shell command in a terminal buffer
+3. Restart the LSP server using =SPC c l s r= (~lsp-workspace-restart~)
+   + This is necessary for the language server to recognize the virtualenv
 
 *** HOLD [#C] Set up debugging
 + Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
