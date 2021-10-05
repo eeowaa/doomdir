@@ -643,6 +643,20 @@ to `org-footnote-section'.  Inline definitions are ignored."
 (after! elfeed
   (add-hook! 'elfeed-search-mode-hook #'elfeed-update))
 
+(after! elfeed
+  ;; Do not truncate RSS entry titles
+  (setq elfeed-search-title-max-width 1000)
+
+  ;; Do not truncate RSS entry tags (just need to shift left by 2 characters)
+  (defun my/elfeed-format-column (string width &optional align)
+    "Return STRING truncated or padded to WIDTH - 2 following ALIGNment.
+  Align should be a keyword :left or :right."
+    (if (<= width 0)
+        ""
+      (format (format "%%%s%d.%ds" (if (eq align :left) "-" "") (- width 2) (- width 2))
+              string)))
+  (advice-add 'elfeed-format-column :override #'my/elfeed-format-column))
+
 (remove-hook 'org-mode-hook #'+literate-enable-recompile-h)
 
 (after! smartparens
