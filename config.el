@@ -657,6 +657,9 @@ to `org-footnote-section'.  Inline definitions are ignored."
               string)))
   (advice-add 'elfeed-format-column :override #'my/elfeed-format-column))
 
+(after! elfeed
+  (setq elfeed-search-remain-on-entry t))
+
 (remove-hook 'org-mode-hook #'+literate-enable-recompile-h)
 
 (after! smartparens

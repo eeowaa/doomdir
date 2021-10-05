@@ -2994,7 +2994,7 @@ I would much prefer a single =circe= command to do this rather than that whole
 song and dance. See also: https://libera.chat/guides/findingchannels
 
 *** TODO [#C] Figure out how to display inline images
-** rss [1/2]
+** rss [3/3]
 #+begin_quote
 Read RSS feeds in the comfort of DOOM (Emacs)
 #+end_quote
@@ -3020,6 +3020,17 @@ Read RSS feeds in the comfort of DOOM (Emacs)
       (format (format "%%%s%d.%ds" (if (eq align :left) "-" "") (- width 2) (- width 2))
               string)))
   (advice-add 'elfeed-format-column :override #'my/elfeed-format-column))
+#+end_src
+
+*** DONE [#C] Leave point on the current entry in the ~*elfeed-search*~ buffer
+By default, point in ~*elfeed-search*~ is always left on the entry /beneath/ the
+currently-displayed entry in ~*elfeed-entry*~, regardless of navigation via
+=C-j= or =C-k=. This is only annoying because I would like for the current entry
+to be highlighted in ~*elfeed-search~ via =hl-line=.
+
+#+begin_src emacs-lisp :tangle yes
+(after! elfeed
+  (setq elfeed-search-remain-on-entry t))
 #+end_src
 
 ** twitter [0/0] :ARCHIVE:
