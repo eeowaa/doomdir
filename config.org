@@ -2285,7 +2285,7 @@ This module adds support for PHP 5.3+ (including PHP7).
 
 ** plantuml [0/0] :ARCHIVE:
 ** purescript [0/0] :ARCHIVE:
-** python [4/7]
+** python [4/6]
 :PROPERTIES:
 :CATEGORY: doom/python
 :END:
@@ -2324,6 +2324,44 @@ More than a simple "Hello World":
 (add-to-list 'auto-mode-alist '("pylint" . conf-mode))
 #+end_src
 
+*** STRT [#B] Integrate Pipenv with projectile
+For some reason, the =:lang python= module disables ~pipenv-with-projectile~, so
+I want to re-enable that here.
+
+_Notes:_
+1. ~use-package-hook!~ is needed to reconfigure the ~use-package!~ block in the
+   module's original configuration.
+2. The ~:pre-init~ section must return ~nil~ in order to override (rather than
+   just append to) the original ~:init~ section.
+3. How I have Doom Emacs configured, all ~use-package-hook!~ forms *MUST* be
+   tangled to =early-init.el=.
+
+#+begin_src emacs-lisp :tangle no
+(use-package-hook! pipenv
+  :pre-init
+  (setq pipenv-with-projectile t)
+  nil)
+#+end_src
+
+_Verdict_:
++ Unfortunately, the above does not seem to work for whatever reason.
++ Whenever a project is switched, the ~projectile-after-switch-project-hook~
+  should run, but it doesn't seem to.
+  - This can be seen in the modeline (the virtual environment is still shown in
+    workspaces that do not use Pipenv or even Python).
++ Might need to add hooks for ~persp~ mode
+  - Doom Emacs does not utilize ~persp-projectile~, so these hooks must be
+    manaully set.
++ See the whole discussion here: https://github.com/hlissner/doom-emacs/issues/1666
+  - Might want to just use the =:tools direnv= as Henrik suggested
+
+#+begin_src emacs-lisp :tangle no
+(defun pipenv-activate-projectile ()
+  "Activate integration of Pipenv with Projectile."
+  (add-hook
+   'projectile-after-switch-project-hook
+   (lambda () (funcall pipenv-projectile-after-switch-function))))
+#+end_src
 
 *** HOLD [#C] Set up debugging
 + Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
