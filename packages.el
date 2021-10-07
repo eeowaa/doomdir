@@ -9,21 +9,19 @@
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
 ;(package! some-package)
 
-;; Programming
+;; :lang
 (package! sed-mode)
 (package! jenkinsfile-mode)
 (when IS-MAC
   (package! applescript-mode)
   (package! ob-applescript))
 
-;; UI
+;; :ui
 (package! col-highlight)
 (package! page-break-lines)
 
-;; Music
+;; :app
 (package! counsel-spotify)
-
-;; Weather
 (package! noaa)
 
 ;; To install a package directly from a remote git repo, you must specify a
