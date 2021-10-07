@@ -282,6 +282,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 ;; Not sure what the best way is to add this hook
 (add-hook 'evil-local-mode-hook #'turn-on-undo-tree-mode)
 
+(after! git-commit
+  (delq! 'overlong-summary-line git-commit-style-convention-checks))
+
 (add-to-list 'auto-mode-alist '("/git/config\\.d/.+" . gitconfig-mode))
 
 (set-eshell-alias!

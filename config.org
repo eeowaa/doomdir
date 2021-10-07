@@ -1020,11 +1020,17 @@ Sometimes this doesn't seem to work.
 (add-hook 'evil-local-mode-hook #'turn-on-undo-tree-mode)
 #+end_src
 
-** vc [1/1]
+** vc [2/2]
 #+begin_quote
 This module augments Emacs builtin version control support and provides better
 integration with git.
 #+end_quote
+
+*** DONE [#B] Do not prompt when the commit message is too long
+#+begin_src emacs-lisp :tangle yes
+(after! git-commit
+  (delq! 'overlong-summary-line git-commit-style-convention-checks))
+#+end_src
 
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
