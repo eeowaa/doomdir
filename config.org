@@ -1422,8 +1422,7 @@ cpan install App::Git::Autofixup
 #+begin_src emacs-lisp :tangle yes
 (setq magit-repository-directories
       '(("~/Documents/src" . 2)
-        ("~/Documents/ref" . 1)
-        ("~/stow-dotfiles" . 1)))
+        ("~/Documents/ref" . 1)))
 #+end_src
 
 ** make [0/0]

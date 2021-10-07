@@ -351,8 +351,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
 (setq magit-repository-directories
       '(("~/Documents/src" . 2)
-        ("~/Documents/ref" . 1)
-        ("~/stow-dotfiles" . 1)))
+        ("~/Documents/ref" . 1)))
 
 (when IS-MAC
   (setq ;; Comfortable keys that work most of the time
