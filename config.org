@@ -1,7 +1,6 @@
 #+TITLE: Doom Emacs Literate Config
 #+STARTUP:  overview
 #+FILETAGS: :doom:
-* Hints
 * Prerequisites
 ** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -1334,7 +1333,7 @@ that prevents errors. Worst case, I could disable =debugger=.
 disable =debugger= for the time being (it's not super-important for me right
 now, anyway).
 
-** direnv [1/2] :ARCHIVE:
+** direnv [1/4] :ARCHIVE:
 #+begin_quote
 This module integrates direnv into Emacs.
 #+end_quote
@@ -1346,7 +1345,73 @@ brew install direnv
 #+end_src
 
 *** TODO [#A] See why =direnv= prevents envvars from propagating between buffers
-I have this module disabled for this sole reason.
+This is the original reason why I disabled this module.
+
+*UPDATE*: It looks like the =envrc= package is used by the =direnv= module.
+According to the =envrc= project's [[https://github.com/purcell/envrc][documentation]]:
+
+#+begin_quote
+This library is like the direnv.el package, but sets all environment variables
+buffer-locally, while direnv.el changes the global set of environment variables
+after each command.
+#+end_quote
+
+So environment variables are set buffer-locally. I wonder if I can exclude
+certain environment variables (such as AWS credentials) from this rule, or if I
+can somehow set them in a global location to get pulled in by all "dir
+environments". Maybe there is a rule for that.
+
+For the sake of debugging, you might want to try the following function:
+
+#+begin_src emacs-lisp :tangle yes
+(defun my/aws-envvars ()
+  "Print the values of AWS environment variables"
+  (interactive)
+  (dolist (var (seq-filter
+                (lambda (s) (string-match "\\`AWS_" s))
+                (sort process-environment #'string<)))
+    (princ (concat var "\n"))))
+#+end_src
+
+*** TODO [#A] Understand how Emacs handles environment variables
++ [ ] Play around with the following Lisp Interaction buffer
+  #+begin_src lisp-interaction :tangle no
+  ;; Variables
+  initial-environment
+  process-environment
+  exec-path
+  doom-env-file
+
+  ;; Function calls
+  (getenv "PATH")
+  (getenv "PATH" (selected-frame))
+  (getenv-internal "PATH")
+  (doom/reload-env)
+  (doom-load-envvars-file)
+  #+end_src
++ [ ] Consult the documentation for all of those variables and functions
++ [ ] See how Doom Emacs uses those functions and variables (=SPC h d e=)
++ [ ] See how =envrc= uses those functions and variables (=C-h C-l envrc RET=)
+  - [ ] Retrieve =envrc= source (=M-x package-install RET envrc RET=)
+
+*** TODO [#B] Try =direnv.el= instead of =envrc=
+https://github.com/wbolster/emacs-direnv
+
+However, be wary of @purcell's comments on =direnv.el=:
+#+begin_quote
++ When switching to a buffer that is not "inside" a project with an =.envrc= file,
+  the buffer will see the last project's environment. I would prefer it to see
+  the default Emacs environment.
+
++ When =direnv= fails to execute in the course of switching to a buffer in a new
+  project with an =.envrc= file (e.g. because that =.envrc= file is disallowed),
+  buffers in the new project will see the environment variables from the
+  previous project.
+
++ Background buffers from a previous project will start seeing the new project's
+  environment, so any processes they launch asynchronously after the switch will
+  use the wrong environment. (This is probably quite rare in practice.)
+#+end_quote
 
 ** docker [1/1]
 #+begin_quote
