@@ -1523,7 +1523,7 @@ This module adds support for [[https://beancount.github.io/][Beancount]] to Emac
 you [[https://plaintextaccounting.org/][manage your money in plain text]].
 #+end_quote
 
-** cc [1/1]
+** cc [1/2]
 #+begin_quote
 This module adds support for the C-family of languages: C, C++, and Objective-C.
 #+end_quote
@@ -1532,6 +1532,24 @@ This module adds support for the C-family of languages: C, C++, and Objective-C.
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/cc` module
 brew install ccls gdb glslang
+#+end_src
+
+*** STRT [#B] Use Linux kernel style for C :TESTME:
+#+begin_src emacs-lisp :tangle yes
+(after! cc-mode
+  (unless (stringp c-default-style)
+    (if (assoc 'c-mode c-default-style)
+        ;; Modify existing `c-mode' cons cell in `c-default-style'
+        (setf (alist-get 'c-mode c-default-style) "linux")
+      ;; Insert a new `c-mode' cons cell into `c-default-style'
+      (setq c-default-style
+            (cons '(c-mode . "linux")
+                  c-default-style))))
+
+  ;; REVIEW Not sure why this is necessary
+  (add-hook! 'c-mode-hook
+   (setq tab-width
+         (alist-get 'c-basic-offset (assoc "linux" c-style-alist)))))
 #+end_src
 
 ** clojure [0/0] :ARCHIVE:

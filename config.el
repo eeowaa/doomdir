@@ -366,6 +366,21 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
         mac-option-modifier 'super
         mac-right-option-modifier 'hyper))
 
+(after! cc-mode
+  (unless (stringp c-default-style)
+    (if (assoc 'c-mode c-default-style)
+        ;; Modify existing `c-mode' cons cell in `c-default-style'
+        (setf (alist-get 'c-mode c-default-style) "linux")
+      ;; Insert a new `c-mode' cons cell into `c-default-style'
+      (setq c-default-style
+            (cons '(c-mode . "linux")
+                  c-default-style))))
+
+  ;; REVIEW Not sure why this is necessary
+  (add-hook! 'c-mode-hook
+   (setq tab-width
+         (alist-get 'c-basic-offset (assoc "linux" c-style-alist)))))
+
 (add-to-list 'auto-mode-alist '("Cask\\'" . lisp-data-mode))
 
 (add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
