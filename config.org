@@ -2459,10 +2459,16 @@ _Verdict_:
 This module provides language functionality for [[https://qt.io][Qt]] specific files.
 #+end_quote
 
-** racket [0/0] :ARCHIVE:
+** racket [1/1]
 #+begin_quote
 This module provides integration for [[https://github.com/greghendershott/racket-mode][racket-mode]].
 #+end_quote
+
+*** DONE [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/racket` module
+brew install --cask racket
+#+end_src
 
 ** raku [0/0] :ARCHIVE:
 #+begin_quote
