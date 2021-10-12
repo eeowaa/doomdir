@@ -3210,6 +3210,15 @@ used for two reasons:
 (setq confirm-kill-processes nil)
 #+end_src
 
+*** DONE [#B] Prevent AWS credentials from being written to ~doom-env-file~
+#+begin_src emacs-lisp :tangle early-init.el
+(when noninteractive
+  (pushnew! doom-env-blacklist
+            "^AWS_ACCESS_KEY_ID$"
+            "^AWS_SECRET_ACCESS_KEY$"
+            "^AWS_SESSION_TOKEN$"))
+#+end_src
+
 *** TODO [#B] Add BitWarden as ~auth-source~ backend
 https://github.com/seanfarley/emacs-bitwarden
 
