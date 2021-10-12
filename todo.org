@@ -158,7 +158,7 @@ keybindings.
   ;;   presentations or streaming.
   #+end_quote
 
-* Config [5/10]
+* Config [5/11]
 :PROPERTIES:
 :CATEGORY: doom/config
 :END:
@@ -283,6 +283,9 @@ blocks in =config.org=.
 I don't really even know what the end result will look like or why it will look
 the way it will (I don't know what I don't know, i.e., there are unknown
 unknowns at this point, which is precisely why I have this listed as an issue)
+
+** TODO [#B] Replace ~advice-add~ with ~defadvice!~ macros
+I want my configuration to use Doom idioms as much as possible.
 
 ** TODO [#C] Figure out how to patch specific functions in Doom
 + =el-patch= looks great: https://github.com/raxod502/el-patch
