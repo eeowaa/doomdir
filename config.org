@@ -1834,7 +1834,7 @@ This module adds [[https://www.java.com][java]] support to Doom Emacs, including
 =groovy-mode=.
 #+end_quote
 
-** javascript [1/3]
+** javascript [2/4]
 :PROPERTIES:
 :CATEGORY: doom/ts
 :END:
@@ -1845,7 +1845,7 @@ This module adds JavaScript and TypeScript support.
 Currently, I am only using TypeScript -- not vanilla JavaScript -- so the
 ~:CATEGORY:~ property for this subtree is set to ~doom/ts~.
 
-*** STRT [#A] Install prerequisites
+*** DONE [#A] Install prerequisites
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/javascript` module
 npm install -g typescript javascript-typescript-langserver eslint trepan-ni
@@ -1855,6 +1855,12 @@ npm install -g typescript javascript-typescript-langserver eslint trepan-ni
 #+begin_src emacs-lisp :tangle yes
 (add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
 #+end_src
+
+*** TODO [#A] Fix broken filename-mode association for =*.js= files
+When I open a =*.js= file, I get the following error:
+: File mode specification error: (error Given parent class xref-location is not a class)
+
+I need to manually run =M-x javascript-mode RET= in order to enable JavaScript mode.
 
 *** HOLD [#B] Set up debugging
 + Try ~dap-mode~ https://www.youtube.com/watch?v=0bilcQVSlbM
