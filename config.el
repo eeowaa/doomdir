@@ -329,6 +329,38 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     (evil-collection-define-key 'insert 'vterm-mode-map
       (kbd key) 'vterm--self-insert)))
 
+(after! flycheck
+  (defun my/flycheck-set-level (level)
+    "Set the Flycheck error level"
+    (interactive
+     (list (flycheck-read-error-level
+            "Minimum error level (errors at lower levels will be hidden): ")))
+    (when (and level (not (flycheck-error-level-p level)))
+      (user-error "Invalid level: %s" level))
+
+    ;; Hide errors in the error list that have a level lower than `level'
+    (flycheck-error-list-set-filter level)
+    (with-current-buffer (or flycheck-error-list-source-buffer (current-buffer))
+      (setq-local flycheck-error-list-minimum-level level)
+
+      ;; Only navigate between errors in the source buffer than have a level of
+      ;; at least `level' (other errors will still be displayed)
+      (setq-local flycheck-navigation-minimum-level level)))
+
+  (defun my/flycheck-reset-level (&optional refresh)
+    "Reset the Flycheck error level"
+    (interactive '(t))
+
+    ;; Refresh the error list according to the global value of
+    ;; `flycheck-error-list-minimum-level'
+    (flycheck-error-list-reset-filter refresh)
+    (with-current-buffer (or flycheck-error-list-source-buffer (current-buffer))
+      (kill-local-variable 'flycheck-error-list-minimum-level)
+
+      ;; Refresh navigation between errors in the source buffer according to the
+      ;; global value of `flycheck-navigation-minimum-level'
+      (kill-local-variable 'flycheck-navigation-minimum-level))))
+
 (mapc (lambda (config-file-dir)
         (add-to-list '+emacs-lisp-disable-flycheck-in-dirs config-file-dir))
       ;; Unique directory components of canonical config file paths

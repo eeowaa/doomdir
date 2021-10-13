@@ -1161,7 +1161,70 @@ into another buffer, you can see the "o". *Note that this is only a problem in
 GUI Emacs, not terminal Emacs*.
 
 * :checkers
-** syntax [1/1]
+** syntax [1/3]
+*** STRT [#A] Allow dynamic changing of error levels displayed
+I have created a couple commands (~my/flycheck-set-level~ and
+~my/flycheck-reset-level~) as an interface to Flycheck's error-level toggling
+functionality. (Note that Flycheck is missing the capability to hide errors in
+the source buffer by error level, and after a bit of digging, it seems too
+difficult to implement myself.)
+
+However, when toggling the Flycheck buffer using =SPC c x=, the buffer-local
+value of ~flycheck-error-list-minimum-level~ gets reset in the error list, while
+it (and the buffer-local value of ~flycheck-navigation-minimum-level~) remain
+unchanged in the source buffer. This creates a mismatch that must be resolved by
+running ~my/flycheck-set-level~ again. Due to this problem, I've decided to
+temporarily keep the two new commands unbound to any keys.
+
+#+begin_src emacs-lisp :tangle yes
+(after! flycheck
+  (defun my/flycheck-set-level (level)
+    "Set the Flycheck error level"
+    (interactive
+     (list (flycheck-read-error-level
+            "Minimum error level (errors at lower levels will be hidden): ")))
+    (when (and level (not (flycheck-error-level-p level)))
+      (user-error "Invalid level: %s" level))
+
+    ;; Hide errors in the error list that have a level lower than `level'
+    (flycheck-error-list-set-filter level)
+    (with-current-buffer (or flycheck-error-list-source-buffer (current-buffer))
+      (setq-local flycheck-error-list-minimum-level level)
+
+      ;; Only navigate between errors in the source buffer than have a level of
+      ;; at least `level' (other errors will still be displayed)
+      (setq-local flycheck-navigation-minimum-level level)))
+
+  (defun my/flycheck-reset-level (&optional refresh)
+    "Reset the Flycheck error level"
+    (interactive '(t))
+
+    ;; Refresh the error list according to the global value of
+    ;; `flycheck-error-list-minimum-level'
+    (flycheck-error-list-reset-filter refresh)
+    (with-current-buffer (or flycheck-error-list-source-buffer (current-buffer))
+      (kill-local-variable 'flycheck-error-list-minimum-level)
+
+      ;; Refresh navigation between errors in the source buffer according to the
+      ;; global value of `flycheck-navigation-minimum-level'
+      (kill-local-variable 'flycheck-navigation-minimum-level))))
+#+end_src
+
+*** STRT [#B] Show error indicators in the margin when in terminal Emacs
+Terminal Emacs does not have fringes -- only margins -- so when Emacs is run in
+nongraphical mode, I would like for Flycheck to use the right margin instead of
+the right fringe for error indicators. As far as I can tell, the right margin is
+not used for anything, so Flycheck should be free to use it.
+
+Unfortunately, when I change ~flycheck-indication-mode~ to ~right-margin~ and
+then run ~flycheck-refresh-fringes-and-margins~, nothing displays in the right
+margin. This happens in both TUI and GUI Emacs. Also, just as a test, I tried
+changing the setting to ~left-margin~, but that did not work, either (note that
+the left margin is currently used by =:ui vc-gutter=).
+
+I should probably use ~doom/sandbox~ (=SPC h d x=) to try this in vanilla Emacs
+and see if Doom is to blame.
+
 *** DONE [#B] Disable flycheck in Emacs Lisp config files
 #+begin_src emacs-lisp :tangle yes
 (mapc (lambda (config-file-dir)
