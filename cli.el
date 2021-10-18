@@ -15,4 +15,7 @@
 
   (defcli! checkout-main ()
     "Checkout main branch for each repo managed by straight."
-    (throw 'exit (list "doom-checkout-main"))))
+    (throw 'exit `(,(concat
+                     (file-name-as-directory
+                      (expand-file-name "bin" doom-private-dir))
+                     "doom-checkout-main")))))
