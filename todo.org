@@ -186,7 +186,7 @@ Here is the convention:
   + =K=
   + =M+x +lookup/documentation=
 + file paths
-  + =$DOOMDIR/config.el=
+  + =DOOMDIR/config.el=
 + citations
   + =:editor evil=
   + =evil=
@@ -218,15 +218,15 @@ I have noticed a few patterns:
 + Tables of contents always use ~-~
 
 *** DONE Rewrite the document
-** DONE [#B] Write =$DOOMDIR/README.org=
+** DONE [#B] Write =DOOMDIR/README.org=
 Interestingly, when I first opened the file, it was pre-populated (probably by
 the =:editor file-templates= module) to look like documentation for a Doom
-module. IIRC, the private user configuration in =$DOOMDIR= is a module itself,
-so I suppose it makes sense. But certain things do *not* make sense:
+module. IIRC, the private user configuration in =DOOMDIR= is a module itself, so
+I suppose it makes sense. But certain things do *not* make sense:
 
-+ [X] Does the =$DOOMDIR= module have a formal name? :: "private configuration"
-+ [X] Does the =$DOOMDIR= module have module flags? :: no
-+ [X] Is =$DOOMDIR/init.el= a member of the =$DOOMDIR= module? :: yes
++ [X] Does the =DOOMDIR= module have a formal name? :: "private configuration"
++ [X] Does the =DOOMDIR= module have module flags? :: no
++ [X] Is =$OOMDIR/init.el= a member of the =DOOMDIR= module? :: yes
 
 ** DONE [#C] Make ~PREREQ~ lines OS-independent
 :LOGBOOK:
@@ -269,7 +269,7 @@ doom info | sed -n \
 
 Which doesn't miss anything, and seems more idiomatic.
 
-** TODO [#A] Tangle =$DOOMDIR/init.el= from =$DOOMDIR/config.org=
+** TODO [#A] Tangle =DOOMDIR/init.el= from =DOOMDIR/config.org=
 This doesn't seem too difficult. All I will need is a set of source blocks that
 tangle to =init.el=. There will need to be some boilerplate at the top and
 bottom, but the rest should sit nicely in the =config.org= document structure.
@@ -295,11 +295,11 @@ I want my configuration to use Doom idioms as much as possible.
 *** HOLD Ask on Discord
 ** TODO [#C] Create custom module =:ui page-break-lines=
 Although I already have the =page-break-lines= package installed in
-=$DOOMDIR/packages.el= and ~global-page-break-lines-mode~ enabled in
-=$DOOMDIR/config.el=, I could write a custom module to do this, placing it under
-=$DOOMDIR/modules/ui/page-break-lines=. (See the documentation for
-~doom-modules-dirs~.)  This would be an easy introduction to writing modules.
+=DOOMDIR/packages.el= and ~global-page-break-lines-mode~ enabled in
+=DOOMDIR/config.el=, I could write a custom module to do this, placing it under
+=DOOMDIR/modules/ui/page-break-lines=. (See the documentation for
+~doom-modules-dirs~.) This would be an easy introduction to writing modules.
 
 It would be nice to include a ~CUSTOM~ comment tag over the module declaration
-in the ~doom!~ block of =$DOOMDIR/init.el= just to remember that /I/ defined the
+in the ~doom!~ block of =DOOMDIR/init.el= just to remember that /I/ defined the
 module.

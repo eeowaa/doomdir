@@ -1,4 +1,4 @@
-#+TITLE:   $DOOMDIR
+#+TITLE:   DOOMDIR
 #+DATE:    October 05, 2021
 #+SINCE:   3.0.0-alpha
 #+STARTUP: inlineimages nofold
@@ -38,8 +38,8 @@ For more detailed information on how modules should be structured, see the
 This module provides no flags.
 
 *** Discussion
-=$DOOMDIR= can't really have module flags, since module flags are passed to
-module declarations in the ~doom!~ block, which is contained in =$DOOMDIR=
+=DOOMDIR= can't really have module flags, since module flags are passed to
+module declarations in the ~doom!~ block, which is contained in =DOOMDIR=
 itself.
 
 ** Plugins
@@ -88,7 +88,7 @@ plans to port their contents to a literate config:
 + [[file:init.el][init.el]]
 + [[file:snippets][snippets/*]]
 
-All other files in =$DOOMDIR= are "illiterate" for a reason; this is not subject
+All other files in =DOOMDIR= are "illiterate" for a reason; this is not subject
 to change anytime soon.
 
 ** Doom Emacs documentation
@@ -303,7 +303,7 @@ for (or in some cases, is at least /intended/ to contain configuration for) the
 option, hook, etc. that you want to configure.
 
 ** Local configuration
-=$DOOMDIR/custom.el= is ignored by [[file:.gitignore][.gitignore]], so it is a good place to store
+=DOOMDIR/custom.el= is ignored by [[file:.gitignore][.gitignore]], so it is a good place to store
 most local configuration. You can take a look at the [[file:config.org::*Load custom config if present]["Load custom config if present"]]
 section of =config.org= for an idea of what to put in it.
 

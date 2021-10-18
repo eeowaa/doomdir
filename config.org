@@ -773,7 +773,7 @@ of ~+file-templates-alist~.
 
 Now the important thing is how ~+file-templates--expand~ actually works.
 *Potentially-important note*: ~yas_snippets-dirs~ contains ~+snippets-dir~, which
-evaluates to =$DOOMDIR/snippets/=.
+evaluates to =DOOMDIR/snippets/=.
 
 *** STRT [#B] Simplify the file template for =sh-mode=
 Doom Emacs' builtin file template for =sh-mode= is not suitable for portable
@@ -787,7 +787,7 @@ $0
 #+end_src
 
 I just created a new file template as follows and stored it in
-=$DOOMDIR/snippets/sh-mode/__=,
+=DOOMDIR/snippets/sh-mode/__=,
 #+begin_src snippet :tangle no
 #!/bin/sh
 $0
@@ -2648,7 +2648,7 @@ Every time I try to use LSP with ~yamlls~, this is what I get:
 : Server yamlls:4133 status:starting exited with status exit. Do you want to restart it? (y or n)
 
 Got it working. See the ~PREREQ~ lines for the =yaml= module in
-=$DOOMDIR/init.el=. Could use some cleanup.
+=DOOMDIR/init.el=. Could use some cleanup.
 
 *** DONE [#A] Download the schema definitions if we don't have them already
 I /think/ this is working. However, I have a note from my "illiterate" config
