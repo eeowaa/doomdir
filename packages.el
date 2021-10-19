@@ -9,21 +9,46 @@
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
 ;(package! some-package)
 
-;; :lang
+;;; :input
+
+;;; :completion
+
+;;; :ui
+(package! col-highlight)
+(package! page-break-lines)
+
+;;; :editor
+
+;;; :emacs
+
+;;; :term
+
+;;; :checkers
+
+;;; :tools
+
+(when EMACS28+
+  (package! xref :pin "a82f459b37b31546bf274388baf8aca79e9c30d9"))
+
+;;; :os
+
+;;; :lang
 (package! sed-mode)
 (package! jenkinsfile-mode)
 (when IS-MAC
   (package! applescript-mode)
   (package! ob-applescript))
 
-;; :ui
-(package! col-highlight)
-(package! page-break-lines)
+;;; :email
 
-;; :app
+;;; :app
 (package! counsel-spotify)
 (package! noaa)
 (package! nov)
+
+(package! elfeed-goodies :disable t)
+
+;;; :config
 
 ;; To install a package directly from a remote git repo, you must specify a
 ;; `:recipe'. You'll find documentation on what `:recipe' accepts here:

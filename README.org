@@ -80,6 +80,7 @@ The following files are tangled from source blocks in [[file:config.org][config.
 
 + [[file:config.el][config.el]]
 + [[file:early-init.el][early-init.el]]
++ [[file:packages.el][packages.el]]
 + [[file:install][install/*]]
 
 The following files are /not currently/ tangled from [[file:config.org][config.org]], but I have

@@ -1,6 +1,21 @@
 #+TITLE: Doom Emacs Literate Config
 #+STARTUP:  overview
 #+FILETAGS: :doom:
+* Headers
+** packages.el
+#+begin_src emacs-lisp :tangle packages.el
+;; -*- no-byte-compile: t; -*-
+;;; DOOMDIR/packages.el
+
+;; To install a package with Doom you must declare them here and run 'doom sync'
+;; on the command line, then restart Emacs for the changes to take effect -- or
+;; use 'M-x doom/reload'.
+
+
+;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
+;(package! some-package)
+#+end_src
+
 * Prerequisites
 ** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -14,6 +29,12 @@ curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh | bash
 #+end_src
 
 * :input
+** =DOOMDIR= [1/1]
+*** DONE =packages.el=
+#+begin_src emacs-lisp :tangle packages.el
+;;; :input
+#+end_src
+
 ** chinese [0/0] :ARCHIVE:
 #+begin_quote
 This module adds support for traditional Chinese script by introducing two input
@@ -35,6 +56,12 @@ This module provides barebones support for using Doom with non-qwerty layouts.
 Modules that provide new interfaces or frameworks for completion, including code
 completion.
 #+end_quote
+
+** =DOOMDIR= [1/1]
+*** DONE =packages.el=
+#+begin_src emacs-lisp :tangle packages.el
+;;; :completion
+#+end_src
 
 ** company [1/1]
 #+begin_quote
@@ -93,6 +120,14 @@ provides a united interface for project search and replace, powered by [[https:/
 #+begin_quote
 Aesthetic modules that affect the Emacs interface or user experience.
 #+end_quote
+
+** =DOOMDIR= [1/1]
+*** DONE =packages.el=
+#+begin_src emacs-lisp :tangle packages.el
+;;; :ui
+(package! col-highlight)
+(package! page-break-lines)
+#+end_src
 
 ** deft [0/0] :ARCHIVE:
 #+begin_quote
@@ -715,6 +750,12 @@ plugins) -- will feel right at home.
 Modules that affect and augment your ability to manipulate or insert text.
 #+end_quote
 
+** =DOOMDIR= [1/1]
+*** DONE =packages.el=
+#+begin_src emacs-lisp :tangle packages.el
+;;; :editor
+#+end_src
+
 ** evil [2/3]
 #+begin_quote
 This holy module brings the vim experience to Emacs.
@@ -994,6 +1035,12 @@ lines in the buffer without modifying the buffer content.
 Modules that reconfigure or augment packages or features built into Emacs.
 #+end_quote
 
+** =DOOMDIR= [1/1]
+*** DONE =packages.el=
+#+begin_src emacs-lisp :tangle packages.el
+;;; :emacs
+#+end_src
+
 ** dired [1/1]
 #+begin_quote
 This module provides configuration for dired.
@@ -1052,6 +1099,12 @@ integration with git.
 #+begin_quote
 Modules that offer terminal emulation.
 #+end_quote
+
+** =DOOMDIR= [1/1]
+*** DONE =packages.el=
+#+begin_src emacs-lisp :tangle packages.el
+;;; :term
+#+end_src
 
 ** eshell [4/7]
 #+begin_quote
@@ -1170,6 +1223,12 @@ into another buffer, you can see the "o". *Note that this is only a problem in
 GUI Emacs, not terminal Emacs*.
 
 * :checkers
+** =DOOMDIR= [1/1]
+*** DONE =packages.el=
+#+begin_src emacs-lisp :tangle packages.el
+;;; :checkers
+#+end_src
+
 ** syntax [1/3]
 *** STRT [#A] Allow dynamic changing of error levels displayed
 I have created a couple commands (~my/flycheck-set-level~ and
@@ -1370,6 +1429,12 @@ sudo ln -sfn /usr/local/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVir
 Small modules that give Emacs access to external tools & services.
 #+end_quote
 
+** =DOOMDIR= [1/1]
+*** DONE =packages.el=
+#+begin_src emacs-lisp :tangle packages.el
+;;; :tools
+#+end_src
+
 ** ansible [1/1]
 *** DONE [#A] Install prerequisites
 #+begin_src sh :tangle install/macos.sh
@@ -1525,11 +1590,20 @@ pipx install --include-deps jupyter
 
 ** evay [0/0]
 ** gist [0/0] :ARCHIVE:
-** lookup [1/2]
+** lookup [1/3]
 *** DONE [#A] Install prerequisites
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/lookup` module
 brew install ripgrep sqlite3
+#+end_src
+
+*** LOOP [#A] Fix the error "Given parent class xref-location is not a class"
+Upon [[https://github.com/hlissner/doom-emacs/issues/5658#issuecomment-946207769][Henrick's advice]], I've pinned =xref= to the last known working commit. This
+is currently only a problem on Emacs 28.
+
+#+begin_src emacs-lisp :tangle packages.el
+(when EMACS28+
+  (package! xref :pin "a82f459b37b31546bf274388baf8aca79e9c30d9"))
 #+end_src
 
 *** HOLD [#C] Add dictionary and thesaurus backends for =SPC s t/T=
@@ -1594,6 +1668,12 @@ brew install terraform
 Modules to improve integration into your OS, system, or devices.
 #+end_quote
 
+** =DOOMDIR= [1/1]
+*** DONE =packages.el=
+#+begin_src emacs-lisp :tangle packages.el
+;;; :os
+#+end_src
+
 ** macos [2/2]
 *** DONE [#A] Remap keys for macOS
 #+begin_src emacs-lisp :tangle yes
@@ -1653,6 +1733,17 @@ See also:
 #+begin_quote
 Modules that bring support for a language or group of languages to Emacs.
 #+end_quote
+
+** =DOOMDIR= [1/1]
+*** DONE =packages.el=
+#+begin_src emacs-lisp :tangle packages.el
+;;; :lang
+(package! sed-mode)
+(package! jenkinsfile-mode)
+(when IS-MAC
+  (package! applescript-mode)
+  (package! ob-applescript))
+#+end_src
 
 ** agda [0/0] :ARCHIVE:
 #+begin_quote
@@ -2789,6 +2880,12 @@ This module adds [[https://ziglang.org/][Zig]] support, with optional (but recom
 #+end_quote
 
 * :email
+** =DOOMDIR= [1/1]
+*** DONE =packages.el=
+#+begin_src emacs-lisp :tangle packages.el
+;;; :email
+#+end_src
+
 ** mu4e [0/1]
 #+begin_quote
 
@@ -2811,6 +2908,15 @@ Application modules are complex and opinionated modules that transform Emacs
 toward a specific purpose. They may have additional dependencies and *should be
 loaded last*, before =:config= modules.
 #+end_quote
+
+** =DOOMDIR= [1/1]
+*** DONE =packages.el=
+#+begin_src emacs-lisp :tangle packages.el
+;;; :app
+(package! counsel-spotify)
+(package! noaa)
+(package! nov)
+#+end_src
 
 ** calendar [0/0] :ARCHIVE:
 #+begin_quote
@@ -2992,10 +3098,18 @@ I would much prefer a single =circe= command to do this rather than that whole
 song and dance. See also: https://libera.chat/guides/findingchannels
 
 *** TODO [#C] Figure out how to display inline images
-** rss [3/3]
+** rss [3/4]
 #+begin_quote
 Read RSS feeds in the comfort of DOOM (Emacs)
 #+end_quote
+*** LOOP [#A] Undo breakage caused by unfortunate pull request
+[[https://github.com/hlissner/doom-emacs/pull/5523][This PR]] broke my config. Here is the fix:
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! elfeed-goodies :disable t)
+#+end_src
+
+If [[https://github.com/hlissner/doom-emacs/pull/5603][this other PR]] gets merged, I may be able to remove this.
 
 *** DONE [#A] Automatically update feed when opening =elfeed=
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -3041,6 +3155,12 @@ Enjoy twitter from emacs.
 Modules that configure Emacs one way or another, or focus on making it easier
 for you to customize it yourself. It is best to load these last.
 #+end_quote
+
+** =DOOMDIR= [1/1]
+*** DONE =packages.el=
+#+begin_src emacs-lisp :tangle packages.el
+;;; :config
+#+end_src
 
 ** literate [1/4]
 #+begin_quote
@@ -3436,4 +3556,48 @@ We already have =C-r=, so might as well replace this mostly-useless keybinding.
 
 #+begin_src emacs-lisp :tangle yes
 (load! "custom" doom-private-dir t)
+#+end_src
+
+* Footers
+** packages.el
+#+begin_src emacs-lisp :tangle packages.el
+;; To install a package directly from a remote git repo, you must specify a
+;; `:recipe'. You'll find documentation on what `:recipe' accepts here:
+;; https://github.com/raxod502/straight.el#the-recipe-format
+;(package! another-package
+;  :recipe (:host github :repo "username/repo"))
+
+;; If the package you are trying to install does not contain a PACKAGENAME.el
+;; file, or is located in a subdirectory of the repo, you'll need to specify
+;; `:files' in the `:recipe':
+;(package! this-package
+;  :recipe (:host github :repo "username/repo"
+;           :files ("some-file.el" "src/lisp/*.el")))
+
+;; If you'd like to disable a package included with Doom, you can do so here
+;; with the `:disable' property:
+;(package! builtin-package :disable t)
+
+;; You can override the recipe of a built in package without having to specify
+;; all the properties for `:recipe'. These will inherit the rest of its recipe
+;; from Doom or MELPA/ELPA/Emacsmirror:
+;(package! builtin-package :recipe (:nonrecursive t))
+;(package! builtin-package-2 :recipe (:repo "myfork/package"))
+
+;; Specify a `:branch' to install a package from a particular branch or tag.
+;; This is required for some packages whose default branch isn't 'master' (which
+;; our package manager can't deal with; see raxod502/straight.el#279)
+;(package! builtin-package :recipe (:branch "develop"))
+
+;; Use `:pin' to specify a particular commit to install.
+;(package! builtin-package :pin "1a2b3c4d5e")
+
+
+;; Doom's packages are pinned to a specific commit and updated from release to
+;; release. The `unpin!' macro allows you to unpin single packages...
+;(unpin! pinned-package)
+;; ...or multiple packages
+;(unpin! pinned-package another-pinned-package)
+;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
+;(unpin! t)
 #+end_src
