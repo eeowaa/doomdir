@@ -1,0 +1,80 @@
+#+TITLE: Python development workflow
+* STRT Running the project
++ If you have a code block like this:
+  #+begin_src python
+  if __name__ == "__main__":
+      ...
+  #+end_src
+  Then you can run like this:
+  #+begin_src sh
+  python3 lambda_function.py # option 1
+  python3 -m lambda_function # option 2 (equivalent)
+  #+end_src
+
+* STRT Testing specific functions
+This re-evaluates the entire module before executing the function:
+#+begin_src python
+python3.8 -m lambda_function -c 'lambda_handler(None, None)'
+#+end_src
+
+* STRT Using the interpreter
+Open the REPL using =SPC o r= (~+eval/open-repl-other-window~). To load the
+definitions your script file (e.g. =lambda_function.py=) so that you can run
+code in the REPL just like in the script file (i.e. same namespace):
+
+#+begin_src python
+from lambda_function import *
+#+end_src
+
+If you've redefined a function in a file-visited buffer and would like for the
+change to take effect in the REPL, just select the function using =vif= and send
+it to the REPL with =gr= (~+eval:region~).
+
+You can also re-evaluate the entire buffer using =gR= (~+eval/buffer~)
+
+* STRT Virtual environments
+The following standard procedure works OK, but does not integrate with Doom
+Emacs at all:
+
+#+begin_src sh :eval no
+virtualenv .venv
+. ./.venv/bin/activate
+pip install -r requirements.txt
+#+end_src
+
+Instead, the =python= module in Doom Emacs comes with the =pipenv= package,
+which provides commands that wrap ~pipenv~, a package manager that replaces the
+standard ~pip~ and ~virtualenv~. Reference: https://realpython.com/pipenv-guide/
+
+1. Create a new virtualenv and install packages
+   + If you are fine with using the current system Python version, =SPC m e i=
+     /in a python buffer/ (~pipenv-install~) can be used to set things up
+     a. Specify package(s) to install when prompted
+     b. Watch for a =Pipfile= and =Pipfile.lock= to appear in the project root
+        + =Pipfile= will contain a specification of requirements
+          - Commit this file just like you would =requirements.txt=
+        + =Pipfile.lock= will contain a manifest of dependencies
+          - Commit this file if you want [[https://github.com/pypa/pipenv/issues/598][reproducible builds]]
+   + If you want a specific Python version, run the following shell command
+     instead of using ~pipenv-install~ from Emacs:
+     : pipenv (--python <version> | --three | --two) install <package>...
+   + By default, the virtualenv will be created under
+     =$XDG_DATA_HOME/virtualenvs=, but the ~PIPENV_VENV_IN_PROJECT~ option can
+     be set to create a =.venv= subdirectory in your project instead
+2. Activate the virtualenv in Emacs using =SPC m e a= /in a python buffer/
+   (~pipenv-activate~)
+   a. Watch for the ~venv:<virtualenv>~ lighter to appear in your modeline
+   b. Now use =SPC h b i pipenv RET= to view keybindings for =pipenv=
+      + =SPC m e i= (~pipenv-install~), =SPC m e u= (~pipenv-uninstall~), and
+        =SPC m e l= (~pipenv-lock~) can be used to *manage packages*
+      + =SPC m e r= (~pipenv-run~) can be used as an *ad-hoc command runner*
+        instead of =SPC p != (~projectile-run-command-in-root~)
+        - The ~pipenv run~ shell command can still be used when outside of the
+          virtualenv (e.g. ~projectile-run-project~ from =README.org=)
+      + =SPC m e o= (~pipenv-open~) can be used to open package modules
+        installed in the virtualenv
+      + The only keybinding I'd actively avoid is =SPC m e s= (~pipenv-shell~),
+        which opens a ~shell-mode~ buffer instead of a terminal popup buffer;
+        just run the ~pipenv shell~ shell command in a terminal buffer
+3. Restart the LSP server using =SPC c l s r= (~lsp-workspace-restart~)
+   + This is necessary for the language server to recognize the virtualenv

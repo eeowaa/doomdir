@@ -1,0 +1,114 @@
+#+TITLE: Generic project-based development workflow
+This document outlines a generic workflow that can be followed for any
+development project.
+
+* DONE Starting a new project
+1. Create the project directory using =M-x mkdir=
+2. Register the project using =SPC p a= (~projectile-add-known-project~)
+3. Initialize the git repo using =SPC g c r= (~magit-init~)
+
+* DONE Contextualizing the work
+1. Create a simple =README.org= using =SPC f f= (~counsel-find-file~)
+   - Briefly describe the project objective
+   - Define the scope of the first iteration
+
+2. Similarly, create a =todo.org= and list a few tasks that come to mind
+   - Feel free to use this very file as a template
+   - Add categories and tags to organize your work:
+     | File          | Heading               |
+     |---------------+-----------------------|
+     | ~#+CATEGORY:~ | ~:CATEGORY:~ property |
+     | ~#+FILETAGS:~ | standard tag          |
+
+3. Add the tasks to your Org Agenda
+   - If you want the tasks to appear alongside the rest of your projects, run
+     =C-c [= (~org-agenda-file-to-front~), which will add =todo.org= to
+     ~org-agenda-files~ by the Customize interface and stored in the file
+     specified by ~custom-file~.
+
+   - On the other hand, if you'd rather focus in on the project and/or not deal
+     with Customize, you can use =SPC u C-c C-x <= (~org-set-restriction-lock~)
+     to restrict the agenda to tasks in =todo.org=. Relevant keybindings:
+     | Binding           | Description         |
+     |-------------------+---------------------|
+     | =SPC u C-c C-x <= | restrict to file    |
+     | =C-c C-x <=       | restrict to subtree |
+     | =C-c C-x >=       | remove restriction  |
+
+* TODO Configure git
+1. If you would like to set your author name and email to something other than
+   the global default, either edit the local gitconfig file using =SPC g f g=
+   (~magit-find-git-config-file~) or just use shell commands:
+   #+begin_src sh
+   # For commit messages
+   git config user.name eeowaa
+   git config user.email 7460185+eeowaa@users.noreply.github.com
+   # For forge commands
+   git config github.user eeowaa
+   #+end_src
+2. If using =:tools magit +forge= to interact with a git remote such as GitHub,
+   you will need to set up an auth token.
+   - [ ] How is this done?
+   - [ ] macOS keychain vs. =~/.authinfo.gpg=
+3. Make your first commit via the menu invoked by =SPC g g= (~magit-status~)
+   - Add files to =.gitignore= using =i= (~magit-gitignore~)
+
+** HOLD Explain how to configure and use the =forge= commands
+:LOGBOOK:
+- Note taken on [2021-10-04 Mon 10:50] \\
+  I currently have =:tools magit +forge= disabled.
+:END:
+- Allows you to use an issue tracker (e.g. GitHub Issues) instead of =todo.org=
+- Bound to =SPC g '=
+
+* TODO Language-specific boilerplate
+** TODO Install interpreter
+Make sure to match the local version with the version you are going to run in
+production.
+
+** TODO Install debugger (optional)
+** TODO Install offline documentation
+- =M-x dash-docs-install-docset=
+  - Do for whatever language(s) you're working with
+  - [ ] Where are they installed?
+- [ ] Texinfo for Python?
+  - [ ] brew command?
+- [ ] Boto3?
+  - There is an ~AWS_Javascript~ Dash docset but I don't see one for Boto3
+
+** TODO Set up environment (e.g. =.env=)
+** TODO Write the =.editorconfig= and optionally the =.dir-locals.el=
+Example =.dir-locals.el=:
+#+begin_src lisp-data
+((nil (projectile-project-run-cmd . "python3.8 -m lambda_function")
+      (compilation-read-command)))
+#+end_src
+
+* TODO Running the project
+To "run a project" means to execute an entrypoint command. Use =SPC p R=
+(~projectile-run-project~) to be prompted for such a command. Once you've run
+the command once, it will be saved in the projectile cache so you can retrieve
+it with =M-p= (~previous-history-element~) in the minibuffer.
+
+To skip the minibuffer prompt altogether, you can use =SPC p C=
+(~projectile-repeat-last-command~), assuming you haven't run any other
+command-executing projectile commands such as =SPC p T=
+(~projectile-test-project~) since the last time you used =SPC p R=.
+
+If the project entrypoint command is static, you can store it in the
+~projectile-project-run-cmd~ variable in the project's =.dir-locals.el=. This
+way, you can use =SPC p R= to run the project without ever seeing a minibuffer
+prompt. This is more consistent than using =SPC p C= after =SPC p R= and is
+guaranteed to work every time. To edit the =.dir-locals.el=, use =SPC p e=
+(~projectile-edit-dir-locals~).
+
+*THE ABOVE PARAGRAPH IS NOT TRUE*. You will still be prompted for a command.
+Unfortunately, just setting ~compilation-read-command~ to ~nil~ means that other
+commands such as ~projectile-test-project~ will not prompt, either.
+
+Probably best to define ~projectile-project-run-cmd~ in =.dir-locals.el= for
+ease of use, and then use =SPC p != (~projectile-run-shell-command-in-root~)
+when there is some variation.
+
+** TODO Explain how to use ~projectile-edit-dir-locals~
+** TODO Explain how to run project in an interactive shell
