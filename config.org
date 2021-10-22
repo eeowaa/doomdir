@@ -2,7 +2,7 @@
 #+STARTUP:  overview
 #+FILETAGS: :doom:
 * Headers
-** packages.el
+** =packages.el=
 #+begin_src emacs-lisp :tangle packages.el
 ;; -*- no-byte-compile: t; -*-
 ;;; DOOMDIR/packages.el
@@ -3559,7 +3559,7 @@ We already have =C-r=, so might as well replace this mostly-useless keybinding.
 #+end_src
 
 * Footers
-** packages.el
+** =packages.el=
 #+begin_src emacs-lisp :tangle packages.el
 ;; To install a package directly from a remote git repo, you must specify a
 ;; `:recipe'. You'll find documentation on what `:recipe' accepts here:
