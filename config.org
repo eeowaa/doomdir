@@ -1034,10 +1034,67 @@ will infer some changes to keep Parens and Indentation inline with one another.
 #+end_quote
 
 ** rotate-text [0/0] :ARCHIVE:
-** snippets [0/0]
+** snippets [1/1]
 #+begin_quote
 This module adds snippets to Emacs, powered by yasnippet.
 #+end_quote
+
+*** DONE [#B] Fix ~projectile-edit-dir-locals~
+Technically, ~projectile-edit-dir-locals~ is implemented via =skeleton=, not
+=yasnippet=. However, I don't have a better place in my literate config to place
+this fix.
+
+The problem is that there is no clear way to exit the interactive session
+started by ~projectile-edit-dir-locals~, at least not without removing
+everything that was inserted into the =.dir-locals.el= buffer.
+
+The following code fixes the problem, allowing =C-g= to exit the session while
+keeping the contents of the buffer.
+
+#+begin_src emacs-lisp :tangle yes
+(after! projectile
+
+  (defun my/projectile-skel-variable-cons ()
+    "Insert a variable-name and a value in a cons-cell.
+
+This function is better than `projectile-skel-variable-cons'
+because it allows `keyboard-quit' to exit skeleton insertion
+without deleting what has already been inserted. Additionally,
+this function constructs cons cells atomically (both the car and
+cdr must be present), and a newline is inserted after each cons
+cell for better formatting at the end of the skeleton inserted by
+`my/projectile-skel-dir-locals'."
+    (condition-case err
+        (let* ((variable (projectile-read-variable))
+               (value (string-trim (read-from-minibuffer
+                                    (format "Value of [%s]: " variable)))))
+          (format "(%s . %s)\n" variable value))
+      (quit nil)))
+
+  (define-skeleton my/projectile-skel-dir-locals
+    "Insert a .dir-locals.el template.
+
+This function fixes `projectile-skel-dirs-locals' by relying on
+`my/projectile-skel-variable-cons' for cons insertion, allowing
+for atomic insertion of cons cells and escaping at any time via
+`keyboard-quit' (\\[keyboard-quit]).
+
+Furthermore, trailing parentheses at the end of the lisp data are
+properly inserted without a leading linebreak. This is acheived
+by using the `>' skeleton token in conjunction with literal
+newlines (rather than the `\\n' skeleton token), and then
+deleting the final newline before inserting the \")))\"."
+    nil
+    ;; Ensure that EOL is represented by "\n" in this buffer
+    '(setq buffer-file-coding-system 'utf-8-unix)
+    "((nil . ("
+    ("" > (skeleton-read #'my/projectile-skel-variable-cons nil t))
+    & -1 ;; If any cons cells were inserted, remove the previous "\n"
+    ")))")
+
+  (advice-add 'projectile-skel-dir-locals
+              :override #'my/projectile-skel-dir-locals))
+#+end_src
 
 ** word-wrap [0/0]
 #+begin_quote
@@ -3524,9 +3581,6 @@ in, so this isn't finished yet.
         (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
                                    t "\\`[^.]")))))
 #+end_src
-
-*** TODO [#C] Figure out how to use ~projectile-edit-dir-locals~ (=SPC p e=)
-https://www.emacswiki.org/emacs/SkeletonMode
 
 *** TODO [#C] Replace =C-?= with backspace
 We already have =C-r=, so might as well replace this mostly-useless keybinding.

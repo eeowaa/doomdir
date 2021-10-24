@@ -279,6 +279,49 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
 (pushnew! evil-emacs-state-modes 'noaa-mode)
 
+(after! projectile
+
+  (defun my/projectile-skel-variable-cons ()
+    "Insert a variable-name and a value in a cons-cell.
+
+This function is better than `projectile-skel-variable-cons'
+because it allows `keyboard-quit' to exit skeleton insertion
+without deleting what has already been inserted. Additionally,
+this function constructs cons cells atomically (both the car and
+cdr must be present), and a newline is inserted after each cons
+cell for better formatting at the end of the skeleton inserted by
+`my/projectile-skel-dir-locals'."
+    (condition-case err
+        (let* ((variable (projectile-read-variable))
+               (value (string-trim (read-from-minibuffer
+                                    (format "Value of [%s]: " variable)))))
+          (format "(%s . %s)\n" variable value))
+      (quit nil)))
+
+  (define-skeleton my/projectile-skel-dir-locals
+    "Insert a .dir-locals.el template.
+
+This function fixes `projectile-skel-dirs-locals' by relying on
+`my/projectile-skel-variable-cons' for cons insertion, allowing
+for atomic insertion of cons cells and escaping at any time via
+`keyboard-quit' (\\[keyboard-quit]).
+
+Furthermore, trailing parentheses at the end of the lisp data are
+properly inserted without a leading linebreak. This is acheived
+by using the `>' skeleton token in conjunction with literal
+newlines (rather than the `\\n' skeleton token), and then
+deleting the final newline before inserting the \")))\"."
+    nil
+    ;; Ensure that EOL is represented by "\n" in this buffer
+    '(setq buffer-file-coding-system 'utf-8-unix)
+    "((nil . ("
+    ("" > (skeleton-read #'my/projectile-skel-variable-cons nil t))
+    & -1 ;; If any cons cells were inserted, remove the previous "\n"
+    ")))")
+
+  (advice-add 'projectile-skel-dir-locals
+              :override #'my/projectile-skel-dir-locals))
+
 ;; This should already be enabled by emacs/undo/config.el
 (global-undo-tree-mode)
 
