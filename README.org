@@ -11,7 +11,6 @@
   - [[#plugins][Plugins]]
   - [[#hacks][Hacks]]
 - [[#prerequisites][Prerequisites]]
-  - [[#macos][macOS]]
 - [[#features][Features]]
   - [[#literate-configuration][Literate configuration]]
   - [[#doom-emacs-documentation][Doom Emacs documentation]]
@@ -65,11 +64,12 @@ following packages are installed via ~package!~ forms in [[file:packages.el][pac
 * Prerequisites
 Shell scripts to install prerequisites are tangled from [[file:config.org][config.org]] into script
 files in the [[file:install/][install/]] directory. There is a script for each system supported by
-this config (currently only macOS).
+this config (currently only macOS). That said, all you need to do is run The
+[[file:install/run][install/run]] script, which is a wrapper that will automatically dispatch the
+appropriate system-specific script.
 
-** macOS
 #+begin_src sh
-install/macos.sh
+install/run
 #+end_src
 
 * Features
