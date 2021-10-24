@@ -42,7 +42,7 @@ pipx install --include-deps jupyter
 brew install ripgrep sqlite3
 
 # Install prerequisites for `tools/magit` module
-cd ~/stow-dotfiles && make perl
+(cd ~/Documents/src/life/stow-dotfiles && make perl)
 brew install perl git-absorb
 cpan install App::Git::Autofixup
 

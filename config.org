@@ -1702,7 +1702,7 @@ won't work for you. Unfortunately, resizing the frame does not help.
 *** DONE [#A] Install prerequisites
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/magit` module
-cd ~/stow-dotfiles && make perl
+(cd ~/Documents/src/life/stow-dotfiles && make perl)
 brew install perl git-absorb
 cpan install App::Git::Autofixup
 #+end_src
