@@ -894,6 +894,27 @@ and uses visual instead."
 
 (setq confirm-kill-processes nil)
 
+(after! projectile
+  ;; For each atom in `obarray'
+  (mapatoms
+   (lambda (symbol)
+     ;; When the atom is a `projectile' variable
+     (when
+         (and (boundp symbol)
+              (not (keywordp symbol))
+              (string-prefix-p "projectile-" (symbol-name symbol)))
+       ;; The variable is safe when ...
+       (put symbol 'safe-local-variable
+            (lambda (_)
+              (when
+                  ;; ... we are in either XDG_DOCUMENTS_DIR or DOOMDIR
+                  (-select
+                   (lambda (dir)
+                     (string-match-p dir (expand-file-name default-directory)))
+                   (list (file-name-as-directory (xdg-user-dir "DOCUMENTS"))
+                         doom-private-dir))
+                t)))))))
+
 ;; Display ^L characters as horizontal lines
 (use-package! page-break-lines
   :config (global-page-break-lines-mode))

@@ -3495,11 +3495,35 @@ used for two reasons:
             "^AWS_SESSION_TOKEN$"))
 #+end_src
 
+*** DONE [#B] Always trust file-location and directory-local variables
+For now, just trust ~projectile-*~ variables as long as they apply to files in
+=XDG_DOCUMENTS_DIR= or =DOOMDIR=.
+
+#+begin_src emacs-lisp :tangle yes
+(after! projectile
+  ;; For each atom in `obarray'
+  (mapatoms
+   (lambda (symbol)
+     ;; When the atom is a `projectile' variable
+     (when
+         (and (boundp symbol)
+              (not (keywordp symbol))
+              (string-prefix-p "projectile-" (symbol-name symbol)))
+       ;; The variable is safe when ...
+       (put symbol 'safe-local-variable
+            (lambda (_)
+              (when
+                  ;; ... we are in either XDG_DOCUMENTS_DIR or DOOMDIR
+                  (-select
+                   (lambda (dir)
+                     (string-match-p dir (expand-file-name default-directory)))
+                   (list (file-name-as-directory (xdg-user-dir "DOCUMENTS"))
+                         doom-private-dir))
+                t)))))))
+#+end_src
+
 *** TODO [#B] Add BitWarden as ~auth-source~ backend
 https://github.com/seanfarley/emacs-bitwarden
-
-*** TODO [#B] Always trust file-location and directory-local variables
-At least for all files in allowed paths (e.g. my source code).
 
 *** TODO [#B] Figure out the autosave and backup situation for Doom Emacs
 Compare with my old config and try to match it.
