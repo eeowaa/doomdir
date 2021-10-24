@@ -274,6 +274,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     "J" #'my/treemacs-visit-next
     "K" #'my/treemacs-visit-previous))
 
+(after! projectile
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
+
 (pushnew! evil-emacs-state-modes 'noaa-mode)
 
 ;; This should already be enabled by emacs/undo/config.el

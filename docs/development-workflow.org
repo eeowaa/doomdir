@@ -85,6 +85,15 @@ Example =.dir-locals.el=:
 #+end_src
 
 * TODO Running the project
+| Command                        | Bindings             |
+|--------------------------------+----------------------|
+| ~projectile-configure-project~ | =C-c p C=, =SPC p g= |
+| ~projectile-compile-project~   | =C-c p c=, =SPC p c= |
+| ~projectile-test-project~      | =C-c p P=, =SPC p T= |
+| ~projectile-install-project~   | =C-c p L=            |
+| ~projectile-package-project~   | =C-c p K=            |
+| ~projectile-run-project~       | =C-c p R=, =SPC p R= |
+
 To "run a project" means to execute an entrypoint command. Use =SPC p R=
 (~projectile-run-project~) to be prompted for such a command. Once you've run
 the command once, it will be saved in the projectile cache so you can retrieve
