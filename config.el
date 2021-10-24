@@ -908,6 +908,7 @@ and uses visual instead."
             (lambda (_)
               (when
                   ;; ... we are in either XDG_DOCUMENTS_DIR or DOOMDIR
+                  ;; TODO See about using `projectile-project-search-path'
                   (-select
                    (lambda (dir)
                      (string-match-p dir (expand-file-name default-directory)))
@@ -926,9 +927,9 @@ and uses visual instead."
 (defun my/recenter-top (&rest r) (recenter 0))
 (advice-add 'forward-page :after #'my/recenter-top)
 
-(setq-default truncate-lines t)
-
 (setq default-input-method "latin-postfix")
+
+(setq-default truncate-lines t)
 
 (defun my/toggle-window-dedicated ()
   "Control whether or not Emacs is allowed to display another
