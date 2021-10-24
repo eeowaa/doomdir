@@ -535,9 +535,9 @@ just perform a complete cycle of `org-cycle'."
     "End up with the cursor in 'insert mode' at the end of the Org heading"
     ;; XXX Doom-specific
     (when evil-mode (evil-org-append-line 1)))
-  (add-hook! org-insert-heading #'(my/org-insert-heading-spacing
-                                   my/org-insert-heading-visibility
-                                   my/org-insert-heading-evil-state)))
+  (add-hook! org-insert-heading #'my/org-insert-heading-spacing
+                                #'my/org-insert-heading-visibility
+                                #'my/org-insert-heading-evil-state))
 
 (after! org
   (defun my/org-inherited-priority (s)

@@ -1874,11 +1874,16 @@ This module adds [[https://coq.inria.fr][coq]] support, powered by [[https://pro
 This modules adds [[https://crystal-lang.org/][crystal]] support.
 #+end_quote
 
-** csharp [0/0] :ARCHIVE:
+** csharp [0/1]
 #+begin_quote
 This module adds C# support to Emacs. Powered by omnisharp (directly or through
 LSP).
 #+end_quote
+
+*** TODO [#A] Install prerequisites
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/csharp` module
+#+end_src
 
 ** data [1/1]
 *** DONE [#A] Install prerequisites
@@ -2226,9 +2231,9 @@ just perform a complete cycle of `org-cycle'."
     "End up with the cursor in 'insert mode' at the end of the Org heading"
     ;; XXX Doom-specific
     (when evil-mode (evil-org-append-line 1)))
-  (add-hook! org-insert-heading #'(my/org-insert-heading-spacing
-                                   my/org-insert-heading-visibility
-                                   my/org-insert-heading-evil-state)))
+  (add-hook! org-insert-heading #'my/org-insert-heading-spacing
+                                #'my/org-insert-heading-visibility
+                                #'my/org-insert-heading-evil-state))
 #+end_src
 
 **** TODO [#C] Create headline sorting function
@@ -3494,6 +3499,7 @@ used for two reasons:
             "^AWS_SECRET_ACCESS_KEY$"
             "^AWS_SESSION_TOKEN$"))
 #+end_src
+***
 
 *** DONE [#B] Always trust file-location and directory-local variables
 For now, just trust ~projectile-*~ variables as long as they apply to files in
