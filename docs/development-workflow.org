@@ -84,40 +84,41 @@ Example =.dir-locals.el=:
       (compilation-read-command)))
 #+end_src
 
-* TODO Running the project
-| Command                        | Bindings             |
-|--------------------------------+----------------------|
-| ~projectile-configure-project~ | =C-c p C=, =SPC p g= |
-| ~projectile-compile-project~   | =C-c p c=, =SPC p c= |
-| ~projectile-test-project~      | =C-c p P=, =SPC p T= |
-| ~projectile-install-project~   | =C-c p L=            |
-| ~projectile-package-project~   | =C-c p K=            |
-| ~projectile-run-project~       | =C-c p R=, =SPC p R= |
+* DONE Running the project
+=projectile= provides a slew of commands for running system commands in a
+project. The commands are outlined below:
 
-To "run a project" means to execute an entrypoint command. Use =SPC p R=
-(~projectile-run-project~) to be prompted for such a command. Once you've run
-the command once, it will be saved in the projectile cache so you can retrieve
-it with =M-p= (~previous-history-element~) in the minibuffer.
+| Command                          | Bindings             |
+|----------------------------------+----------------------|
+| ~projectile-configure-project~   | =C-c p C=, =SPC p g= |
+| ~projectile-compile-project~     | =C-c p c=, =SPC p c= |
+| ~projectile-test-project~        | =C-c p P=, =SPC p T= |
+| ~projectile-install-project~     | =C-c p L=            |
+| ~projectile-package-project~     | =C-c p K=            |
+| ~projectile-run-project~         | =C-c p R=, =SPC p R= |
+
+Once you've run a ~projectile-*-project~ command once, the system command you
+entered will be cached so you can retrieve it with =M-p=
+(~previous-history-element~) in the minibuffer the next time you run that elisp
+command.
 
 To skip the minibuffer prompt altogether, you can use =SPC p C=
-(~projectile-repeat-last-command~), assuming you haven't run any other
-command-executing projectile commands such as =SPC p T=
-(~projectile-test-project~) since the last time you used =SPC p R=.
+(~projectile-repeat-last-command~) to evaluate the previously-run =projectile=
+command again (and executing the corresponding system command).
 
-If the project entrypoint command is static, you can store it in the
-~projectile-project-run-cmd~ variable in the project's =.dir-locals.el=. This
-way, you can use =SPC p R= to run the project without ever seeing a minibuffer
-prompt. This is more consistent than using =SPC p C= after =SPC p R= and is
-guaranteed to work every time. To edit the =.dir-locals.el=, use =SPC p e=
-(~projectile-edit-dir-locals~).
+** DONE Explain how to use ~projectile-edit-dir-locals~
+Instead of manually entering system commands for each ~projectile-*-project~
+command, you can store defaults in corresponding variables set in the
+project-specific =.dir-locals.el= file. Just run =SPC p e=
+(~projectile-edit-dir-locals~) and enter values for one or more
+~projectile-project-*-cmd~ variables.
 
-*THE ABOVE PARAGRAPH IS NOT TRUE*. You will still be prompted for a command.
-Unfortunately, just setting ~compilation-read-command~ to ~nil~ means that other
-commands such as ~projectile-test-project~ will not prompt, either.
+For example, if you set ~projectile-project-compile-cmd~ to ~"make"~ in a
+Makefile-based project, running =SPC p c= will still prompt you for a
+compilation command, but the minibuffer will be prepopulated with ~make~. This
+allows you to pass additional flags to ~make~ before running.
 
-Probably best to define ~projectile-project-run-cmd~ in =.dir-locals.el= for
-ease of use, and then use =SPC p != (~projectile-run-shell-command-in-root~)
-when there is some variation.
-
-** TODO Explain how to use ~projectile-edit-dir-locals~
-** TODO Explain how to run project in an interactive shell
+** DONE Explain how to run project in an interactive shell
+Any of the =projectile-*-project= commands used to run a project can be
+interactive. All you have to do is set the corresponding
+~projectile-*-use-comint-mode~ variable to ~t~.
