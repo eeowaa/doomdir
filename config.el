@@ -275,7 +275,8 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     "K" #'my/treemacs-visit-previous))
 
 (after! projectile
-  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
+  (define-key! projectile-mode-map
+    "C-c p" #'projectile-command-map))
 
 (pushnew! evil-emacs-state-modes 'noaa-mode)
 

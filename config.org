@@ -749,7 +749,8 @@ for standard Emacs bindings (snippet from =+emacs-bindings.el=):
 
 #+begin_src emacs-lisp :tangle yes
 (after! projectile
-  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
+  (define-key! projectile-mode-map
+    "C-c p" #'projectile-command-map))
 #+end_src
 
 ** zen [0/0]
