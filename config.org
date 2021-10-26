@@ -772,7 +772,7 @@ Modules that affect and augment your ability to manipulate or insert text.
 ;;; :editor
 #+end_src
 
-** evil [2/3]
+** evil [3/4]
 #+begin_quote
 This holy module brings the vim experience to Emacs.
 #+end_quote
@@ -795,6 +795,59 @@ version of Emacs (I have ~HEAD~ of Emacs 28), or just wait until =evil=, =org=
 *** DONE [#B] Define modes that should always come up in Emacs state
 #+begin_src emacs-lisp :tangle yes
 (pushnew! evil-emacs-state-modes 'noaa-mode)
+#+end_src
+
+*** DONE [#C] Define Vim bindings for games
+=evil-collection= already defines Vim bindings for Tetris, but not for any other
+builtin game.
+
+#+begin_src emacs-lisp :tangle yes
+(after! 5x5
+  (map! :mode 5x5-mode
+    :e "k" #'5x5-up
+    :e "j" #'5x5-down
+    :e "h" #'5x5-left
+    :e "l" #'5x5-right))
+
+(after! blackbox
+  (map! :mode blackbox-mode
+    :e "k" #'bb-up
+    :e "j" #'bb-down
+    :e "h" #'bb-left
+    :e "l" #'bb-right))
+
+(after! bubbles
+  (map! :mode bubbles-mode
+    :e "k" #'previous-line
+    :e "j" #'next-line
+    :e "h" #'backward-char
+    :e "l" #'forward-char))
+
+(after! pong
+  (advice-add 'pong-init :after (lambda () (evil-emacs-state)))
+  (map! :map pong-mode-map
+    :e "k" #'pong-move-up
+    :e "j" #'pong-move-down
+    :e "h" #'pong-move-left
+    :e "l" #'pong-move-right))
+
+(after! snake
+  (map! :mode snake-mode
+    :e "l" #'snake-move-right
+    :e "h" #'snake-move-left
+    :e "k" #'snake-move-up
+    :e "j" #'snake-move-down))
+
+(after! solitaire
+  (map! :mode solitaire-mode
+    :e "l" #'solitaire-right
+    :e "h" #'solitaire-left
+    :e "k" #'solitaire-up
+    :e "j" #'solitaire-down
+    :e "L" #'solitaire-move-right
+    :e "H" #'solitaire-move-left
+    :e "K" #'solitaire-move-up
+    :e "J" #'solitaire-move-down))
 #+end_src
 
 *** TODO [#C] Bind ~helpful-update~ to an Evil Normal state key

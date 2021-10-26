@@ -280,6 +280,53 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
 (pushnew! evil-emacs-state-modes 'noaa-mode)
 
+(after! 5x5
+  (map! :mode 5x5-mode
+    :e "k" #'5x5-up
+    :e "j" #'5x5-down
+    :e "h" #'5x5-left
+    :e "l" #'5x5-right))
+
+(after! blackbox
+  (map! :mode blackbox-mode
+    :e "k" #'bb-up
+    :e "j" #'bb-down
+    :e "h" #'bb-left
+    :e "l" #'bb-right))
+
+(after! bubbles
+  (map! :mode bubbles-mode
+    :e "k" #'previous-line
+    :e "j" #'next-line
+    :e "h" #'backward-char
+    :e "l" #'forward-char))
+
+(after! pong
+  (advice-add 'pong-init :after (lambda () (evil-emacs-state)))
+  (map! :map pong-mode-map
+    :e "k" #'pong-move-up
+    :e "j" #'pong-move-down
+    :e "h" #'pong-move-left
+    :e "l" #'pong-move-right))
+
+(after! snake
+  (map! :mode snake-mode
+    :e "l" #'snake-move-right
+    :e "h" #'snake-move-left
+    :e "k" #'snake-move-up
+    :e "j" #'snake-move-down))
+
+(after! solitaire
+  (map! :mode solitaire-mode
+    :e "l" #'solitaire-right
+    :e "h" #'solitaire-left
+    :e "k" #'solitaire-up
+    :e "j" #'solitaire-down
+    :e "L" #'solitaire-move-right
+    :e "H" #'solitaire-move-left
+    :e "K" #'solitaire-move-up
+    :e "J" #'solitaire-move-down))
+
 (after! projectile
 
   (defun my/projectile-skel-variable-cons ()
