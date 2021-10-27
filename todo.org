@@ -4,7 +4,7 @@
 :PROPERTIES:
 :CATEGORY: doom/inbox
 :END:
-* Upstream [0/8]
+* Upstream [0/9]
 :PROPERTIES:
 :CATEGORY: doom/upstream
 :END:
@@ -31,7 +31,7 @@
 + Upload public part to GitHub
   - ~/.ssh/github/id_ed25519.pub
 
-*** TODO Integrate SSH keys with Macbook
+*** DONE Integrate SSH keys with Macbook
 https://www.getpagespeed.com/work/proper-use-of-ssh-client-in-mac-os-x
 + Need to restart computer before I can really test
 + In the meantime, I can check the Keychain
@@ -95,6 +95,10 @@ Set FORCE-DOWNLOADING to non-nil to force re-download the database."
             (not (file-exists-p lsp-yaml-schema-store-local-db)))
     (url-copy-file lsp-yaml-schema-store-uri lsp-yaml-schema-store-local-db)))
 #+end_src
+
+** TODO [#B] Submit a PR for =make=
+Looking at the definition of ~+make/run~, only =Makefile= and =makefile= are
+searched for, but =GNUmakefile= should also be searched for.
 
 ** TODO [#B] Do not fail to store Org links before opening a PDF
 ~org-store-link~ fails with the following error message:

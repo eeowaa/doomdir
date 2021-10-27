@@ -5,6 +5,9 @@ development project.
 * DONE Starting a new project
 1. Create the project directory using =M-x mkdir=
 2. Register the project using =SPC p a= (~projectile-add-known-project~)
+   followed by =M-p= (~ivy-previous-history-element~)
+3. Switch to the new project using =SPC p p=
+   (~counsel-projectile-switch-project~) followed by =C-p= (~ivy-previous-line~)
 3. Initialize the git repo using =SPC g c r= (~magit-init~)
 
 * DONE Contextualizing the work
