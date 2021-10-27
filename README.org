@@ -80,12 +80,12 @@ The following files are tangled from source blocks in [[file:config.org][config.
 + [[file:early-init.el][early-init.el]]
 + [[file:packages.el][packages.el]]
 + [[file:install][install/*]]
++ [[file:snippets][snippets/*]]
 
 The following files are /not currently/ tangled from [[file:config.org][config.org]], but I have
 plans to port their contents to a literate config:
 
 + [[file:init.el][init.el]]
-+ [[file:snippets][snippets/*]]
 
 All other files in =DOOMDIR= are "illiterate" for a reason; this is not subject
 to change anytime soon.

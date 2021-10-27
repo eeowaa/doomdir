@@ -859,12 +859,12 @@ Options to look at:
 + ~evil-collection-helpful-maps~
 + ~helpful-mode-map~
 
-** file-templates [0/2]
+** file-templates [2/2]
 #+begin_quote
 This module adds file templates for blank files, powered by yasnippet.
 #+end_quote
 
-*** STRT [#A] Figure out how to override existing templates
+*** DONE [#A] Figure out how to override existing templates
 The function ~+file-templates-check-h~ determines if the current buffer is a
 candidate for file template expansion, so its source code is probably the best
 place to determine how this works.
@@ -885,29 +885,19 @@ Now the important thing is how ~+file-templates--expand~ actually works.
 *Potentially-important note*: ~yas_snippets-dirs~ contains ~+snippets-dir~, which
 evaluates to =DOOMDIR/snippets/=.
 
-*** STRT [#B] Simplify the file template for =sh-mode=
-Doom Emacs' builtin file template for =sh-mode= is not suitable for portable
-shell scripts:
-
-#+begin_src snippet :tangle no
-#!/usr/bin/env `(if (equal (file-name-extension buffer-file-name) "zsh") "zsh" "bash")`
-set -euo pipefail
-
-$0
-#+end_src
-
-I just created a new file template as follows and stored it in
-=DOOMDIR/snippets/sh-mode/__=,
-#+begin_src snippet :tangle no
-#!/bin/sh
-$0
-#+end_src
-
 From https://tecosaur.github.io/emacs-config/config.html#file-templates:
 #+begin_src emacs-lisp :tangle no
 (set-file-template! "\\.tex$" :trigger "__" :mode 'latex-mode)
 (set-file-template! "\\.org$" :trigger "__" :mode 'org-mode)
 (set-file-template! "/LICEN[CS]E$" :trigger '+file-templates/insert-license)
+#+end_src
+
+*** DONE [#B] Simplify the file template for =sh-mode=
+Doom Emacs' builtin file template for =sh-mode= is not suitable for portable
+shell scripts, so I created my own:
+#+begin_src snippet :tangle snippets/sh-mode/__
+#!/bin/sh
+$0
 #+end_src
 
 ** fold [0/2]
