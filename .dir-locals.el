@@ -1,6 +1,5 @@
 ((nil . (;; Edit local configuration (if there is a server)
-         (projectile-project-configure-cmd
-          . "if [ -S /tmp/emacs/server ]; then emacsclient -n custom.el; else echo >&2 'Emacs server is not running'; exit 1; fi")
+         (projectile-project-configure-cmd . "emacsclient -n -a false custom.el")
 
          ;; Tangle literate config into elisp and shell scripts
          ;; FIXME This seemingly tangles everything, including archived subtrees!
