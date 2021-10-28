@@ -18,6 +18,102 @@
                   ("DEBUG" font-lock-preprocessor-face bold))
                 hl-todo-keyword-faces)))
 
+(after! projectile
+  (global-set-key (kbd "C-c r") 'hydra-run/body)
+  (defhydra hydra-run (:color blue :hint none)
+    "
+confi_g_ure -> ?g?
+_c_ompile ---> ?c?
+_t_est ------> ?t?
+_r_un -------> ?r?
+_i_nstall ---> ?i?
+_p_ackage ---> ?p?
+"
+    ("g" (let ((compilation-read-command)) (funcall #'projectile-configure-project nil))
+     (format "%s" projectile-project-configure-cmd))
+    ("c" (let ((compilation-read-command)) (funcall #'projectile-compile-project nil))
+     (format "%s" projectile-project-compilation-cmd))
+    ("t" (let ((compilation-read-command)) (funcall #'projectile-test-project nil))
+     (format "%s" projectile-project-test-cmd))
+    ("r" (let ((compilation-read-command)) (funcall #'projectile-run-project nil))
+     (format "%s" projectile-project-run-cmd))
+    ("i" (let ((compilation-read-command)) (funcall #'projectile-install-project nil))
+     (format "%s" projectile-project-install-cmd))
+    ("p" (let ((compilation-read-command)) (funcall #'projectile-package-project nil))
+     (format "%s" projectile-project-package-cmd))))
+
+(global-set-key (kbd "C-c g") 'hydra-game/body)
+(defhydra hydra-game (:color blue :hint nil)
+  "
+^Arcade^      ^Puzzle^        ^Board^          ^Text^        ^Self-Playing^
+^-^-----------^-^--------------------------------------------^-^-----------
+_t_: Tetris   _5_: 5x5        _g_: Gomoku      _a_: Dunnet   _l_: Life
+_s_: Snake    _b_: Blackbox   _i_: Solitaire   _d_: Doctor   _h_: Hanoi
+_p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
+^ ^           _o_: Bubbles
+"
+  ;; Arcade
+  ("t" tetris)
+  ("s" snake)
+  ("p" pong)
+
+  ;; Puzzle
+  ("5" 5x5)
+  ("b" blackbox)
+  ("m" mpuz)
+  ("o" bubbles)
+
+  ;; Board
+  ("i" solitaire)
+  ("g" gomoku)
+
+  ;; Text
+  ("a" dunnet)
+  ("d" doctor)
+
+  ;; Self-Playing
+  ("l" life)
+  ("h" hanoi)
+  ("z" zone)
+
+  ;; Other
+  ("q" nil))
+
+(global-set-key (kbd "C-c s") 'hydra-spotify/body)
+(defhydra hydra-spotify (:color blue :hint nil)
+  "
+^Playback control^   ^Collection^     ^Song^           ^Open Spotify^
+^---^----------------^-^--------------^-^-------------------------------
+_SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
+  _n_: Next          _a_: Artist      _A_: By artist   _w_: Web player
+  _p_: Previous      _r_: Record      _R_: By record   _i_: Integrations
+"
+  ;; Playback Control
+  ("SPC" counsel-spotify-toggle-play-pause :color red)
+  ("n" counsel-spotify-next :color red)
+  ("p" counsel-spotify-previous :color red)
+
+  ;; Collection
+  ("l" counsel-spotify-search-playlist)
+  ("a" counsel-spotify-search-artist)
+  ("r" counsel-spotify-search-album)
+
+  ;; Song
+  ("s" counsel-spotify-search-track)
+  ("A" counsel-spotify-search-tracks-by-artist)
+  ("R" counsel-spotify-search-tracks-by-album)
+
+  ;; Open Spotify
+  ("o" (cond
+        (IS-MAC (call-process "open" nil nil nil "-a" "spotify"))
+        (IS-LINUX (call-process "xdg-open" nil nil nil "spotify"))
+        (t (user-error! "Unsupported operating system"))))
+  ("w" (browse-url "https://open.spotify.com"))
+  ("i" (browse-url "https://developer.spotify.com/my-applications"))
+
+  ;; Other
+  ("q" nil))
+
 (global-set-key (kbd "C-c t") 'hydra-table/body)
 (defhydra hydra-table ()
   "table.el"
@@ -122,78 +218,6 @@
   ("l" (table-generate-source 'latex) "LaTeX")
   ("c" (table-generate-source 'cals) "CALS")
   ("SPC" hydra-table/body "Menu" :exit 1))
-
-(defhydra hydra-game (:color blue :hint nil)
-  "
-^Arcade^      ^Puzzle^        ^Board^          ^Text^        ^Self-Playing^
-^-^-----------^-^--------------------------------------------^-^-----------
-_t_: Tetris   _5_: 5x5        _g_: Gomoku      _a_: Dunnet   _l_: Life
-_s_: Snake    _b_: Blackbox   _i_: Solitaire   _d_: Doctor   _h_: Hanoi
-_p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
-^ ^           _o_: Bubbles
-"
-  ;; Arcade
-  ("t" tetris)
-  ("s" snake)
-  ("p" pong)
-
-  ;; Puzzle
-  ("5" 5x5)
-  ("b" blackbox)
-  ("m" mpuz)
-  ("o" bubbles)
-
-  ;; Board
-  ("i" solitaire)
-  ("g" gomoku)
-
-  ;; Text
-  ("a" dunnet)
-  ("d" doctor)
-
-  ;; Self-Playing
-  ("l" life)
-  ("h" hanoi)
-  ("z" zone)
-
-  ;; Other
-  ("q" nil))
-(global-set-key (kbd "C-c g") #'hydra-game/body)
-
-(global-set-key (kbd "C-c s") 'hydra-spotify/body)
-(defhydra hydra-spotify (:color blue :hint nil)
-  "
-^Playback control^   ^Collection^     ^Song^           ^Open Spotify^
-^---^----------------^-^--------------^-^-------------------------------
-_SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
-  _n_: Next          _a_: Artist      _A_: By artist   _w_: Web player
-  _p_: Previous      _r_: Record      _R_: By record   _i_: Integrations
-"
-  ;; Playback Control
-  ("SPC" counsel-spotify-toggle-play-pause :color red)
-  ("n" counsel-spotify-next :color red)
-  ("p" counsel-spotify-previous :color red)
-
-  ;; Collection
-  ("l" counsel-spotify-search-playlist)
-  ("a" counsel-spotify-search-artist)
-  ("r" counsel-spotify-search-album)
-
-  ;; Song
-  ("s" counsel-spotify-search-track)
-  ("A" counsel-spotify-search-tracks-by-artist)
-  ("R" counsel-spotify-search-tracks-by-album)
-
-  ;; Open Spotify
-  ("o" (cond
-        (IS-MAC (call-process "open" nil nil nil "-a" "spotify"))
-        (IS-LINUX (call-process "xdg-open" nil nil nil "spotify"))
-        (t (user-error! "Unsupported operating system"))))
-  ("w" (browse-url "https://open.spotify.com"))
-  ("i" (browse-url "https://developer.spotify.com/my-applications"))
-
-  ;; Other
-  ("q" nil))
 
 (setq +ligatures-extras-in-modes '(org-mode))
 
