@@ -2820,7 +2820,7 @@ This module provides an environment for hacking and having fun in scheme. It is
 powered by [[https://www.nongnu.org/geiser/geiser_1.html#introduction][geiser]].
 #+end_quote
 
-** sh [3/3]
+** sh [3/4]
 #+begin_quote
 This module adds support for shell scripting languages.
 #+end_quote
@@ -2844,6 +2844,26 @@ npm install -g bash-language-server
   (add-to-list 'auto-mode-alist
                `(,re . shell-script-mode)))
 #+end_src
+
+*** TODO [#C] Edit the current region in an indirect buffer
+Shell scripts often include nested scripts in subshells, and it would be nice to
+have the =C-'= keybinding take you to an indirect buffer to edit the subshell.
+Some examples of such subshells are shown below:
+
+#+begin_src sh :eval no :tangle no
+(
+    echo 'this is a subshell'
+)
+foo=$(
+    echo 'this is a subshell'
+)
+bar=`
+    echo 'this is a subshell'
+`
+#+end_src
+
+Reference:
++ ~edit-indirect-region~
 
 ** sml [0/0] :ARCHIVE:
 #+begin_quote
