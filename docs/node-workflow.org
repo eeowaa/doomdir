@@ -1,0 +1,30 @@
+#+TITLE: Node.js development workflow
+* STRT Recommended =.dir-locals.el=
+#+begin_src lisp-data
+((nil . ((projectile-project-configure-cmd . "npm run configure")
+         (projectile-project-compilation-cmd . "npm run build")
+         (projectile-project-run-cmd . "npm start")
+         (projectile-project-test-cmd . "npm test")
+         (projectile-project-package-cmd . "npm run package")
+         (projectile-project-install-cmd . "NODE_STAGE=beta npm run deploy")
+
+         ;; Use `comint-mode' to interpret ANSI escape codes from npm
+         (projectile-configure-use-comint-mode . t)
+         (projectile-compile-use-comint-mode . t)
+         (projectile-package-use-comint-mode . t)
+         (projectile-test-use-comint-mode . t)
+         (projectile-install-use-comint-mode . t))))
+
+#+end_src
+
+Corresponding ~"scripts"~ section in =package.json=:
+#+begin_src json
+"scripts": {
+  "configure": "npx npm ...",
+  "build":     "npx npm ...",
+  "start":     "npx node file.js",
+  "test":      "npx node test.js",
+  "package":   "npx npm ...",
+  "install":   "npx npm ..."
+}
+#+end_src
