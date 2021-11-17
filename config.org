@@ -2886,7 +2886,7 @@ npm install -g js-beautify stylelint
 npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 #+end_src
 
-** yaml [5/7]
+** yaml [4/8]
 :PROPERTIES:
 :CATEGORY: doom/yaml
 :END:
@@ -2921,54 +2921,23 @@ saying that the implementation of ~lsp-yaml-download-schema-store-db~ is buggy.
       (lsp-yaml-download-schema-store-db))))
 #+end_src
 
-*** STRT [#B] Use CloudFormation YAML schema
-I use YAML almost entirely for CloudFormation, so I like to use CloudFormation
-YAML schema by default. This involves setting ~lsp-yaml-schemas~ appropriately,
-but unfortunately the documentation in that regard is quite lacking. I managed
-to get it right mostly by running =M-x lsp-yaml-select-buffer-schema= and then
-selecting the correct schema ("AWS CloudFormation") through interactive
-completion.
-
-#+begin_src emacs-lisp :tangle no
-(setq lsp-yaml-schemas
-      '((https://raw\.githubusercontent\.com/awslabs/goformation/v4\.15\.0/schema/cloudformation\.schema\.json
-         . ["*.yaml" "*.yml"])))
-#+end_src
-
-Other references:
-+ https://github.com/redhat-developer/yaml-language-server#using-yamlschemas-settings
-+ Help for ~lsp-yaml-schemas~
-+ File referenced by ~lsp-yaml-schema-store-local-db~
-
-*UPDATE*: I ended up reverting this behavior as follows:
-#+begin_src emacs-lisp :tangle no
-;; Sick and tired of Cloudformation checking on different schemas
-(setq lsp-yaml-schemas nil)
-(after! flycheck
-  (setq flycheck-checkers (delete 'cfn-lint flycheck-checkers)))
-#+end_src
-
-*** DONE [#B] Disable LSP syntax checking
-Honestly, I don't really need syntax checking from RedHat's YAML language server
-when ~cfn-lint~ does a better job. In fact, it appears as though there are false
-alarms when using LSP syntax checking (and that's not even counting custom
-tags).
-
+*** DONE [#B] Allow YAML schemas to be decided in .dir-locals.el
 #+begin_src emacs-lisp :tangle yes
-(setq-hook! 'yaml-mode-hook lsp-diagnostic-package :none)
+(put lsp-yaml-schemas 'safe-local-variable)
 #+end_src
 
-References:
-+ https://github.com/emacs-lsp/lsp-mode/issues/1810
-+ [[file:~/.config/emacs/modules/lang/yaml/config.el]]
-
-*** DONE [#A] Integrate ~cfn-lint~ with Flycheck
+*** STRT [#A] Integrate ~cfn-lint~ with Flycheck
+:LOGBOOK:
+- Note taken on [2021-11-17 Wed 15:06] \\
+  I can no longer assume that YAML will almost always be CloudFormation, so I have
+  disabled tangling of the source block, at least for now.
+:END:
 Again, since I'm only really using YAML for CloudFormation (at the moment), I
 feel OK about automatically integrating ~cfn-lint~ into Flycheck for all YAML
 files. This fills in the diagnostics gap left by RedHat's YAML language
 server implementation and corresponding Emacs mode.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (after! flycheck
   (flycheck-define-checker cfn-lint
     "A CloudFormation linter using cfn-lint."
@@ -2990,7 +2959,50 @@ tried doing this, I had some errors so decided to back out for now.
 Reference:
 + https://awk.space/blog/cfn-lint/
 
-*** HOLD [#C] Add custom CloudFormation tags :TESTME:
+*** STRT [#B] Use CloudFormation YAML schema
+:LOGBOOK:
+- Note taken on [2021-11-17 Wed 15:06] \\
+  I can no longer assume that YAML will almost always be CloudFormation, so I have
+  disabled tangling of the source block, at least for now.
+:END:
+I use YAML almost entirely for CloudFormation, so I like to use CloudFormation
+YAML schema by default. This involves setting ~lsp-yaml-schemas~ appropriately,
+but unfortunately the documentation in that regard is quite lacking. I managed
+to get it right mostly by running =M-x lsp-yaml-select-buffer-schema= and then
+selecting the correct schema ("AWS CloudFormation") through interactive
+completion.
+
+#+begin_src emacs-lisp :tangle no
+(setq lsp-yaml-schemas
+      '((https://raw\.githubusercontent\.com/awslabs/goformation/v4\.15\.0/schema/cloudformation\.schema\.json
+         . ["*.yaml" "*.yml"])))
+#+end_src
+
+Other references:
++ https://github.com/redhat-developer/yaml-language-server#using-yamlschemas-settings
++ Help for ~lsp-yaml-schemas~
++ File referenced by ~lsp-yaml-schema-store-local-db~
+
+*** STRT [#B] Disable LSP syntax checking
+:LOGBOOK:
+- Note taken on [2021-11-17 Wed 15:06] \\
+  I can no longer assume that YAML will almost always be CloudFormation, so I have
+  disabled tangling of the source block, at least for now.
+:END:
+Honestly, I don't really need syntax checking from RedHat's YAML language server
+when ~cfn-lint~ does a better job. In fact, it appears as though there are false
+alarms when using LSP syntax checking (and that's not even counting custom
+tags).
+
+#+begin_src emacs-lisp :tangle no
+(setq-hook! 'yaml-mode-hook lsp-diagnostics-provider :none)
+#+end_src
+
+References:
++ https://github.com/emacs-lsp/lsp-mode/issues/1810
++ [[file:~/.config/emacs/modules/lang/yaml/config.el]]
+
+*** HOLD [#C] Add custom CloudFormation tags
 This is the sort of thing that should probably be set per schema, but again,
 since I pretty much only use YAML for CloudFormation, defining custom tags
 globally should be OK. Unfortunately, I can't figure out how to get this to

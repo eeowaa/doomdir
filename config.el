@@ -788,20 +788,7 @@ to `org-footnote-section'.  Inline definitions are ignored."
       (mkdir (file-name-directory f) t)
       (lsp-yaml-download-schema-store-db))))
 
-(setq-hook! 'yaml-mode-hook lsp-diagnostic-package :none)
-
-(after! flycheck
-  (flycheck-define-checker cfn-lint
-    "A CloudFormation linter using cfn-lint."
-    :command ("cfn-lint" "-f" "parseable" source)
-    :error-patterns ((warning line-start (file-name) ":" line ":" column
-                              ":" (one-or-more digit) ":" (one-or-more digit) ":"
-                              (id "W" (one-or-more digit)) ":" (message) line-end)
-                     (error line-start (file-name) ":" line ":" column
-                            ":" (one-or-more digit) ":" (one-or-more digit) ":"
-                            (id "E" (one-or-more digit)) ":" (message) line-end))
-    :modes (yaml-mode))
-    (add-to-list 'flycheck-checkers 'cfn-lint))
+(put lsp-yaml-schemas 'safe-local-variable)
 
 (after! elfeed
   (add-hook! 'elfeed-search-mode-hook #'elfeed-update))
