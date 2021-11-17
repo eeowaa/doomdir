@@ -788,10 +788,6 @@ to `org-footnote-section'.  Inline definitions are ignored."
       (mkdir (file-name-directory f) t)
       (lsp-yaml-download-schema-store-db))))
 
-(setq lsp-yaml-schemas
-      '((https://raw\.githubusercontent\.com/awslabs/goformation/v4\.15\.0/schema/cloudformation\.schema\.json
-         . ["*.yaml" "*.yml"])))
-
 (setq-hook! 'yaml-mode-hook lsp-diagnostic-package :none)
 
 (after! flycheck

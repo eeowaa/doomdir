@@ -2886,7 +2886,7 @@ npm install -g js-beautify stylelint
 npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 #+end_src
 
-** yaml [6/7]
+** yaml [5/7]
 :PROPERTIES:
 :CATEGORY: doom/yaml
 :END:
@@ -2921,7 +2921,7 @@ saying that the implementation of ~lsp-yaml-download-schema-store-db~ is buggy.
       (lsp-yaml-download-schema-store-db))))
 #+end_src
 
-*** DONE [#B] Use CloudFormation YAML schema
+*** STRT [#B] Use CloudFormation YAML schema
 I use YAML almost entirely for CloudFormation, so I like to use CloudFormation
 YAML schema by default. This involves setting ~lsp-yaml-schemas~ appropriately,
 but unfortunately the documentation in that regard is quite lacking. I managed
@@ -2929,7 +2929,7 @@ to get it right mostly by running =M-x lsp-yaml-select-buffer-schema= and then
 selecting the correct schema ("AWS CloudFormation") through interactive
 completion.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (setq lsp-yaml-schemas
       '((https://raw\.githubusercontent\.com/awslabs/goformation/v4\.15\.0/schema/cloudformation\.schema\.json
          . ["*.yaml" "*.yml"])))
@@ -2939,6 +2939,14 @@ Other references:
 + https://github.com/redhat-developer/yaml-language-server#using-yamlschemas-settings
 + Help for ~lsp-yaml-schemas~
 + File referenced by ~lsp-yaml-schema-store-local-db~
+
+*UPDATE*: I ended up reverting this behavior as follows:
+#+begin_src emacs-lisp :tangle no
+;; Sick and tired of Cloudformation checking on different schemas
+(setq lsp-yaml-schemas nil)
+(after! flycheck
+  (setq flycheck-checkers (delete 'cfn-lint flycheck-checkers)))
+#+end_src
 
 *** DONE [#B] Disable LSP syntax checking
 Honestly, I don't really need syntax checking from RedHat's YAML language server
