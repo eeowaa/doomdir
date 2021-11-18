@@ -788,7 +788,7 @@ to `org-footnote-section'.  Inline definitions are ignored."
       (mkdir (file-name-directory f) t)
       (lsp-yaml-download-schema-store-db))))
 
-(put lsp-yaml-schemas 'safe-local-variable)
+(put 'lsp-yaml-schemas 'safe-local-variable #'always)
 
 (after! elfeed
   (add-hook! 'elfeed-search-mode-hook #'elfeed-update))

@@ -2923,7 +2923,7 @@ saying that the implementation of ~lsp-yaml-download-schema-store-db~ is buggy.
 
 *** DONE [#B] Allow YAML schemas to be decided in .dir-locals.el
 #+begin_src emacs-lisp :tangle yes
-(put lsp-yaml-schemas 'safe-local-variable)
+(put 'lsp-yaml-schemas 'safe-local-variable #'always)
 #+end_src
 
 *** STRT [#A] Integrate ~cfn-lint~ with Flycheck
