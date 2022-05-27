@@ -25,9 +25,22 @@
 curl -Lo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
 
 # Install NVM
-curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh | bash
+curl -Lo /tmp/nvm-install.sh https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh
+chmod +x /tmp/nvm-install.sh
+PROFILE=/dev/null /tmp/nvm-install.sh
+rm /tmp/nvm-install.sh
 #+end_src
 
+** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+#!/bin/sh
+
+# Install NVM
+curl -Lo /tmp/nvm-install.sh https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh
+chmod +x /tmp/nvm-install.sh
+PROFILE=/dev/null /tmp/nvm-install.sh
+rm /tmp/nvm-install.sh
+#+end_src
 * :input
 ** =DOOMDIR= [1/1]
 *** DONE =packages.el=
@@ -99,9 +112,16 @@ a unified interface for project search and replace, powered by [[https://github.
 #+end_quote
 
 *** DONE [#A] Install prerequisites
+**** DONE macoS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `completion/ivy` module
 brew install ripgrep
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `completion/ivy` module
+sudo sudo dnf -y install ripgrep
 #+end_src
 
 *** DONE [#A] Make it easier to jump to headlines across Org buffers
@@ -671,9 +691,16 @@ utilities.
 #+end_quote
 
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `ui/treemacs` module
 brew install python3
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `ui/treemacs` module
+sudo dnf -y install python3
 #+end_src
 
 *** DONE [#B] Fix ace-window keybindings :hack:
@@ -1190,9 +1217,16 @@ This module provides configuration for dired.
 #+end_quote
 
 *** DONE Install prerequisites
+**** DONE macoS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `emacs/dired` module
 brew install coreutils
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `emacs/dired` module
+sudo dnf -y install coreutils
 #+end_src
 
 ** electric [0/0]
@@ -1255,9 +1289,16 @@ This module provides additional features for the built-in [[https://www.gnu.org/
 #+end_quote
 
 *** DONE [#A] Install prerequisites
+**** DONE macoS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `term/eshell` module
 brew install fish
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `term/eshell` module
+sudo dnf -y install fish
 #+end_src
 
 *** DONE [#B] Define aliases
@@ -1336,9 +1377,16 @@ alpha and requires a component be compiled (=vterm-module.so=).
 #+end_quote
 
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `term/vterm` module
 brew install libvterm cmake
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `term/vterm` module
+sudo dnf -y install libvterm cmake
 #+end_src
 
 *** DONE [#B] Export ~$EDITOR~ to =vterm=
@@ -1457,9 +1505,16 @@ This modules provides spellchecking powered by =aspell=, =hunspell= or =enchant=
 #+end_quote
 
 *** DONE [#A] Install prerequisites
+**** DONE macoS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `checkers/spell` module
 brew install aspell
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `checkers/spell` module
+sudo dnf -y install aspell
 #+end_src
 
 *** DONE [#A] Prevent ~spell-fu-mode~ from being enabled by default
@@ -1560,11 +1615,20 @@ This module adds grammar checking to Emacs to aid your writing by combining
 =lang-tool= and =writegood-mode=.
 #+end_quote
 
-*** DONE [#A] Install prerequisites
+*** STRT [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `checkers/grammar` module
 brew install languagetool
 sudo ln -sfn /usr/local/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk
+#+end_src
+
+**** STRT Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `checkers/grammar` module
+curl -L https://raw.githubusercontent.com/languagetool-org/languagetool/master/install.sh | sudo bash
+# TODO: See if the following command is needed
+# sudo ln -sfn /usr/local/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk
 #+end_src
 
 * :tools
@@ -1580,17 +1644,33 @@ Small modules that give Emacs access to external tools & services.
 
 ** ansible [1/1]
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/ansible` module
 brew install ansible
 #+end_src
 
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `tools/ansible` module
+sudo dnf -y install pipx
+pipx install ansible-core
+ansible-galaxy collection install community.general
+#+end_src
+
 ** debugger [0/2] :ARCHIVE:
 *** STRT [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/debugger` module
 # https://stackoverflow.com/questions/18423124/please-check-gdb-is-codesigned-see-taskgated8-how-to-get-gdb-installed-w
 brew install gdb
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `tools/debugger` module
+sudo dnf -y install gdb
 #+end_src
 
 *** TODO [#A] Fix DAP mode error message
@@ -1619,9 +1699,16 @@ This module integrates direnv into Emacs.
 #+end_quote
 
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/direnv` module
 brew install direnv
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `tools/direnv` module
+sudo dnf -y install direnv
 #+end_src
 
 *** TODO [#A] See why =direnv= prevents envvars from propagating between buffers
@@ -1700,10 +1787,27 @@ Emacs.
 #+end_quote
 
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/docker` module
 brew install docker
 npm install -g dockerfile-language-server-nodejs
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `tools/docker` module
+sudo dnf -y install shadow-utils fuse-overlayfs iptables
+sudo systemctl disable --now docker.service docker.socket
+dockerd-rootless-setuptool.sh install
+curl -fsSL https://get.docker.com/rootless | sh
+cat >"$HOME/.profile.d/docker-rootless.sh" <<\EOF
+export PATH=$HOME/bin:$PATH
+export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+EOF
+. "$HOME/.profile.d/docker-rootless.sh"
+systemctl --user start docker.service
+sudo loginctl enable-linger `whoami`
 #+end_src
 
 ** editorconfig [1/1]
@@ -1714,9 +1818,16 @@ specification]]).
 #+end_quote
 
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/editorconfig` module
 brew install editorconfig
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `tools/editorconfig` module
+sudo dnf -y install editorconfig
 #+end_src
 
 ** ein [1/1]
@@ -1725,9 +1836,17 @@ Adds Jupyter notebook integration into emacs.
 #+end_quote
 
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/ein` module
 brew install python
+pipx install --include-deps jupyter
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `tools/ein` module
+sudo dnf -y install python3 pipx
 pipx install --include-deps jupyter
 #+end_src
 
@@ -1735,9 +1854,16 @@ pipx install --include-deps jupyter
 ** gist [0/0] :ARCHIVE:
 ** lookup [1/3]
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/lookup` module
 brew install ripgrep sqlite3
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `tools/lookup` module
+sudo dnf -y install ripgrep sqlite-3
 #+end_src
 
 *** LOOP [#A] Fix the error "Given parent class xref-location is not a class"
@@ -1770,11 +1896,22 @@ won't work for you. Unfortunately, resizing the frame does not help.
 #+end_src
 
 ** magit [2/2]
-*** DONE [#A] Install prerequisites
+*** STRT [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/magit` module
 (cd ~/Documents/src/life/stow-dotfiles && make perl)
 brew install perl git-absorb
+cpan install App::Git::Autofixup
+#+end_src
+
+**** STRT Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `tools/magit` module
+(cd ~/Documents/src/life/stow-dotfiles && make perl)
+sudo dnf -y install perl
+# TODO: Find equivalent to git-absorb
+# TODO: Fix cpan install command
 cpan install App::Git::Autofixup
 #+end_src
 
@@ -1789,9 +1926,16 @@ cpan install App::Git::Autofixup
 ** pass [0/0] :ARCHIVE:
 ** pdf [1/1]
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/pdf` module
 brew install pkg-config poppler automake
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `tools/pdf` module
+sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
 #+end_src
 
 ** prodigy [0/0] :ARCHIVE:
@@ -1799,9 +1943,16 @@ brew install pkg-config poppler automake
 ** taskrunner [0/0] :ARCHIVE:
 ** terraform [1/1]
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/terraform` module
 brew install terraform
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `tools/terraform` module
+sudo dnf -y install terraform
 #+end_src
 
 ** tmux [0/0] :ARCHIVE:
@@ -1905,10 +2056,18 @@ you [[https://plaintextaccounting.org/][manage your money in plain text]].
 This module adds support for the C-family of languages: C, C++, and Objective-C.
 #+end_quote
 
-*** DONE [#A] Install prerequisites
+*** STRT [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/cc` module
 brew install ccls gdb glslang
+#+end_src
+
+**** STRT Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `lang/cc` module
+sudo dnf -y install gdb glslang
+# TODO: Install ccls
 #+end_src
 
 *** STRT [#B] Use Linux kernel style for C :TESTME:
@@ -1952,17 +2111,32 @@ LSP).
 #+end_quote
 
 *** TODO [#A] Install prerequisites
+**** TODO macOS
 #+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/csharp` module
+#+end_src
+
+**** TODO Fedora
+#+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `lang/csharp` module
 #+end_src
 
 ** data [1/1]
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/data` module
 curl --create-dirs \
-    -o ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.13.1-uber.jar \
-    https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.13.1/org.eclipse.lemminx-0.13.1-uber.jar
+    -o ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
+    https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.20.0/org.eclipse.lemminx-0.20.0-uber.jar
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `lang/data` module
+curl --create-dirs \
+    -o ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
+    https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.20.0/org.eclipse.lemminx-0.20.0-uber.jar
 #+end_src
 
 ** dart [0/0] :ARCHIVE:
@@ -2036,9 +2210,10 @@ This module adds [[https://golang.org][Go]] support, with optional (but recommen
 #+end_quote
 
 *** STRT [#A] Install prerequisites
+**** STRT macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/go` module
-cd ~/stow-dotfiles && make go
+(cd ~/Documents/src/life/stow-dotfiles && make go)
 brew install go gopls golangci-lint
 # FIXME (see https://github.com/rocky/ssa-interp)
 # curl -Lo- https://raw.githubusercontent.com/rocky/ssa-interp/HEAD/gub-installer | bash
@@ -2050,6 +2225,24 @@ go get -v -u golang.org/x/tools/cmd/gorename
 go get -v -u golang.org/x/tools/cmd/guru
 go get -v -u github.com/cweill/gotests/...
 go get -v -u github.com/fatih/gomodifytags
+#+end_src
+
+**** STRT Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `lang/go` module
+(cd ~/Documents/src/life/stow-dotfiles && make go)
+sudo dnf -y install golang golang-x-tools-gopls golang-github-golangci-lint-1
+# FIXME (see https://github.com/rocky/ssa-interp)
+# curl -L https://raw.githubusercontent.com/rocky/ssa-interp/HEAD/gub-installer | bash
+# FIXME (go: go.mod file not found in current directory or any parent directory.)
+# go get -v -u github.com/motemen/gore/cmd/gore
+# go get -v -u github.com/stamblerre/gocode
+# go get -v -u golang.org/x/tools/cmd/godoc
+# go get -v -u golang.org/x/tools/cmd/goimports
+# go get -v -u golang.org/x/tools/cmd/gorename
+# go get -v -u golang.org/x/tools/cmd/guru
+# go get -v -u github.com/cweill/gotests/...
+# go get -v -u github.com/fatih/gomodifytags
 #+end_src
 
 ** haskell [0/0] :ARCHIVE:
@@ -2070,9 +2263,17 @@ This module provides JSON support.
 #+end_quote
 
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/json` module
 brew install jq
+npm install -g vscode-json-languageserver
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `lang/json` module
+dnf -y install jq
 npm install -g vscode-json-languageserver
 #+end_src
 
@@ -2094,7 +2295,14 @@ Currently, I am only using TypeScript -- not vanilla JavaScript -- so the
 ~:CATEGORY:~ property for this subtree is set to ~doom/ts~.
 
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/javascript` module
+npm install -g typescript javascript-typescript-langserver eslint trepan-ni
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `lang/javascript` module
 npm install -g typescript javascript-typescript-langserver eslint trepan-ni
 #+end_src
@@ -2129,10 +2337,16 @@ This module adds Kotlin support to Emacs.
 Provide a helping hand when working with LaTeX documents.
 #+end_quote
 
-*** DONE [#A] Install prerequisites
+*** STRT [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/latex` module
 brew install mactex texlab wget
+#+end_src
+
+**** TODO Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `lang/latex` module
 #+end_src
 
 ** lean [0/0] :ARCHIVE:
@@ -2156,7 +2370,14 @@ This module provides Markdown support for Emacs.
 #+end_quote
 
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/markdown` module
+npm install -g markdownlint marked
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `lang/markdown` module
 npm install -g markdownlint marked
 #+end_src
@@ -2229,10 +2450,19 @@ adjustments, extensions and reasonable defaults to make it more performant and
 intuitive out of the box.
 #+end_quote
 
-*** DONE [#A] Install prerequisites
+*** STRT [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/org` module
 brew install gnuplot pandoc graphviz pngpaste
+mkdir -p ~/org/roam
+#+end_src
+
+**** TODO Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `lang/org` module
+sudo dnf -y install gnuplot pandoc graphviz
+# TODO: Find equivalent to pngpaste
 mkdir -p ~/org/roam
 #+end_src
 
@@ -2699,9 +2929,24 @@ Adds Python support to Doom Emacs.
 #+end_quote
 
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/python` module
 brew install python
+pipx install pylint
+pipx install flake8
+pipx install pytest
+pipx install nose
+pipx install pyflakes
+pipx install isort
+pipx install --include-deps jupyter
+npm install -g pyright
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `lang/python` module
+sudo dnf -y install python3 pipx
 pipx install pylint
 pipx install flake8
 pipx install pytest
@@ -2782,9 +3027,16 @@ This module provides integration for [[https://github.com/greghendershott/racket
 #+end_quote
 
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/racket` module
 brew install --cask racket
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `lang/racket` module
+sudo dnf -y install racket
 #+end_src
 
 ** raku [0/0] :ARCHIVE:
@@ -2825,10 +3077,19 @@ powered by [[https://www.nongnu.org/geiser/geiser_1.html#introduction][geiser]].
 This module adds support for shell scripting languages.
 #+end_quote
 
-*** DONE [#A] Install prerequisites
+*** STRT [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/sh` module
 brew install bash zsh fish powershell bashdb zshdb shellcheck
+npm install -g bash-language-server
+#+end_src
+
+**** STRT Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `lang/sh` module
+sudo dnf -y install bash zsh fish powershell ShellCheck
+# TODO: Find equivalent to bashdb and zshdb
 npm install -g bash-language-server
 #+end_src
 
@@ -2879,9 +3140,18 @@ This module adds [[https://github.com/ethereum/solidity][Solidity]] support thro
 ** terra [0/0] :ARCHIVE:
 ** web [1/1]
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/web` module
 brew install tidy-html5
+npm install -g js-beautify stylelint
+npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `lang/web` module
+sudo dnf -y install tidy
 npm install -g js-beautify stylelint
 npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 #+end_src
@@ -2895,7 +3165,14 @@ This module provides support for the [[https://yaml.org/][YAML file format]].
 #+end_quote
 
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/yaml` module
+npm install -g yaml-language-server
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `lang/yaml` module
 npm install -g yaml-language-server
 #+end_src
@@ -3234,9 +3511,16 @@ This module turns Emacs into an IRC client, capable of OS notifications.
 #+end_quote
 
 *** DONE [#A] Install prerequisites
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `app/irc` module
 brew install gnutls
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `app/irc` module
+sudo dnf -y install gnutls
 #+end_src
 
 *** DONE [#A] Configure =circe= for Libera.Chat

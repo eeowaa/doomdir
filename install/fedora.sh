@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# Install Homebrew
-curl -Lo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
-
 # Install NVM
 curl -Lo /tmp/nvm-install.sh https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh
 chmod +x /tmp/nvm-install.sh
@@ -10,56 +7,64 @@ PROFILE=/dev/null /tmp/nvm-install.sh
 rm /tmp/nvm-install.sh
 
 # Install prerequisites for `completion/ivy` module
-brew install ripgrep
+sudo sudo dnf -y install ripgrep
 
 # Install prerequisites for `ui/treemacs` module
-brew install python3
+sudo dnf -y install python3
 
 # Install prerequisites for `emacs/dired` module
-brew install coreutils
+sudo dnf -y install coreutils
 
 # Install prerequisites for `term/eshell` module
-brew install fish
+sudo dnf -y install fish
 
 # Install prerequisites for `term/vterm` module
-brew install libvterm cmake
+sudo dnf -y install libvterm cmake
 
 # Install prerequisites for `checkers/spell` module
-brew install aspell
+sudo dnf -y install aspell
 
 # Install prerequisites for `tools/ansible` module
-brew install ansible
+sudo dnf -y install pipx
+pipx install ansible-core
+ansible-galaxy collection install community.general
 
 # Install prerequisites for `tools/docker` module
-brew install docker
-npm install -g dockerfile-language-server-nodejs
+sudo dnf -y install shadow-utils fuse-overlayfs iptables
+sudo systemctl disable --now docker.service docker.socket
+dockerd-rootless-setuptool.sh install
+curl -fsSL https://get.docker.com/rootless | sh
+cat >"$HOME/.profile.d/docker-rootless.sh" <<\EOF
+export PATH=$HOME/bin:$PATH
+export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+EOF
+. "$HOME/.profile.d/docker-rootless.sh"
+systemctl --user start docker.service
+sudo loginctl enable-linger `whoami`
 
 # Install prerequisites for `tools/editorconfig` module
-brew install editorconfig
+sudo dnf -y install editorconfig
 
 # Install prerequisites for `tools/ein` module
-brew install python
+sudo dnf -y install python3 pipx
 pipx install --include-deps jupyter
 
 # Install prerequisites for `tools/lookup` module
-brew install ripgrep sqlite3
+sudo dnf -y install ripgrep sqlite-3
 
 # Install prerequisites for `tools/magit` module
 (cd ~/Documents/src/life/stow-dotfiles && make perl)
-brew install perl git-absorb
+sudo dnf -y install perl
+# TODO: Find equivalent to git-absorb
+# TODO: Fix cpan install command
 cpan install App::Git::Autofixup
 
-# Install prerequisites for `tools/pdf` module
-brew install pkg-config poppler automake
-
-# Install prerequisites for `tools/pdf` module
-sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
-
 # Install prerequisites for `tools/terraform` module
-brew install terraform
+sudo dnf -y install terraform
 
 # Install prerequisites for `lang/cc` module
-brew install ccls gdb glslang
+sudo dnf -y install gdb glslang
+# TODO: Install ccls
 
 # Install prerequisites for `lang/csharp` module
 
@@ -70,37 +75,38 @@ curl --create-dirs \
 
 # Install prerequisites for `lang/go` module
 (cd ~/Documents/src/life/stow-dotfiles && make go)
-brew install go gopls golangci-lint
+sudo dnf -y install golang golang-x-tools-gopls golang-github-golangci-lint-1
 # FIXME (see https://github.com/rocky/ssa-interp)
-# curl -Lo- https://raw.githubusercontent.com/rocky/ssa-interp/HEAD/gub-installer | bash
-go get -v -u github.com/motemen/gore/cmd/gore
-go get -v -u github.com/stamblerre/gocode
-go get -v -u golang.org/x/tools/cmd/godoc
-go get -v -u golang.org/x/tools/cmd/goimports
-go get -v -u golang.org/x/tools/cmd/gorename
-go get -v -u golang.org/x/tools/cmd/guru
-go get -v -u github.com/cweill/gotests/...
-go get -v -u github.com/fatih/gomodifytags
+# curl -L https://raw.githubusercontent.com/rocky/ssa-interp/HEAD/gub-installer | bash
+# FIXME (go: go.mod file not found in current directory or any parent directory.)
+# go get -v -u github.com/motemen/gore/cmd/gore
+# go get -v -u github.com/stamblerre/gocode
+# go get -v -u golang.org/x/tools/cmd/godoc
+# go get -v -u golang.org/x/tools/cmd/goimports
+# go get -v -u golang.org/x/tools/cmd/gorename
+# go get -v -u golang.org/x/tools/cmd/guru
+# go get -v -u github.com/cweill/gotests/...
+# go get -v -u github.com/fatih/gomodifytags
 
 # Install prerequisites for `lang/json` module
-brew install jq
+dnf -y install jq
 npm install -g vscode-json-languageserver
 
 # Install prerequisites for `lang/javascript` module
 npm install -g typescript javascript-typescript-langserver eslint trepan-ni
 
 # Install prerequisites for `lang/latex` module
-brew install mactex texlab wget
 
 # Install prerequisites for `lang/markdown` module
 npm install -g markdownlint marked
 
 # Install prerequisites for `lang/org` module
-brew install gnuplot pandoc graphviz pngpaste
+sudo dnf -y install gnuplot pandoc graphviz
+# TODO: Find equivalent to pngpaste
 mkdir -p ~/org/roam
 
 # Install prerequisites for `lang/python` module
-brew install python
+sudo dnf -y install python3 pipx
 pipx install pylint
 pipx install flake8
 pipx install pytest
@@ -111,14 +117,15 @@ pipx install --include-deps jupyter
 npm install -g pyright
 
 # Install prerequisites for `lang/racket` module
-brew install --cask racket
+sudo dnf -y install racket
 
 # Install prerequisites for `lang/sh` module
-brew install bash zsh fish powershell bashdb zshdb shellcheck
+sudo dnf -y install bash zsh fish powershell ShellCheck
+# TODO: Find equivalent to bashdb and zshdb
 npm install -g bash-language-server
 
 # Install prerequisites for `lang/web` module
-brew install tidy-html5
+sudo dnf -y install tidy
 npm install -g js-beautify stylelint
 npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 
@@ -126,4 +133,4 @@ npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 npm install -g yaml-language-server
 
 # Install prerequisites for `app/irc` module
-brew install gnutls
+sudo dnf -y install gnutls

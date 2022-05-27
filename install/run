@@ -1,12 +1,20 @@
 #!/bin/sh
-# TODO: Distinguish between Linux distros
 system=`uname -s`
+unsupported() {
+    echo >&2 "Unsupported system: $system"
+    exit 1
+}
 
 # Run the system-specific installer script
 progdir=`dirname "$0"`
 case $system in
 Darwin)
     sh -x "$progdir/macos.sh" ;;
-*)  echo >&2 "Unsupported system: $system"
-    exit 1 ;;
+Linux)
+    distro=`sed -n 's/^ID=//p' /etc/os-release`
+    case $distro in
+    fedora) sh -x "$progdir/$distro".sh ;;
+    *) unsupported ;;
+    esac ;;
+*)  unsuported ;;
 esac
