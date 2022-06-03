@@ -499,6 +499,8 @@ deleting the final newline before inserting the \")))\"."
 
 (setq ispell-dictionary "english")
 
+(dap-gdb-lldb-setup)
+
 (after! lsp
   (setq lsp-restart 'auto-restart))
 
@@ -775,6 +777,9 @@ to `org-footnote-section'.  Inline definitions are ignored."
 
 (add-to-list 'auto-mode-alist '("pylint" . conf-mode))
 
+(after! dap-mode
+  (setq dap-python-debugger 'debugpy))
+
 (setq-default sh-shell-file "/bin/sh")
 
 (dolist (re '("/\\.config/\\(shell\\|bash\\)/.+"
@@ -942,9 +947,9 @@ and uses visual instead."
 
 (setq disabled-command-function nil)
 
-(when (and (featurep 'nativecomp)
+(when (and (featurep 'native-compile)
            (native-comp-available-p))
-  (setq comp-speed 2
+  (setq native-comp-speed 2
         package-native-compile t))
 
 (setq confirm-kill-processes nil)

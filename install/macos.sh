@@ -1,9 +1,9 @@
 #!/bin/sh
 
-# Install Homebrew
+# Install Homebrew to install packages
 curl -Lo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
 
-# Install NVM
+# Install NVM to install packages
 curl -Lo /tmp/nvm-install.sh https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh
 chmod +x /tmp/nvm-install.sh
 PROFILE=/dev/null /tmp/nvm-install.sh
@@ -29,6 +29,10 @@ brew install aspell
 
 # Install prerequisites for `tools/ansible` module
 brew install ansible
+
+# Install prerequisites for `tools/debugger` module
+# https://stackoverflow.com/questions/18423124/please-check-gdb-is-codesigned-see-taskgated8-how-to-get-gdb-installed-w
+brew install gdb
 
 # Install prerequisites for `tools/docker` module
 brew install docker
@@ -87,13 +91,10 @@ brew install jq
 npm install -g vscode-json-languageserver
 
 # Install prerequisites for `lang/javascript` module
-npm install -g typescript javascript-typescript-langserver eslint trepan-ni
-
-# Install prerequisites for `lang/latex` module
-brew install mactex texlab wget
+npm install -g typescript typescript-language-server eslint trepan-ni
 
 # Install prerequisites for `lang/markdown` module
-npm install -g markdownlint marked
+npm install -g markdownlint-cli marked
 
 # Install prerequisites for `lang/org` module
 brew install gnuplot pandoc graphviz pngpaste
@@ -101,14 +102,18 @@ mkdir -p ~/org/roam
 
 # Install prerequisites for `lang/python` module
 brew install python
+npm install -g pyright
+pipx install pipenv
 pipx install pylint
 pipx install flake8
 pipx install pytest
-pipx install nose
+pipx install nose2
 pipx install pyflakes
 pipx install isort
 pipx install --include-deps jupyter
-npm install -g pyright
+
+## Debugging
+pip3 install --user debugpy
 
 # Install prerequisites for `lang/racket` module
 brew install --cask racket
