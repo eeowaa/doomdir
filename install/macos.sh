@@ -88,7 +88,7 @@ go get -v -u github.com/fatih/gomodifytags
 
 # Install prerequisites for `lang/json` module
 brew install jq
-npm install -g vscode-json-languageserver
+npm install -g vscode-langservers-extracted
 
 # Install prerequisites for `lang/javascript` module
 npm install -g typescript typescript-language-server eslint trepan-ni

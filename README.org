@@ -18,6 +18,7 @@
   - [[#finding-a-good-subtree-in-configorg-for-new-configuration][Finding a good subtree in =config.org= for new configuration]]
   - [[#local-configuration][Local configuration]]
 - [[#troubleshooting][Troubleshooting]]
+  - [[#finding-an-lsp-server-for-a-language][Finding an LSP server for a language]]
   - [[#trouble-with-tangling-source-blocks-from-configorg][Trouble with tangling source blocks from =config.org=]]
 
 * Description
@@ -116,6 +117,24 @@ All credentials should go in some authentication source available to the
 locally).
 
 * Troubleshooting
+** Finding an LSP server for a language
+Look for ~lsp-dependency~ forms in the =lsp-mode= library, specifically under
+=~/.emacs.d/.local/straight/repos/lsp-mode/clients/lsp-LANG.el= for a given
+language. For example, =lsp-json.el= contains the following form:
+
+#+begin_src emacs-lisp :tangle no
+(lsp-dependency 'vscode-json-languageserver
+                '(:system "vscode-json-language-server")
+                '(:npm :package "vscode-langservers-extracted"
+                       :path "vscode-json-language-server"))
+#+end_src
+
+What this says is that if there is a =vscode-json-language-server= executable in
+your ~$PATH~, then use that. Otherwise, prompt the user to install the
+~vscode-langservers-extracted~ package using ~npm~, which should install an
+executable named =vscode-json-language-server= (the lack of an absolute path
+means that the executable could be installed anywhere).
+
 ** Trouble with tangling source blocks from =config.org=
 Are you having trouble tangling [[file:config.org][config.org]] via =C-c C-v C-t=
 (~org-babel-tangle~)? Have you recently updated Doom Emacs using ~doom upgrade~?

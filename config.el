@@ -499,8 +499,6 @@ deleting the final newline before inserting the \")))\"."
 
 (setq ispell-dictionary "english")
 
-(dap-gdb-lldb-setup)
-
 (after! lsp
   (setq lsp-restart 'auto-restart))
 

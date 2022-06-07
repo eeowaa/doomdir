@@ -210,7 +210,7 @@ sudo dnf -y install llvm
 
 # Install prerequisites for `lang/json` module
 dnf -y install jq
-npm install -g vscode-json-languageserver
+npm install -g vscode-langservers-extracted
 
 # Install prerequisites for `lang/javascript` module
 npm install -g typescript typescript-language-server eslint trepan-ni
