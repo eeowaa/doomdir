@@ -68,6 +68,7 @@ brew install ccls gdb glslang
 # Install prerequisites for `lang/csharp` module
 
 # Install prerequisites for `lang/data` module
+
 curl --create-dirs \
     -o ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
     https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.20.0/org.eclipse.lemminx-0.20.0-uber.jar

@@ -1731,7 +1731,7 @@ sudo dnf -y install lldb gdb unzip
 nvm install node
 #+end_src
 
-*** STRT [#A] Configure Realgud
+*** LOOP [#A] Configure Realgud
 See the section for "Realgud" on [[https://docs.doomemacs.org/latest/modules/tools/debugger/][this web page]].
 
 #+begin_src emacs-lisp :tangle no
@@ -3219,7 +3219,7 @@ This module provides an environment for hacking and having fun in scheme. It is
 powered by [[https://www.nongnu.org/geiser/geiser_1.html#introduction][geiser]].
 #+end_quote
 
-** sh [3/4]
+** sh [3/5]
 #+begin_quote
 This module adds support for shell scripting languages.
 #+end_quote
@@ -3254,6 +3254,28 @@ npm install -g bash-language-server
 *** DONE [#A] Assume Bourne Shell by default
 #+begin_src emacs-lisp :tangle yes
 (setq-default sh-shell-file "/bin/sh")
+#+end_src
+
+*** DONE [#B] Disable error reporting in sh-mode buffers
+LSP is still useful for other things, but I get annoyed with the error messages
+and indicators in ~sh-mode~.
+
+#+begin_src emacs-lisp :tangle yes
+;; Prevent flycheck from being automatically enabled
+(if (or (not (boundp 'flycheck-global-modes))
+        (not (eq 'not (car flycheck-global-modes))))
+    (setq flycheck-global-modes '(not sh-mode))
+  (let ((modes (cdr flycheck-global-modes)))
+    (setcdr flycheck-global-modes (pushnew! modes 'sh-mode))))
+
+;; Prevent lsp diagnostics from being enabled
+(if (boundp 'lsp-diagnostics-disabled-modes)
+    (pushnew! lsp-diagnostics-disabled-modes 'sh-mode)
+  (setq lsp-diagnostics-disabled-modes '(sh-mode)))
+
+;; Don't bother checking for an LSP diagnostics provider in sh-mode
+(setq-hook! 'sh-mode-hook
+  lsp-diagnostics-provider :none)
 #+end_src
 
 *** DONE [#C] Filename-mode associations

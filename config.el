@@ -780,6 +780,22 @@ to `org-footnote-section'.  Inline definitions are ignored."
 
 (setq-default sh-shell-file "/bin/sh")
 
+;; Prevent flycheck from being automatically enabled
+(if (or (not (boundp 'flycheck-global-modes))
+        (not (eq 'not (car flycheck-global-modes))))
+    (setq flycheck-global-modes '(not sh-mode))
+  (let ((modes (cdr flycheck-global-modes)))
+    (setcdr flycheck-global-modes (pushnew! modes 'sh-mode))))
+
+;; Prevent lsp diagnostics from being enabled
+(if (boundp 'lsp-diagnostics-disabled-modes)
+    (pushnew! lsp-diagnostics-disabled-modes 'sh-mode)
+  (setq lsp-diagnostics-disabled-modes '(sh-mode)))
+
+;; Don't bother checking for an LSP diagnostics provider in sh-mode
+(setq-hook! 'sh-mode-hook
+  lsp-diagnostics-provider :none)
+
 (dolist (re '("/\\.config/\\(shell\\|bash\\)/.+"
               "\\.\\(env\\|cygport\\)\\'"))
   (add-to-list 'auto-mode-alist
