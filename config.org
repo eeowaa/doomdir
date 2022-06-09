@@ -2113,6 +2113,7 @@ Modules that bring support for a language or group of languages to Emacs.
 ;;; :lang
 (package! sed-mode)
 (package! jenkinsfile-mode)
+(package! adoc-mode)
 (when IS-MAC
   (package! applescript-mode)
   (package! ob-applescript))

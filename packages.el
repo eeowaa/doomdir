@@ -35,6 +35,7 @@
 ;;; :lang
 (package! sed-mode)
 (package! jenkinsfile-mode)
+(package! adoc-mode)
 (when IS-MAC
   (package! applescript-mode)
   (package! ob-applescript))
