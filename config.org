@@ -1748,7 +1748,8 @@ nvm install node
 See the section for "Realgud" on [[https://docs.doomemacs.org/latest/modules/tools/debugger/][this web page]].
 
 #+begin_src emacs-lisp :tangle no
-(dap-gdb-lldb-setup)
+(after! dap-mode
+  (dap-gdb-lldb-setup))
 #+end_src
 
 *** TODO [#A] Fix DAP mode error message
