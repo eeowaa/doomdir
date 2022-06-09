@@ -617,6 +617,9 @@ just perform a complete cycle of `org-cycle'."
                                 #'my/org-insert-heading-evil-state))
 
 (after! org
+  (setcdr (assoc 'file org-link-frame-setup) #'find-file-other-window))
+
+(after! org
   (defun my/org-inherited-priority (s)
     (cond
      ;; Priority cookie in this heading
