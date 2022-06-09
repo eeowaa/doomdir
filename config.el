@@ -11,6 +11,11 @@
           'doom-outrun-electric
         'eeowaa-henna))
 
+(after! (solaire-mode ivy)
+  (custom-theme-set-faces! 'doom-outrun-electric
+    `(solaire-hl-line-face :background
+                           ,(face-attribute 'ivy-current-match :background))))
+
 (after! hl-todo
   (setq hl-todo-keyword-faces
         (append '(("TESTME" font-lock-constant-face bold)

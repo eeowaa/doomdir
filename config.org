@@ -280,18 +280,31 @@ satisfy the following requirements /without modification/ when running in a
 3. The background color of the current selection in ~ivy~ is never the same as
    the foreground color of any part of the selection
 
-While ~doom-badger~ is OK, I prefer ~doom-henna~. Unfortunately, it does not
-satisfy the 3rd requirement, so I made a patched copy of the theme called
-~eeowaa-henna~ which fixes the problem with ~ivy-current-match~.
+For a 256-color terminal, ~doom-badger~ is OK, but I prefer ~doom-henna~.
+Unfortunately, it does not satisfy the 3rd requirement, so I made a patched copy
+of the theme called ~eeowaa-henna~ which fixes the problem with
+~ivy-current-match~. Note that I created a new theme instead of customizing
+~doom-henna~ because I prefer ~doom-henna~ over ~eeowaa-henna~ in GUI Emacs and
+like using it sometimes.
 
-As for GUI Emacs, I like ~doom-outrun-electric~ for its clear separation between
-windows and for its cool color palette.
+As for GUI Emacs, I love ~doom-outrun-electric~ for its clear separation between
+windows and for its cool color palette. However, the background color of the
+selected item in Treemacs is nearly the same as the regular background color (a
+problem that [[https://www.reddit.com/r/DoomEmacs/comments/pfp39u/customizing_doomtheme/][others have experienced]]), so it is hard to tell what is currently
+selected. To fix the problem, I customized the theme to use the same background
+color as the ~ivy-current-match~ face. Note that this fix also modifies the
+background color of highlighted lines in other windows that use =solaire-mode=.
 
 #+begin_src emacs-lisp :tangle yes
 (setq doom-theme
       (if initial-window-system
           'doom-outrun-electric
         'eeowaa-henna))
+
+(after! (solaire-mode ivy)
+  (custom-theme-set-faces! 'doom-outrun-electric
+    `(solaire-hl-line-face :background
+                           ,(face-attribute 'ivy-current-match :background))))
 #+end_src
 
 ** doom-dashboard [0/0] :ARCHIVE:
