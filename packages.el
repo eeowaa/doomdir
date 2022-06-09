@@ -47,6 +47,12 @@
 (package! noaa)
 (package! nov)
 
+;; Kubernetes packages
+(package! k8s-mode)
+(package! kubedoc)
+(package! kubel)
+(package! kubel-evil) ;; TODO Require `kubel-evil' to be loaded with `kubel'
+
 (package! elfeed-goodies :disable t)
 
 ;;; :config

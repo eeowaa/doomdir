@@ -3585,6 +3585,12 @@ loaded last*, before =:config= modules.
 (package! counsel-spotify)
 (package! noaa)
 (package! nov)
+
+;; Kubernetes packages
+(package! k8s-mode)
+(package! kubedoc)
+(package! kubel)
+(package! kubel-evil) ;; TODO Require `kubel-evil' to be loaded with `kubel'
 #+end_src
 
 ** calendar [0/0] :ARCHIVE:
