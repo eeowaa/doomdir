@@ -36,6 +36,7 @@
 (package! sed-mode)
 (package! jenkinsfile-mode)
 (package! adoc-mode)
+(package! jq-mode)
 (when IS-MAC
   (package! applescript-mode)
   (package! ob-applescript))
