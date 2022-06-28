@@ -97,6 +97,7 @@ $func: (recursively) delete? [y/N]: "
     ln -sf "$canonical_path/$binary" "$HOME/.local/bin"
 }
 #+end_src
+
 * :input
 ** =DOOMDIR= [1/1]
 *** DONE =packages.el=
@@ -343,7 +344,7 @@ major-modes.
                 hl-todo-keyword-faces)))
 #+end_src
 
-** hydra [3/4]
+** hydra [4/5]
 #+begin_quote
 This module adds hydra to Doom Emacs, as well as a few custom built hydras to
 start with.
@@ -452,6 +453,21 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
   ;; Other
   ("q" nil))
+#+end_src
+
+*** DONE [#C] Add a hydra for timeclock
+#+begin_src emacs-lisp :tangle yes
+(global-set-key (kbd "C-c c") 'hydra-timeclock/body)
+(defhydra hydra-timeclock (:color blue)
+  "Timeclock"
+  ("i" timeclock-in "In")
+  ("o" timeclock-out "Out")
+  ("c" timeclock-change "Change")
+  ("e" timeclock-visit-timelog "Edit")
+  ("g" timeclock-reread-log "Reload")
+  ("s" timeclock-status-string "Status")
+  ("r" timeclock-generate-report "Report")
+  ("q" nil "Quit"))
 #+end_src
 
 *** STRT [#B] Add a hydra for table.el

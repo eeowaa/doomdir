@@ -119,6 +119,18 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   ;; Other
   ("q" nil))
 
+(global-set-key (kbd "C-c c") 'hydra-timeclock/body)
+(defhydra hydra-timeclock (:color blue)
+  "Timeclock"
+  ("i" timeclock-in "In")
+  ("o" timeclock-out "Out")
+  ("c" timeclock-change "Change")
+  ("e" timeclock-visit-timelog "Edit")
+  ("g" timeclock-reread-log "Reload")
+  ("s" timeclock-status-string "Status")
+  ("r" timeclock-generate-report "Report")
+  ("q" nil "Quit"))
+
 (global-set-key (kbd "C-c t") 'hydra-table/body)
 (defhydra hydra-table ()
   "table.el"
