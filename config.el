@@ -562,13 +562,29 @@ deleting the final newline before inserting the \")))\"."
    ("&copy;" 0 '(face nil display "©"))
    ("<a name=\".*\"></a>" 0 '(face nil display ""))))
 
-(add-to-list 'auto-mode-alist '("\\.mdx\\'" . markdown-mode))
-
 (after! markdown
   (defun my/markdown-preview (f &rest r)
     (let ((browse-url-browser-function #'browse-url-default-browser))
       (apply f r)))
   (advice-add 'markdown-preview :around #'my/markdown-preview))
+
+;; Prevent flycheck from being automatically enabled
+(if (or (not (boundp 'flycheck-global-modes))
+        (not (eq 'not (car flycheck-global-modes))))
+    (setq flycheck-global-modes '(not markdown-mode))
+  (let ((modes (cdr flycheck-global-modes)))
+    (setcdr flycheck-global-modes (pushnew! modes 'markdown-mode))))
+
+;; Prevent lsp diagnostics from being enabled
+(if (boundp 'lsp-diagnostics-disabled-modes)
+    (pushnew! lsp-diagnostics-disabled-modes 'markdown-mode)
+  (setq lsp-diagnostics-disabled-modes '(markdown-mode)))
+
+;; Don't bother checking for an LSP diagnostics provider in sh-mode
+(setq-hook! 'markdown-mode-hook
+  lsp-diagnostics-provider :none)
+
+(add-to-list 'auto-mode-alist '("\\.mdx\\'" . markdown-mode))
 
 (after! org
   (setq org-hide-leading-stars nil

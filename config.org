@@ -2543,7 +2543,7 @@ accounting system that works with simple text files holding transactions.
 Adds Lua support to Doom Emacs
 #+end_quote
 
-** markdown [3/6]
+** markdown [4/7]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
@@ -2586,11 +2586,6 @@ pipx install grip
    ("<a name=\".*\"></a>" 0 '(face nil display ""))))
 #+end_src
 
-*** DONE [#C] Filename-mode associations
-#+begin_src emacs-lisp :tangle yes
-(add-to-list 'auto-mode-alist '("\\.mdx\\'" . markdown-mode))
-#+end_src
-
 *** DONE [#B] Preview Markdown buffers in an external browser
 Regardless of what I've set ~browse-url-browser-function~ to, I would like to
 preview Markdown rendering in the system browser.
@@ -2601,6 +2596,32 @@ preview Markdown rendering in the system browser.
     (let ((browse-url-browser-function #'browse-url-default-browser))
       (apply f r)))
   (advice-add 'markdown-preview :around #'my/markdown-preview))
+#+end_src
+
+*** DONE [#B] Disable error reporting in markdown-mode buffers
+Reference: [[*Disable error reporting in sh-mode buffers][Disable error reporting in sh-mode buffers]]
+
+#+begin_src emacs-lisp :tangle yes
+;; Prevent flycheck from being automatically enabled
+(if (or (not (boundp 'flycheck-global-modes))
+        (not (eq 'not (car flycheck-global-modes))))
+    (setq flycheck-global-modes '(not markdown-mode))
+  (let ((modes (cdr flycheck-global-modes)))
+    (setcdr flycheck-global-modes (pushnew! modes 'markdown-mode))))
+
+;; Prevent lsp diagnostics from being enabled
+(if (boundp 'lsp-diagnostics-disabled-modes)
+    (pushnew! lsp-diagnostics-disabled-modes 'markdown-mode)
+  (setq lsp-diagnostics-disabled-modes '(markdown-mode)))
+
+;; Don't bother checking for an LSP diagnostics provider in sh-mode
+(setq-hook! 'markdown-mode-hook
+  lsp-diagnostics-provider :none)
+#+end_src
+
+*** DONE [#C] Filename-mode associations
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'auto-mode-alist '("\\.mdx\\'" . markdown-mode))
 #+end_src
 
 *** TODO [#B] Live-preview Markdown buffers in an external browser
