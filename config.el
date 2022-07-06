@@ -551,6 +551,9 @@ deleting the final newline before inserting the \")))\"."
    (setq tab-width
          (alist-get 'c-basic-offset (assoc "linux" c-style-alist)))))
 
+(after! ws-butler
+  (pushnew! ws-butler-global-exempt-modes 'tsv-mode))
+
 (add-to-list 'auto-mode-alist '("Cask\\'" . lisp-data-mode))
 
 (add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))

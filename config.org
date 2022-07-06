@@ -2285,7 +2285,7 @@ github_binary_release \
     --binary netcoredbg
 #+end_src
 
-** data [1/1]
+** data [2/2]
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -2302,6 +2302,20 @@ curl --create-dirs \
     -o ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
     https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.20.0/org.eclipse.lemminx-0.20.0-uber.jar
 #+end_src
+
+*** DONE [#A] Do not remove trailing whitespace in TSV mode
+Trailing whitespace in =tsv-mode= could represent empty fields (if that
+whitespace is a series of consecutive tabs), which we want to preserve.
+
+#+begin_src emacs-lisp :tangle yes
+(after! ws-butler
+  (pushnew! ws-butler-global-exempt-modes 'tsv-mode))
+#+end_src
+
+We could be picky about this and write a different whitespace cleanup function
+for =ws-butler= to use in =tsv-mode= buffers to remove trailing spaces while
+keeping trailing tabs, or maybe even to removing trailing spaces from each
+tab-separated field, but this is good enough for now.
 
 ** dart [0/0] :ARCHIVE:
 #+begin_quote
