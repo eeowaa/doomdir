@@ -349,6 +349,9 @@ major-modes.
 This module adds hydra to Doom Emacs, as well as a few custom built hydras to
 start with.
 #+end_quote
+*** COMMENT Documentation
++ [[doom-modules:ui/hydra/README.org][ui/pdf module documentation]]
++ [[doom:.local/straight/repos/hydra/README.md][hydra package README]]
 
 *** DONE [#A] Add a hydra for projectile run commands
 #+begin_src emacs-lisp :tangle yes
@@ -911,7 +914,7 @@ Modules that affect and augment your ability to manipulate or insert text.
 ;;; :editor
 #+end_src
 
-** evil [3/4]
+** evil [3/5]
 #+begin_quote
 This holy module brings the vim experience to Emacs.
 #+end_quote
@@ -988,6 +991,13 @@ builtin game.
     :e "K" #'solitaire-move-up
     :e "J" #'solitaire-move-down))
 #+end_src
+
+*** TODO [#B] Improve visual line navigation
+I would like to use the standard =gj= and =gk= Vim bindings to navigate between
+wrapped visual lines, but a lot of other modes wrap those bindings. An
+altnerative solution would be to enable ~evil-respect-visual-line-mode~ in
+=DOOMDIR/init.el=, but apparently there are problems with doing so. See this
+open issue in Doom Emacs: https://github.com/doomemacs/doomemacs/issues/2447
 
 *** TODO [#C] Bind ~helpful-update~ to an Evil Normal state key
 ~helpful-update~ is the function that is used to redisplay help buffers (useful
@@ -1976,12 +1986,12 @@ aren't working very well. Just try it out for yourself and see. Might want to
 open a PR or two.
 
 ** lsp [1/3]
-Documentation:
+*** COMMENT Documentation
 + [[doom-modules:tools/lsp/README.org][tools/lsp module documentation]]
 + [[doom:.local/straight/repos/lsp-mode/README.md][lsp-mode package README]]
 + [[doom:.local/straight/repos/lsp-mode/docs/page][lsp-mode package documentation]]
- - [[doom:.local/straight/repos/lsp-mode/docs/page/performance.md][performance.md]]
- - [[doom:.local/straight/repos/lsp-mode/docs/page/troubleshooting.md][troubleshooting.md]]
+  - [[doom:.local/straight/repos/lsp-mode/docs/page/performance.md][performance.md]]
+  - [[doom:.local/straight/repos/lsp-mode/docs/page/troubleshooting.md][troubleshooting.md]]
 
 *** DONE [#B] Automatically restart the LSP server when it crashes
 #+begin_src emacs-lisp :tangle yes
