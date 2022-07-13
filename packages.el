@@ -16,6 +16,7 @@
 ;;; :ui
 (package! col-highlight)
 (package! page-break-lines)
+(package! imenu-list)
 
 ;;; :editor
 

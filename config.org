@@ -204,6 +204,7 @@ Aesthetic modules that affect the Emacs interface or user experience.
 ;;; :ui
 (package! col-highlight)
 (package! page-break-lines)
+(package! imenu-list)
 #+end_src
 
 ** deft [0/0] :ARCHIVE:
@@ -671,7 +672,7 @@ certain operations. It highlights regions of text that the last operation (like
 yank) acted on.
 #+end_quote
 
-** popup [5/7]
+** popup [5/8]
 #+begin_quote
 This module provides a customizable popup window management system.
 #+end_quote
@@ -761,6 +762,17 @@ To redisplay with new width, call ~Man-update-manpage~ in a =Man= buffer (or
 just wait a few seconds after resizing a window for it to get called
 automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
 =R= in Emacs evil state).
+
+*** STRT [#B] Add popup rule for Ilist
+I would like to display a similar modeline to that of Treemacs, but beyond that,
+everything is OK.
+
+#+begin_src emacs-lisp :tangle yes
+(after! imenu-list
+  (set-popup-rule! "^\\*Ilist\\*"
+    :side 'right :size 35 :modeline "Ilist")
+  (remove-hook 'imenu-list-major-mode-hook #'imenu-list--set-mode-line))
+#+end_src
 
 *** TODO [#B] Configure WoMan for AWS CLI man pages
 *** TODO [#C] Modify popup behavior for Customize buffers
@@ -4277,6 +4289,21 @@ buffer in current window."
   "d" #'my/toggle-window-dedicated)
 #+end_src
 
+*** DONE [#B] Add key binding for Ilist
+#+begin_src emacs-lisp :tangle yes
+;; NOTE For whatever reason, I cannot use :defer to lazy-load `imenu-list'
+;; without it breaking
+(use-package! imenu-list
+  :init
+  (define-key! doom-leader-open-map "i" #'imenu-list-minor-mode)
+  :after imenu)
+
+(after! which-key
+  (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
+    (cl-pushnew `((,(format "\\`%s o i\\'" prefix-re)) nil . "Ilist")
+                which-key-replacement-alist)))
+#+end_src
+
 *** DONE [#C] Keep icons small by default
 #+begin_src emacs-lisp :tangle yes
 (setq all-the-icons-scale-factor 1.0)
@@ -4286,6 +4313,18 @@ buffer in current window."
 #+begin_src emacs-lisp :tangle yes
 (setq extended-command-suggest-shorter nil)
 #+end_src
+
+*** TODO [#C] Keep Ilist the same same size as before when opening and closing it
+Could hook into ~imenu-list-quit-window~ and save a variable such as
+~my/imenu-list--popup-size~, and then default to that when opening back up.
+
+*** TODO [#C] Disable the cursor in Ilist buffers (like Treemacs)
+*** TODO [#C] Remap "<" and ">" to window resize functions in Ilist
+Right now, those keys are not being used.
+
+*** TODO [#C] Use a different line truncate character than "$" in Ilist
+This is especially annoying when lines get truncated despite the text being
+scaled down, because the "$" character is full-sized.
 
 ** config
 *** STRT [#B] Remove =straight= package repos from =projectile=

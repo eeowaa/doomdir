@@ -298,6 +298,11 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (setq Man-width-max nil
       woman-fill-frame t)
 
+(after! imenu-list
+  (set-popup-rule! "^\\*Ilist\\*"
+    :side 'right :size 35 :modeline imenu-list-mode-line-format)
+  (remove-hook 'imenu-list-major-mode-hook #'imenu-list--set-mode-line))
+
 (require 'ace-window)
 
 (after! treemacs-evil
@@ -1058,6 +1063,18 @@ buffer in current window."
 (define-key! evil-window-map
   ;; replaces `+workspace/close-window-or-workspace'
   "d" #'my/toggle-window-dedicated)
+
+;; NOTE For whatever reason, I cannot use :defer to lazy-load `imenu-list'
+;; without it breaking
+(use-package! imenu-list
+  :init
+  (define-key! doom-leader-open-map "i" #'imenu-list-minor-mode)
+  :after imenu)
+
+(after! which-key
+  (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
+    (cl-pushnew `((,(format "\\`%s o i\\'" prefix-re)) nil . "Ilist")
+                which-key-replacement-alist)))
 
 (setq all-the-icons-scale-factor 1.0)
 
