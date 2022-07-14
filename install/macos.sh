@@ -130,5 +130,8 @@ npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 # Install prerequisites for `lang/yaml` module
 npm install -g yaml-language-server
 
+# Install prerequisites for `email/mu4e` module
+brew install mu
+
 # Install prerequisites for `app/irc` module
 brew install gnutls

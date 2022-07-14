@@ -118,6 +118,9 @@ sudo dnf -y install perl
 # TODO: Fix cpan install command
 cpan install App::Git::Autofixup
 
+# Install prerequisites for `tools/pass' module
+sudo dnf -y install pass gnupg2
+
 # Install prerequisites for `tools/terraform` module
 sudo dnf -y install terraform
 
@@ -266,6 +269,107 @@ npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 
 # Install prerequisites for `lang/yaml` module
 npm install -g yaml-language-server
+
+# Install prerequisites for `email/mu4e` module
+sudo dnf -y install maildir-utils
+
+# Function to extract a value from an INI config file
+ini_parse() {
+    local func='ini_parse' config=$1 key=$2
+    [ $# -eq 2 ] || {
+        echo >&2 "ERROR: $func: wrong number of arguments"
+        return 1
+    }
+    [ -f "$config" ] || {
+        echo >&2 "ERROR: $func: not a file: $config"
+        return 1
+    }
+    local section=${key%.*} var=${key##*.}
+    if [ "X$section" = X ] || [ "X$var" = X ]
+    then
+        echo >&2 "ERROR: $func: malformed argument: $key"
+        return 1
+    fi
+    awk '
+        BEGIN {
+            FS = "[ 	]*=[ 	]*"
+            status = 1
+        }
+        match($0, /^\[(.*)\]$/, a) {
+            if (tolower(a[1]) == tolower(section)) x = 1
+            else x = 0
+            next
+        }
+        x && tolower($1) == tolower(var) {
+            status = 0
+            print $2
+        }
+        END {
+            exit status
+        }
+    ' "section=$section" "var=$var" "$config"
+}
+
+# Create top-level Maildir if it does not already exist
+[ "$MAILDIR" ] || MAILDIR=$HOME/Maildir
+export MAILDIR
+mkdir -p "$MAILDIR"
+chmod 700 "$MAILDIR"
+
+# Symlink Evolution MUA Maildirs into ~/Maildir
+#
+# TODO: Similar setup for $XDG_DATA_HOME/evolution/mail/local
+#
+# FIXME: Exchange Web Services (EWS) mail accounts do *NOT* use Maildir, but a
+# similar format. Rather than .../cur/<message hash>, EWS accounts use
+# .../cur/<first 2 chars of message hash>/<rest of message hash>, which `mu`
+# ignores. Possible solutions include (in decreasing order of preference):
+#
+# 1. Modifying how messages are stored via configuration or modifying source
+# 2. Modifying what `mu` looks to index via configuration or modifying source
+# 3. Symlinking all .../cur/01/23456789abcdef to .../cur/0123456789abcdef
+#
+# Or, rather than do any of that, I could just configure Evolution to use a
+# Maildir that is connected to EWS using other tools, and point Evolution to
+# those tools in order to send mail. This might be the best solution, as it
+# would allow me to use different MUAs to access and manage the same email
+# without local storage duplication or excessive processes.
+#
+[ -d "$XDG_CACHE_HOME/evolution/mail" ] && {
+    fd -gtd --exact-depth=2 folders "$XDG_CACHE_HOME/evolution/mail" |
+    sed 's,/folders$,,' |
+    while read account_dir
+    do
+        account=`basename "$account_dir"`
+        account_file=$XDG_CONFIG_HOME/evolution/sources/$account'.source'
+        [ -f "$account_file" ] || {
+            echo >&2 "WARN: missing mail account file: $account_file"
+            continue
+        }
+        identity=`ini_parse "$account_file" 'Mail Account'.IdentityUid`
+        identity_file=$XDG_CONFIG_HOME/evolution/sources/$identity'.source'
+        [ -f "$identity_file" ] || {
+            echo >&2 "WARN: missing mail identity file: $identity_file"
+            continue
+        }
+        address=`ini_parse "$identity_file" 'Mail Identity'.Address`
+        [ "$address" ] || {
+            echo >&2 "WARN: missing mail address for identity: $identity"
+            continue
+        }
+        [ -h "$MAILDIR/$address" ] && rm "$MAILDIR/$address"
+        [ -e "$MAILDIR/$address" ] && {
+            echo >&2 "WARN: refusing to overwrite: $MAILDIR/$address"
+            continue
+        }
+        echo "INFO: symlinking '$account_dir/folders' to '$MAILDIR/$address'"
+        ln -s "$account_dir/folders" "$MAILDIR/$address"
+    done
+}
+
+# Create mu database
+mu init
+mu index
 
 # Install prerequisites for `app/irc` module
 sudo dnf -y install gnutls
