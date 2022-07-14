@@ -2295,6 +2295,10 @@ cpan install App::Git::Autofixup
 ** make [0/0]
 ** pass [0/0] :ARCHIVE:
 ** pdf [1/1]
+*** COMMENT Documentation
++ [[doom-modules:tools/pdf/README.org][tools/pdf module documentation]]
++ [[doom:.local/straight/repos/pdf-tools/README.org][pdf-tools package README]]
+
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
