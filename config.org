@@ -2234,7 +2234,7 @@ I've done everything that the Doom documentation told me to do, but things
 aren't working very well. Just try it out for yourself and see. Might want to
 open a PR or two.
 
-** lsp [1/3]
+** lsp [1/4]
 *** COMMENT Documentation
 + [[doom-modules:tools/lsp/README.org][tools/lsp module documentation]]
 + [[doom:.local/straight/repos/lsp-mode/README.md][lsp-mode package README]]
@@ -2255,6 +2255,15 @@ When the frame is too small (e.g. its default size), the first few menu items in
 the popup window are cut off, and all you see are options to exclude the file
 from the LSP workspace. Unless you know about the other available options, LSP
 won't work for you. Unfortunately, resizing the frame does not help.
+
+*** TODO [#B] Provide better integration with lsp-ui-imenu
++ ~lsp-ui-imenu~ provides a smoother and more aesthetically-pleasing experience
+  compared to ~imenu-list~, but there are currently no keybindings to open it.
+  - Essentially, I need to map ~lsp-ui-imenu~ to an LSP prefix map
+    + =SPC c l T i= would be good for a toggle, but ~lsp-ui-imenu~ by itself
+      does not toggle the window.
+    + Reference ~imenu-list-minor-mode~ to see how it toggles its window.
++ https://emacs-lsp.github.io/lsp-ui/#lsp-ui-imenu
 
 *** TODO [#B] Look into LSP performance improvements
 Resources:
