@@ -764,8 +764,11 @@ automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
 =R= in Emacs evil state).
 
 *** STRT [#B] Add popup rule for Ilist
-I would like to display a similar modeline to that of Treemacs, but beyond that,
-everything is OK.
+- [ ] Display a similar modeline to that of Treemacs
+- [ ] Use the same popup window as Treemacs (only display one at a time)
+  - I would rather not take up too much screen real estate
+  - I normally only need to see one of those at a time (because I'm either
+    focused on file operations or on operations within a single file)
 
 #+begin_src emacs-lisp :tangle yes
 (after! imenu-list
@@ -4337,6 +4340,21 @@ buffer in current window."
 *** DONE [#C] Don't suggest abbreviations for long command names
 #+begin_src emacs-lisp :tangle yes
 (setq extended-command-suggest-shorter nil)
+#+end_src
+
+*** TODO [#C] Always display Imenu for current buffer in Ilist
+If the current buffer does not have Imenu entries, I do not want old ones to
+persist in the Ilist, because I find that confusing. Actually, maybe I just want
+Ilist to display entries for the list selected buffer (in the current workspace)
+that is derived from ~prog-mode~.
+
+In any case, the following does *not* work, because it causes Ilist to update
+(and display nothing) when I am just doing stuff in the minibuffer (or within
+Ilist itself!), and I'd like to keep it displaying what it had before in those
+obvious cases:
+
+#+begin_src emacs-lisp :tangle no
+(setq imenu-list-persist-when-imenu-index-unavailable nil)
 #+end_src
 
 *** TODO [#C] Keep Ilist the same same size as before when opening and closing it
