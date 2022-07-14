@@ -1,8 +1,8 @@
 #+TITLE: Doom Emacs Literate Config
-#+STARTUP:  overview
-#+FILETAGS: :doom:
-* Headers
-** =packages.el=
+#+STARTUP:      overview
+#+FILETAGS:     :doom:
+#+EXCLUDE_TAGS: SCAFFOLDING ARCHIVE noexport
+* Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;; -*- no-byte-compile: t; -*-
 ;;; DOOMDIR/packages.el
@@ -16,8 +16,9 @@
 ;(package! some-package)
 #+end_src
 
-* Prerequisites
-** DONE macOS
+* Miscellany
+** Install prerequisites [2/2]
+*** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 #!/bin/sh
 
@@ -31,7 +32,7 @@ PROFILE=/dev/null /tmp/nvm-install.sh
 rm /tmp/nvm-install.sh
 #+end_src
 
-** DONE Fedora
+*** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
 #!/bin/sh
 
@@ -99,11 +100,15 @@ $func: (recursively) delete? [y/N]: "
 #+end_src
 
 * :input
-** =DOOMDIR= [1/1]
-*** DONE =packages.el=
+** Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;;; :input
 #+end_src
+
+** Miscellany [0/0] :ARCHIVE:
+#+begin_quote
+Miscellaneous configuration without a corresponding module.
+#+end_quote
 
 ** chinese [0/0] :ARCHIVE:
 #+begin_quote
@@ -127,11 +132,15 @@ Modules that provide new interfaces or frameworks for completion, including code
 completion.
 #+end_quote
 
-** =DOOMDIR= [1/1]
-*** DONE =packages.el=
+** Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;;; :completion
 #+end_src
+
+** Miscellany [0/0] :ARCHIVE:
+#+begin_quote
+Miscellaneous configuration without a corresponding module.
+#+end_quote
 
 ** company [1/1]
 #+begin_quote
@@ -198,14 +207,88 @@ provides a united interface for project search and replace, powered by [[https:/
 Aesthetic modules that affect the Emacs interface or user experience.
 #+end_quote
 
-** =DOOMDIR= [1/1]
-*** DONE =packages.el=
+** Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;;; :ui
 (package! col-highlight)
 (package! page-break-lines)
 (package! imenu-list)
 #+end_src
+
+** Miscellany [4/9]
+#+begin_quote
+Miscellaneous configuration without a corresponding module.
+#+end_quote
+
+*** DONE [#B] Dedicate windows
+#+begin_src emacs-lisp :tangle yes
+(defun my/toggle-window-dedicated ()
+  "Control whether or not Emacs is allowed to display another
+buffer in current window."
+  (interactive)
+  (message
+   (if (let (window (get-buffer-window (current-buffer)))
+         (set-window-dedicated-p window (not (window-dedicated-p window))))
+       "%s: Can't touch this!"
+     "%s is up for grabs.")
+   (current-buffer)))
+
+(define-key! evil-window-map
+  ;; replaces `+workspace/close-window-or-workspace'
+  "d" #'my/toggle-window-dedicated)
+#+end_src
+
+*** DONE [#B] Add key binding for Ilist
+#+begin_src emacs-lisp :tangle yes
+;; NOTE For whatever reason, I cannot use :defer to lazy-load `imenu-list'
+;; without it breaking
+(use-package! imenu-list
+  :init
+  (define-key! doom-leader-open-map "i" #'imenu-list-minor-mode)
+  :after imenu)
+
+(after! which-key
+  (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
+    (cl-pushnew `((,(format "\\`%s o i\\'" prefix-re)) nil . "Ilist")
+                which-key-replacement-alist)))
+#+end_src
+
+*** DONE [#C] Keep icons small by default
+#+begin_src emacs-lisp :tangle yes
+(setq all-the-icons-scale-factor 1.0)
+#+end_src
+
+*** DONE [#C] Don't suggest abbreviations for long command names
+#+begin_src emacs-lisp :tangle yes
+(setq extended-command-suggest-shorter nil)
+#+end_src
+
+*** TODO [#C] Always display Imenu for current buffer in Ilist
+If the current buffer does not have Imenu entries, I do not want old ones to
+persist in the Ilist, because I find that confusing. Actually, maybe I just want
+Ilist to display entries for the list selected buffer (in the current workspace)
+that is derived from ~prog-mode~.
+
+In any case, the following does *not* work, because it causes Ilist to update
+(and display nothing) when I am just doing stuff in the minibuffer (or within
+Ilist itself!), and I'd like to keep it displaying what it had before in those
+obvious cases:
+
+#+begin_src emacs-lisp :tangle no
+(setq imenu-list-persist-when-imenu-index-unavailable nil)
+#+end_src
+
+*** TODO [#C] Keep Ilist the same same size as before when opening and closing it
+Could hook into ~imenu-list-quit-window~ and save a variable such as
+~my/imenu-list--popup-size~, and then default to that when opening back up.
+
+*** TODO [#C] Disable the cursor in Ilist buffers (like Treemacs)
+*** TODO [#C] Remap "<" and ">" to window resize functions in Ilist
+Right now, those keys are not being used.
+
+*** TODO [#C] Use a different line truncate character than "$" in Ilist
+This is especially annoying when lines get truncated despite the text being
+scaled down, because the "$" character is full-sized.
 
 ** deft [0/0] :ARCHIVE:
 #+begin_quote
@@ -261,12 +344,12 @@ Terminus is a good font but must be installed first:
 brew install font-terminus
 #+end_src
 
-#+TITLE: Terminus (disabled)
+#+CAPTION: Terminus (disabled)
 #+begin_src emacs-lisp :tangle no
 (setq doom-font (font-spec :family "Terminus (TTF)" :size 16))
 #+end_src
 
-#+TITLE: Menlo (disabled)
+#+CAPTION: Menlo (disabled)
 #+begin_src emacs-lisp :tangle no
 (setq doom-font (font-spec :family "Menlo" :size 16))
 #+end_src
@@ -948,10 +1031,40 @@ plugins) -- will feel right at home.
 Modules that affect and augment your ability to manipulate or insert text.
 #+end_quote
 
-** =DOOMDIR= [1/1]
-*** DONE =packages.el=
+** Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;;; :editor
+#+end_src
+
+** Miscellany [2/3]
+#+begin_quote
+Miscellaneous configuration without a corresponding module.
+#+end_quote
+
+*** DONE [#A] Configure line-feed behavior
+#+begin_src emacs-lisp :tangle yes
+;; Display ^L characters as horizontal lines
+(use-package! page-break-lines
+  :config (global-page-break-lines-mode))
+
+;; Have C-l send the current line to the top of the window
+(setq recenter-positions '(top bottom middle))
+
+;; Perform a line feed after jumping to a ^L character
+(defun my/recenter-top (&rest r) (recenter 0))
+(advice-add 'forward-page :after #'my/recenter-top)
+#+end_src
+
+*** DONE [#C] Allow easy input of accented and special characters via =C-\=
+#+begin_src emacs-lisp :tangle yes
+(setq default-input-method "latin-postfix")
+#+end_src
+
+*** STRT [#B] Truncate lines by default
+This doesn't appear to be working...
+
+#+begin_src emacs-lisp :tangle yes
+(setq-default truncate-lines t)
 #+end_src
 
 ** evil [3/5]
@@ -1340,11 +1453,98 @@ lines in the buffer without modifying the buffer content.
 Modules that reconfigure or augment packages or features built into Emacs.
 #+end_quote
 
-** =DOOMDIR= [1/1]
-*** DONE =packages.el=
+** Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;;; :emacs
 #+end_src
+
+** Miscellany [3/8]
+#+begin_quote
+Miscellaneous configuration without a corresponding module.
+#+end_quote
+
+*** DONE [#A] Enable all disabled commands
+#+begin_src emacs-lisp :tangle yes
+(setq disabled-command-function nil)
+#+end_src
+
+*** DONE [#A] Configure native compilation
+#+begin_src emacs-lisp :tangle yes
+(when (and (featurep 'native-compile)
+           (native-comp-available-p))
+  (setq native-comp-speed 2
+        package-native-compile t))
+#+end_src
+
+The conditional was taken from ~comp-ensure-native-compiler~, which was /not/
+used for two reasons:
+
+1. The =comp= package defines ~comp-ensure-native-compiler~, but I don't know
+   when the =comp= package is loaded. However, ~featurep~ and
+   ~native-comp-available-p~ are both C constructs.
+2. Rather than return ~t~ when native compilation is built-in and available,
+   ~comp-ensure-native-compiler~ always returns ~nil~ and just spits an error
+   in the negative case.
+
+*** DONE [#C] Don't prompt about killing running processing when quitting
+#+begin_src emacs-lisp :tangle yes
+(setq confirm-kill-processes nil)
+#+end_src
+
+*** TODO [#B] Prevent AWS credentials from being written to ~doom-env-file~
+- [ ] Look at recent changes to =core/cli/= and =core/core-cli-lib.el= to fix
+  this problem and others in =DOOMDIR/cli.el=.
+
+# :tangle early-init.el
+#+begin_src emacs-lisp :tangle no
+(when noninteractive
+  ;; FIXME This variable is not defined
+  (pushnew! doom-env-deny
+            "^AWS_ACCESS_KEY_ID$"
+            "^AWS_SECRET_ACCESS_KEY$"
+            "^AWS_SESSION_TOKEN$"))
+#+end_src
+
+*** LOOP [#B] Always trust file-location and directory-local variables
+:LOGBOOK:
+- Note taken on [2022-07-14 Thu 10:37] \\
+  This stopped working for me at some point. Need to revisit.
+:END:
+For now, just trust ~projectile-*~ variables as long as they apply to files in
+=XDG_DOCUMENTS_DIR= or =DOOMDIR=.
+
+#+begin_src emacs-lisp :tangle yes
+(after! projectile
+  ;; For each atom in `obarray'
+  (mapatoms
+   (lambda (symbol)
+     ;; When the atom is a `projectile' variable
+     (when
+         (and (boundp symbol)
+              (not (keywordp symbol))
+              (string-prefix-p "projectile-" (symbol-name symbol)))
+       ;; The variable is safe when ...
+       (put symbol 'safe-local-variable
+            (lambda (_)
+              (when
+                  ;; ... we are in either XDG_DOCUMENTS_DIR or DOOMDIR
+                  ;; TODO See about using `projectile-project-search-path'
+                  (-select
+                   (lambda (dir)
+                     (string-match-p dir (expand-file-name default-directory)))
+                   (list (file-name-as-directory (xdg-user-dir "DOCUMENTS"))
+                         doom-private-dir))
+                t)))))))
+#+end_src
+
+*** TODO [#B] Add BitWarden as ~auth-source~ backend
+https://github.com/seanfarley/emacs-bitwarden
+
+*** TODO [#B] Figure out the autosave and backup situation for Doom Emacs
+Compare with my old config and try to match it.
+
+*** TODO [#C] Suppress warning for ~Package cl is deprecated~
+https://github.com/hlissner/doom-emacs/issues/3372
 
 ** dired [1/1]
 #+begin_quote
@@ -1405,18 +1605,19 @@ integration with git.
 #+end_src
 
 * :term
-:PROPERTIES:
-:CATEGORY: doom/term
-:END:
 #+begin_quote
 Modules that offer terminal emulation.
 #+end_quote
 
-** =DOOMDIR= [1/1]
-*** DONE =packages.el=
+** Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;;; :term
 #+end_src
+
+** Miscellany [0/0] :ARCHIVE:
+#+begin_quote
+Miscellaneous configuration without a corresponding module.
+#+end_quote
 
 ** eshell [4/7]
 #+begin_quote
@@ -1549,11 +1750,15 @@ into another buffer, you can see the "o". *Note that this is only a problem in
 GUI Emacs, not terminal Emacs*.
 
 * :checkers
-** =DOOMDIR= [1/1]
-*** DONE =packages.el=
+** Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;;; :checkers
 #+end_src
+
+** Miscellany [0/0] :ARCHIVE:
+#+begin_quote
+Miscellaneous configuration without a corresponding module.
+#+end_quote
 
 ** syntax [1/3]
 *** STRT [#A] Allow dynamic changing of error levels displayed
@@ -1771,11 +1976,15 @@ curl -L https://raw.githubusercontent.com/languagetool-org/languagetool/master/i
 Small modules that give Emacs access to external tools & services.
 #+end_quote
 
-** =DOOMDIR= [1/1]
-*** DONE =packages.el=
+** Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;;; :tools
 #+end_src
+
+** Miscellany [0/0] :ARCHIVE:
+#+begin_quote
+Miscellaneous configuration without a corresponding module.
+#+end_quote
 
 ** ansible [1/1]
 *** DONE [#A] Install prerequisites
@@ -2126,11 +2335,15 @@ sudo dnf -y install terraform
 Modules to improve integration into your OS, system, or devices.
 #+end_quote
 
-** =DOOMDIR= [1/1]
-*** DONE =packages.el=
+** Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;;; :os
 #+end_src
+
+** Miscellany [0/0] :ARCHIVE:
+#+begin_quote
+Miscellaneous configuration without a corresponding module.
+#+end_quote
 
 ** macos [2/2]
 *** DONE [#A] Remap keys for macOS
@@ -2192,10 +2405,18 @@ See also:
 Modules that bring support for a language or group of languages to Emacs.
 #+end_quote
 
-** =DOOMDIR= [1/1]
-*** DONE =packages.el=
+** Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;;; :lang
+#+end_src
+
+** Miscellany [1/1]
+#+begin_quote
+Miscellaneous configuration without a corresponding module.
+#+end_quote
+
+*** DONE [#A] Install packages
+#+begin_src emacs-lisp :tangle packages.el
 (package! sed-mode)
 (package! jenkinsfile-mode)
 (package! adoc-mode)
@@ -3245,7 +3466,7 @@ pipx install --include-deps jupyter
 pip3 install --user debugpy
 #+end_src
 
-*** DONE [#A] Develop and run a simple "Hello World" program
+*** DONE [#A] Develop and run a simple "Hello World" program :noexport:
 More than a simple "Hello World":
 + [[file:~/Documents/src/life/secret-santa/][Secret Santa project]]
 + [[file:~/org/life/notes.org::*Developing with interpreted languages][Notes for developing with interpreted languages]]
@@ -3673,15 +3894,18 @@ This module adds [[https://ziglang.org/][Zig]] support, with optional (but recom
 #+end_quote
 
 * :email
-** =DOOMDIR= [1/1]
-*** DONE =packages.el=
+** Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;;; :email
 #+end_src
 
+** Miscellany [0/0] :ARCHIVE:
+#+begin_quote
+Miscellaneous configuration without a corresponding module.
+#+end_quote
+
 ** mu4e [0/1]
 #+begin_quote
-
 This module makes Emacs an email client, using ~mu4e~.
 #+end_quote
 
@@ -3702,10 +3926,18 @@ toward a specific purpose. They may have additional dependencies and *should be
 loaded last*, before =:config= modules.
 #+end_quote
 
-** =DOOMDIR= [1/1]
-*** DONE =packages.el=
+** Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;;; :app
+#+end_src
+
+** Miscellany [1/1]
+#+begin_quote
+Miscellaneous configuration without a corresponding module.
+#+end_quote
+
+*** DONE [#A] Install packages
+#+begin_src emacs-lisp :tangle packages.el
 (package! counsel-spotify)
 (package! noaa)
 (package! nov)
@@ -3962,10 +4194,77 @@ Modules that configure Emacs one way or another, or focus on making it easier
 for you to customize it yourself. It is best to load these last.
 #+end_quote
 
-** =DOOMDIR= [1/1]
-*** DONE =packages.el=
+** Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;;; :config
+#+end_src
+
+** Miscellany [1/3]
+#+begin_quote
+Miscellaneous configuration without a corresponding module.
+#+end_quote
+
+*** STRT [#B] Remove =straight= package repos from =projectile=
+Unfortunately, the =~/.config/emacs/.local/straight/repos/*= are creeping back
+in, so this isn't finished yet.
+
+#+begin_src emacs-lisp :tangle yes
+;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
+(after! projectile
+  (eval
+   `(pushnew!
+     projectile-globally-ignored-directories
+     ,@(mapcan
+        (lambda (f)
+          (when (file-directory-p f)
+            (list (abbreviate-file-name f))))
+        (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
+                                   t "\\`[^.]")))))
+#+end_src
+
+*** TODO [#C] Replace =C-?= with backspace
+We already have =C-r=, so might as well replace this mostly-useless keybinding.
+
+*** DONE [#A] Load custom config if present
+=~/.config/doom/custom.el= should look something like this:
+
+#+begin_src emacs-lisp :tangle no
+;;; Manual
+
+;; Identifying information
+(setq user-full-name "John Doe"
+      user-mail-address "johndoe@example.com")
+
+;; Geographic location
+(setq calendar-latitude 35.0933
+      calendar-longitude -98.2632
+      calendar-location-name "Nowhere, OK")
+
+;; RSS feeds
+(setq elfeed-feeds
+      '("https://example.com/rss.xml"))
+
+;; Spotify (see https://developer.spotify.com/my-applications)
+;; Could also use `auth-source' library to retrieve the credentials
+(setq counsel-spotify-client-id "00000000000000000000000000000000"
+      counsel-spotify-client-secret "00000000000000000000000000000000")
+
+;; IRC
+(set-irc-server! "irc.libera.chat"
+  `(:tls t
+    :port 6697
+    :nick "johndoe"
+    :sasl-password (auth-source-pick-first-password
+                    :host "libera.chat"
+                    :user "johndoe")
+    :channels ("#emacs"
+               "#")))
+
+;;; Customize
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(load! "custom" doom-private-dir t)
 #+end_src
 
 ** literate [2/4]
@@ -3987,11 +4286,9 @@ I would like to make =packages.el= literate instead of "illiterate". 😉
 Refer to your old config.
 
 *** HOLD [#C] Split up my literate config into separate files
-+ [[file:~/.config/emacs/modules/config/literate/README.org::*Modularizing your literate config with ~#+INCLUDE~ directives][Modularizing your literate config with ~#+INCLUDE~ directives]]
-
-Doing so might make tangling faster, but currently I don't have any problems
-with performance. If and when I start to notice a problem, I'll revisit this
-item.
+This can be done with ~#+INCLUDE~ directives. Doing so might make tangling
+faster, but currently I don't have any problems with performance. If and when I
+start to notice a problem, I'll revisit this item.
 
 ** default [6/9]
 #+begin_quote
@@ -4187,254 +4484,7 @@ error in process sentinel: Error in a Doom module: "modules/config/default/confi
                 which-key-replacement-alist)))
 #+end_src
 
-* Miscellany
-:PROPERTIES:
-:CATEGORY: doom/misc
-:END:
-** emacs
-*** DONE [#A] Enable all disabled commands
-#+begin_src emacs-lisp :tangle yes
-(setq disabled-command-function nil)
-#+end_src
-
-*** DONE [#A] Configure native compilation
-#+begin_src emacs-lisp :tangle yes
-(when (and (featurep 'native-compile)
-           (native-comp-available-p))
-  (setq native-comp-speed 2
-        package-native-compile t))
-#+end_src
-
-The conditional was taken from ~comp-ensure-native-compiler~, which was /not/
-used for two reasons:
-
-1. The =comp= package defines ~comp-ensure-native-compiler~, but I don't know
-   when the =comp= package is loaded. However, ~featurep~ and
-   ~native-comp-available-p~ are both C constructs.
-2. Rather than return ~t~ when native compilation is built-in and available,
-   ~comp-ensure-native-compiler~ always returns ~nil~ and just spits an error
-   in the negative case.
-
-*** DONE [#C] Don't prompt about killing running processing when quitting
-#+begin_src emacs-lisp :tangle yes
-(setq confirm-kill-processes nil)
-#+end_src
-
-*** TODO [#B] Prevent AWS credentials from being written to ~doom-env-file~
-- [ ] Look at recent changes to =core/cli/= and =core/core-cli-lib.el= to fix
-  this problem and others in =DOOMDIR/cli.el=.
-
-# :tangle early-init.el
-#+begin_src emacs-lisp :tangle no
-(when noninteractive
-  ;; FIXME This variable is not defined
-  (pushnew! doom-env-deny
-            "^AWS_ACCESS_KEY_ID$"
-            "^AWS_SECRET_ACCESS_KEY$"
-            "^AWS_SESSION_TOKEN$"))
-#+end_src
-
-*** DONE [#B] Always trust file-location and directory-local variables
-For now, just trust ~projectile-*~ variables as long as they apply to files in
-=XDG_DOCUMENTS_DIR= or =DOOMDIR=.
-
-#+begin_src emacs-lisp :tangle yes
-(after! projectile
-  ;; For each atom in `obarray'
-  (mapatoms
-   (lambda (symbol)
-     ;; When the atom is a `projectile' variable
-     (when
-         (and (boundp symbol)
-              (not (keywordp symbol))
-              (string-prefix-p "projectile-" (symbol-name symbol)))
-       ;; The variable is safe when ...
-       (put symbol 'safe-local-variable
-            (lambda (_)
-              (when
-                  ;; ... we are in either XDG_DOCUMENTS_DIR or DOOMDIR
-                  ;; TODO See about using `projectile-project-search-path'
-                  (-select
-                   (lambda (dir)
-                     (string-match-p dir (expand-file-name default-directory)))
-                   (list (file-name-as-directory (xdg-user-dir "DOCUMENTS"))
-                         doom-private-dir))
-                t)))))))
-#+end_src
-
-*** TODO [#B] Add BitWarden as ~auth-source~ backend
-https://github.com/seanfarley/emacs-bitwarden
-
-*** TODO [#B] Figure out the autosave and backup situation for Doom Emacs
-Compare with my old config and try to match it.
-
-*** TODO [#C] Suppress warning for ~Package cl is deprecated~
-https://github.com/hlissner/doom-emacs/issues/3372
-
-** editor
-*** DONE [#A] Configure line-feed behavior
-#+begin_src emacs-lisp :tangle yes
-;; Display ^L characters as horizontal lines
-(use-package! page-break-lines
-  :config (global-page-break-lines-mode))
-
-;; Have C-l send the current line to the top of the window
-(setq recenter-positions '(top bottom middle))
-
-;; Perform a line feed after jumping to a ^L character
-(defun my/recenter-top (&rest r) (recenter 0))
-(advice-add 'forward-page :after #'my/recenter-top)
-#+end_src
-
-*** DONE [#C] Allow easy input of accented and special characters via =C-\=
-#+begin_src emacs-lisp :tangle yes
-(setq default-input-method "latin-postfix")
-#+end_src
-
-*** STRT [#B] Truncate lines by default
-This doesn't appear to be working...
-
-#+begin_src emacs-lisp :tangle yes
-(setq-default truncate-lines t)
-#+end_src
-
-** ui
-*** DONE [#B] Dedicate windows
-#+begin_src emacs-lisp :tangle yes
-(defun my/toggle-window-dedicated ()
-  "Control whether or not Emacs is allowed to display another
-buffer in current window."
-  (interactive)
-  (message
-   (if (let (window (get-buffer-window (current-buffer)))
-         (set-window-dedicated-p window (not (window-dedicated-p window))))
-       "%s: Can't touch this!"
-     "%s is up for grabs.")
-   (current-buffer)))
-
-(define-key! evil-window-map
-  ;; replaces `+workspace/close-window-or-workspace'
-  "d" #'my/toggle-window-dedicated)
-#+end_src
-
-*** DONE [#B] Add key binding for Ilist
-#+begin_src emacs-lisp :tangle yes
-;; NOTE For whatever reason, I cannot use :defer to lazy-load `imenu-list'
-;; without it breaking
-(use-package! imenu-list
-  :init
-  (define-key! doom-leader-open-map "i" #'imenu-list-minor-mode)
-  :after imenu)
-
-(after! which-key
-  (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
-    (cl-pushnew `((,(format "\\`%s o i\\'" prefix-re)) nil . "Ilist")
-                which-key-replacement-alist)))
-#+end_src
-
-*** DONE [#C] Keep icons small by default
-#+begin_src emacs-lisp :tangle yes
-(setq all-the-icons-scale-factor 1.0)
-#+end_src
-
-*** DONE [#C] Don't suggest abbreviations for long command names
-#+begin_src emacs-lisp :tangle yes
-(setq extended-command-suggest-shorter nil)
-#+end_src
-
-*** TODO [#C] Always display Imenu for current buffer in Ilist
-If the current buffer does not have Imenu entries, I do not want old ones to
-persist in the Ilist, because I find that confusing. Actually, maybe I just want
-Ilist to display entries for the list selected buffer (in the current workspace)
-that is derived from ~prog-mode~.
-
-In any case, the following does *not* work, because it causes Ilist to update
-(and display nothing) when I am just doing stuff in the minibuffer (or within
-Ilist itself!), and I'd like to keep it displaying what it had before in those
-obvious cases:
-
-#+begin_src emacs-lisp :tangle no
-(setq imenu-list-persist-when-imenu-index-unavailable nil)
-#+end_src
-
-*** TODO [#C] Keep Ilist the same same size as before when opening and closing it
-Could hook into ~imenu-list-quit-window~ and save a variable such as
-~my/imenu-list--popup-size~, and then default to that when opening back up.
-
-*** TODO [#C] Disable the cursor in Ilist buffers (like Treemacs)
-*** TODO [#C] Remap "<" and ">" to window resize functions in Ilist
-Right now, those keys are not being used.
-
-*** TODO [#C] Use a different line truncate character than "$" in Ilist
-This is especially annoying when lines get truncated despite the text being
-scaled down, because the "$" character is full-sized.
-
-** config
-*** STRT [#B] Remove =straight= package repos from =projectile=
-Unfortunately, the =~/.config/emacs/.local/straight/repos/*= are creeping back
-in, so this isn't finished yet.
-
-#+begin_src emacs-lisp :tangle yes
-;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
-(after! projectile
-  (eval
-   `(pushnew!
-     projectile-globally-ignored-directories
-     ,@(mapcan
-        (lambda (f)
-          (when (file-directory-p f)
-            (list (abbreviate-file-name f))))
-        (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
-                                   t "\\`[^.]")))))
-#+end_src
-
-*** TODO [#C] Replace =C-?= with backspace
-We already have =C-r=, so might as well replace this mostly-useless keybinding.
-
-*** DONE [#A] Load custom config if present
-=~/.config/doom/custom.el= should look something like this:
-
-#+begin_src emacs-lisp :tangle no
-;;; Manual
-
-;; Identifying information
-(setq user-full-name "John Doe"
-      user-mail-address "johndoe@example.com")
-
-;; Geographic location
-(setq calendar-latitude 35.0933
-      calendar-longitude -98.2632
-      calendar-location-name "Nowhere, OK")
-
-;; RSS feeds
-(setq elfeed-feeds
-      '("https://example.com/rss.xml"))
-
-;; Spotify (see https://developer.spotify.com/my-applications)
-;; Could also use `auth-source' library to retrieve the credentials
-(setq counsel-spotify-client-id "00000000000000000000000000000000"
-      counsel-spotify-client-secret "00000000000000000000000000000000")
-
-;; IRC
-(set-irc-server! "irc.libera.chat"
-  `(:tls t
-    :port 6697
-    :nick "johndoe"
-    :sasl-password (auth-source-pick-first-password
-                    :host "libera.chat"
-                    :user "johndoe")
-    :channels ("#emacs"
-               "#")))
-
-;;; Customize
-#+end_src
-
-#+begin_src emacs-lisp :tangle yes
-(load! "custom" doom-private-dir t)
-#+end_src
-
-* Footers
-** =packages.el=
+* Footers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;; To install a package directly from a remote git repo, you must specify a
 ;; `:recipe'. You'll find documentation on what `:recipe' accepts here:

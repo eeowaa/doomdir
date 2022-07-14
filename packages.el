@@ -34,6 +34,7 @@
 ;;; :os
 
 ;;; :lang
+
 (package! sed-mode)
 (package! jenkinsfile-mode)
 (package! adoc-mode)
@@ -45,6 +46,7 @@
 ;;; :email
 
 ;;; :app
+
 (package! counsel-spotify)
 (package! noaa)
 (package! nov)

@@ -2,6 +2,37 @@
 
 (setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
 
+(defun my/toggle-window-dedicated ()
+  "Control whether or not Emacs is allowed to display another
+buffer in current window."
+  (interactive)
+  (message
+   (if (let (window (get-buffer-window (current-buffer)))
+         (set-window-dedicated-p window (not (window-dedicated-p window))))
+       "%s: Can't touch this!"
+     "%s is up for grabs.")
+   (current-buffer)))
+
+(define-key! evil-window-map
+  ;; replaces `+workspace/close-window-or-workspace'
+  "d" #'my/toggle-window-dedicated)
+
+;; NOTE For whatever reason, I cannot use :defer to lazy-load `imenu-list'
+;; without it breaking
+(use-package! imenu-list
+  :init
+  (define-key! doom-leader-open-map "i" #'imenu-list-minor-mode)
+  :after imenu)
+
+(after! which-key
+  (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
+    (cl-pushnew `((,(format "\\`%s o i\\'" prefix-re)) nil . "Ilist")
+                which-key-replacement-alist)))
+
+(setq all-the-icons-scale-factor 1.0)
+
+(setq extended-command-suggest-shorter nil)
+
 ;; `always' is just a no-op that returns `t'
 (advice-add 'hide-mode-line-mode :override #'always)
 (advice-add 'doom-themes-hide-modeline :override #'always)
@@ -300,7 +331,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
 (after! imenu-list
   (set-popup-rule! "^\\*Ilist\\*"
-    :side 'right :size 35 :modeline imenu-list-mode-line-format)
+    :side 'right :size 35 :modeline "Ilist")
   (remove-hook 'imenu-list-major-mode-hook #'imenu-list--set-mode-line))
 
 (require 'ace-window)
@@ -325,6 +356,21 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (after! projectile
   (define-key! projectile-mode-map
     "C-c p" #'projectile-command-map))
+
+;; Display ^L characters as horizontal lines
+(use-package! page-break-lines
+  :config (global-page-break-lines-mode))
+
+;; Have C-l send the current line to the top of the window
+(setq recenter-positions '(top bottom middle))
+
+;; Perform a line feed after jumping to a ^L character
+(defun my/recenter-top (&rest r) (recenter 0))
+(advice-add 'forward-page :after #'my/recenter-top)
+
+(setq default-input-method "latin-postfix")
+
+(setq-default truncate-lines t)
 
 (pushnew! evil-emacs-state-modes 'noaa-mode)
 
@@ -417,6 +463,37 @@ deleting the final newline before inserting the \")))\"."
 
   (advice-add 'projectile-skel-dir-locals
               :override #'my/projectile-skel-dir-locals))
+
+(setq disabled-command-function nil)
+
+(when (and (featurep 'native-compile)
+           (native-comp-available-p))
+  (setq native-comp-speed 2
+        package-native-compile t))
+
+(setq confirm-kill-processes nil)
+
+(after! projectile
+  ;; For each atom in `obarray'
+  (mapatoms
+   (lambda (symbol)
+     ;; When the atom is a `projectile' variable
+     (when
+         (and (boundp symbol)
+              (not (keywordp symbol))
+              (string-prefix-p "projectile-" (symbol-name symbol)))
+       ;; The variable is safe when ...
+       (put symbol 'safe-local-variable
+            (lambda (_)
+              (when
+                  ;; ... we are in either XDG_DOCUMENTS_DIR or DOOMDIR
+                  ;; TODO See about using `projectile-project-search-path'
+                  (-select
+                   (lambda (dir)
+                     (string-match-p dir (expand-file-name default-directory)))
+                   (list (file-name-as-directory (xdg-user-dir "DOCUMENTS"))
+                         doom-private-dir))
+                t)))))))
 
 ;; This should already be enabled by emacs/undo/config.el
 (global-undo-tree-mode)
@@ -875,6 +952,20 @@ to `org-footnote-section'.  Inline definitions are ignored."
 (after! elfeed
   (setq elfeed-search-remain-on-entry t))
 
+;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
+(after! projectile
+  (eval
+   `(pushnew!
+     projectile-globally-ignored-directories
+     ,@(mapcan
+        (lambda (f)
+          (when (file-directory-p f)
+            (list (abbreviate-file-name f))))
+        (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
+                                   t "\\`[^.]")))))
+
+(load! "custom" doom-private-dir t)
+
 (remove-hook 'org-mode-hook #'+literate-enable-recompile-h)
 
 (after! smartparens
@@ -1004,94 +1095,3 @@ and uses visual instead."
                 which-key-replacement-alist)
     (cl-pushnew `((,(format "\\`%s t SPC\\'" prefix-re)) nil . "Whitespace mode")
                 which-key-replacement-alist)))
-
-(setq disabled-command-function nil)
-
-(when (and (featurep 'native-compile)
-           (native-comp-available-p))
-  (setq native-comp-speed 2
-        package-native-compile t))
-
-(setq confirm-kill-processes nil)
-
-(after! projectile
-  ;; For each atom in `obarray'
-  (mapatoms
-   (lambda (symbol)
-     ;; When the atom is a `projectile' variable
-     (when
-         (and (boundp symbol)
-              (not (keywordp symbol))
-              (string-prefix-p "projectile-" (symbol-name symbol)))
-       ;; The variable is safe when ...
-       (put symbol 'safe-local-variable
-            (lambda (_)
-              (when
-                  ;; ... we are in either XDG_DOCUMENTS_DIR or DOOMDIR
-                  ;; TODO See about using `projectile-project-search-path'
-                  (-select
-                   (lambda (dir)
-                     (string-match-p dir (expand-file-name default-directory)))
-                   (list (file-name-as-directory (xdg-user-dir "DOCUMENTS"))
-                         doom-private-dir))
-                t)))))))
-
-;; Display ^L characters as horizontal lines
-(use-package! page-break-lines
-  :config (global-page-break-lines-mode))
-
-;; Have C-l send the current line to the top of the window
-(setq recenter-positions '(top bottom middle))
-
-;; Perform a line feed after jumping to a ^L character
-(defun my/recenter-top (&rest r) (recenter 0))
-(advice-add 'forward-page :after #'my/recenter-top)
-
-(setq default-input-method "latin-postfix")
-
-(setq-default truncate-lines t)
-
-(defun my/toggle-window-dedicated ()
-  "Control whether or not Emacs is allowed to display another
-buffer in current window."
-  (interactive)
-  (message
-   (if (let (window (get-buffer-window (current-buffer)))
-         (set-window-dedicated-p window (not (window-dedicated-p window))))
-       "%s: Can't touch this!"
-     "%s is up for grabs.")
-   (current-buffer)))
-
-(define-key! evil-window-map
-  ;; replaces `+workspace/close-window-or-workspace'
-  "d" #'my/toggle-window-dedicated)
-
-;; NOTE For whatever reason, I cannot use :defer to lazy-load `imenu-list'
-;; without it breaking
-(use-package! imenu-list
-  :init
-  (define-key! doom-leader-open-map "i" #'imenu-list-minor-mode)
-  :after imenu)
-
-(after! which-key
-  (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
-    (cl-pushnew `((,(format "\\`%s o i\\'" prefix-re)) nil . "Ilist")
-                which-key-replacement-alist)))
-
-(setq all-the-icons-scale-factor 1.0)
-
-(setq extended-command-suggest-shorter nil)
-
-;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
-(after! projectile
-  (eval
-   `(pushnew!
-     projectile-globally-ignored-directories
-     ,@(mapcan
-        (lambda (f)
-          (when (file-directory-p f)
-            (list (abbreviate-file-name f))))
-        (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
-                                   t "\\`[^.]")))))
-
-(load! "custom" doom-private-dir t)
