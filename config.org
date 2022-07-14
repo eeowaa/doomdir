@@ -781,7 +781,7 @@ everything is OK.
 This module adds an Atom-esque tab bar to the Emacs UI.
 #+end_quote
 
-** treemacs [4/5]
+** treemacs [5/6]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -835,6 +835,31 @@ not work in the lisp functions.
     "J" #'my/treemacs-visit-next
     "K" #'my/treemacs-visit-previous))
 #+end_src
+
+*** DONE [#A] Allow resizable fonts
+Right now, =C--= (~text-scale-decrease~) and =C-== (~text-scale-increase~) are
+unmapped, but I can still use =C-x C--= or =C-x C-== to invoke
+~text-scale-adjust~. However, before incorporating the following code snippet,
+only the icons get resized, not the text itself.
+
+#+begin_src emacs-lisp :tangle yes
+(setq doom-themes-treemacs-enable-variable-pitch nil)
+#+end_src
+
+The culprit seems to have been that ~doom-themes-treemacs-enable-variable-pitch~
+was enabled, so the file/directory labels were using the face specified by
+~doom-themes-treemacs-variable-pitch-face~, which is currently ~variable-pitch~
+(see =SPC h F variable-pitch RET= to get information on the face). Basically,
+the face did not get resized.
+
+The only downside right now is that Treemacs only uses fixed-width fonts right
+now, which makes certain things harder to read. Overall, however, I think it
+looks better.
+
+See also:
++ [[help:doom-variable-pitch-font][doom-variable-pitch-font]]
++ [[doom:.local/straight/repos/themes/extensions/doom-themes-ext-treemacs.el][doom-themes-ext-treemacs.el]]
++ =M-x customize-group doom-themes-treemacs RET=
 
 *** TODO [#B] Display "+" and "-" icons in tty emacs
 https://github.com/hlissner/emacs-doom-themes/issues/489
