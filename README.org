@@ -44,14 +44,24 @@ itself.
 In addition to all the packages installed by enabled modules in [[file:init.el][init.el]], the
 following packages are installed via ~package!~ forms in [[file:packages.el][packages.el]]:
 
-+ Programming
-  + [[https://elpa.gnu.org/packages/sed-mode.html][sed-mode]]
-  + [[https://github.com/john2x/jenkinsfile-mode][jenkinsfile-mode]]
-  + [[https://github.com/emacsorphanage/applescript-mode][applescript-mode]] (=:os macos=)
-  + [[http://github.com/stig/ob-applescript.el][ob-applescript]] (=:os macos=)
 + UI
   + [[https://www.emacswiki.org/emacs/download/col-highlight.el][col-highlight]]
   + [[https://github.com/purcell/page-break-lines][page-break-lines]]
+  + [[https://github.com/bmag/imenu-list][imenu-list]]
++ Languages
+  + [[https://elpa.gnu.org/packages/sed-mode.html][sed-mode]]
+  + [[https://github.com/john2x/jenkinsfile-mode][jenkinsfile-mode]]
+  + [[https://github.com/ljos/jq-mode][jq-mode]]
+  + [[https://github.com/emacsorphanage/applescript-mode][applescript-mode]] (=:os macos=)
+  + [[http://github.com/stig/ob-applescript.el][ob-applescript]] (=:os macos=)
++ Documentation
+  + [[https://depp.brause.cc/nov.el][nov]]
+  + [[https://github.com/sensorflo/adoc-mode/wiki][adoc-mode]]
++ Kubernetes
+  + [[https://github.com/TxGVNN/emacs-k8s-mode][k8s-mode]]
+  + [[https://github.com/r0bobo/kubedoc.el/][kubedoc]]
+  + [[https://github.com/abrochard/kubel][kubel]]
+  + [[https://github.com/abrochard/kubel][kubel-evil]]
 + Music
   + [[https://github.com/Lautaro-Garcia/counsel-spotify][counsel-spotify]]
 + Weather
@@ -63,11 +73,9 @@ following packages are installed via ~package!~ forms in [[file:packages.el][pac
 + Modified ~doom-*~ theme(s) in [[file:themes/][themes/]].
 
 * Prerequisites
-Shell scripts to install prerequisites are tangled from [[file:config.org][config.org]] into script
-files in the [[file:install/][install/]] directory. There is a script for each system supported by
-this config (currently only macOS). That said, all you need to do is run The
-[[file:install/run][install/run]] script, which is a wrapper that will automatically dispatch the
-appropriate system-specific script.
+System-specific shell scripts to install prerequisites are tangled from
+[[file:config.org][config.org]] into the [[file:install/][install/]] directory. The [[file:install/run][install/run]] script wraps all of
+these and may be used on any supported system (currently macOS and Fedora):
 
 #+begin_src sh
 install/run
@@ -88,8 +96,8 @@ plans to port their contents to a literate config:
 
 + [[file:init.el][init.el]]
 
-All other files in =DOOMDIR= are "illiterate" for a reason; this is not subject
-to change anytime soon.
+All other files in =DOOMDIR= are probably "illiterate" for a reason; this is not
+subject to change anytime soon.
 
 ** Doom Emacs documentation
 See the [[file:docs][docs/]] directory for (/currently work-in-progress/) documentation I've
