@@ -210,15 +210,19 @@ Aesthetic modules that affect the Emacs interface or user experience.
 ** Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;;; :ui
+#+end_src
+
+** Miscellany [5/10]
+#+begin_quote
+Miscellaneous configuration without a corresponding module.
+#+end_quote
+
+*** DONE [#A] Install packages
+#+begin_src emacs-lisp :tangle packages.el
 (package! col-highlight)
 (package! page-break-lines)
 (package! imenu-list)
 #+end_src
-
-** Miscellany [4/9]
-#+begin_quote
-Miscellaneous configuration without a corresponding module.
-#+end_quote
 
 *** DONE [#B] Dedicate windows
 #+begin_src emacs-lisp :tangle yes
