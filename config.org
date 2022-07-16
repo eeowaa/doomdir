@@ -1726,7 +1726,7 @@ tput: unknown terminal "eterm-color"
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [3/4]
+** vterm [4/4]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
@@ -1758,7 +1758,11 @@ sudo dnf -y install libvterm cmake
       (kbd key) 'vterm--self-insert)))
 #+end_src
 
-*** TODO [#C] Prevent ~git-graph~ cutoff
+*** KILL [#C] Prevent ~git-graph~ cutoff
+:LOGBOOK:
+- Note taken on [2022-07-15 Fri 20:21] \\
+  This doesn't seem to be a problem for me anymore on Fedora.
+:END:
 The last character ("o" in this case) gets hidden:
 #+begin_example
 $ git graph
