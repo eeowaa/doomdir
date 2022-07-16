@@ -267,5 +267,9 @@ npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 # Install prerequisites for `lang/yaml` module
 npm install -g yaml-language-server
 
+# Install prerequisites for `app/everywhere` module
+# XXX This will only work for X sessions (not Wayland)
+sudo dnf -y install xclip xdotool xprop xwininfo
+
 # Install prerequisites for `app/irc` module
 sudo dnf -y install gnutls

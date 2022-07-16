@@ -4003,9 +4003,10 @@ server and [[https://musicpd.org/clients/mpc/][mpc]] to update your music databa
 This module adds system-wide popup Emacs windows for quick edits.
 #+end_quote
 
-*** WAIT [#A] Install prerequisites
-**** WAIT Create an automator service to run a command
-***** DONE Manual instructions
+*** TODO [#A] Install prerequisites
+**** WAIT macOS
+***** WAIT Create an automator service to run a command
+****** DONE Manual instructions
 https://support.apple.com/guide/automator/use-a-shell-script-action-in-a-workflow-autbbd4cc11c/mac
 #+begin_quote
 _Use a shell script action in an Automator workflow on Mac_
@@ -4024,7 +4025,7 @@ perform complex tasks, and then pass the results to a window.
 7. Test your workflow before saving it.
 #+end_quote
 
-***** WAIT Use AppleScript to create an Automator Workflow
+****** WAIT Use AppleScript to create an Automator Workflow
 :LOGBOOK:
 - Note taken on [2021-09-28 Tue 11:31] \\
   Waiting for a response on this StackExchange question that I just posted:
@@ -4083,8 +4084,8 @@ The following code block should produce the contents of the ~#!/bin/sh~ script:
   (format "%s %s %s -e '(emacs-everywhere)'" emacsclient server-flag server-file))
 #+end_src
 
-**** HOLD Bind the service to a keybinding
-***** DONE Manual instructions
+***** HOLD Bind the service to a keybinding
+****** DONE Manual instructions
 https://www.howtogeek.com/286332/how-to-run-any-mac-terminal-command-with-a-keyboard-shortcut/
 #+begin_quote
 _How to Run Any Mac Terminal Command With a Keyboard Shortcut_
@@ -4096,17 +4097,36 @@ Next, head to System Preferences > Keyboard > Shortcuts. In the left panel click
 be under the “General” section.
 #+end_quote
 
-***** HOLD Use AppleScript to assign the Workflow to a keybinding
-****** DONE Create a script to do this
+****** HOLD Use AppleScript to assign the Workflow to a keybinding
+******* DONE Create a script to do this
 https://github.com/eeowaa/stow-dotfiles/blob/main/macos/.local/bin/service-shortcut
 
-****** HOLD Call the script
+******* HOLD Call the script
 Should eventually tangle to =install/macos.sh= once I have created the Workflow
 via AppleScript:
 
 #+begin_src sh :tangle no
 service-shortcut 'Emacs everywhere' 4 e # Command+Option+E
 #+end_src
+
+**** TODO Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `app/everywhere` module
+# XXX This will only work for X sessions (not Wayland)
+sudo dnf -y install xclip xdotool xprop xwininfo
+#+end_src
+
+***** TODO Automatically map ~doom everywhere~ to a key on GNOME
+For now, I just manually mapped it to =Super-D=, but I would like to automate
+that. I'm sure it's not too difficult.
+
+***** STRT Get this working on GNOME
+When I try this on GNOME, I keep getting messages like this:
+: File no longer exists: /tmp/emacs-everywhere-20220715-204508-libreoffice-writer, write buffer to file? (y or n) n
+
+***** WAIT Get this working on Wayland
++ Currently a work-in-progress: https://github.com/tecosaur/emacs-everywhere/issues/50
++ I could probably help with this...
 
 ** irc [3/5]
 #+begin_quote
