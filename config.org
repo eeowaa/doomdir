@@ -1619,7 +1619,7 @@ Modules that offer terminal emulation.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-** eshell [4/7]
+** eshell [7/7]
 #+begin_quote
 This module provides additional features for the built-in [[https://www.gnu.org/software/emacs/manual/html_mono/eshell.html][Emacs Shell]].
 #+end_quote
@@ -1665,7 +1665,7 @@ sudo dnf -y install fish
   "w" "eww-open-file $1"
 
   ;; shell commands
-  "git" "TERM=eterm-color git --no-pager -c color.ui=always -c interactive.singleKey=false $*"
+  "git" "git --no-pager -c color.ui=always -c interactive.singleKey=false $*"
   "f"   "cd $1 && ls")
 #+end_src
 
@@ -1684,7 +1684,27 @@ how I have things configured), the following works great.
   (advice-add 'eshell/clear :override #'recenter-top-bottom))
 #+end_src
 
-*** TODO [#B] Fix ANSI escape codes
+*** DONE [#B] Export ~$EDITOR~ to =eshell=
+*NOTE*: At one point, I was hesistant to do this (see quote), but I cannot
+figure out how to replicate the problem, nor can I prove that the problem
+doesn't exist. In any case, it works perfectly with =git=, and that's all I
+really care about.
+
+#+begin_quote
+Unlike with =vterm=, we currently do not export ~$EDITOR~ to =eshell=. This is
+to avoid a dangerous situation in which =C-c C-k= not only returns an error code
+to =eshell=, it forcefully clears the file on disk.
+#+end_quote
+
+#+begin_src emacs-lisp :tangle yes
+(add-hook! eshell-mode #'with-editor-export-editor)
+#+end_src
+
+*** KILL [#B] Fix ANSI escape codes
+:LOGBOOK:
+- Note taken on [2022-07-15 Fri 19:40] \\
+  This doesn't seem to be a problem for me anymore on Fedora.
+:END:
 When there is a lot of colorized output (for example, the output of ~git log -p~
 on a big repo), eventually ANSI escape codes do not get interpreted. Here is an
 example from ~doom doctor~:
@@ -1693,12 +1713,12 @@ example from ~doom doctor~:
 [32m✓ Finished in 7.4969s[0m
 #+end_example
 
-*** TODO [#B] Export ~$EDITOR~ to =eshell=
-Unlike with =vterm=, we currently do not export ~$EDITOR~ to =eshell=. This is
-to avoid a dangerous situation in which =C-c C-k= not only returns an error code
-to =eshell=, it forcefully clears the file on disk.
-
-*** TODO [#B] Fix terminal type
+*** KILL [#B] Fix terminal type
+:LOGBOOK:
+- Note taken on [2022-07-15 Fri 20:09] \\
+  This is no longer a problem now that I have removed TERM=eterm-color
+  from the git eshell alias
+:END:
 Sometimes ~git~ will spit the following:
 #+begin_example
 tput: unknown terminal "eterm-color"

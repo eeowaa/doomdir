@@ -532,7 +532,7 @@ deleting the final newline before inserting the \")))\"."
   "w" "eww-open-file $1"
 
   ;; shell commands
-  "git" "TERM=eterm-color git --no-pager -c color.ui=always -c interactive.singleKey=false $*"
+  "git" "git --no-pager -c color.ui=always -c interactive.singleKey=false $*"
   "f"   "cd $1 && ls")
 
 (after! eshell
@@ -540,6 +540,8 @@ deleting the final newline before inserting the \")))\"."
 
 (after! eshell
   (advice-add 'eshell/clear :override #'recenter-top-bottom))
+
+(add-hook! eshell-mode #'with-editor-export-editor)
 
 (add-hook! vterm-mode #'with-editor-export-editor)
 
