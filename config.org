@@ -993,13 +993,18 @@ persistently disable =git-gutter= in a buffer.
 Displays a tilde(~) in the left fringe to indicate an empty line, similar to Vi.
 #+end_quote
 
-** window-select [0/1]
+** window-select [1/1]
 #+begin_quote
 This module provides several methods for selecting windows without the use of
 the mouse or spatial navigation (e.g. =C-w {h,j,k,l}=).
 #+end_quote
 
-*** TODO [#C] Add an =ace-window= keybinding to close windows
+*** KILL [#C] Add an =ace-window= keybinding to close windows
+:LOGBOOK:
+- Note taken on [2022-07-18 Mon 11:10] \\
+  =C-w C-w x= already does exactly what I want. Not sure if this functionality was
+  added later or if I was just unaware of it.
+:END:
 Currently, I can use =C-w C-w e <window> C-w c= to close a window, but the
 cursor may switch to another window after this operation. I would rather create
 a keybinding like =C-w C-w x <window>= that closes the window that I select
@@ -4297,8 +4302,37 @@ in, so this isn't finished yet.
                                    t "\\`[^.]")))))
 #+end_src
 
-*** TODO [#C] Replace =C-?= with backspace
-We already have =C-r=, so might as well replace this mostly-useless keybinding.
+*** TODO [#C] Add ergonomic keybindings for hard-to-reach keys
+I do not like to put undue stress on my pinky fingers while typing, so I often
+like to use alternate key chords for the Enter, Backspace, and Tab keys (I have
+Control and Alt mapped to thumb keys on my keyboard).
+
+I would like to configure Emacs to use similar key chords as terminal emulators
+for these special keys. Here are some options:
+
++ =RET= (=<return>=)
+  - Options:
+    + =C-j=: This is for "electric" and "special return" commands
+      - Terminal Emacs actually recognizes =C-j= as a distinct key sequence,
+        although typical Bourne-compatible shells and Vim do not
+      - In my opinion, too much Emacs functionality relies on this sequence and
+        there is no other keybinding that does the same thing
+    + =C-m=: This already works as expected
+      - No configuration necessary AFIAK
++ =DEL= (=<backspace>=)
+  - Options:
+    + =C-h=: This is just "help", which I can achieve using =SPC h= and =M-SPC h=
+      - My muscle memory might make it hard for me to forget this keybinding
+      - Terminal Emacs actually recognizes =C-h= as a distinct key sequence,
+        although typical Bourne-compatible shells and Vim do not
+    + =C-?=: This is just "redo", which I can achieve using =M-_=
+      - The corresponding "undo" keybinding is =C-_=
+      - =C-x u= runs ~undo-tree-visualize~, which gives a nice interface to this
++ =TAB= (=<tab>=)
+  - Options:
+    + =C-i=: This is just "jump forward", which I can achieve using =C-M-,=
+      - The corresponding "jump backward" keybinding is =M-,=
+      - =SPC s j= runs ~+ivy/jump-list~, which gives a nice interface to this
 
 *** DONE [#A] Load custom config if present
 =~/.config/doom/custom.el= should look something like this:
