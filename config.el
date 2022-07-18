@@ -334,6 +334,8 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     :side 'right :size 35 :modeline "Ilist")
   (remove-hook 'imenu-list-major-mode-hook #'imenu-list--set-mode-line))
 
+(setq doom-themes-treemacs-enable-variable-pitch nil)
+
 (require 'ace-window)
 
 (after! treemacs-evil
@@ -351,7 +353,6 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     "J" #'my/treemacs-visit-next
     "K" #'my/treemacs-visit-previous))
 
-(setq doom-themes-treemacs-enable-variable-pitch nil)
 (when (and (featurep! :ui vc-gutter)
            (featurep! :ui hydra))
 
