@@ -1637,10 +1637,18 @@ Modules that offer terminal emulation.
 ;;; :term
 #+end_src
 
-** Miscellany [0/0] :ARCHIVE:
+** Miscellany [1/1]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
+
+*** DONE Define a helper function to wrap calls to ~with-editor-export-editor~
+#+begin_src emacs-lisp :tangle yes
+(defun my/with-editor-export ()
+  "Run `with-editor-export-editor' for all envvars that I care about"
+  (dolist (var '("EDITOR" "VISUAL"))
+    (with-editor-export-editor var)))
+#+end_src
 
 ** eshell [7/7]
 #+begin_quote
@@ -1720,7 +1728,7 @@ to =eshell=, it forcefully clears the file on disk.
 #+end_quote
 
 #+begin_src emacs-lisp :tangle yes
-(add-hook! eshell-mode #'with-editor-export-editor)
+(add-hook! eshell-mode #'my/with-editor-export)
 #+end_src
 
 *** KILL [#B] Fix ANSI escape codes
@@ -1749,7 +1757,7 @@ tput: unknown terminal "eterm-color"
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [4/4]
+** vterm [5/6]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
@@ -1768,9 +1776,15 @@ brew install libvterm cmake
 sudo dnf -y install libvterm cmake
 #+end_src
 
-*** DONE [#B] Export ~$EDITOR~ to =vterm=
+*** DONE [#B] Export editor variables to =vterm=
 #+begin_src emacs-lisp :tangle yes
-(add-hook! vterm-mode #'with-editor-export-editor)
+(add-hook! vterm-mode #'my/with-editor-export)
+#+end_src
+
+*** DONE [#B] Let =C-m= send =<return>=
+#+begin_src emacs-lisp :tangle yes
+(after! vterm
+  (defalias 'vterm-send-C-m #'vterm-send-return))
 #+end_src
 
 *** DONE [#B] Let =C-j= and =<M-backspace>= pass through in Evil insert state
@@ -1781,11 +1795,46 @@ sudo dnf -y install libvterm cmake
       (kbd key) 'vterm--self-insert)))
 #+end_src
 
-*** KILL [#C] Prevent ~git-graph~ cutoff
-:LOGBOOK:
-- Note taken on [2022-07-15 Fri 20:21] \\
-  This doesn't seem to be a problem for me anymore on Fedora.
-:END:
+*** DONE [#B] Define aliases
+These depend on the existence of a ~vterm_cmd~ function. See the =README.md= for
+=vterm= for more information.
+
+#+begin_src emacs-lisp :tangle yes
+(after! vterm
+  (defun my/set-vterm-alias (&rest aliases)
+    "Define aliases for vterm.
+
+ALIASES is a flat list of alias -> command pairs. e.g.
+
+  (my/set-vterm-alias
+    \"e\" \"find-file\"
+    \"r\" \"find-file-read-only\")"
+    (or (cl-evenp (length aliases))
+        (signal 'wrong-number-of-arguments (list 'even (length aliases))))
+    (with-temp-file (concat user-emacs-directory "vterm.sh")
+      (while aliases
+        (let ((alias (pop aliases))
+              (command (pop aliases)))
+          (add-to-list 'vterm-eval-cmds (list command (intern command)))
+          (insert (format "alias %s='vterm_cmd %s'\n" alias command))))))
+
+  (my/set-vterm-alias
+    ;; Define aliases to open files in Emacs
+    "e"  "find-file"
+    "4e" "find-file-other-window"
+    "5e" "find-file-other-frame"
+
+    ;; Define aliases to open files in Emacs (read-only)
+    "r"  "find-file-read-only"
+    "4r" "find-file-read-only-other-window"
+    "5r" "find-file-read-only-other-frame"
+
+    ;; Define aliases for special Emacs functionality
+    "w"  "eww-open-file"
+    "gg" "magit-status"))
+#+end_src
+
+*** TODO [#C] Prevent ~git-graph~ cutoff
 The last character ("o" in this case) gets hidden:
 #+begin_example
 $ git graph
@@ -1794,7 +1843,7 @@ $ git graph
 
 I say "hidden" instead of "truncated" because if you kill the line and yank it
 into another buffer, you can see the "o". *Note that this is only a problem in
-GUI Emacs, not terminal Emacs*.
+GUI Emacs, not terminal Emacs. Also, this is only a problem in popup buffers.*
 
 * :checkers
 ** Headers :SCAFFOLDING:

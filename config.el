@@ -517,6 +517,11 @@ deleting the final newline before inserting the \")))\"."
 
 (add-to-list 'auto-mode-alist '("/git/config\\.d/.+" . gitconfig-mode))
 
+(defun my/with-editor-export ()
+  "Run `with-editor-export-editor' for all envvars that I care about"
+  (dolist (var '("EDITOR" "VISUAL"))
+    (with-editor-export-editor var)))
+
 (set-eshell-alias!
   ;; C-x [0123]
   "0" "delete-window"
@@ -552,14 +557,50 @@ deleting the final newline before inserting the \")))\"."
 (after! eshell
   (advice-add 'eshell/clear :override #'recenter-top-bottom))
 
-(add-hook! eshell-mode #'with-editor-export-editor)
+(add-hook! eshell-mode #'my/with-editor-export)
 
-(add-hook! vterm-mode #'with-editor-export-editor)
+(add-hook! vterm-mode #'my/with-editor-export)
+
+(after! vterm
+  (defalias 'vterm-send-C-m #'vterm-send-return))
 
 (after! evil-collection-vterm
   (dolist (key '("C-j" "<M-backspace>"))
     (evil-collection-define-key 'insert 'vterm-mode-map
       (kbd key) 'vterm--self-insert)))
+
+(after! vterm
+  (defun my/set-vterm-alias (&rest aliases)
+    "Define aliases for vterm.
+
+ALIASES is a flat list of alias -> command pairs. e.g.
+
+  (my/set-vterm-alias
+    \"e\" \"find-file\"
+    \"r\" \"find-file-read-only\")"
+    (or (cl-evenp (length aliases))
+        (signal 'wrong-number-of-arguments (list 'even (length aliases))))
+    (with-temp-file (concat user-emacs-directory "vterm.sh")
+      (while aliases
+        (let ((alias (pop aliases))
+              (command (pop aliases)))
+          (add-to-list 'vterm-eval-cmds (list command (intern command)))
+          (insert (format "alias %s='vterm_cmd %s'\n" alias command))))))
+
+  (my/set-vterm-alias
+    ;; Define aliases to open files in Emacs
+    "e"  "find-file"
+    "4e" "find-file-other-window"
+    "5e" "find-file-other-frame"
+
+    ;; Define aliases to open files in Emacs (read-only)
+    "r"  "find-file-read-only"
+    "4r" "find-file-read-only-other-window"
+    "5r" "find-file-read-only-other-frame"
+
+    ;; Define aliases for special Emacs functionality
+    "w"  "eww-open-file"
+    "gg" "magit-status"))
 
 (after! flycheck
   (defun my/flycheck-set-level (level)
