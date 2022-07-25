@@ -3040,7 +3040,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [15/33]
+** org [15/34]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -3421,7 +3421,7 @@ annoying extra step.
 
 *** Exporting [0/0]
 *** Publishing [0/0]
-*** Working with Source Code [2/2]
+*** Working with Source Code [2/3]
 **** DONE [#A] Indent source blocks
 + https://emacs.stackexchange.com/a/9483/21977
 
@@ -3440,6 +3440,17 @@ annoying extra step.
               +popup--display-buffer-alist))
   (when (bound-and-true-p +popup-mode)
     (setq display-buffer-alist +popup--display-buffer-alist)))
+#+end_src
+
+**** LOOP [#B] Make it easy to jump between source and tangled file
+Right now, I am only considering tangling to Elisp, since that's what I do most
+of the time.
+
+#+begin_src emacs-lisp :tangle yes
+(after! projectile
+  (pushnew! projectile-other-file-alist
+            '("org" "el")
+            '("el" "org")))
 #+end_src
 
 *** Miscellaneous [0/1]
@@ -4448,7 +4459,7 @@ This can be done with ~#+INCLUDE~ directives. Doing so might make tangling
 faster, but currently I don't have any problems with performance. If and when I
 start to notice a problem, I'll revisit this item.
 
-** default [6/9]
+** default [7/10]
 #+begin_quote
 This module provides a set of reasonable defaults.
 #+end_quote
@@ -4566,6 +4577,19 @@ and uses visual instead."
 (define-key! help-map
   "de" #'my/doom-help-search-source
   "dM" #'my/doom-help-search-modules)
+#+end_src
+
+*** DONE [#B] Add additional file keybindings
+#+begin_src emacs-lisp :tangle yes
+(when (fboundp 'find-sibling-file)
+  ;; Same directory, same base file name, different extension
+  (add-to-list 'find-sibling-rules '("\\([^/]+\\)\\..*\\'" "\\1\\..*\\'"))
+  (define-key! doom-leader-file-map
+    "o" #'find-sibling-file)
+  (after! which-key
+    (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
+      (cl-pushnew `((,(format "\\`%s f o\\'" prefix-re)) nil . "Find other file")
+                  which-key-replacement-alist))))
 #+end_src
 
 *** STRT [#A] Do not auto-insert pairs of quotes

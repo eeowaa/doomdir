@@ -916,6 +916,11 @@ to `org-footnote-section'.  Inline definitions are ignored."
   (when (bound-and-true-p +popup-mode)
     (setq display-buffer-alist +popup--display-buffer-alist)))
 
+(after! projectile
+  (pushnew! projectile-other-file-alist
+            '("org" "el")
+            '("el" "org")))
+
 (setq org-ditaa-jar-path
       (cond (IS-MAC
              (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))))
@@ -1098,6 +1103,16 @@ and uses visual instead."
 (define-key! help-map
   "de" #'my/doom-help-search-source
   "dM" #'my/doom-help-search-modules)
+
+(when (fboundp 'find-sibling-file)
+  ;; Same directory, same base file name, different extension
+  (add-to-list 'find-sibling-rules '("\\([^/]+\\)\\..*\\'" "\\1\\..*\\'"))
+  (define-key! doom-leader-file-map
+    "o" #'find-sibling-file)
+  (after! which-key
+    (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
+      (cl-pushnew `((,(format "\\`%s f o\\'" prefix-re)) nil . "Find other file")
+                  which-key-replacement-alist))))
 
 ;; Function to toggle 1 or 2 spaces at the end of sentences
 (defun my/toggle-sentence-end-double-space ()
