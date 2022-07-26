@@ -269,7 +269,8 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   ("c" (table-generate-source 'cals) "CALS")
   ("SPC" hydra-table/body "Menu" :exit 1))
 
-(setq +ligatures-extras-in-modes '(org-mode))
+(setq +ligatures-in-modes '(org-mode)
+      +ligatures-extras-in-modes '(org-mode))
 
 (setq column-number-indicator-zero-based nil)
 

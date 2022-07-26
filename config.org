@@ -769,9 +769,10 @@ tables (harfbuzz on Emacs 28), falling back on ~prettify-symbols-mode~
 otherwise.
 #+end_quote
 
-*** DONE [#C] Only enable extra ligatures in Org mode (for now)
+*** DONE [#C] Only enable ligatures in Org mode (for now)
 #+begin_src emacs-lisp :tangle yes
-(setq +ligatures-extras-in-modes '(org-mode))
+(setq +ligatures-in-modes '(org-mode)
+      +ligatures-extras-in-modes '(org-mode))
 #+end_src
 
 ** minimap [0/0]
