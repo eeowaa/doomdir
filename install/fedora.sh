@@ -65,6 +65,17 @@ $func: (recursively) delete? [y/N]: "
 # Install prerequisites for `completion/ivy` module
 sudo sudo dnf -y install ripgrep
 
+# Install prerequisites for `ui/doom` module
+sudo dnf -y install terminus-fonts
+
+# Comic Mono
+# <https://dtinth.github.io/comic-mono-font>
+# <https://docs.fedoraproject.org/en-US/quick-docs/fonts/#unpackaged>
+npm install -g comic-mono
+mkdir -p "$XDG_DATA_HOME/fonts"
+ln -s "`npm root -g`/comic-mono" "$XDG_DATA_HOME/fonts"
+fc-cache -v
+
 # Install prerequisites for `ui/treemacs` module
 sudo dnf -y install python3
 

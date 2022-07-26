@@ -300,11 +300,36 @@ scaled down, because the "$" character is full-sized.
 formats, such as org-mode, markdown, and LaTeX.
 #+end_quote
 
-** doom [3/3]
+** doom [2/5]
 #+begin_quote
 This module gives Doom its signature look: powered by the =doom-one= theme
 (inspired by Atom's One Dark theme) and =solaire-mode=.
 #+end_quote
+
+*** LOOP [#A] Install prerequisites
+**** LOOP macOS
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `ui/doom` module
+brew install font-terminus
+
+# TODO: Comic Mono
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `ui/doom` module
+sudo dnf -y install terminus-fonts
+
+# Comic Mono
+# <https://dtinth.github.io/comic-mono-font>
+# <https://docs.fedoraproject.org/en-US/quick-docs/fonts/#unpackaged>
+npm install -g comic-mono
+mkdir -p "$XDG_DATA_HOME/fonts"
+ln -s "`npm root -g`/comic-mono" "$XDG_DATA_HOME/fonts"
+fc-cache -v
+#+end_src
+
+#+RESULTS:
 
 *** DONE [#A] Never hide the modeline
 Without a modeline, the only way to see a clear distinction between the bottom
@@ -340,22 +365,6 @@ exchange of screen real estate.
                 vterm-mode-hook
                 eshell-mode-hook)
               #'hide-mode-line-mode)
-#+end_src
-
-*** DONE [#C] Set the font
-Terminus is a good font but must be installed first:
-#+begin_src sh :tangle no
-brew install font-terminus
-#+end_src
-
-#+CAPTION: Terminus (disabled)
-#+begin_src emacs-lisp :tangle no
-(setq doom-font (font-spec :family "Terminus (TTF)" :size 16))
-#+end_src
-
-#+CAPTION: Menlo (disabled)
-#+begin_src emacs-lisp :tangle no
-(setq doom-font (font-spec :family "Menlo" :size 16))
 #+end_src
 
 *** DONE [#C] Set the theme
@@ -396,6 +405,48 @@ background color of highlighted lines in other windows that use =solaire-mode=.
                            ,(face-attribute 'ivy-current-match :background))))
 #+end_src
 
+Some other themes that I enjoy in GUI Emacs include:
+- ~doom-tokyo-night~ (good dark theme that is easy on the eyes and brain)
+- ~doom-gruvbox-light~ (good light theme for working in direct sunlight)
+- ~doom-tomorrow-day~ (good light theme to go with Comic Mono font)
+- ~doom-plain~ and ~doom-plain-dark~ (good monochrome themes to focus on text)
+
+*** STRT [#C] Set the font
+At least on Linux, you can list available fonts like this:
+
+#+begin_src sh :tangle no :results verbatim
+fc-list :spacing=mono family style | sort
+#+end_src
+
+Some of my favorite free and open-source fonts include:
+- ~Source Code Pro~ (well-rounded)
+- ~Terminus~ (crisp)
+- ~Comic Mono~ (fun)
+
+**** DONE Source Code Pro :ARCHIVE:
+For now, I am using Source Code Pro.
+
+#+begin_src emacs-lisp :tangle yes
+(setq doom-font (font-spec :family "Source Code Pro" :size 16))
+#+end_src
+**** DONE Terminus :ARCHIVE:
+For now, I am using Terminus.
+
+#+begin_src emacs-lisp :tangle yes
+(setq doom-font (font-spec :family "Terminus" :size 16))
+#+end_src
+
+**** STRT Comic Mono
+For now, I am using Comic Mono.
+
+- I would like to set the variable-width font to Comic Sans to fit the theme.
+- I would like to couple this font with ~tomorrow-day~ for a scholastic vibe.
+
+#+begin_src emacs-lisp :tangle yes
+(setq doom-font (font-spec :family "Comic Mono" :size 16))
+#+end_src
+
+*** TODO [#B] Cycle fonts without restarting Doom Emacs
 ** doom-dashboard [0/0] :ARCHIVE:
 #+begin_quote
 This module adds a minimalistic, Atom-inspired dashboard to Emacs.

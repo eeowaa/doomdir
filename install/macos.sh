@@ -12,6 +12,11 @@ rm /tmp/nvm-install.sh
 # Install prerequisites for `completion/ivy` module
 brew install ripgrep
 
+# Install prerequisites for `ui/doom` module
+brew install font-terminus
+
+# TODO: Comic Mono
+
 # Install prerequisites for `ui/treemacs` module
 brew install python3
 
