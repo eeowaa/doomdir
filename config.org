@@ -1532,7 +1532,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [3/8]
+** Miscellany [3/9]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -1544,26 +1544,51 @@ Miscellaneous configuration without a corresponding module.
 
 *** DONE [#A] Configure native compilation
 #+begin_src emacs-lisp :tangle yes
-(when (and (featurep 'native-compile)
-           (native-comp-available-p))
+(when NATIVECOMP
   (setq native-comp-speed 2
         package-native-compile t))
 #+end_src
-
-The conditional was taken from ~comp-ensure-native-compiler~, which was /not/
-used for two reasons:
-
-1. The =comp= package defines ~comp-ensure-native-compiler~, but I don't know
-   when the =comp= package is loaded. However, ~featurep~ and
-   ~native-comp-available-p~ are both C constructs.
-2. Rather than return ~t~ when native compilation is built-in and available,
-   ~comp-ensure-native-compiler~ always returns ~nil~ and just spits an error
-   in the negative case.
 
 *** DONE [#C] Don't prompt about killing running processing when quitting
 #+begin_src emacs-lisp :tangle yes
 (setq confirm-kill-processes nil)
 #+end_src
+
+*** TODO [#A] Override builtin ~restart-emacs~ function :flagged:
+- Emacs 29 introduced the ~restart-emacs~ function
+  - ~emacs-version~ has the version string, but I believe that it was introduced
+    in a random commit not really associated with a specific version
+  - Probably need to check for the existence of a builtin ~restart-emacs~
+    function instead of checking the version string, and then work around it
+  - The function is defined in =/usr/share/emacs/29.0.50/lisp/files.el.gz=
+- Doom uses the ~restart-emacs~ function defined in the =restart-emacs= package
+  - The package is declared in a ~package!~ form in =~/.config/emacs/core/packages.el=
+  - The ~package!~ form sets up an autoload for ~restart-emacs~
+  - User-defined ~package!~ forms go in =~/.config/doom/packages.el=
+- Reference information about autoloads:
+  - ~autoload~ (also check the Info documentation)
+  - ~load-path~
+  - ~lisp-directory~ (=/usr/share/emacs/29.0.50/lisp=)
+- Can undefine a function using ~fmakunbound~
+- In =~/.config/emacs/core/core.el=, the following comment explains how Doom
+  starts up, which may be helpful in solving this problem:
+  #+begin_src emacs-lisp :eval no :tangle no
+  ;; The overall load order of Doom is as follows:
+  ;;
+  ;;   $EMACSDIR/early-init.el
+  ;;   $EMACSDIR/core/core.el
+  ;;   $DOOMDIR/init.el
+  ;;   {$DOOMDIR,~/.emacs.d}/modules/*/*/init.el
+  ;;   `doom-before-init-modules-hook'
+  ;;   {$DOOMDIR,~/.emacs.d}/modules/*/*/config.el
+  ;;   `doom-init-modules-hook'
+  ;;   $DOOMDIR/config.el
+  ;;   `doom-after-init-modules-hook'
+  ;;   `after-init-hook'
+  ;;   `emacs-startup-hook'
+  ;;   `doom-init-ui-hook'
+  ;;   `window-setup-hook'
+  #+end_src
 
 *** TODO [#B] Prevent AWS credentials from being written to ~doom-env-file~
 - [ ] Look at recent changes to =core/cli/= and =core/core-cli-lib.el= to fix
@@ -1986,7 +2011,7 @@ and see if Doom is to blame.
                              (file-truename doom-private-dir))))))
 #+end_src
 
-** spell [3/4]
+** spell [3/5]
 #+begin_quote
 This modules provides spellchecking powered by =aspell=, =hunspell= or =enchant=.
 #+end_quote
@@ -2065,12 +2090,23 @@ second time to disable it. For now, I'll just always require it:
 (require 'spell-fu)
 #+end_src
 
-*** HOLD [#B] Fix spelling correction
+*** TODO [#B] Fix ~+spell/add-word~
+~+spell/correct~ (=zg=) spits the following error:
+#+begin_quote
+Cannot add "<word>" to any active dictionary.
+#+end_quote
+
+Reference:
+- ~ispell-personal-dictionary~
+- ~spell-fu-word-add~
+- ~spell-fu-dictionaries~
+
+*** HOLD [#B] Fix ~+spell/correct~
 :LOGBOOK:
 - Note taken on [2021-06-25 Fri 11:13] \\
   I am no longer seeing this error and cannot replicate it.
 :END:
-~+spell/correct~ (=z ==) spits the following error:
+~+spell/correct~ (=z==) spits the following error on macOS:
 #+begin_quote
 Starting new Ispell process aspell with english dictionary...done
 ispell-init-process: Error: /Users/eeowaa/.config/emacs/.local/etc/ispell/english.pws: The language "english" is not known. This is probably because: the file "/usr/local/Cellar/aspell/0.60.8/lib/aspell-0.60/english.dat" can not be opened for reading.

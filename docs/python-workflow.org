@@ -26,7 +26,7 @@ code in the REPL just like in the script file (i.e. same namespace):
 from lambda_function import *
 #+end_src
 
-If you've redefined a function in a file-visited buffer and would like for the
+If you've redefined a function in a file-visiting buffer and would like for the
 change to take effect in the REPL, just select the function using =vif= and send
 it to the REPL with =gr= (~+eval:region~).
 

@@ -479,8 +479,7 @@ deleting the final newline before inserting the \")))\"."
 
 (setq disabled-command-function nil)
 
-(when (and (featurep 'native-compile)
-           (native-comp-available-p))
+(when NATIVECOMP
   (setq native-comp-speed 2
         package-native-compile t))
 

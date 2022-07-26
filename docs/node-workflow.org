@@ -1,5 +1,14 @@
 #+TITLE: Node.js development workflow
 * STRT Recommended =.dir-locals.el=
+#+begin_quote
+*NOTE:* If you have a lot of NPM projects with the same configuration, you can
+define a custom project type (for example, ~my/npm~) using the
+~projectile-register-project-type~ function, and then set the
+~projectile-project-type~ variable to your custom project type in each project's
+=.dir-locals.el=. The ~projectile-project-types~ variable contains a list of
+available project types.
+#+end_quote
+
 #+begin_src lisp-data
 ((nil . ((projectile-project-configure-cmd . "npm run configure")
          (projectile-project-compilation-cmd . "npm run build")
