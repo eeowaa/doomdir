@@ -571,6 +571,15 @@ deleting the final newline before inserting the \")))\"."
       (kbd key) 'vterm--self-insert)))
 
 (after! vterm
+
+  ;; This function is to be called in shell configuration to obtain the
+  ;; directory in which to read aliases
+  (defun my/vterm--write-user-emacs-directory (tmpfile)
+    "Write the string evaluation of `user-emacs-directory' to TMPFILE."
+    (f-write user-emacs-directory 'utf-8 tmpfile))
+  (add-to-list 'vterm-eval-cmds '("my/vterm--write-user-emacs-directory"
+                                  my/vterm--write-user-emacs-directory))
+
   (defun my/set-vterm-alias (&rest aliases)
     "Define aliases for vterm.
 
@@ -581,7 +590,7 @@ ALIASES is a flat list of alias -> command pairs. e.g.
     \"r\" \"find-file-read-only\")"
     (or (cl-evenp (length aliases))
         (signal 'wrong-number-of-arguments (list 'even (length aliases))))
-    (with-temp-file (concat user-emacs-directory "vterm.sh")
+    (with-temp-file (concat user-emacs-directory "vterm-aliases.sh")
       (while aliases
         (let ((alias (pop aliases))
               (command (pop aliases)))
