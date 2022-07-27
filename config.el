@@ -977,6 +977,12 @@ to `org-footnote-section'.  Inline definitions are ignored."
 
 (add-to-list 'auto-mode-alist '("pylint" . conf-mode))
 
+;; Add "pipenv" label to "e" prefix key
+(after! pipenv
+  (map! :map python-mode-map
+        :localleader
+        :prefix ("e" . "pipenv")))
+
 (after! dap-mode
   (setq dap-python-debugger 'debugpy))
 

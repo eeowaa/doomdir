@@ -3709,6 +3709,15 @@ More than a simple "Hello World":
 (add-to-list 'auto-mode-alist '("pylint" . conf-mode))
 #+end_src
 
+*** DONE [#A] Fix quirks with keymaps
+#+begin_src emacs-lisp :tangle yes
+;; Add "pipenv" label to "e" prefix key
+(after! pipenv
+  (map! :map python-mode-map
+        :localleader
+        :prefix ("e" . "pipenv")))
+#+end_src
+
 *** STRT [#B] Integrate Pipenv with projectile
 For some reason, the =:lang python= module disables ~pipenv-with-projectile~, so
 I want to re-enable that here.
