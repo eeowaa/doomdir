@@ -677,6 +677,14 @@ ALIASES is a flat list of alias -> command pairs. e.g.
 (after! lsp
   (setq lsp-restart 'auto-restart))
 
+(define-key! doom-leader-toggle-map
+  "i" #'lsp-ui-imenu)
+
+(after! which-key
+  (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
+    (cl-pushnew `((,(format "\\`%s t i\\'" prefix-re)) nil . "LSP Imenu")
+                which-key-replacement-alist)))
+
 (setq magit-repository-directories
       '(("~/Documents/src" . 2)
         ("~/Documents/ref" . 1)))
