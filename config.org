@@ -2567,17 +2567,45 @@ sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/terraform` module
-brew install terraform
+brew install terraform hashicorp/tap/terraform-ls
 #+end_src
 
 **** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `tools/terraform` module
-sudo dnf -y install terraform
+sudo dnf -y install terraform terraform-ls
 #+end_src
 
-*** TODO [#B] Configure LSP
+*** LOOP [#B] Configure LSP
 + [[doom:.local/straight/repos/lsp-mode/docs/manual-language-docs/lsp-terraform-ls.md][lsp-terraform-ls.md]]
++ Need to verify that this all works as intended
++ Probably have more to go to bring LSP up to par with Doom modules having
+  official LSP support
+
+#+begin_src emacs-lisp :tangle yes
+;; <https://emacs-lsp.github.io/lsp-mode/page/lsp-terraform-ls/>
+(when (featurep! :tools terraform +lsp)
+  (setq
+    ;; Use the official Hashicorp language server from Hashicorp
+    lsp-disabled-clients '(tfls)
+
+    ;; Enable reference counts
+    lsp-terraform-ls-enable-show-reference t
+
+    ;; REVIEW Enable semantic token support
+    lsp-semantic-tokens-enable t
+    lsp-semantic-tokens-honor-refresh-requests t)
+
+  ;; Set keybindings for LSP (reference existing LSP configurations)
+  (after! terraform-mode
+    (map! :map terraform-mode-map
+          :localleader
+          (:prefix ("l" . "LSP")
+            :desc "terraform init" "i" #'lsp-terraform-ls-init
+            :desc "terraform validate" "v" #'lsp-terraform-ls-validate
+            :desc "Providers widget" "p" #'lsp-terraform-ls-providers
+            :desc "Module calls widget" "m" #'lsp-terraform-ls-module-calls))))
+#+end_src
 
 ** tmux [0/0] :ARCHIVE:
 ** upload [0/0] :ARCHIVE:

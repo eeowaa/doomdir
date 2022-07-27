@@ -130,7 +130,7 @@ sudo dnf -y install perl
 cpan install App::Git::Autofixup
 
 # Install prerequisites for `tools/terraform` module
-sudo dnf -y install terraform
+sudo dnf -y install terraform terraform-ls
 
 # Install prerequisites for `lang/cc` module
 

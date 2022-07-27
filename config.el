@@ -689,6 +689,29 @@ ALIASES is a flat list of alias -> command pairs. e.g.
       '(("~/Documents/src" . 2)
         ("~/Documents/ref" . 1)))
 
+;; <https://emacs-lsp.github.io/lsp-mode/page/lsp-terraform-ls/>
+(when (featurep! :tools terraform +lsp)
+  (setq
+    ;; Use the official Hashicorp language server from Hashicorp
+    lsp-disabled-clients '(tfls)
+
+    ;; Enable reference counts
+    lsp-terraform-ls-enable-show-reference t
+
+    ;; REVIEW Enable semantic token support
+    lsp-semantic-tokens-enable t
+    lsp-semantic-tokens-honor-refresh-requests t)
+
+  ;; Set keybindings for LSP (reference existing LSP configurations)
+  (after! terraform-mode
+    (map! :map terraform-mode-map
+          :localleader
+          (:prefix ("l" . "LSP")
+            :desc "terraform init" "i" #'lsp-terraform-ls-init
+            :desc "terraform validate" "v" #'lsp-terraform-ls-validate
+            :desc "Providers widget" "p" #'lsp-terraform-ls-providers
+            :desc "Module calls widget" "m" #'lsp-terraform-ls-module-calls))))
+
 (when IS-MAC
   (setq ;; Comfortable keys that work most of the time
         mac-command-modifier 'control

@@ -65,7 +65,7 @@ brew install pkg-config poppler automake
 sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
 
 # Install prerequisites for `tools/terraform` module
-brew install terraform
+brew install terraform hashicorp/tap/terraform-ls
 
 # Install prerequisites for `lang/cc` module
 brew install ccls gdb glslang
