@@ -2467,14 +2467,36 @@ won't work for you. Unfortunately, resizing the frame does not help.
     + Reference ~imenu-list-minor-mode~ to see how it toggles its window.
 + https://emacs-lsp.github.io/lsp-ui/#lsp-ui-imenu
 
-*** TODO [#B] Look into LSP performance improvements
+*** LOOP [#B] Look into LSP performance improvements
 Resources:
 + [[help:lsp-doctor][lsp-doctor]]
 + [[doom:.local/straight/repos/lsp-mode/docs/page/performance.md][performance.md]]
 
-With my current setup, the main thing I can improve is using plists instead of
-hash-tables to improve deserialization performance (although I don't know the
-wider implications of doing this and if there are any negatives).
+**** LOOP Enable plist-based JSON deserialization
+From =performance.md=:
+
+#+begin_quote
+1. Configure the following env variable. Make sure that Emacs can see that
+   variable (best way to do that is to start Emacs from the shell, not from
+   the icon).
+   : export LSP_USE_PLISTS=true
+2. Delete ~lsp-mode~ related packages.
+3. Make sure that ~lsp-use-plists~ is non-nil.
+4. Restart Emacs and install again ~lsp-mode~ related packages.
+#+end_quote
+
+For whatever reason, after doing all of the above, sometimes hash tables are
+expected and I get messages like this:
+
+#+begin_quote
+Wrong type argument: hash-table-p
+#+end_quote
+
+Until I get things figured out, I am going to continue to use hash tables.
+
+#+begin_src emacs-lisp :tangle no
+(setq lsp-use-plists t)
+#+end_src
 
 ** magit [2/2]
 *** STRT [#A] Install prerequisites
