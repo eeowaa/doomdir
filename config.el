@@ -486,6 +486,8 @@ deleting the final newline before inserting the \")))\"."
 
 (setq confirm-kill-processes nil)
 
+(defalias 'ps 'list-processes)
+
 (after! projectile
   ;; For each atom in `obarray'
   (mapatoms

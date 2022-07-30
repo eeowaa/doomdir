@@ -1533,7 +1533,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [3/9]
+** Miscellany [5/10]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -1553,6 +1553,13 @@ Miscellaneous configuration without a corresponding module.
 *** DONE [#C] Don't prompt about killing running processing when quitting
 #+begin_src emacs-lisp :tangle yes
 (setq confirm-kill-processes nil)
+#+end_src
+
+*** DONE [#C] Add aliases for common commands
+I'll keep adding more as I need them.
+
+#+begin_src emacs-lisp :tangle yes
+(defalias 'ps 'list-processes)
 #+end_src
 
 *** KILL [#C] Suppress warning for ~Package cl is deprecated~
