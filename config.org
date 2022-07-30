@@ -1555,41 +1555,9 @@ Miscellaneous configuration without a corresponding module.
 (setq confirm-kill-processes nil)
 #+end_src
 
-*** TODO [#A] Override builtin ~restart-emacs~ function :flagged:
-- Emacs 29 introduced the ~restart-emacs~ function
-  - ~emacs-version~ has the version string, but I believe that it was introduced
-    in a random commit not really associated with a specific version
-  - Probably need to check for the existence of a builtin ~restart-emacs~
-    function instead of checking the version string, and then work around it
-  - The function is defined in =/usr/share/emacs/29.0.50/lisp/files.el.gz=
-- Doom uses the ~restart-emacs~ function defined in the =restart-emacs= package
-  - The package is declared in a ~package!~ form in =~/.config/emacs/core/packages.el=
-  - The ~package!~ form sets up an autoload for ~restart-emacs~
-  - User-defined ~package!~ forms go in =~/.config/doom/packages.el=
-- Reference information about autoloads:
-  - ~autoload~ (also check the Info documentation)
-  - ~load-path~
-  - ~lisp-directory~ (=/usr/share/emacs/29.0.50/lisp=)
-- Can undefine a function using ~fmakunbound~
-- In =~/.config/emacs/core/core.el=, the following comment explains how Doom
-  starts up, which may be helpful in solving this problem:
-  #+begin_src emacs-lisp :eval no :tangle no
-  ;; The overall load order of Doom is as follows:
-  ;;
-  ;;   $EMACSDIR/early-init.el
-  ;;   $EMACSDIR/core/core.el
-  ;;   $DOOMDIR/init.el
-  ;;   {$DOOMDIR,~/.emacs.d}/modules/*/*/init.el
-  ;;   `doom-before-init-modules-hook'
-  ;;   {$DOOMDIR,~/.emacs.d}/modules/*/*/config.el
-  ;;   `doom-init-modules-hook'
-  ;;   $DOOMDIR/config.el
-  ;;   `doom-after-init-modules-hook'
-  ;;   `after-init-hook'
-  ;;   `emacs-startup-hook'
-  ;;   `doom-init-ui-hook'
-  ;;   `window-setup-hook'
-  #+end_src
+*** KILL [#C] Suppress warning for ~Package cl is deprecated~
+Like Henrik said, there is nothing we can do about this:
+https://github.com/hlissner/doom-emacs/issues/3372
 
 *** TODO [#B] Prevent AWS credentials from being written to ~doom-env-file~
 - [ ] Look at recent changes to =core/cli/= and =core/core-cli-lib.el= to fix
@@ -1643,8 +1611,52 @@ https://github.com/seanfarley/emacs-bitwarden
 *** TODO [#B] Figure out the autosave and backup situation for Doom Emacs
 Compare with my old config and try to match it.
 
-*** TODO [#C] Suppress warning for ~Package cl is deprecated~
-https://github.com/hlissner/doom-emacs/issues/3372
+*** HOLD [#A] Override builtin ~restart-emacs~ function
+:LOGBOOK:
+- Note taken on [2022-07-29 Fri 18:51] \\
+  This only matters in Emacs 29, which I am no longer using (I'm back at 28.1, the
+  latest stable version as of now).
+
+  Just a few days ago, Fedora started packaging Emacs 28.1, while before, they
+  were back at an older version that did not support native compilation. I was
+  using a COPR repo that supports native comp, which also happens to use the
+  development version of Emacs. A recent commit added the builtin ~restart-emacs~
+  function. Rather than fight with that, I'll fall back to Fedora's new package.
+:END:
+- Emacs 29 introduced the ~restart-emacs~ function
+  - ~emacs-version~ has the version string, but I believe that it was introduced
+    in a random commit not really associated with a specific version
+  - Probably need to check for the existence of a builtin ~restart-emacs~
+    function instead of checking the version string, and then work around it
+  - The function is defined in =/usr/share/emacs/29.0.50/lisp/files.el.gz=
+- Doom uses the ~restart-emacs~ function defined in the =restart-emacs= package
+  - The package is declared in a ~package!~ form in =~/.config/emacs/core/packages.el=
+  - The ~package!~ form sets up an autoload for ~restart-emacs~
+  - User-defined ~package!~ forms go in =~/.config/doom/packages.el=
+- Reference information about autoloads:
+  - ~autoload~ (also check the Info documentation)
+  - ~load-path~
+  - ~lisp-directory~ (=/usr/share/emacs/29.0.50/lisp=)
+- Can undefine a function using ~fmakunbound~
+- In =~/.config/emacs/core/core.el=, the following comment explains how Doom
+  starts up, which may be helpful in solving this problem:
+  #+begin_src emacs-lisp :eval no :tangle no
+  ;; The overall load order of Doom is as follows:
+  ;;
+  ;;   $EMACSDIR/early-init.el
+  ;;   $EMACSDIR/core/core.el
+  ;;   $DOOMDIR/init.el
+  ;;   {$DOOMDIR,~/.emacs.d}/modules/*/*/init.el
+  ;;   `doom-before-init-modules-hook'
+  ;;   {$DOOMDIR,~/.emacs.d}/modules/*/*/config.el
+  ;;   `doom-init-modules-hook'
+  ;;   $DOOMDIR/config.el
+  ;;   `doom-after-init-modules-hook'
+  ;;   `after-init-hook'
+  ;;   `emacs-startup-hook'
+  ;;   `doom-init-ui-hook'
+  ;;   `window-setup-hook'
+  #+end_src
 
 ** dired [1/1]
 #+begin_quote
