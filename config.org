@@ -429,6 +429,7 @@ For now, I am using Source Code Pro.
 #+begin_src emacs-lisp :tangle yes
 (setq doom-font (font-spec :family "Source Code Pro" :size 16))
 #+end_src
+
 **** DONE Terminus :ARCHIVE:
 For now, I am using Terminus.
 
@@ -3730,7 +3731,7 @@ This module adds support for PHP 5.3+ (including PHP7).
 
 ** plantuml [0/0] :ARCHIVE:
 ** purescript [0/0] :ARCHIVE:
-** python [4/6]
+** python [5/7]
 :PROPERTIES:
 :CATEGORY: doom/python
 :END:
@@ -4537,60 +4538,10 @@ for you to customize it yourself. It is best to load these last.
 ;;; :config
 #+end_src
 
-** Miscellany [1/3]
+** Miscellany [2/3]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
-
-*** STRT [#B] Remove =straight= package repos from =projectile=
-Unfortunately, the =~/.config/emacs/.local/straight/repos/*= are creeping back
-in, so this isn't finished yet.
-
-#+begin_src emacs-lisp :tangle yes
-;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
-(after! projectile
-  (eval
-   `(pushnew!
-     projectile-globally-ignored-directories
-     ,@(mapcan
-        (lambda (f)
-          (when (file-directory-p f)
-            (list (abbreviate-file-name f))))
-        (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
-                                   t "\\`[^.]")))))
-#+end_src
-
-*** TODO [#C] Add ergonomic keybindings for hard-to-reach keys
-I do not like to put undue stress on my pinky fingers while typing, so I often
-like to use alternate key chords for the Enter, Backspace, and Tab keys (I have
-Control and Alt mapped to thumb keys on my keyboard).
-
-I would like to configure Emacs to use similar key chords as terminal emulators
-for these special keys. Here are some options:
-
-+ =RET= (=<return>=)
-  - Options:
-    + =C-j=: This is for "electric" and "special return" commands
-      - Terminal Emacs actually recognizes =C-j= as a distinct key sequence,
-        although typical Bourne-compatible shells and Vim do not
-      - In my opinion, too much Emacs functionality relies on this sequence and
-        there is no other keybinding that does the same thing
-    + =C-m=: This already works as expected
-      - No configuration necessary AFIAK
-+ =DEL= (=<backspace>=)
-  - Options:
-    + =C-h=: This is just "help", which I can achieve using =SPC h= and =M-SPC h=
-      - My muscle memory might make it hard for me to forget this keybinding
-      - Terminal Emacs actually recognizes =C-h= as a distinct key sequence,
-        although typical Bourne-compatible shells and Vim do not
-    + =C-?=: This is just "redo", which I can achieve using =M-_=
-      - The corresponding "undo" keybinding is =C-_=
-      - =C-x u= runs ~undo-tree-visualize~, which gives a nice interface to this
-+ =TAB= (=<tab>=)
-  - Options:
-    + =C-i=: This is just "jump forward", which I can achieve using =C-M-,=
-      - The corresponding "jump backward" keybinding is =M-,=
-      - =SPC s j= runs ~+ivy/jump-list~, which gives a nice interface to this
 
 *** DONE [#A] Load custom config if present
 =~/.config/doom/custom.el= should look something like this:
@@ -4632,6 +4583,76 @@ for these special keys. Here are some options:
 
 #+begin_src emacs-lisp :tangle yes
 (load! "custom" doom-private-dir t)
+#+end_src
+
+*** DONE [#C] Add ergonomic keybindings for hard-to-reach keys
+I do not like to put undue stress on my pinky fingers while typing, so I often
+like to use alternate key chords for the Enter, Backspace, and Tab keys (I have
+Control and Alt mapped to thumb keys on my keyboard).
+
+I would like to configure Emacs to use similar key chords as terminal emulators
+for these special keys. Here are some options:
+
++ =RET= (=<return>=)
+  - Options:
+    + =C-j=: This is for "electric" and "special return" commands
+      - Terminal Emacs actually recognizes =C-j= as a distinct key sequence,
+        although typical Bourne-compatible shells and Vim do not
+      - In my opinion, too much Emacs functionality relies on this sequence and
+        there is no other keybinding that does the same thing
+    + =C-m=: This already works as expected
+      - No configuration necessary AFIAK
++ =DEL= (=<backspace>=)
+  - Options:
+    + =C-h=: This is just "help", which I can achieve using =SPC h= and =M-SPC h=
+      - My muscle memory might make it hard for me to forget this keybinding
+      - Terminal Emacs actually recognizes =C-h= as a distinct key sequence,
+        although typical Bourne-compatible shells and Vim do not
+    + =C-?=: This is just "redo", which I can achieve using =M-_=
+      - The corresponding "undo" keybinding is =C-_=
+      - =C-x u= runs ~undo-tree-visualize~, which gives a nice interface to this
++ =TAB= (=<tab>=)
+  - Options:
+    + =C-i=: This is just "jump forward", which I can achieve using =C-M-,=
+      - The corresponding "jump backward" keybinding is =M-,=
+      - =SPC s j= runs ~+ivy/jump-list~, which gives a nice interface to this
+  - Updates:
+    + For some reason (either by recently upgrading Doom Emacs or by downgrading
+      to Emacs 28.1), =C-M-,= is no longer mapped to ~better-jumper-jump-forward~,
+      but I can just manually add this keymapping
+    + =C-M-,= does not work in GNOME terminal, but it can probably be fixed
+      similarly to how [[https://www.emacswiki.org/emacs/LinuxConsoleKeys][keys can be fixed in the Linux console]]
+
+References:
++ https://www.gnu.org/software/emacs/manual/html_node/elisp/Translation-Keymaps.html#Translation-Keymaps
++ https://emacs.stackexchange.com/a/3839
++ http://xahlee.info/emacs/emacs/emacs_key-translation-map.html
+
+#+begin_src emacs-lisp :tangle yes
+;; Map C-? to DEL
+(define-key key-translation-map (kbd "C-?") (kbd "DEL"))
+
+;; Map C-i to TAB and provide an alternative mapping for `better-jumper-jump-forward'
+(define-key key-translation-map (kbd "C-i") (kbd "TAB"))
+(global-set-key (kbd "C-M-,") #'better-jumper-jump-forward)
+#+end_src
+
+*** STRT [#B] Remove =straight= package repos from =projectile=
+Unfortunately, the =~/.config/emacs/.local/straight/repos/*= are creeping back
+in, so this isn't finished yet.
+
+#+begin_src emacs-lisp :tangle yes
+;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
+(after! projectile
+  (eval
+   `(pushnew!
+     projectile-globally-ignored-directories
+     ,@(mapcan
+        (lambda (f)
+          (when (file-directory-p f)
+            (list (abbreviate-file-name f))))
+        (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
+                                   t "\\`[^.]")))))
 #+end_src
 
 ** literate [2/4]

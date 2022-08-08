@@ -1070,6 +1070,15 @@ to `org-footnote-section'.  Inline definitions are ignored."
 (after! elfeed
   (setq elfeed-search-remain-on-entry t))
 
+(load! "custom" doom-private-dir t)
+
+;; Map C-? to DEL
+(define-key key-translation-map (kbd "C-?") (kbd "DEL"))
+
+;; Map C-i to TAB and provide an alternative mapping for `better-jumper-jump-forward'
+(define-key key-translation-map (kbd "C-i") (kbd "TAB"))
+(global-set-key (kbd "C-M-,") #'better-jumper-jump-forward)
+
 ;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
 (after! projectile
   (eval
@@ -1081,8 +1090,6 @@ to `org-footnote-section'.  Inline definitions are ignored."
             (list (abbreviate-file-name f))))
         (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
                                    t "\\`[^.]")))))
-
-(load! "custom" doom-private-dir t)
 
 (remove-hook 'org-mode-hook #'+literate-enable-recompile-h)
 
