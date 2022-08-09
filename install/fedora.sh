@@ -1,10 +1,8 @@
 #!/bin/sh
 
 # Install NVM to install packages
-curl -Lo /tmp/nvm-install.sh https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh
-chmod +x /tmp/nvm-install.sh
-PROFILE=/dev/null /tmp/nvm-install.sh
-rm /tmp/nvm-install.sh
+curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
+    | env PROFILE=/dev/null bash
 
 # Install pipx to install packages
 sudo dnf -y install pipx

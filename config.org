@@ -18,35 +18,11 @@
 
 * Miscellany
 ** Install prerequisites [2/2]
-*** DONE macOS
-#+begin_src sh :tangle install/macos.sh
-#!/bin/sh
-
-# Install Homebrew to install packages
-curl -Lo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
-
-# Install NVM to install packages
-curl -Lo /tmp/nvm-install.sh https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh
-chmod +x /tmp/nvm-install.sh
-PROFILE=/dev/null /tmp/nvm-install.sh
-rm /tmp/nvm-install.sh
-#+end_src
-
-*** DONE Fedora
-#+begin_src sh :tangle install/fedora.sh
-#!/bin/sh
-
-# Install NVM to install packages
-curl -Lo /tmp/nvm-install.sh https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh
-chmod +x /tmp/nvm-install.sh
-PROFILE=/dev/null /tmp/nvm-install.sh
-rm /tmp/nvm-install.sh
-
-# Install pipx to install packages
-sudo dnf -y install pipx
-
-# Function to install a binary asset from the latest release of a GitHub repo
-sudo dnf -y install jq
+:PROPERTIES:
+:header-args: :noweb yes
+:END:
+#+name: github_binary_release
+#+begin_src sh :exports none
 github_binary_release() {
     local func='github_binary_release'
     local repo= asset= prefix= root= binary=
@@ -97,6 +73,38 @@ $func: (recursively) delete? [y/N]: "
     }
     ln -sf "$canonical_path/$binary" "$HOME/.local/bin"
 }
+#+end_src
+
+*** DONE macOS
+#+begin_src sh :tangle install/macos.sh
+#!/bin/sh
+
+# Install Homebrew to install packages
+curl -Lo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
+
+# Install NVM to install packages
+curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
+    | env PROFILE=/dev/null bash
+
+# Function to install a binary asset from the latest release of a GitHub repo
+brew install jq
+<<github_binary_release>>
+#+end_src
+
+*** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+#!/bin/sh
+
+# Install NVM to install packages
+curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
+    | env PROFILE=/dev/null bash
+
+# Install pipx to install packages
+sudo dnf -y install pipx
+
+# Function to install a binary asset from the latest release of a GitHub repo
+sudo dnf -y install jq
+<<github_binary_release>>
 #+end_src
 
 * :input

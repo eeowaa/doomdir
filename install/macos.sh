@@ -4,10 +4,61 @@
 curl -Lo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
 
 # Install NVM to install packages
-curl -Lo /tmp/nvm-install.sh https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh
-chmod +x /tmp/nvm-install.sh
-PROFILE=/dev/null /tmp/nvm-install.sh
-rm /tmp/nvm-install.sh
+curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
+    | env PROFILE=/dev/null bash
+
+# Function to install a binary asset from the latest release of a GitHub repo
+brew install jq
+github_binary_release() {
+    local func='github_binary_release'
+    local repo= asset= prefix= root= binary=
+    while [ $# -gt 0 ]
+    do
+        case $1 in
+        --repo) repo=$2 ;;
+        --asset) asset=$2 ;;
+        --prefix) prefix=$2 ;;
+        --path) root=$2 ;; # cannot use "path" due to conflict with ZSH
+        --binary) binary=$2 ;;
+        esac
+        shift; shift
+    done
+    for arg in "$repo" "$asset" "$prefix" "$root" "$binary"
+    do
+        [ "X$arg" = X ] && {
+            echo >&2 "ERROR: $func: missing argument"
+            return 1
+        }
+    done
+    local url=`
+        curl -s https://api.github.com/repos/$repo/releases/latest | jq -r \
+        '.assets[] | select(.name == "'"$asset"'") | .browser_download_url'
+    `
+    [ "X$url" = X ] && {
+        echo >&2 "ERROR: $func: could not find URL"
+        return 1
+    }
+    [ -e "$prefix/$root" ] && {
+        local canonical_path=`readlink -e "$prefix/$root"`
+        printf "\
+$func: found existing: $canonical_path
+$func: (recursively) delete? [y/N]: "
+        read delete
+        case $delete in
+        [yY]*)
+            rm -rf "$canonical_path" ;;
+        *)  echo >&2 "ERROR: $func: refusing to download"
+            return 1 ;;
+        esac
+    }
+    mkdir -p "$prefix" "$HOME/.local/bin"
+    curl -Lo- "$url" | tar -C "$prefix" -xzf -
+    [ -x "$canonical_path/$binary" ] || {
+        echo >&2 "ERROR: $func: not an executable file: $canonical_path/$binary"
+        return 1
+    }
+    ln -sf "$canonical_path/$binary" "$HOME/.local/bin"
+}
 
 # Install prerequisites for `completion/ivy` module
 brew install ripgrep
