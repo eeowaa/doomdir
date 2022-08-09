@@ -3890,11 +3890,76 @@ This module adds [[https://en.wikipedia.org/wiki/Representational_state_transfer
 This module add Ruby and optional Ruby on Rails support to Emacs.
 #+end_quote
 
-** rust [0/0] :ARCHIVE:
+** rust [2/3]
 #+begin_quote
 This module adds support for the Rust language and integration for its tools,
 e.g. ~cargo~.
 #+end_quote
+
+*** WAIT [#A] Install prerequisites
+**** WAIT macOS
+#+begin_src sh :tangle no
+# Install prerequisites for `lang/rust` module
+#+end_src
+
+**** DONE Fedora
+From an official [[https://blog.rust-lang.org/2022/07/01/RLS-deprecation.html][Rust Blog post]] published on July 1, 2022:
+#+begin_quote
+The Rust Language Server (RLS) is being deprecated in favor of rust-analyzer.
+#+end_quote
+
+Unfortunately, ~rust-analyzer~ cannot be installed on Fedora via ~dnf~ or
+another packager that can be installed via ~dnf~ (such as ~cargo~). Instead,
+~rust-analyzer~ can be installed via ~rustup~, which is officially installed via
+a ~curl~-to-~sh~ command line. I really hate that method of software
+installation, but there's no easy alternative at the moment.
+
+References:
++ [[https://www.rust-lang.org/tools/install][Official installation documentation for Rust]]
+  - [[https://www.reddit.com/r/rust/comments/dk35e6/rusts_install_instructions_of_curltobash_is/][Discussion of Rust installation method on Reddit]]
++ [[https://rust-analyzer.github.io/manual.html#installation][Official installation documentation for rust-analyzer]]
+
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `lang/rust` module
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+    | sh -s -- --no-modify-path --quiet -y
+cargo install cargo-check
+rustup component add rustfmt-preview clippy-preview
+
+## rust-analyzer
+rustup component add rust-src
+rustup +nightly component add rust-analyzer-preview
+ln -s ~/.rustup/toolchains/nightly-*/bin/rust-analyzer ~/.cargo/bin
+#+end_src
+
+Another snag that I ran into is that =lsp-mode= [[https://emacs-lsp.github.io/lsp-mode/page/lsp-rust-analyzer/#debugger-not-available][does not provide a debugger]] for
+~rust-analyzer~, but it [[https://emacs-lsp.github.io/lsp-mode/page/lsp-rust-rls/#debugger-yes][has a debugger]] for ~rls~. For now, that's a good enough
+reason for me to favor ~rls~, but I'll still keep ~rust-analyzer~ around so that
+I can easily switch back to it.
+
+#+begin_src sh :tangle install/fedora.sh
+## rls
+rustup component add rls rust-analysis rust-src
+#+end_src
+
+References:
++ [[https://github.com/rust-lang/rls#setup][Official installation documentation for rls]]
+
+*** DONE [#B] Favor ~rls~ over ~rust-analyzer~
+Although ~rls~ has been deprecated in favor of ~rust-analyzer~, =lsp-mode= only
+supports debugging for ~rls~ at the moment.
+
+#+begin_src emacs-lisp :tangle yes
+(after! rustic
+  (setq rustic-lsp-server 'rls))
+#+end_src
+
+*** DONE [#C] Open =Cargo.lock= files as read-only TOML config files
+#+begin_src emacs-lisp :tangle yes
+(dolist (cell '((auto-mode-alist . conf-toml-mode)
+                (auto-minor-mode-alist . read-only-mode)))
+  (add-to-list (car cell) (cons "/Cargo\\.lock\\'" (cdr cell))))
+#+end_src
 
 ** scala [0/0] :ARCHIVE:
 #+begin_quote
@@ -4639,7 +4704,8 @@ References:
 
 *** STRT [#B] Remove =straight= package repos from =projectile=
 Unfortunately, the =~/.config/emacs/.local/straight/repos/*= are creeping back
-in, so this isn't finished yet.
+in, so this isn't finished yet. Check =~/.config/emacs/core/core-projects.el=
+to see how Doom configures Projectile.
 
 #+begin_src emacs-lisp :tangle yes
 ;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result

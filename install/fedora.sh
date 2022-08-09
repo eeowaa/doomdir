@@ -254,6 +254,20 @@ pip3 install --user debugpy
 sudo dnf -y install racket
 raco pkg install --auto racket-langserver
 
+# Install prerequisites for `lang/rust` module
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+    | sh -s -- --no-modify-path --quiet -y
+cargo install cargo-check
+rustup component add rustfmt-preview clippy-preview
+
+## rust-analyzer
+rustup component add rust-src
+rustup +nightly component add rust-analyzer-preview
+ln -s ~/.rustup/toolchains/nightly-*/bin/rust-analyzer ~/.cargo/bin
+
+## rls
+rustup component add rls rust-analysis rust-src
+
 # Install prerequisites for `lang/sh` module
 sudo dnf -y install bash zsh fish powershell ShellCheck
 npm install -g bash-language-server
