@@ -3,18 +3,20 @@ This document outlines a generic workflow that can be followed for any
 development project.
 
 * DONE Starting a new project
-1. Create the project directory using =M-x mkdir=
-2. Register the project using =SPC p a= (~projectile-add-known-project~)
-   followed by =M-p= (~ivy-previous-history-element~)
-3. Switch to the new project using =SPC p p=
+1. Initialize a git repo using =SPC g c r= (~magit-init~)
+   - The directory does not need to exist yet
+2. Create an empty file such as =.gitignore= or =LICENSE= to populate the
+   directory if it is empty (this gives you a file to switch to)
+3. Register the project using =SPC p a= (~projectile-add-known-project~)
+   followed by =RET= (the new git repo will be automatically selected)
+4. Switch to the new project using =SPC p p=
    (~counsel-projectile-switch-project~) followed by =C-p= (~ivy-previous-line~)
-3. Initialize the git repo using =SPC g c r= (~magit-init~)
 
 * DONE Contextualizing the work
-1. Create a simple =README.org= using =SPC f f= (~counsel-find-file~)
+1. Create a simple =README.md= or =README.org= using =SPC f f=
+   (~counsel-find-file~)
    - Briefly describe the project objective
    - Define the scope of the first iteration
-
 2. Similarly, create a =todo.org= and list a few tasks that come to mind
    - Feel free to use this very file as a template
    - Add categories and tags to organize your work:

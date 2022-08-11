@@ -19,8 +19,8 @@ python3.8 -m lambda_function -c 'lambda_handler(None, None)'
 
 * STRT Using the interpreter
 Open the REPL using =SPC o r= (~+eval/open-repl-other-window~). To load the
-definitions your script file (e.g. =lambda_function.py=) so that you can run
-code in the REPL just like in the script file (i.e. same namespace):
+definitions from your script file (e.g. =lambda_function.py=) so that you can
+run code in the REPL just like in the script file (i.e. same namespace):
 
 #+begin_src python
 from lambda_function import *
@@ -47,6 +47,9 @@ which provides commands that wrap ~pipenv~, a package manager that replaces the
 standard ~pip~ and ~virtualenv~. Reference: https://realpython.com/pipenv-guide/
 
 1. Create a new virtualenv and install packages
+   + If you already have a populated =Pipfile=, just run ~pipenv install~ with
+     no arguments using =SPC p &= (~projectile-run-async-shell-command-in-root~)
+     and continue to step 2.
    + If you are fine with using the current system Python version, =SPC m e i=
      /in a python buffer/ (~pipenv-install~) can be used to set things up
      a. Specify package(s) to install when prompted
