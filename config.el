@@ -677,6 +677,14 @@ ALIASES is a flat list of alias -> command pairs. e.g.
 
 (setq ispell-dictionary "english")
 
+(defun my/aws-envvars ()
+  "Print the values of AWS environment variables"
+  (interactive)
+  (dolist (var (seq-filter
+                (lambda (s) (string-match "\\`AWS_" s))
+                (sort process-environment #'string<)))
+    (princ (concat var "\n"))))
+
 (after! lsp
   (setq lsp-restart 'auto-restart))
 

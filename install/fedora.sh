@@ -97,6 +97,9 @@ ansible-galaxy collection install community.general
 sudo dnf -y install lldb gdb unzip
 nvm install node
 
+# Install prerequisites for `tools/direnv` module
+sudo dnf -y install direnv
+
 # Install prerequisites for `tools/docker` module
 sudo dnf -y install shadow-utils fuse-overlayfs iptables
 sudo systemctl disable --now docker.service docker.socket

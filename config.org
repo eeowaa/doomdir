@@ -2278,7 +2278,12 @@ that prevents errors. Worst case, I could disable =debugger=.
 disable =debugger= for the time being (it's not super-important for me right
 now, anyway).
 
-** direnv [1/4] :ARCHIVE:
+** direnv [1/4]
+:LOGBOOK:
+- Note taken on [2022-08-11 Thu 17:08] \\
+  I have re-enabled this module and things seem to be working OK so far. That
+  said, I don't have any complicated use cases right now.
+:END:
 #+begin_quote
 This module integrates direnv into Emacs.
 #+end_quote

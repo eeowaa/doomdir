@@ -90,6 +90,9 @@ brew install ansible
 # https://stackoverflow.com/questions/18423124/please-check-gdb-is-codesigned-see-taskgated8-how-to-get-gdb-installed-w
 brew install gdb
 
+# Install prerequisites for `tools/direnv` module
+brew install direnv
+
 # Install prerequisites for `tools/docker` module
 brew install docker
 npm install -g dockerfile-language-server-nodejs
