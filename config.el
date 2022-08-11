@@ -1098,6 +1098,18 @@ to `org-footnote-section'.  Inline definitions are ignored."
         (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
                                    t "\\`[^.]")))))
 
+(setq projectile-project-search-path
+      (list
+       ;; Standard source directories
+       (cons "/usr/src" 2)
+       (cons "/usr/local/src" 2)
+       (cons (concat (file-name-as-directory (getenv "HOME")) ".local/src") 2)
+
+       ;; Personal source directories
+
+       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/work") 2)
+       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/life") 2)))
+
 (remove-hook 'org-mode-hook #'+literate-enable-recompile-h)
 
 (after! smartparens
