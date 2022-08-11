@@ -3980,7 +3980,7 @@ supports debugging for ~rls~ at the moment.
 This module adds [[https://www.scala-lang.org][scala]] and [[https://www.scala-sbt.org/][sbt]] support to Doom Emacs.
 #+end_quote
 
-** sceme [0/0] :ARCHIVE:
+** scheme [0/0] :ARCHIVE:
 #+begin_quote
 This module provides an environment for hacking and having fun in scheme. It is
 powered by [[https://www.nongnu.org/geiser/geiser_1.html#introduction][geiser]].
@@ -4617,7 +4617,7 @@ for you to customize it yourself. It is best to load these last.
 ;;; :config
 #+end_src
 
-** Miscellany [2/3]
+** Miscellany [2/4]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
