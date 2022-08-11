@@ -1730,6 +1730,7 @@ integration with git.
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
 (add-to-list 'auto-mode-alist '("/git/config\\.d/.+" . gitconfig-mode))
+(add-to-list 'auto-mode-alist '("\\.gitignore\\'" . gitignore-mode))
 #+end_src
 
 * :term

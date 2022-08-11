@@ -520,6 +520,7 @@ deleting the final newline before inserting the \")))\"."
   (delq! 'overlong-summary-line git-commit-style-convention-checks))
 
 (add-to-list 'auto-mode-alist '("/git/config\\.d/.+" . gitconfig-mode))
+(add-to-list 'auto-mode-alist '("\\.gitignore\\'" . gitignore-mode))
 
 (defun my/with-editor-export ()
   "Run `with-editor-export-editor' for all envvars that I care about"
