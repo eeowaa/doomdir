@@ -3809,6 +3809,7 @@ More than a simple "Hello World":
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
 (add-to-list 'auto-mode-alist '("pylint" . conf-mode))
+(add-to-list 'auto-mode-alist '("/activate\\'" . shell-script-mode))
 #+end_src
 
 *** DONE [#A] Fix quirks with keymaps

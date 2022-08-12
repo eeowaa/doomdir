@@ -1018,6 +1018,7 @@ to `org-footnote-section'.  Inline definitions are ignored."
   (display-fill-column-indicator-mode))
 
 (add-to-list 'auto-mode-alist '("pylint" . conf-mode))
+(add-to-list 'auto-mode-alist '("/activate\\'" . shell-script-mode))
 
 ;; Add "pipenv" label to "e" prefix key
 (after! pipenv
