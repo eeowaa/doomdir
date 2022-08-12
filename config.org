@@ -3904,7 +3904,7 @@ This module adds [[https://en.wikipedia.org/wiki/Representational_state_transfer
 This module add Ruby and optional Ruby on Rails support to Emacs.
 #+end_quote
 
-** rust [2/3]
+** rust [2/4]
 #+begin_quote
 This module adds support for the Rust language and integration for its tools,
 e.g. ~cargo~.
@@ -3946,10 +3946,11 @@ rustup +nightly component add rust-analyzer-preview
 ln -s ~/.rustup/toolchains/nightly-*/bin/rust-analyzer ~/.cargo/bin
 #+end_src
 
-Another snag that I ran into is that =lsp-mode= [[https://emacs-lsp.github.io/lsp-mode/page/lsp-rust-analyzer/#debugger-not-available][does not provide a debugger]] for
-~rust-analyzer~, but it [[https://emacs-lsp.github.io/lsp-mode/page/lsp-rust-rls/#debugger-yes][has a debugger]] for ~rls~. For now, that's a good enough
-reason for me to favor ~rls~, but I'll still keep ~rust-analyzer~ around so that
-I can easily switch back to it.
+Another snag that I ran into is that =lsp-mode= apparently [[https://emacs-lsp.github.io/lsp-mode/page/lsp-rust-analyzer/#debugger-not-available][does not]] provide
+=dap-mode= integration for ~rust-analyzer~, but it [[https://emacs-lsp.github.io/lsp-mode/page/lsp-rust-rls/#debugger-yes][does]] provide =dap-mode=
+integration for ~rls~. I would really like a debugger for Rust (especially given
+how new I am to the language), so I will also install ~rls~. That said, I'll
+still keep ~rust-analyzer~ around so that I can easily switch back to it.
 
 #+begin_src sh :tangle install/fedora.sh
 ## rls
@@ -3959,14 +3960,53 @@ rustup component add rls rust-analysis rust-src
 References:
 + [[https://github.com/rust-lang/rls#setup][Official installation documentation for rls]]
 
-*** DONE [#B] Favor ~rls~ over ~rust-analyzer~
+*** KILL [#B] Favor ~rls~ over ~rust-analyzer~
+:LOGBOOK:
+- Note taken on [2022-08-09 Tue 15:59] \\
+  I am going to try debugging with ~rust-analyzer~ instead. Other sources besides
+  the =lsp-mode= documentation indicates that it is possible.
+:END:
 Although ~rls~ has been deprecated in favor of ~rust-analyzer~, =lsp-mode= only
 supports debugging for ~rls~ at the moment.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (after! rustic
   (setq rustic-lsp-server 'rls))
 #+end_src
+
+*** TODO [#B] Get debugging to work
+Reference: https://gagbo.net/post/dap-mode-rust/
+
+1. Install =lsp-mode=, =dap-mode=, =gdb=, and =rust-analyzer=
+2. Execute the following elisp:
+   #+begin_src emacs-lisp :tangle no
+   (setq dap-cpptools-extension-version "1.5.1")
+
+   (with-eval-after-load 'lsp-rust
+     (require 'dap-cpptools))
+
+   (with-eval-after-load 'dap-cpptools
+     ;; Add a template specific for debugging Rust programs.
+     ;; It is used for new projects, where I can M-x dap-edit-debug-template
+     (dap-register-debug-template "Rust::CppTools Run Configuration"
+                                  (list :type "cppdbg"
+                                        :request "launch"
+                                        :name "Rust::Run"
+                                        :MIMode "gdb"
+                                        :miDebuggerPath "rust-gdb"
+                                        :environment []
+                                        :program "${workspaceFolder}/target/debug/hello / replace with binary"
+                                        :cwd "${workspaceFolder}"
+                                        :console "external"
+                                        :dap-compilation "cargo build"
+                                        :dap-compilation-dir "${workspaceFolder}")))
+
+   (with-eval-after-load 'dap-mode
+     (setq dap-default-terminal-kind "integrated") ;; Make sure that terminal programs open a term for I/O in an Emacs buffer
+     (dap-auto-configure-mode +1))
+   #+end_src
+3. =M-x dap-cpptools-setup=
+4. Open a project and =M-x dap-edit-debug-template= to set up the template
 
 *** DONE [#C] Open =Cargo.lock= files as read-only TOML config files
 #+begin_src emacs-lisp :tangle yes

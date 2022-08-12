@@ -1028,9 +1028,6 @@ to `org-footnote-section'.  Inline definitions are ignored."
 (after! dap-mode
   (setq dap-python-debugger 'debugpy))
 
-(after! rustic
-  (setq rustic-lsp-server 'rls))
-
 (dolist (cell '((auto-mode-alist . conf-toml-mode)
                 (auto-minor-mode-alist . read-only-mode)))
   (add-to-list (car cell) (cons "/Cargo\\.lock\\'" (cdr cell))))
