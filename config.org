@@ -1236,6 +1236,10 @@ altnerative solution would be to enable ~evil-respect-visual-line-mode~ in
 =DOOMDIR/init.el=, but apparently there are problems with doing so. See this
 open issue in Doom Emacs: https://github.com/doomemacs/doomemacs/issues/2447
 
+A temporary workaround is to switch to Emacs state using =C-z= and then use
+=C-n= and =C-p= to navigate between visual lines. Once finished, use =C-z= again
+to exit Emacs state.
+
 *** TODO [#C] Bind ~helpful-update~ to an Evil Normal state key
 ~helpful-update~ is the function that is used to redisplay help buffers (useful
 for when a value changes). Currently, I need to switch to Emacs state via =C-z=

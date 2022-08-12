@@ -1092,18 +1092,6 @@ to `org-footnote-section'.  Inline definitions are ignored."
 (define-key key-translation-map (kbd "C-i") (kbd "TAB"))
 (global-set-key (kbd "C-M-,") #'better-jumper-jump-forward)
 
-;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
-(after! projectile
-  (eval
-   `(pushnew!
-     projectile-globally-ignored-directories
-     ,@(mapcan
-        (lambda (f)
-          (when (file-directory-p f)
-            (list (abbreviate-file-name f))))
-        (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
-                                   t "\\`[^.]")))))
-
 (setq projectile-project-search-path
       (list
        ;; Standard source directories
@@ -1115,6 +1103,18 @@ to `org-footnote-section'.  Inline definitions are ignored."
 
        (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/work") 2)
        (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/life") 2)))
+
+;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
+(after! projectile
+  (eval
+   `(pushnew!
+     projectile-globally-ignored-directories
+     ,@(mapcan
+        (lambda (f)
+          (when (file-directory-p f)
+            (list (abbreviate-file-name f))))
+        (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
+                                   t "\\`[^.]")))))
 
 (remove-hook 'org-mode-hook #'+literate-enable-recompile-h)
 
