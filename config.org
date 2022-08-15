@@ -1071,13 +1071,18 @@ cursor may switch to another window after this operation. I would rather create
 a keybinding like =C-w C-w x <window>= that closes the window that I select
 /without/ moving the cursor.
 
-** workspaces [2/2]
+** workspaces [2/3]
 #+begin_quote
 This module adds support for workspaces, powered by persp_mode, as well as a API
 for manipulating them.
 #+end_quote
 
-*** KILL Uniquify buffer names using file paths
+*** TODO [#B] Create a ~:tabmove~ command for Evil mode
+Reference:
++ ~+workspace/swap-left~
++ ~+workspace/swap-right~
+
+*** KILL [#A] Uniquify buffer names using file paths
 This is done by setting the ~uniquify-buffer-name-style~ variable to ~forward~,
 which Doom does by default in =core/core-ui.el=. However, when the =workspaces=
 module is enabled, Doom makes sure that the =uniquify= package does not modify
@@ -1085,7 +1090,7 @@ buffer names, as it breaks =persp-mode= (what powers the =workspaces= module).
 
 Visit the source code of ~+workspaces-init-persp-mode-h~ for more detail.
 
-*** DONE Give ~persp-keymap-prefix~ binding to =projectile=
+*** DONE [#B] Give ~persp-keymap-prefix~ binding to =projectile=
 By default, =C-c p= is used as the prefix for ~persp-mode-map~, but I would
 prefer to save that prefix for =projectile= commands. I will do what Doom does
 for standard Emacs bindings (snippet from =+emacs-bindings.el=):
@@ -1151,7 +1156,7 @@ https://emacs.stackexchange.com/questions/51989/how-to-truncate-lines-by-default
 (setq-default truncate-lines t)
 #+end_src
 
-** evil [3/5]
+** evil [3/6]
 #+begin_quote
 This holy module brings the vim experience to Emacs.
 #+end_quote
@@ -1228,6 +1233,10 @@ builtin game.
     :e "K" #'solitaire-move-up
     :e "J" #'solitaire-move-down))
 #+end_src
+
+*** TODO [#A] Redefine ~:q~ and ~:wq~ semantics
++ Where applicable, integrate with ~server-edit~ (bound to =C-x #=)
++ Do not ever use to exit Emacs; just for writing and closing buffers
 
 *** TODO [#B] Improve visual line navigation
 I would like to use the standard =gj= and =gk= Vim bindings to navigate between
@@ -1867,7 +1876,7 @@ tput: unknown terminal "eterm-color"
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [5/6]
+** vterm [5/7]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
@@ -1961,6 +1970,14 @@ ALIASES is a flat list of alias -> command pairs. e.g.
     "w"    "eww-open-file"
     "gg"   "magit-status"))
 #+end_src
+
+*** HOLD [#A] Allow scrolling back while output is being written
+https://github.com/akermu/emacs-libvterm/issues/397
+
+Right now, =C-c C-t= (~vterm-copy-mode~) can be used to toggle output being
+written to the buffer. When there is no output being written, you can freely
+scroll back in the buffer. Unfortunately there is no better way to do this at
+the moment, but it works pretty well anyway.
 
 *** TODO [#C] Prevent ~git-graph~ cutoff
 The last character ("o" in this case) gets hidden:
