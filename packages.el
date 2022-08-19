@@ -61,11 +61,14 @@
 ;; Ebooks
 (package! nov)
 
-;; Kubernetes packages
-(package! k8s-mode)
-(package! kubedoc)
-(package! kubel)
-(package! kubel-evil) ;; TODO Require `kubel-evil' to be loaded with `kubel'
+;; Kubernetes
+(package! k8s-mode)   ;; highlighting, snippets, and `k8s-goto-documents'
+(package! kubedoc)    ;; `kubedoc' command
+(package! kubel)      ;; interaction with pods
+(package! kubernetes) ;; interaction with a cluster
+(when (featurep! :editor evil +everywhere)
+  (package! kubel-evil)
+  (package! kubernetes-evil))
 
 (package! elfeed-goodies :disable t)
 

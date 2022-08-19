@@ -1876,7 +1876,7 @@ tput: unknown terminal "eterm-color"
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [5/7]
+** vterm [5/8]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
@@ -1970,6 +1970,29 @@ ALIASES is a flat list of alias -> command pairs. e.g.
     "w"    "eww-open-file"
     "gg"   "magit-status"))
 #+end_src
+
+*** STRT [#A] Get =vterm= working with ~kubectl~
+This seems to work with =kubel= as long as no =vterm= buffers exist:
+
+#+begin_src emacs-lisp :tangle yes
+(after! vterm
+  (let ((alist (assoc-delete-all "kubectl" vterm-tramp-shells)))
+    (setq vterm-tramp-shells
+          (push '("kubectl" "sh -c \"clear; (bash || ash || sh)\"") alist))))
+#+end_src
+
+The above code block is necessary, but I also need to do one or more of the
+following (I had done everything listed when I got it working once before):
+
+1. Prevent =with-editor= export to =vterm= (although this should theoretically
+   work with remote containers over TRAMP)
+2. Set ~vterm-use-vterm-prompt-detection-method~ to ~nil~
+3. Bypass =$HOME/.environ.d/vterm.sh=
+
+So far, the only remote shell method that's working for me is ANSI Term (=term=)
+via =kubel=, though ideally I'd use =vterm= with =kubernetes= and get rid of
+=kubel= altogether (the working remote shell capability is the only reason why
+I'm keeping that package around).
 
 *** HOLD [#A] Allow scrolling back while output is being written
 https://github.com/akermu/emacs-libvterm/issues/397
@@ -4435,7 +4458,7 @@ loaded last*, before =:config= modules.
 ;;; :app
 #+end_src
 
-** Miscellany [1/1]
+** Miscellany [1/4]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -4451,11 +4474,90 @@ Miscellaneous configuration without a corresponding module.
 ;; Ebooks
 (package! nov)
 
-;; Kubernetes packages
-(package! k8s-mode)
-(package! kubedoc)
-(package! kubel)
-(package! kubel-evil) ;; TODO Require `kubel-evil' to be loaded with `kubel'
+;; Kubernetes
+(package! k8s-mode)   ;; highlighting, snippets, and `k8s-goto-documents'
+(package! kubedoc)    ;; `kubedoc' command
+(package! kubel)      ;; interaction with pods
+(package! kubernetes) ;; interaction with a cluster
+(when (featurep! :editor evil +everywhere)
+  (package! kubel-evil)
+  (package! kubernetes-evil))
+#+end_src
+
+*** STRT [#A] Configure k8s-mode
++ [X] Open k8s manifest files in ~k8s-mode~
+  - Configured this with ~:magic~
+  - ~:magic~ only works for file-visiting buffers
+  - See note in source block for more info
++ [X] Configure documentation lookup
+  - Use either ~k8s-goto-documents~ or ~kubedoc~
++ [ ] Fine-tune documentation lookup
+  - Attempt to lookup the symbol under point
+
+Reference:
++ ~use-package!~ declarations in emacs/modules/tools/magit/config.el
++ https://blog.chmouel.com/2016/09/07/dealing-with-yaml-in-emacs/
+
+#+begin_src emacs-lisp :tangle yes
+;; NOTE k8s manifests do not have to begin with "apiVersion", but I've seen that
+;; more often than not. Worst case, if this doesn't end up catching enough, I
+;; can write a function that searches for the "^apiVersion:" regexp in a buffer
+;; visiting a file whose name matches "\\.yml\\'" or "\\.yaml\\'". I can then
+;; replace the "apiVersion:" regex in the :magic form with a call to that function.
+(use-package! k8s-mode
+  :magic ("apiVersion:" . k8s-mode)
+  :config
+  (set-lookup-handlers! 'k8s-mode
+    :documentation #'kubedoc))
+
+;; REVIEW Is there even a point in having an empty `use-package!' declaration?
+(use-package! kubedoc)
+#+end_src
+
+*** STRT [#A] Configure kubel
++ [X] Open k8s manifest buffers in ~k8s-mode~
++ [X] Activate =kubel-evil= before =kubel=
++ [ ] Scroll to top of resource buffers after they are populated
+  - =kubel= attempts to scroll to the top of the buffers before they are
+    populated, I end up needing to scroll to the top myself.
+  - Might have to wait for a process to finish
+    + ~kubel--describe-resource~
+    + ~kubel--exec~
+    + ~kubel--sentinel~
+    + =SPC h i g m elisp RET g m Sentinels RET=
+
+#+begin_src emacs-lisp :tangle yes
+;; REVIEW Compare `kubel' with `kubernetes-el'
+;; - kubel is great for working with pods (listing, examining, modifying, logging, and interacting)
+;; - kubernetes-el might be closer to Lens in terms of functionality, but I have not tried it yet
+(use-package! kubel
+  :defer t
+  :after kubel-evil
+  :config
+  (defadvice! my/activate-k8s-mode-a (&rest _)
+    :after #'kubel-yaml-editing-mode
+    (k8s-mode)))
+
+(use-package! kubel-evil
+  :when (featurep! :editor evil +everywhere))
+#+end_src
+
+*** TODO [#A] Configure kubernetes
++ [X] Activate =kubernetes-evil= before =kubernetes=
++ [ ] Use similar keybindings that Doom Emacs does for Magit
++ [ ] Compare =kubernetes= to Lens; missing features:
+  - Display resources across all namespaces
+  - Display the following types of resources:
+    - DaemonSets
+    - ...
+
+#+begin_src emacs-lisp :tangle yes
+(use-package! kubernetes
+  :defer t
+  :after kubernetes-evil)
+
+(use-package! kubernetes-evil
+  :when (featurep! :editor evil +everywhere))
 #+end_src
 
 ** calendar [0/0] :ARCHIVE:

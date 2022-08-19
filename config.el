@@ -625,6 +625,11 @@ ALIASES is a flat list of alias -> command pairs. e.g.
     "w"    "eww-open-file"
     "gg"   "magit-status"))
 
+(after! vterm
+  (let ((alist (assoc-delete-all "kubectl" vterm-tramp-shells)))
+    (setq vterm-tramp-shells
+          (push '("kubectl" "sh -c \"clear; (bash || ash || sh)\"") alist))))
+
 (after! flycheck
   (defun my/flycheck-set-level (level)
     "Set the Flycheck error level"
@@ -1094,6 +1099,41 @@ Optional argument INFO is a plist of options."
       (lsp-yaml-download-schema-store-db))))
 
 (put 'lsp-yaml-schemas 'safe-local-variable #'always)
+
+;; NOTE k8s manifests do not have to begin with "apiVersion", but I've seen that
+;; more often than not. Worst case, if this doesn't end up catching enough, I
+;; can write a function that searches for the "^apiVersion:" regexp in a buffer
+;; visiting a file whose name matches "\\.yml\\'" or "\\.yaml\\'". I can then
+;; replace the "apiVersion:" regex in the :magic form with a call to that function.
+(use-package! k8s-mode
+  :magic ("apiVersion:" . k8s-mode)
+  :config
+  (set-lookup-handlers! 'k8s-mode
+    :documentation #'kubedoc))
+
+;; REVIEW Is there even a point in having an empty `use-package!' declaration?
+(use-package! kubedoc)
+
+;; REVIEW Compare `kubel' with `kubernetes-el'
+;; - kubel is great for working with pods (listing, examining, modifying, logging, and interacting)
+;; - kubernetes-el might be closer to Lens in terms of functionality, but I have not tried it yet
+(use-package! kubel
+  :defer t
+  :after kubel-evil
+  :config
+  (defadvice! my/activate-k8s-mode-a (&rest _)
+    :after #'kubel-yaml-editing-mode
+    (k8s-mode)))
+
+(use-package! kubel-evil
+  :when (featurep! :editor evil +everywhere))
+
+(use-package! kubernetes
+  :defer t
+  :after kubernetes-evil)
+
+(use-package! kubernetes-evil
+  :when (featurep! :editor evil +everywhere))
 
 (after! elfeed
   (add-hook! 'elfeed-search-mode-hook #'elfeed-update))
