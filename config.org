@@ -4839,19 +4839,34 @@ This can be done with ~#+INCLUDE~ directives. Doing so might make tangling
 faster, but currently I don't have any problems with performance. If and when I
 start to notice a problem, I'll revisit this item.
 
-** default [7/10]
+** default [7/11]
 #+begin_quote
 This module provides a set of reasonable defaults.
 #+end_quote
 
-*** DONE [#A] Disable smartparens in the minibuffer, including the ~evil-ex~ prompt
+*** LOOP [#A] Disable smartparens altogether
+I'll try this for a while and see if I can live with it. I should try to
+optimize this if I can (by not loading =smartparens= at all). *UPDATE*: This
+does not appear to be working (~smartparens-global-mode~ is still active upon
+startup, so I have to manually disable it).
+
+#+begin_src emacs-lisp :tangle yes
+(after! smartparens
+  (smartparens-global-mode -1))
+#+end_src
+
+*** KILL [#A] Disable smartparens in the minibuffer, including the ~evil-ex~ prompt
+:LOGBOOK:
+- Note taken on [2022-08-15 Mon 12:28] \\
+  I've completely disabled smartparens for now. It's just too annoying.
+:END:
 According to the documentation, each mode listed in ~sp-ignore-modes-list~ will
 have smartparens disabled when ~smartparens-global-mode~ is active. However,
 this does not appear to be functioning properly, at least for
 ~minibuffer-inactive-mode~, so I get around this by overriding all the pair
 insertion rules for that specific mode.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (after! smartparens
   (let* ((default-pairs (cdr (assoc t sp-pairs)))
          (default-openers (mapcar (lambda (pair) (plist-get pair :open))

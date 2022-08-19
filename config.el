@@ -1120,11 +1120,7 @@ to `org-footnote-section'.  Inline definitions are ignored."
 (remove-hook 'org-mode-hook #'+literate-enable-recompile-h)
 
 (after! smartparens
-  (let* ((default-pairs (cdr (assoc t sp-pairs)))
-         (default-openers (mapcar (lambda (pair) (plist-get pair :open))
-                                  default-pairs)))
-    (dolist (opener default-openers)
-      (sp-local-pair 'minibuffer-inactive-mode opener nil :actions nil))))
+  (smartparens-global-mode -1))
 
 (setq which-key-idle-delay 0.5
       which-key-idle-secondary-delay 0.1)
