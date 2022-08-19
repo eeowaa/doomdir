@@ -52,8 +52,13 @@
 
 ;;; :app
 
+;; Music
 (package! counsel-spotify)
+
+;; Weather
 (package! noaa)
+
+;; Ebooks
 (package! nov)
 
 ;; Kubernetes packages

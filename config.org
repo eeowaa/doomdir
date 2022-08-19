@@ -452,7 +452,7 @@ For now, I am using Comic Mono.
 - I would like to couple this font with ~tomorrow-day~ for a scholastic vibe.
 
 #+begin_src emacs-lisp :tangle yes
-(setq doom-font (font-spec :family "Comic Mono" :size 16))
+(setq doom-font (font-spec :family "Comic Mono" :size 20))
 #+end_src
 
 *** TODO [#B] Cycle fonts without restarting Doom Emacs
@@ -4442,8 +4442,13 @@ Miscellaneous configuration without a corresponding module.
 
 *** DONE [#A] Install packages
 #+begin_src emacs-lisp :tangle packages.el
+;; Music
 (package! counsel-spotify)
+
+;; Weather
 (package! noaa)
+
+;; Ebooks
 (package! nov)
 
 ;; Kubernetes packages
