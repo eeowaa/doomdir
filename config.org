@@ -2491,7 +2491,7 @@ pipx install --include-deps jupyter
 
 ** evay [0/0]
 ** gist [0/0] :ARCHIVE:
-** lookup [1/3]
+** lookup [1/4]
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -2503,6 +2503,19 @@ brew install ripgrep sqlite3
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `tools/lookup` module
 sudo dnf -y install ripgrep sqlite-3
+#+end_src
+
+*** STRT [#A] Automatically install missing docsets
+For whatever reason, this is not working (does not get called upon entering a
+mode derived from ~prog-mode~, even though ~prog-mode-hook~ does get updated).
+
+#+begin_src emacs-lisp :tangle yes
+(when (featurep! :tools lookup +docsets)
+  (defun my/ensure-docsets ()
+    (dolist (docset dash-docs-docsets)
+      (dash-docs-ensure-docset-installed (string-replace " " "_" docset))))
+  ;; REVIEW Ensure that `set-docsets!' is only called for modes derived from `prog-mode'
+  (add-hook! prog-mode #'my/ensure-docsets))
 #+end_src
 
 *** LOOP [#A] Fix the error "Given parent class xref-location is not a class"

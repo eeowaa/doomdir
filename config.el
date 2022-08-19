@@ -692,6 +692,13 @@ ALIASES is a flat list of alias -> command pairs. e.g.
 
 (setq ein:output-area-inlined-images t)
 
+(when (featurep! :tools lookup +docsets)
+  (defun my/ensure-docsets ()
+    (dolist (docset dash-docs-docsets)
+      (dash-docs-ensure-docset-installed (string-replace " " "_" docset))))
+  ;; REVIEW Ensure that `set-docsets!' is only called for modes derived from `prog-mode'
+  (add-hook! prog-mode #'my/ensure-docsets))
+
 (after! lsp
   (setq lsp-restart 'auto-restart))
 
