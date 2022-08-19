@@ -685,6 +685,8 @@ ALIASES is a flat list of alias -> command pairs. e.g.
                 (sort process-environment #'string<)))
     (princ (concat var "\n"))))
 
+(setq ein:output-area-inlined-images t)
+
 (after! lsp
   (setq lsp-restart 'auto-restart))
 
@@ -965,6 +967,35 @@ to `org-footnote-section'.  Inline definitions are ignored."
               (unless (member label inserted)
                 (insert definition "\n")))))))))
   (advice-add 'org-footnote-sort :override #'my/org-footnote-sort))
+
+(use-package! ox-ipynb
+  :when (featurep! :tools ein)
+  :after ox
+  :config
+  (defun my/ox-ipynb-export-to-ipynb-no-results-file
+      (&optional async subtreep visible-only body-only info)
+    "Export current buffer to a file. Strip results first.
+Optional argument ASYNC to asynchronously export.
+Optional argument SUBTREEP to export current subtree.
+Optional argument VISIBLE-ONLY to only export visible content.
+Optional argument BODY-ONLY export only the body.
+Optional argument INFO is a plist of options."
+    (let ((ox-ipynb-preprocess-hook
+           '((lambda ()
+               (org-babel-map-src-blocks nil (org-babel-remove-result))))))
+      (ox-ipynb-export-to-ipynb-file)))
+
+  ;; Slightly modified from `ob-ipynb' (added dispatch to new export function)
+  (org-export-define-derived-backend 'jupyter-notebook 'org
+    :menu-entry
+    '(?n "Export to jupyter notebook"
+         ((?b "to buffer" ox-ipynb-export-to-ipynb-buffer)
+          (?n "to notebook" ox-ipynb-export-to-ipynb-file)
+          (?N "to nb (no results)" my/ox-ipynb-export-to-ipynb-no-results-file)
+          (?o "to notebook and open" ox-ipynb-export-to-ipynb-file-and-open)
+          (?p "to participant nb & open" ox-ipynb-export-to-participant-notebook)
+          (?r "to nb (no results) and open" ox-ipynb-export-to-ipynb-no-results-file-and-open)
+          (?s "to slides and open" ox-ipynb-export-to-ipynb-slides-and-open)))))
 
 (after! org
   (setq org-src-preserve-indentation nil

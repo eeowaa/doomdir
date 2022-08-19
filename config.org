@@ -2441,7 +2441,7 @@ brew install editorconfig
 sudo dnf -y install editorconfig
 #+end_src
 
-** ein [1/1]
+** ein [2/2]
 #+begin_quote
 Adds Jupyter notebook integration into emacs.
 #+end_quote
@@ -2459,6 +2459,11 @@ pipx install --include-deps jupyter
 # Install prerequisites for `tools/ein` module
 sudo dnf -y install python3 pipx
 pipx install --include-deps jupyter
+#+end_src
+
+*** DONE [#B] Display inline images in output
+#+begin_src emacs-lisp :tangle yes
+(setq ein:output-area-inlined-images t)
 #+end_src
 
 ** evay [0/0]
@@ -3265,7 +3270,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [15/34]
+** org [16/35]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -3644,7 +3649,46 @@ The current workaround is to select the "object" under point using =v i e= and
 then use the corresponding help command. This works well enough, but is an
 annoying extra step.
 
-*** Exporting [0/0]
+*** Exporting [1/1]
+**** DONE [#A] Support exporting to IPython notebooks
+#+begin_src emacs-lisp :tangle packages.el
+(when (featurep! :tools ein)
+  (package! ox-ipynb
+    :recipe (:host github :repo "jkitchin/ox-ipynb")))
+#+end_src
+
+Inspiration taken from the =org= module's =config.el=.
+#+begin_src emacs-lisp :tangle yes
+(use-package! ox-ipynb
+  :when (featurep! :tools ein)
+  :after ox
+  :config
+  (defun my/ox-ipynb-export-to-ipynb-no-results-file
+      (&optional async subtreep visible-only body-only info)
+    "Export current buffer to a file. Strip results first.
+Optional argument ASYNC to asynchronously export.
+Optional argument SUBTREEP to export current subtree.
+Optional argument VISIBLE-ONLY to only export visible content.
+Optional argument BODY-ONLY export only the body.
+Optional argument INFO is a plist of options."
+    (let ((ox-ipynb-preprocess-hook
+           '((lambda ()
+               (org-babel-map-src-blocks nil (org-babel-remove-result))))))
+      (ox-ipynb-export-to-ipynb-file)))
+
+  ;; Slightly modified from `ob-ipynb' (added dispatch to new export function)
+  (org-export-define-derived-backend 'jupyter-notebook 'org
+    :menu-entry
+    '(?n "Export to jupyter notebook"
+         ((?b "to buffer" ox-ipynb-export-to-ipynb-buffer)
+          (?n "to notebook" ox-ipynb-export-to-ipynb-file)
+          (?N "to nb (no results)" my/ox-ipynb-export-to-ipynb-no-results-file)
+          (?o "to notebook and open" ox-ipynb-export-to-ipynb-file-and-open)
+          (?p "to participant nb & open" ox-ipynb-export-to-participant-notebook)
+          (?r "to nb (no results) and open" ox-ipynb-export-to-ipynb-no-results-file-and-open)
+          (?s "to slides and open" ox-ipynb-export-to-ipynb-slides-and-open)))))
+#+end_src
+
 *** Publishing [0/0]
 *** Working with Source Code [2/3]
 **** DONE [#A] Indent source blocks

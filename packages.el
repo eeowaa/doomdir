@@ -44,6 +44,10 @@
   (package! applescript-mode)
   (package! ob-applescript))
 
+(when (featurep! :tools ein)
+  (package! ox-ipynb
+    :recipe (:host github :repo "jkitchin/ox-ipynb")))
+
 ;;; :email
 
 ;;; :app
