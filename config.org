@@ -1156,7 +1156,7 @@ https://emacs.stackexchange.com/questions/51989/how-to-truncate-lines-by-default
 (setq-default truncate-lines t)
 #+end_src
 
-** evil [3/6]
+** evil [4/6]
 #+begin_quote
 This holy module brings the vim experience to Emacs.
 #+end_quote
@@ -1234,9 +1234,31 @@ builtin game.
     :e "J" #'solitaire-move-down))
 #+end_src
 
-*** TODO [#A] Redefine ~:q~ and ~:wq~ semantics
+*** DONE [#A] Redefine ~:q~ and ~:wq~ semantics
 + Where applicable, integrate with ~server-edit~ (bound to =C-x #=)
 + Do not ever use to exit Emacs; just for writing and closing buffers
+
+#+begin_src emacs-lisp :tangle yes
+(evil-define-command my/evil-quit (&optional force)
+  "Mark the current buffer as \"Done\" when performing a server
+edit; otherwise, just kill the current buffer. Prompt to save the
+current buffer first unless the `force' argument is given."
+  :repeat nil
+  (interactive "<!>")
+  (if (and (boundp 'server-buffer-clients)
+           (fboundp 'server-edit)
+           (fboundp 'server-buffer-done)
+           server-buffer-clients)
+      (if force
+          (server-buffer-done (current-buffer))
+        (server-edit))
+    (when force
+      (set-buffer-modified-p nil))
+    (kill-current-buffer)))
+
+;; Works for all variations of `:q'
+(advice-add 'evil-quit :override #'my/evil-quit)
+#+end_src
 
 *** TODO [#B] Improve visual line navigation
 I would like to use the standard =gj= and =gk= Vim bindings to navigate between
