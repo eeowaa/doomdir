@@ -3744,7 +3744,22 @@ Optional argument INFO is a plist of options."
           (?o "to notebook and open" ox-ipynb-export-to-ipynb-file-and-open)
           (?p "to participant nb & open" ox-ipynb-export-to-participant-notebook)
           (?r "to nb (no results) and open" ox-ipynb-export-to-ipynb-no-results-file-and-open)
-          (?s "to slides and open" ox-ipynb-export-to-ipynb-slides-and-open)))))
+          (?s "to slides and open" ox-ipynb-export-to-ipynb-slides-and-open))))
+
+  ;; Support exporting to bash kernel notebooks
+  (let ((kernelspecs (assoc-delete-all 'sh ox-ipynb-kernelspecs))
+        (language-infos (assoc-delete-all 'sh ox-ipynb-language-infos)))
+    (setq ox-ipynb-kernelspecs
+          (push '(sh . (kernelspec . ((display_name . "Bash")
+                                      (language . "bash")
+                                      (name . "python")))) kernelspecs)
+          ox-ipynb-language-infos
+          (push '(sh . (language_info . ((codemirror_mode . "shell")
+                                         (file_extension . ".sh")
+                                         (mimetype . "text/x-sh")
+                                         (name . "bash")
+                                         ;; Missing (version . "X.Y.Z")
+                                         (pygments_lexer . "bash")))) language-infos))))
 #+end_src
 
 *** Publishing [0/0]
