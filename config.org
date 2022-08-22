@@ -2486,7 +2486,7 @@ brew install editorconfig
 sudo dnf -y install editorconfig
 #+end_src
 
-** ein [3/3]
+** ein [4/5]
 #+begin_quote
 Adds Jupyter notebook integration into emacs.
 #+end_quote
@@ -2549,6 +2549,37 @@ pipx install --include-deps jupyter
             body params (funcall (symbol-function parser) params))
          body)
        params))))
+#+end_src
+
+*** DONE [#B] Output using =ox-ipynb=
+The following enables support for exporting from ~ein-python~ and ~ein-bash~
+source blocks:
+
+#+begin_src emacs-lisp :tangle yes
+(after! ox-ipynb
+  (dolist (pair '((ipython . "python")
+                  (sh . "bash")))
+    (let* ((key (car pair))
+           (lang (cdr pair))
+           (ein-key (intern (concat "ein-" lang)))
+           (kernelspec (alist-get key ox-ipynb-kernelspecs))
+           (language-info (alist-get key ox-ipynb-language-infos)))
+      (pushnew! ox-ipynb-kernelspecs (cons ein-key kernelspec))
+      (pushnew! ox-ipynb-language-infos (cons ein-key language-info)))))
+#+end_src
+
+*** TODO [#C] Exclude result names from =ox-ipynb= output
+In the following example, ~a34ef92b-1a76-41b3-a410-79bdac3f55e9~ would appear
+after the output block of the resulting IPYNB buffer:
+
+#+begin_src org :eval no
+,#+NAME: a34ef92b-1a76-41b3-a410-79bdac3f55e9
+,#+begin_src ein-bash
+echo "Hi, ${name}!"
+,#+end_src
+
+,#+RESULTS: a34ef92b-1a76-41b3-a410-79bdac3f55e9
+: Hi, Mom!
 #+end_src
 
 ** evay [0/0]

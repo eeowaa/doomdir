@@ -749,6 +749,17 @@ ALIASES is a flat list of alias -> command pairs. e.g.
          body)
        params))))
 
+(after! ox-ipynb
+  (dolist (pair '((ipython . "python")
+                  (sh . "bash")))
+    (let* ((key (car pair))
+           (lang (cdr pair))
+           (ein-key (intern (concat "ein-" lang)))
+           (kernelspec (alist-get key ox-ipynb-kernelspecs))
+           (language-info (alist-get key ox-ipynb-language-infos)))
+      (pushnew! ox-ipynb-kernelspecs (cons ein-key kernelspec))
+      (pushnew! ox-ipynb-language-infos (cons ein-key language-info)))))
+
 (when (featurep! :tools lookup +docsets)
   (defun my/ensure-docsets ()
     (dolist (docset dash-docs-docsets)
