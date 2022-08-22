@@ -1049,7 +1049,7 @@ to `org-footnote-section'.  Inline definitions are ignored."
   (advice-add 'org-footnote-sort :override #'my/org-footnote-sort))
 
 (use-package! ox-ipynb
-  :when (featurep! :tools ein)
+  :when (featurep! :lang org +jupyter)
   :after ox
   :config
   (defun my/ox-ipynb-export-to-ipynb-no-results-file
@@ -1089,7 +1089,6 @@ Optional argument INFO is a plist of options."
                                          (file_extension . ".sh")
                                          (mimetype . "text/x-sh")
                                          (name . "bash")
-                                         ;; Missing (version . "X.Y.Z")
                                          (pygments_lexer . "bash")))) language-infos))))
 
 (after! org

@@ -44,7 +44,7 @@
   (package! applescript-mode)
   (package! ob-applescript))
 
-(when (featurep! :tools ein)
+(when (featurep! :lang org +jupyter)
   (package! ox-ipynb
     :recipe (:host github :repo "jkitchin/ox-ipynb")))
 

@@ -3781,7 +3781,7 @@ annoying extra step.
 *** Exporting [1/1]
 **** DONE [#A] Support exporting to IPython notebooks
 #+begin_src emacs-lisp :tangle packages.el
-(when (featurep! :tools ein)
+(when (featurep! :lang org +jupyter)
   (package! ox-ipynb
     :recipe (:host github :repo "jkitchin/ox-ipynb")))
 #+end_src
@@ -3789,7 +3789,7 @@ annoying extra step.
 Inspiration taken from the =org= module's =config.el=.
 #+begin_src emacs-lisp :tangle yes
 (use-package! ox-ipynb
-  :when (featurep! :tools ein)
+  :when (featurep! :lang org +jupyter)
   :after ox
   :config
   (defun my/ox-ipynb-export-to-ipynb-no-results-file
@@ -3829,7 +3829,6 @@ Optional argument INFO is a plist of options."
                                          (file_extension . ".sh")
                                          (mimetype . "text/x-sh")
                                          (name . "bash")
-                                         ;; Missing (version . "X.Y.Z")
                                          (pygments_lexer . "bash")))) language-infos))))
 #+end_src
 
