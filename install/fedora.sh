@@ -234,6 +234,7 @@ pipx install grip
 # Install prerequisites for `lang/org` module
 sudo dnf -y install gnuplot pandoc graphviz sqlite-3
 pipx install --include-deps jupyter
+pipx inject jupyter ipykernel
 mkdir -p ~/org/roam
 
 # Install prerequisites for `lang/python` module
