@@ -712,6 +712,43 @@ ALIASES is a flat list of alias -> command pairs. e.g.
 
 (setq ein:output-area-inlined-images t)
 
+;; HACK The machinery provided by `ob-ein-languages' and `ob-ein--babelize-lang'
+;; is insufficient for bash, so we do it by hand.
+(after! ob
+  (add-to-list 'org-babel-load-languages '(ein . t))
+  (require 'ob-ein)
+
+  ;; Execute in an anonymous local session by default
+  (setq ob-ein-default-header-args:ein
+        '((:session . "localhost")))
+
+  ;; This does two things:
+  ;; 1. Allows the correct kernel to be selected for execution
+  ;; 2. Enables bash-specific features in the source buffer
+  (when (not (fboundp 'bash-mode))
+    (define-derived-mode bash-mode sh-mode "Bash-script"
+      "Major mode for editing bash scripts."
+      (sh-set-shell "bash" nil nil)))
+  (add-to-list 'org-src-lang-modes '("ein-bash" . "bash"))
+
+  ;; Send output from `ein-bash' source blocks back to org buffer
+  (let ((alist (assoc-delete-all :results ob-ein-default-header-args:ein)))
+    (setq org-babel-default-header-args:ein-bash
+          (push '(:results . "output verbatim") alist)))
+
+  ;; Function to execute `ein-bash' source blocks with
+  (defun org-babel-execute:ein-bash (body params)
+    (require 'ob-shell nil t)
+    ;; hack because ob-ein loads independently of ein
+    (custom-set-variables '(python-indent-guess-indent-offset-verbose nil))
+    (let ((parser 'org-babel-variable-assignments:bash))
+      (ob-ein--execute-body
+       (if (fboundp parser)
+           (org-babel-expand-body:generic
+            body params (funcall (symbol-function parser) params))
+         body)
+       params))))
+
 (when (featurep! :tools lookup +docsets)
   (defun my/ensure-docsets ()
     (dolist (docset dash-docs-docsets)
