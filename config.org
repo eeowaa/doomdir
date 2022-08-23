@@ -2486,7 +2486,7 @@ brew install editorconfig
 sudo dnf -y install editorconfig
 #+end_src
 
-** ein [4/5]
+** ein [3/4]
 #+begin_quote
 Adds Jupyter notebook integration into emacs.
 #+end_quote
@@ -2551,23 +2551,6 @@ pipx install --include-deps jupyter
        params))))
 #+end_src
 
-*** DONE [#B] Output using =ox-ipynb=
-The following enables support for exporting from ~ein-python~ and ~ein-bash~
-source blocks:
-
-#+begin_src emacs-lisp :tangle yes
-(after! ox-ipynb
-  (dolist (pair '((ipython . "python")
-                  (sh . "bash")))
-    (let* ((key (car pair))
-           (lang (cdr pair))
-           (ein-key (intern (concat "ein-" lang)))
-           (kernelspec (alist-get key ox-ipynb-kernelspecs))
-           (language-info (alist-get key ox-ipynb-language-infos)))
-      (pushnew! ox-ipynb-kernelspecs (cons ein-key kernelspec))
-      (pushnew! ox-ipynb-language-infos (cons ein-key language-info)))))
-#+end_src
-
 *** TODO [#C] Exclude result names from =ox-ipynb= output
 In the following example, ~a34ef92b-1a76-41b3-a410-79bdac3f55e9~ would appear
 after the output block of the resulting IPYNB buffer:
@@ -2581,6 +2564,8 @@ echo "Hi, ${name}!"
 ,#+RESULTS: a34ef92b-1a76-41b3-a410-79bdac3f55e9
 : Hi, Mom!
 #+end_src
+
+A workaround is to simply *not export* the results.
 
 ** evay [0/0]
 ** gist [0/0] :ARCHIVE:
@@ -3793,6 +3778,8 @@ Inspiration taken from the =org= module's =config.el=.
   :when (featurep! :lang org +jupyter)
   :after ox
   :config
+
+  ;; Define an `ox-ipynb' export function that excludes results
   (defun my/ox-ipynb-export-to-ipynb-no-results-file
       (&optional async subtreep visible-only body-only info)
     "Export current buffer to a file. Strip results first.
@@ -3824,13 +3811,25 @@ Optional argument INFO is a plist of options."
     (setq ox-ipynb-kernelspecs
           (push '(sh . (kernelspec . ((display_name . "Bash")
                                       (language . "bash")
-                                      (name . "python")))) kernelspecs)
+                                      (name . "bash")))) kernelspecs)
           ox-ipynb-language-infos
           (push '(sh . (language_info . ((codemirror_mode . "shell")
                                          (file_extension . ".sh")
                                          (mimetype . "text/x-sh")
                                          (name . "bash")
-                                         (pygments_lexer . "bash")))) language-infos))))
+                                         (pygments_lexer . "bash")))) language-infos)))
+
+  ;; Support exporting from `ein-LANG' source blocks
+  (when (featurep! :tools ein)
+    (dolist (pair '((ipython . "python")
+                    (sh . "bash")))
+      (let* ((key (car pair))
+             (lang (cdr pair))
+             (ein-key (intern (concat "ein-" lang)))
+             (kernelspec (alist-get key ox-ipynb-kernelspecs))
+             (language-info (alist-get key ox-ipynb-language-infos)))
+        (pushnew! ox-ipynb-kernelspecs (cons ein-key kernelspec))
+        (pushnew! ox-ipynb-language-infos (cons ein-key language-info))))))
 #+end_src
 
 *** Publishing [0/0]
