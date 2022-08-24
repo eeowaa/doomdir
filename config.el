@@ -860,6 +860,12 @@ ALIASES is a flat list of alias -> command pairs. e.g.
 
 (add-to-list 'auto-mode-alist '("\\.mdx\\'" . markdown-mode))
 
+(when (featurep! :completion ivy)
+  (defalias 'counsel-markdown-goto #'counsel-outline)
+  (map! :map markdown-mode-map
+        :localleader
+        "." #'counsel-markdown-goto))
+
 (after! org
   (setq org-hide-leading-stars nil
         org-startup-indented nil

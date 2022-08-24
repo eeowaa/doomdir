@@ -3281,7 +3281,7 @@ accounting system that works with simple text files holding transactions.
 Adds Lua support to Doom Emacs
 #+end_quote
 
-** markdown [4/7]
+** markdown [4/8]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
@@ -3360,6 +3360,18 @@ Reference: [[*Disable error reporting in sh-mode buffers][Disable error reportin
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
 (add-to-list 'auto-mode-alist '("\\.mdx\\'" . markdown-mode))
+#+end_src
+
+*** LOOP [#B] Create a =SPC m .= binding like in Org mode
+This is good for now, but I'll need to revisit this if/when I switch over to
+vertico completion.
+
+#+begin_src emacs-lisp :tangle yes
+(when (featurep! :completion ivy)
+  (defalias 'counsel-markdown-goto #'counsel-outline)
+  (map! :map markdown-mode-map
+        :localleader
+        "." #'counsel-markdown-goto))
 #+end_src
 
 *** TODO [#B] Live-preview Markdown buffers in an external browser
