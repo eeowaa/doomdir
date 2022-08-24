@@ -504,6 +504,19 @@ deleting the final newline before inserting the \")))\"."
   (setq native-comp-speed 2
         package-native-compile t))
 
+(defun my/doom--sudo-file-path (file)
+  (let ((host (or (file-remote-p file 'host) tramp-system-name)))
+    (concat "/" (when (file-remote-p file)
+                  (concat (file-remote-p file 'method) ":"
+                          (if-let (user (file-remote-p file 'user))
+                              (concat user "@" host)
+                            host)
+                          "|"))
+            "sudo:root@" host
+            ":" (or (file-remote-p file 'localname)
+                    file))))
+(advice-add 'doom--sudo-file-path :override #'my/doom--sudo-file-path)
+
 (setq confirm-kill-processes nil)
 
 (defalias 'ps 'list-processes)

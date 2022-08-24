@@ -1594,6 +1594,29 @@ Miscellaneous configuration without a corresponding module.
         package-native-compile t))
 #+end_src
 
+*** DONE [#B] Fix ~doom/sudo-find-file~ and ~doom/sudo-this-file~
+The resulting ~/sudo:root@localhost:/path/to/file~ string does not work for me,
+so I replaced ~"localhost"~ in the original ~doom--sudo-file-path~ with
+~tramp-system-name~.
+
+This solves the problem for me and allows me to run =SPC f u=
+(~doom/sudo-find-file~) and =SPC f U= (~doom/sudo-this-file~).
+
+#+begin_src emacs-lisp :tangle yes
+(defun my/doom--sudo-file-path (file)
+  (let ((host (or (file-remote-p file 'host) tramp-system-name)))
+    (concat "/" (when (file-remote-p file)
+                  (concat (file-remote-p file 'method) ":"
+                          (if-let (user (file-remote-p file 'user))
+                              (concat user "@" host)
+                            host)
+                          "|"))
+            "sudo:root@" host
+            ":" (or (file-remote-p file 'localname)
+                    file))))
+(advice-add 'doom--sudo-file-path :override #'my/doom--sudo-file-path)
+#+end_src
+
 *** DONE [#C] Don't prompt about killing running processing when quitting
 #+begin_src emacs-lisp :tangle yes
 (setq confirm-kill-processes nil)
