@@ -1633,6 +1633,17 @@ I'll keep adding more as I need them.
 Like Henrik said, there is nothing we can do about this:
 https://github.com/hlissner/doom-emacs/issues/3372
 
+*** TODO [#B] Attempt to open a file with ~sudo~ if needed
+I might be able to wrap ~find-file~ in a ~condition-case~ form (via ~:around~
+advice) that catches errors like this:
+
+: File is not readable: /path/to/file
+
+See the definition of ~evil-quit~ for an example of ~condition-case~.
+
+It might also be possible to add a function to ~+lookup-file-functions~ to
+identify files that require elevated privileges to open.
+
 *** TODO [#B] Prevent AWS credentials from being written to ~doom-env-file~
 - [ ] Look at recent changes to =core/cli/= and =core/core-cli-lib.el= to fix
   this problem and others in =DOOMDIR/cli.el=.
