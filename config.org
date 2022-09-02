@@ -2470,7 +2470,7 @@ However, be wary of @purcell's comments on =direnv.el=:
   use the wrong environment. (This is probably quite rare in practice.)
 #+end_quote
 
-** docker [1/1]
+** docker [2/2]
 #+begin_quote
 This module allows you to manipulate Docker images, containers & more from
 Emacs.
@@ -2498,6 +2498,12 @@ EOF
 . "$HOME/.profile.d/docker-rootless.sh"
 systemctl --user start docker.service
 sudo loginctl enable-linger `whoami`
+npm install -g dockerfile-language-server-nodejs
+#+end_src
+
+*** DONE [#C] Filename-mode associations
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'auto-mode-alist '("/Containerfile\\'" . dockerfile-mode))
 #+end_src
 
 ** editorconfig [1/1]

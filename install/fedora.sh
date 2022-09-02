@@ -112,6 +112,7 @@ EOF
 . "$HOME/.profile.d/docker-rootless.sh"
 systemctl --user start docker.service
 sudo loginctl enable-linger `whoami`
+npm install -g dockerfile-language-server-nodejs
 
 # Install prerequisites for `tools/editorconfig` module
 sudo dnf -y install editorconfig

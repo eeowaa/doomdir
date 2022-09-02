@@ -723,6 +723,8 @@ ALIASES is a flat list of alias -> command pairs. e.g.
                 (sort process-environment #'string<)))
     (princ (concat var "\n"))))
 
+(add-to-list 'auto-mode-alist '("/Containerfile\\'" . dockerfile-mode))
+
 (setq ein:output-area-inlined-images t)
 
 ;; HACK The machinery provided by `ob-ein-languages' and `ob-ein--babelize-lang'
