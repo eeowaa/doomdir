@@ -4681,6 +4681,14 @@ loaded last*, before =:config= modules.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
+*** HOLD [#A] Install prerequisites
+**** HOLD macOS
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `app/Miscellany`
+sudo dnf -y install w3m
+#+end_src
+
 *** DONE [#A] Install packages
 #+begin_src emacs-lisp :tangle packages.el
 ;; Music
@@ -4700,6 +4708,9 @@ Miscellaneous configuration without a corresponding module.
 (when (featurep! :editor evil +everywhere)
   (package! kubel-evil)
   (package! kubernetes-evil))
+
+;; Browsing
+(package! w3m) ;; Better than `eww' IMO
 #+end_src
 
 *** STRT [#A] Configure k8s-mode
@@ -4777,6 +4788,10 @@ Reference:
 (use-package! kubernetes-evil
   :when (featurep! :editor evil +everywhere))
 #+end_src
+
+*** TODO [#C] Configure w3m
++ [ ] Redefine some mappings from =evil-collection=
++ [ ] Add mappings for ~w3m-lnum-mode~
 
 ** calendar [0/0] :ARCHIVE:
 #+begin_quote

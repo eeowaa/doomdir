@@ -70,6 +70,9 @@
   (package! kubel-evil)
   (package! kubernetes-evil))
 
+;; Browsing
+(package! w3m) ;; Better than `eww' IMO
+
 (package! elfeed-goodies :disable t)
 
 ;;; :config
