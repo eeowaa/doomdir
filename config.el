@@ -951,6 +951,17 @@ just perform a complete cycle of `org-cycle'."
   (setcdr (assoc 'file org-link-frame-setup) #'find-file-other-window))
 
 (after! org
+  (org-link-set-parameters
+   "man"
+   ;; TODO Allow storing links via `:store'
+   ;; TODO Allow specification of manual section (e.g. "printf.1" vs "printf.3")
+   :follow (lambda (page)
+             ;; From `+default/man-or-woman'
+             (if (and (not IS-MAC) (executable-find "man"))
+                 (man page)
+               (woman page)))))
+
+(after! org
   (defun my/org-inherited-priority (s)
     (cond
      ;; Priority cookie in this heading
