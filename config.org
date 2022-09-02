@@ -4789,6 +4789,27 @@ Reference:
   :when (featurep! :editor evil +everywhere))
 #+end_src
 
+*** TODO [#B] Add a project mode for Helm charts
+- https://www.reddit.com/r/emacs/comments/my1npn/kuberneteshelm_file_syntax_highlighting_and/
+- Reference ~+ansible-yaml-mode~.
+
+Right now, a manual workaround is to run the following commands in sequence
+after entering a YAML file that is a Helm chart template:
+
+1. =M-x lsp-disconnect RET= (to remove irrelevant error messages)
+2. =M-x k8s-mode RET= (to add minimal font-locking for k8s keywords)
+3. =M-x ansible-add-font-lock RET= (to font-lock the templating)
+
+This gives /decent/ font-locking, but is still miles away from an ideal
+solution. Alternate font-locking is available via =jinja2-mode=.
+
+#+begin_src emacs-lisp :tangle no
+(def-project-mode! my/k8s-helm-yaml-mode
+  :modes '(yaml-mode)
+  :add-hooks '(k8s-mode ansible) ;; `ansible' gives us good syntax highlighting
+  :files "templates/")
+#+end_src
+
 *** TODO [#C] Configure w3m
 + [ ] Redefine some mappings from =evil-collection=
 + [ ] Add mappings for ~w3m-lnum-mode~
