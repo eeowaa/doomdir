@@ -2917,7 +2917,14 @@ Miscellaneous configuration without a corresponding module.
 (when IS-MAC
   (package! applescript-mode)
   (package! ob-applescript))
+
+;; MongoDB
+(package! ob-mongo)
+(package! inf-mongo)
 #+end_src
+
+Note that MongoDB queries use Javascript syntax, so there is no Mongo-specific
+mode derived from ~prog-mode~ (just use ~js-mode~).
 
 ** agda [0/0] :ARCHIVE:
 #+begin_quote

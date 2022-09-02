@@ -44,6 +44,10 @@
   (package! applescript-mode)
   (package! ob-applescript))
 
+;; MongoDB
+(package! ob-mongo)
+(package! inf-mongo)
+
 (when (featurep! :lang org +jupyter)
   (package! ox-ipynb
     :recipe (:host github :repo "jkitchin/ox-ipynb")))
