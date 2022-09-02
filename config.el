@@ -356,17 +356,6 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     "J" #'my/treemacs-visit-next
     "K" #'my/treemacs-visit-previous))
 
-(when (and (featurep! :ui vc-gutter)
-           (featurep! :ui hydra))
-
-  (define-key! doom-leader-git-map
-    "v" #'+vc/gutter-hydra/body)
-
-  (after! which-key
-    (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
-      (cl-pushnew `((,(format "\\`%s g v\\'" prefix-re)) nil . "VCGutter")
-                  which-key-replacement-alist))))
-
 (after! projectile
   (define-key! projectile-mode-map
     "C-c p" #'projectile-command-map))

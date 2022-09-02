@@ -1023,7 +1023,13 @@ support in insufficient.
 #+end_quote
 
 ** vc-gutter [1/2]
-*** DONE [#C] Bind ~+vc/gutter-hydra/body~ to another key
+*** KILL [#C] Bind ~+vc/gutter-hydra/body~ to another key
+:LOGBOOK:
+- Note taken on [2022-09-02 Fri 01:09] \\
+  Sadly, Henrik removed the hydra in commit ~27a448b04b~. The =hydra= module is
+  now deprecated (I didn't notice), so I guess I can't count on this ever coming
+  back. I'll keep this Org entry around for a while just in case.
+:END:
 Currently, ~+vc/gutter-hydra/body~ gets bound to =SPC g .=, but that binding
 gets overridden by ~magit-file-dispatch~ in =+evil-bindings.el= (located in the
 =:config default= module). A better (unused) binding would be =SPC g v=.
@@ -1032,7 +1038,7 @@ To get started on this, open =+evil-bindings.el= by searching for it with
 ~doom/find-file-in-emacsd~ (=SPC f e=) and then search for
 "+vc/gutter-hydra/body" in the file.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (when (and (featurep! :ui vc-gutter)
            (featurep! :ui hydra))
 
