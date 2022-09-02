@@ -19,6 +19,9 @@
 (package! page-break-lines)
 (package! imenu-list)
 
+;; More pretty themes by prot
+(package! ef-themes)
+
 ;;; :editor
 
 ;;; :emacs
