@@ -431,7 +431,7 @@ Some of my favorite free and open-source fonts include:
 - ~Terminus~ (crisp)
 - ~Comic Mono~ (fun)
 
-**** DONE Source Code Pro :ARCHIVE:
+**** DONE Source Code Pro
 For now, I am using Source Code Pro.
 
 #+begin_src emacs-lisp :tangle yes
@@ -445,7 +445,7 @@ For now, I am using Terminus.
 (setq doom-font (font-spec :family "Terminus" :size 16))
 #+end_src
 
-**** STRT Comic Mono
+**** STRT Comic Mono :ARCHIVE:
 For now, I am using Comic Mono.
 
 - I would like to set the variable-width font to Comic Sans to fit the theme.

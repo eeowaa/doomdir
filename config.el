@@ -47,7 +47,7 @@ buffer in current window."
     `(solaire-hl-line-face :background
                            ,(face-attribute 'ivy-current-match :background))))
 
-(setq doom-font (font-spec :family "Comic Mono" :size 20))
+(setq doom-font (font-spec :family "Source Code Pro" :size 16))
 
 (after! hl-todo
   (setq hl-todo-keyword-faces
