@@ -857,6 +857,8 @@ ALIASES is a flat list of alias -> command pairs. e.g.
       (apply f r)))
   (advice-add 'markdown-preview :around #'my/markdown-preview))
 
+(setq markdown-fontify-code-blocks-natively t)
+
 ;; Prevent flycheck from being automatically enabled
 (if (or (not (boundp 'flycheck-global-modes))
         (not (eq 'not (car flycheck-global-modes))))
@@ -874,6 +876,12 @@ ALIASES is a flat list of alias -> command pairs. e.g.
   lsp-diagnostics-provider :none)
 
 (add-to-list 'auto-mode-alist '("\\.mdx\\'" . markdown-mode))
+
+(after! markdown
+  (defun my/markdown-edit-code-block (f &rest r)
+    (let ((display-buffer-overriding-action (list #'display-buffer-same-window)))
+      (apply f r)))
+  (advice-add 'markdown-edit-code-block :around #'my/markdown-edit-code-block))
 
 (when (featurep! :completion ivy)
   (defalias 'counsel-markdown-goto #'counsel-outline)

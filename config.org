@@ -3321,7 +3321,7 @@ accounting system that works with simple text files holding transactions.
 Adds Lua support to Doom Emacs
 #+end_quote
 
-** markdown [4/8]
+** markdown [6/10]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
@@ -3376,6 +3376,11 @@ preview Markdown rendering in the system browser.
   (advice-add 'markdown-preview :around #'my/markdown-preview))
 #+end_src
 
+*** DONE [#B] Fontify source blocks
+#+begin_src emacs-lisp :tangle yes
+(setq markdown-fontify-code-blocks-natively t)
+#+end_src
+
 *** DONE [#B] Disable error reporting in markdown-mode buffers
 Reference: [[*Disable error reporting in sh-mode buffers][Disable error reporting in sh-mode buffers]]
 
@@ -3400,6 +3405,31 @@ Reference: [[*Disable error reporting in sh-mode buffers][Disable error reportin
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
 (add-to-list 'auto-mode-alist '("\\.mdx\\'" . markdown-mode))
+#+end_src
+
+*** DONE [#B] Show edit buffer in the current window
+The call stack for =C-c '= is as follows:
+
+- ~markdown-edit-code-block~
+  - ~edit-indirect-region~
+    - ~edit-indirect--display-buffer~
+      - ~display-buffer~
+      - ~select-window~
+
+The important function is ~display-buffer~. Its [[help:display-buffer][help text]] describes setting
+~display-buffer-alist~ to configure fine-grained window selection (in fact, this
+is what Doom Emacs uses for its =popup= module). The help text goes on to
+mention the ~display-buffer-overriding-action~ variable, which is given the
+highest priority in window selection but is only meant to be set temporarily,
+which is perfect for ~:around~ advice:
+
+#+begin_src emacs-lisp :tangle yes
+(after! markdown
+  (defun my/markdown-edit-code-block (f &rest r)
+    (let ((display-buffer-overriding-action (list #'display-buffer-same-window)))
+      (apply f r)))
+  (advice-add 'markdown-edit-code-block :around #'my/markdown-edit-code-block))
+
 #+end_src
 
 *** LOOP [#B] Create a =SPC m .= binding like in Org mode
