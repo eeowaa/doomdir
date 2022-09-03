@@ -34,8 +34,10 @@ buffer in current window."
 (setq extended-command-suggest-shorter nil)
 
 ;; `always' is just a no-op that returns `t'
-(advice-add 'hide-mode-line-mode :override #'always)
-(advice-add 'doom-themes-hide-modeline :override #'always)
+(defadvice! my/never-hide-modeline (&rest _)
+  "Never hide the modeline"
+  :around #'hide-mode-line-mode #'doom-themes-hide-modeline
+  #'always)
 
 (setq doom-theme
       (if initial-window-system
@@ -368,8 +370,10 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (setq recenter-positions '(top bottom middle))
 
 ;; Perform a line feed after jumping to a ^L character
-(defun my/recenter-top (&rest r) (recenter 0))
-(advice-add 'forward-page :after #'my/recenter-top)
+(defadvice! my/recenter-top (&rest _)
+  "Perform a line feed after jumping to a ^L character"
+  :after #'forward-page
+  (recenter 0))
 
 (setq default-input-method "latin-postfix")
 
@@ -399,7 +403,10 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     :e "l" #'forward-char))
 
 (after! pong
-  (advice-add 'pong-init :after (lambda () (evil-emacs-state)))
+  (defadvice! my/pong-emacs-evil-state (&rest _)
+    "Use Emacs evil state in `pong'"
+    :after #'pong-init
+    (evil-emacs-state))
   (map! :map pong-mode-map
     :e "k" #'pong-move-up
     :e "j" #'pong-move-down
@@ -493,7 +500,9 @@ deleting the final newline before inserting the \")))\"."
   (setq native-comp-speed 2
         package-native-compile t))
 
-(defun my/doom--sudo-file-path (file)
+(defadvice! my/doom--sudo-file-path (file)
+  "Use `tramp-system-name' instead of \"localhost\" as the hostname"
+  :override #'doom--sudo-file-path
   (let ((host (or (file-remote-p file 'host) tramp-system-name)))
     (concat "/" (when (file-remote-p file)
                   (concat (file-remote-p file 'method) ":"
@@ -504,7 +513,6 @@ deleting the final newline before inserting the \")))\"."
             "sudo:root@" host
             ":" (or (file-remote-p file 'localname)
                     file))))
-(advice-add 'doom--sudo-file-path :override #'my/doom--sudo-file-path)
 
 (setq confirm-kill-processes nil)
 
@@ -1264,14 +1272,17 @@ Optional argument INFO is a plist of options."
   (setq elfeed-search-title-max-width 1000)
 
   ;; Do not truncate RSS entry tags (just need to shift left by 2 characters)
-  (defun my/elfeed-format-column (string width &optional align)
-    "Return STRING truncated or padded to WIDTH - 2 following ALIGNment.
-  Align should be a keyword :left or :right."
+  (defadvice! my/elfeed-format-column (str width &optional align)
+    "Return STRING truncated or padded to WIDTH - 2 following alignment.
+ALIGN should be a keyword :left or :right."
+    :override #'elfeed-format-column
     (if (<= width 0)
         ""
-      (format (format "%%%s%d.%ds" (if (eq align :left) "-" "") (- width 2) (- width 2))
-              string)))
-  (advice-add 'elfeed-format-column :override #'my/elfeed-format-column))
+      (format (format "%%%s%d.%ds"
+                      (if (eq align :left) "-" "")
+                      (- width 2)
+                      (- width 2))
+              string))))
 
 (after! elfeed
   (setq elfeed-search-remain-on-entry t))

@@ -162,7 +162,7 @@ keybindings.
   ;;   presentations or streaming.
   #+end_quote
 
-* Config [5/11]
+* Config [6/11]
 :PROPERTIES:
 :CATEGORY: doom/config
 :END:
@@ -232,6 +232,13 @@ I suppose it makes sense. But certain things do *not* make sense:
 + [X] Does the =DOOMDIR= module have module flags? :: no
 + [X] Is =$OOMDIR/init.el= a member of the =DOOMDIR= module? :: yes
 
+** DONE [#B] Replace ~advice-add~ with ~defadvice!~ macros
+:LOGBOOK:
+- Note taken on [2022-09-02 Fri 20:33] \\
+  I have done this as much as possible without too much hassle.
+:END:
+I want my configuration to use Doom idioms as much as possible.
+
 ** DONE [#C] Make ~PREREQ~ lines OS-independent
 :LOGBOOK:
 - Note taken on [2021-09-23 Thu 08:43] \\
@@ -287,9 +294,6 @@ blocks in =config.org=.
 I don't really even know what the end result will look like or why it will look
 the way it will (I don't know what I don't know, i.e., there are unknown
 unknowns at this point, which is precisely why I have this listed as an issue)
-
-** TODO [#B] Replace ~advice-add~ with ~defadvice!~ macros
-I want my configuration to use Doom idioms as much as possible.
 
 ** TODO [#C] Figure out how to patch specific functions in Doom
 + =el-patch= looks great: https://github.com/raxod502/el-patch
