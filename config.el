@@ -837,6 +837,16 @@ ALIASES is a flat list of alias -> command pairs. e.g.
 (after! ws-butler
   (pushnew! ws-butler-global-exempt-modes 'tsv-mode))
 
+(defadvice! my/format-result (f &rest r)
+  "Prepend \";; =>\"."
+  :around #'eval-print-last-sexp
+  (let ((p (point)))
+    (apply f r)
+    (save-excursion
+      (goto-char p)
+      (forward-line 1)
+      (insert ";; => "))))
+
 (add-to-list 'auto-mode-alist '("Cask\\'" . lisp-data-mode))
 
 (add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))

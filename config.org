@@ -3123,10 +3123,25 @@ or [[https://github.com/elixir-lsp/elixir-ls/][elixir-ls]].
 #+end_quote
 
 ** elm [0/0] :ARCHIVE:
-** emacs-lisp [1/1]
+** emacs-lisp [2/2]
 #+begin_quote
 This module extends support for Emacs Lisp in Doom Emacs.
 #+end_quote
+
+*** DONE [#B] Prepend ";; => " to output in Lisp Interaction Mode
+https://www.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_thread/eqrf693?utm_source=share&utm_medium=web2x
+
+#+begin_src emacs-lisp :tangle yes
+(defadvice! my/format-result (f &rest r)
+  "Prepend \";; =>\"."
+  :around #'eval-print-last-sexp
+  (let ((p (point)))
+    (apply f r)
+    (save-excursion
+      (goto-char p)
+      (forward-line 1)
+      (insert ";; => "))))
+#+end_src
 
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
