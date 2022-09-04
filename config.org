@@ -1610,7 +1610,7 @@ Miscellaneous configuration without a corresponding module.
         package-native-compile t))
 #+end_src
 
-*** DONE [#B] Fix ~doom/sudo-find-file~ and ~doom/sudo-this-file~
+*** DONE [#B] Fix ~doom/sudo-find-file~ and ~doom/sudo-this-file~ :hack:
 The resulting ~/sudo:root@localhost:/path/to/file~ string does not work for me,
 so I replaced ~"localhost"~ in the original ~doom--sudo-file-path~ with
 ~tramp-system-name~.
@@ -5067,7 +5067,7 @@ If [[https://github.com/hlissner/doom-emacs/pull/5603][this other PR]] gets merg
   (add-hook! 'elfeed-search-mode-hook #'elfeed-update))
 #+END_SRC
 
-*** DONE [#B] Allow widening of the description column
+*** DONE [#B] Allow widening of the description column :hack:
 #+begin_src emacs-lisp :tangle yes
 (after! elfeed
   ;; Do not truncate RSS entry titles
