@@ -3123,10 +3123,18 @@ or [[https://github.com/elixir-lsp/elixir-ls/][elixir-ls]].
 #+end_quote
 
 ** elm [0/0] :ARCHIVE:
-** emacs-lisp [2/2]
+** emacs-lisp [3/4]
 #+begin_quote
 This module extends support for Emacs Lisp in Doom Emacs.
 #+end_quote
+
+*** DONE [#A] Add =DOOMDIR/lisp= to ~load-path~
+=DOOMDIR/lisp= is the logical place for ad-hoc libraries, so it's a bit
+surprising that it isn't in ~load-path~ already.
+
+#+begin_src emacs-lisp :tangle yes
+(add-load-path! "lisp")
+#+end_src
 
 *** DONE [#B] Prepend ";; => " to output in Lisp Interaction Mode
 https://www.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_thread/eqrf693?utm_source=share&utm_medium=web2x
@@ -3146,6 +3154,13 @@ https://www.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_thread/eqrf69
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
 (add-to-list 'auto-mode-alist '("Cask\\'" . lisp-data-mode))
+#+end_src
+
+*** LOOP [#B] Load all of my custom libraries
+I should probably use autoloading instead.
+
+#+begin_src emacs-lisp :tangle yes
+(require 'eeowaa-debug)
 #+end_src
 
 ** erlang [0/0] :ARCHIVE:
