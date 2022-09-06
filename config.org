@@ -3523,7 +3523,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [16/36]
+** org [18/37]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -3627,7 +3627,18 @@ just perform a complete cycle of `org-cycle'."
 + Reference ~org-sort-entries~
 
 *** Tables [0/0]
-*** Hyperlinks [1/4]
+*** Hyperlinks [3/5]
+**** DONE [#A] Add missing org link (=ol-*=) modules
+References:
++ [[file:~/.config/emacs/modules/lang/org/config.el::(defvar org-modules][~/.config/emacs/modules/lang/org/config.el]]
++ [[file:~/.config/emacs/.local/straight/repos/org/lisp/][~/.config/emacs/.local/straight/repos/org/lisp/]]
+
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (dolist (ol-module '(ol-man ol-info ol-w3m))
+    (add-to-list 'org-modules ol-module)))
+#+end_src
+
 **** DONE [#B] Open file links in another window
 + https://stackoverflow.com/questions/17590784/how-to-let-org-mode-open-a-link-like-file-file-org-in-current-window-inste
 + [[help:org-link-frame-setup]]
@@ -3637,20 +3648,12 @@ just perform a complete cycle of `org-cycle'."
   (setcdr (assoc 'file org-link-frame-setup) #'find-file-other-window))
 #+end_src
 
-**** STRT [#B] Create a custom link for man pages
-For example: [[man:printf]]
-
+**** DONE [#C] Configure how links to man pages are opened
 #+begin_src emacs-lisp :tangle yes
-(after! org
-  (org-link-set-parameters
-   "man"
-   ;; TODO Allow storing links via `:store'
-   ;; TODO Allow specification of manual section (e.g. "printf.1" vs "printf.3")
-   :follow (lambda (page)
-             ;; From `+default/man-or-woman'
-             (if (and (not IS-MAC) (executable-find "man"))
-                 (man page)
-               (woman page)))))
+(setq org-man-command
+      (if (and (not IS-MAC) (executable-find "man"))
+          #'man
+        #'woman))
 #+end_src
 
 **** TODO [#B] Open specific URLs in specific browsers
