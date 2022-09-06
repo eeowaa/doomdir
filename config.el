@@ -1437,6 +1437,7 @@ and uses visual instead."
   "p" #'page-break-lines-mode
   "t" #'toggle-truncate-lines
   "|" #'visual-fill-column-mode
+  "(" #'smartparens-global-mode
   "." #'my/toggle-sentence-end-double-space
   "SPC" #'whitespace-mode)
 (after! which-key
@@ -1460,6 +1461,8 @@ and uses visual instead."
     (cl-pushnew `((,(format "\\`%s t t\\'" prefix-re)) nil . "Truncate lines")
                 which-key-replacement-alist)
     (cl-pushnew `((,(format "\\`%s t |\\'" prefix-re)) nil . "Visual fill column")
+                which-key-replacement-alist)
+    (cl-pushnew `((,(format "\\`%s t (\\'" prefix-re)) nil . "Smartparens")
                 which-key-replacement-alist)
     (cl-pushnew `((,(format "\\`%s t \\.\\'" prefix-re)) nil . "Sentence spacing")
                 which-key-replacement-alist)
