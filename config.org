@@ -2920,7 +2920,7 @@ Modules that bring support for a language or group of languages to Emacs.
 ;;; :lang
 #+end_src
 
-** Miscellany [1/1]
+** Miscellany [1/2]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -2945,6 +2945,10 @@ Miscellaneous configuration without a corresponding module.
 
 Note that MongoDB queries use Javascript syntax, so there is no Mongo-specific
 mode derived from ~prog-mode~ (just use ~js-mode~).
+
+*** TODO [#A] Configure Perl modes
+Doom Emacs does not have a module for Perl 5. That said, Emacs has a lot of
+built-in functionality for Perl that just needs a little bit of configuration.
 
 ** agda [0/0] :ARCHIVE:
 #+begin_quote
@@ -3127,6 +3131,21 @@ or [[https://github.com/elixir-lsp/elixir-ls/][elixir-ls]].
 #+begin_quote
 This module extends support for Emacs Lisp in Doom Emacs.
 #+end_quote
+
+*** COMMENT Documentation
++ Debugging
+  - [[info:eintr#Debugging][Introduction]]
++ Authoring macros
+  - [[info:elisp#Problems with Macros][Avoiding common problems]]
+    1. Do the "real work" /in the expansion/, not /during expansion/.
+    2. Prevent arguments from being evaluated too many times /in the expansion/.
+    3. If symbols are created /in the expansion/, even within ~let~ forms, those
+       symbols should be created /during expansion/ using ~make-symbol~ to
+       prevent namespace collision when the macro is called.
+    4. Due to variable scoping issues, do not ~eval~ macro arguments /during
+       expansion/. Instead, refer to the argument /in the expansion/.
+    5. Avoid side-effects on objects constructed /during expansion/, as this can
+       cause issues in byte-compiled code.
 
 *** DONE [#A] Add =DOOMDIR/lisp= to ~load-path~
 =DOOMDIR/lisp= is the logical place for ad-hoc libraries, so it's a bit

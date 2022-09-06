@@ -81,7 +81,7 @@ production.
 - [ ] Boto3?
   - There is an ~AWS_Javascript~ Dash docset but I don't see one for Boto3
 
-** TODO Set up environment (e.g. =.env=)
+** TODO Set up environment (e.g. =.envrc=)
 ** TODO Write the =.editorconfig= and optionally the =.dir-locals.el=
 Example =.dir-locals.el=:
 #+begin_src lisp-data
