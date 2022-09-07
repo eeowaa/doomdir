@@ -2329,10 +2329,43 @@ Small modules that give Emacs access to external tools & services.
 ;;; :tools
 #+end_src
 
-** Miscellany [0/0] :ARCHIVE:
+** Miscellany [1/4]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
+
+*** DONE Configure =eeowaa-project= package
+#+begin_src emacs-lisp :tangle yes
+(setq eeowaa-project-init-files-alist
+      '(;; Git
+        (".gitignore")
+        (".gitattributes")
+
+        ;; Documentation
+        ("README.md")
+        ("LICENSE")
+        ("todo.org")
+
+        ;; Dev tooling
+        (".envrc")
+        (".editorconfig")))
+#+end_src
+
+*** TODO Add templates for each file in =eeowaa-project=
+*** TODO Add support to =eeowaa-project= for language-specific files
++ =.gitignore= (steal from https://github.com/github/gitignore.git)
++ Packaging (e.g. =package.json=, =Dockerfile=)
++ Execution (e.g. =package.json=, =docker-compose.yml=)
++ =.dir-locals.el= (for =projectile= configuration)
++ =todo.org= (for language-specific boilerplate tasks)
+
+Could add templates under =stow-dotfiles/<lang>/.local/etc/skel/= (this is what
+I'm currently doing with Python). I could also create subdirectories under
+=skel/= specific to certain project types.
+
+*** TODO Add support to =eeowaa-project= for environment-specific files
++ CI/CD (e.g. steal from https://github.com/Microsoft/azure-pipelines-yaml)
++ PR templates (e.g. =.azuredevops/pull_request_template.md=)
 
 ** ansible [1/1]
 *** DONE [#A] Install prerequisites
@@ -3180,6 +3213,7 @@ I should probably use autoloading instead.
 
 #+begin_src emacs-lisp :tangle yes
 (require 'eeowaa-debug)
+(require 'eeowaa-project)
 #+end_src
 
 ** erlang [0/0] :ARCHIVE:

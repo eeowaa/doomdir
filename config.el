@@ -712,6 +712,20 @@ ALIASES is a flat list of alias -> command pairs. e.g.
 
 (setq ispell-dictionary "english")
 
+(setq eeowaa-project-init-files-alist
+      '(;; Git
+        (".gitignore")
+        (".gitattributes")
+
+        ;; Documentation
+        ("README.md")
+        ("LICENSE")
+        ("todo.org")
+
+        ;; Dev tooling
+        (".envrc")
+        (".editorconfig")))
+
 (defun my/aws-envvars ()
   "Print the values of AWS environment variables"
   (interactive)
@@ -850,6 +864,9 @@ ALIASES is a flat list of alias -> command pairs. e.g.
       (insert ";; => "))))
 
 (add-to-list 'auto-mode-alist '("Cask\\'" . lisp-data-mode))
+
+(require 'eeowaa-debug)
+(require 'eeowaa-project)
 
 (add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
 

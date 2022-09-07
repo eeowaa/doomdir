@@ -162,7 +162,7 @@ keybindings.
   ;;   presentations or streaming.
   #+end_quote
 
-* Config [6/11]
+* Config [6/12]
 :PROPERTIES:
 :CATEGORY: doom/config
 :END:
@@ -289,6 +289,9 @@ bottom, but the rest should sit nicely in the =config.org= document structure.
 Basically, anywhere I have an ~auth-source-pick-first-password~ function call, I
 should make sure that it actually works. I can do this by tangling from source
 blocks in =config.org=.
+
+** TODO [#B] Create a =doctor.el= file that reports on ~:hack:~ tags, ~defadvice!~, and similar
+I just don't want my modifications to get out of hand.
 
 ** TODO [#B] Reorganize =config.el= so that ~after!~ blocks are utilized correctly
 I don't really even know what the end result will look like or why it will look
