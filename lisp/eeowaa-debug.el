@@ -27,13 +27,8 @@ function arguments."
   (add-variable-watcher symbol #'eeowaa-debug--watchpoint-break)
   (cl-pushnew symbol eeowaa-debug--watchpoints))
 
-(defun eeowaa-debug-watchpoint-list ()
-  "Print a list of all watched variables."
-  (interactive)
-  (princ eeowaa-debug--watchpoints))
-
-(defun eeowaa-debug-watchpoint-remove (symbol)
-  "Remove a watchpoint for SYMBOL."
+(defun eeowaa-debug-watchpoint-unset (symbol)
+  "Unset a watchpoint for SYMBOL."
   (interactive
    (list
     (if (null eeowaa-debug--watchpoints)
@@ -46,6 +41,11 @@ function arguments."
   (remove-variable-watcher symbol #'eeowaa-debug--watchpoint-break)
   (setq eeowaa-debug--watchpoints (delete symbol eeowaa-debug--watchpoints))
   (message (format "Removed watchpoint for `%s'" symbol)))
+
+(defun eeowaa-debug-watchpoint-list ()
+  "Print a list of all watched variables."
+  (interactive)
+  (princ eeowaa-debug--watchpoints))
 
 ;;
 ;;; Edebug
