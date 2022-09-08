@@ -937,7 +937,7 @@ automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
 This module adds an Atom-esque tab bar to the Emacs UI.
 #+end_quote
 
-** treemacs [5/6]
+** treemacs [5/7]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -1016,6 +1016,11 @@ not work in the lisp functions.
     "J" #'my/treemacs-visit-next
     "K" #'my/treemacs-visit-previous))
 #+end_src
+
+*** TODO [#A] Prevent Treemacs from scrolling seemingly at random
+I don't know why this is happening, but it is very annoying. To debug, I could
+start by setting a watchpoint on a variable that keeps track of the Treemacs
+buffer's vertical position (~eeowaa-watchpoint-set~).
 
 *** TODO [#B] Display "+" and "-" icons in tty emacs
 https://github.com/hlissner/emacs-doom-themes/issues/489
@@ -5360,7 +5365,7 @@ This can be done with ~#+INCLUDE~ directives. Doing so might make tangling
 faster, but currently I don't have any problems with performance. If and when I
 start to notice a problem, I'll revisit this item.
 
-** default [7/11]
+** default [7/12]
 #+begin_quote
 This module provides a set of reasonable defaults.
 #+end_quote
@@ -5396,7 +5401,7 @@ insertion rules for that specific mode.
       (sp-local-pair 'minibuffer-inactive-mode opener nil :actions nil))))
 #+end_src
 
-*** DONE [#A] Adjust ~which-key~ timing
+*** DONE [#A] Adjust =which-key= timing
 The default delay of 1 second is too long for my taste.
 
 #+begin_src emacs-lisp :tangle yes
@@ -5516,6 +5521,10 @@ More than half the time, I do not want that behavior.
 (sp-pair "'"  nil :actions :rem)
 (sp-pair "`"  nil :actions :rem)
 #+end_src
+
+*** TODO [#A] Prevent the =which-key= popop from "bouncing"
+Sometimes the window overshoots its height and settles back down to where it
+should be. This is an annoying visual distraction.
 
 *** HOLD [#B] Prevent error related to ~'~ pairs
 :LOGBOOK:
