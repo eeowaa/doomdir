@@ -16,7 +16,14 @@ function arguments."
 
 (defun eeowaa-debug-watchpoint-set (symbol)
   "Set a watchpoint for SYMBOL."
-  (interactive "SSymbol: ")
+  (interactive
+   `(,(completing-read "Symbol: "
+                       obarray
+                       ;; Ripped from `counsel--variable-p'
+                       (lambda (s)
+                         (or (and (boundp s)
+                                  (not (keywordp s)))
+                             (get s 'variable-documentation))))))
   (add-variable-watcher symbol #'eeowaa-debug--watchpoint-break)
   (cl-pushnew symbol eeowaa-debug--watchpoints))
 
