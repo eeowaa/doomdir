@@ -3,18 +3,18 @@
 ;;
 ;;; Watchpoints
 
-(defvar eeowaa-debug--watchpoints nil
-  "A list of variable watchpoints.
+(defvar eeowaa-watchpoint--symbols nil
+  "A list of symbols with watchpoints.
 This variable should not be modified directly. For that, use
-`eeowaa-debug-watchpoint-set' and `eeowaa-debug-watchpoint-remove'.")
+`eeowaa-watchpoint-set' and `eeowaa-watchpoint-remove'.")
 
-(defun eeowaa-debug--watchpoint-break (symbol newval operation where)
+(defun eeowaa-watchpoint--break (symbol newval operation where)
   "Start the debugger when SYMBOL is about to be modified.
 See the help text for `add-variable-watcher' for an explanation
 function arguments."
   (debug))
 
-(defun eeowaa-debug-watchpoint-set (symbol)
+(defun eeowaa-watchpoint-set (symbol)
   "Set a watchpoint for SYMBOL."
   (interactive
    `(,(completing-read "Symbol: "
@@ -24,28 +24,29 @@ function arguments."
                          (or (and (boundp s)
                                   (not (keywordp s)))
                              (get s 'variable-documentation))))))
-  (add-variable-watcher symbol #'eeowaa-debug--watchpoint-break)
-  (cl-pushnew symbol eeowaa-debug--watchpoints))
+  (add-variable-watcher symbol #'eeowaa-watchpoint--break)
+  (cl-pushnew symbol eeowaa-watchpoint--symbols)
+  (message (format "Added watchpoint for `%s'" symbol)))
 
-(defun eeowaa-debug-watchpoint-unset (symbol)
+(defun eeowaa-watchpoint-unset (symbol)
   "Unset a watchpoint for SYMBOL."
   (interactive
    (list
-    (if (null eeowaa-debug--watchpoints)
+    (if (null eeowaa-watchpoint--symbols)
         (error "No watchpoints to remove")
       (let ((input (completing-read "Symbol: "
-                                    eeowaa-debug--watchpoints nil t)))
+                                    eeowaa-watchpoint--symbols nil t)))
              (if (string= input "")
                  (error "No symbol given")
                (intern input))))))
-  (remove-variable-watcher symbol #'eeowaa-debug--watchpoint-break)
-  (setq eeowaa-debug--watchpoints (delete symbol eeowaa-debug--watchpoints))
+  (remove-variable-watcher symbol #'eeowaa-watchpoint--break)
+  (setq eeowaa-watchpoint--symbols (delete symbol eeowaa-watchpoint--list))
   (message (format "Removed watchpoint for `%s'" symbol)))
 
-(defun eeowaa-debug-watchpoint-list ()
+(defun eeowaa-watchpoint-list ()
   "Print a list of all watched variables."
   (interactive)
-  (princ eeowaa-debug--watchpoints))
+  (princ eeowaa-watchpoint--symbols))
 
 ;;
 ;;; Edebug
