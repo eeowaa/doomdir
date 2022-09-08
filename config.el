@@ -868,6 +868,9 @@ ALIASES is a flat list of alias -> command pairs. e.g.
 (require 'eeowaa-debug)
 (require 'eeowaa-project)
 
+(after! lsp-haskell
+  (setq lsp-haskell-formatting-provider "brittany"))
+
 (add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
 
 (add-to-list 'font-lock-extra-managed-props 'display)

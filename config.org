@@ -3320,11 +3320,63 @@ github_binary_release \
 sudo dnf -y install llvm
 #+end_src
 
-** haskell [0/0] :ARCHIVE:
+** haskell [1/2]
 #+begin_quote
 This module adds [[https://www.haskell.org/][Haskell]] support, powered by either [[https://github.com/jyp/dante][dante]] (the default) or LSP
 (haskell-language-server or ghcide).
 #+end_quote
+
+*** HOLD [#A] Install prerequisites
+**** HOLD macOS
+**** DONE Fedora
+~ghc~, ~stack~, and ~cabal~ can be installed via ~dnf~, which would
+significantly speed up execution of the following code block. That said, I have
+not investigated ~hls~ installation options outside of ~ghcup~, and it does not
+appear to have support through Fedora's official ~dnf~ repos.
+
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `lang/haskell` module
+
+## Meta package manager
+## TODO: Verify GPG signatures (https://www.haskell.org/ghcup/install/#manual-install)
+curl --proto '=https' --tlsv1.2 -sSf -Lo "$HOME/.local/bin/ghcup" \
+    https://downloads.haskell.org/~ghcup/x86_64-linux-ghcup
+chmod +x "$HOME/.local/bin/ghcup"
+
+## Compiler
+ghcup install ghc
+(
+    version=`
+        ghcup list \
+            --tool ghc \
+            --show-criteria installed \
+            --raw-format 2>/dev/null |
+        tail -1 | awk '{print $2}'
+    `
+    cd ~/.ghcup/bin
+    ln -sf ghc-$version ghc
+    ln -sf ghci-$version ghci
+)
+
+## Language server
+ghcup install hls
+
+## Code formatting
+ghcup install stack
+stack install brittany # "$HOME/.ghcup/bin" must be in PATH
+
+# Linter and documentation lookup
+ghcup install cabal
+cabal update           # "$HOME/.ghcup/bin" must be in PATH
+cabal install hlint    # "$HOME/.ghcup/bin" must be in PATH
+cabal install hoogle   # "$HOME/.ghcup/bin" must be in PATH
+#+end_src
+
+*** DONE [#A] Specify desired formatter
+#+begin_src emacs-lisp :tangle yes
+(after! lsp-haskell
+  (setq lsp-haskell-formatting-provider "brittany"))
+#+end_src
 
 ** hy [0/0] :ARCHIVE:
 ** idris [0/0] :ARCHIVE:

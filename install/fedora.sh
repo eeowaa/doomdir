@@ -221,6 +221,42 @@ github_binary_release \
 ## Debugging
 sudo dnf -y install llvm
 
+# Install prerequisites for `lang/haskell` module
+
+## Meta package manager
+## TODO: Verify GPG signatures (https://www.haskell.org/ghcup/install/#manual-install)
+curl --proto '=https' --tlsv1.2 -sSf -Lo "$HOME/.local/bin/ghcup" \
+    https://downloads.haskell.org/~ghcup/x86_64-linux-ghcup
+chmod +x "$HOME/.local/bin/ghcup"
+
+## Compiler
+ghcup install ghc
+(
+    version=`
+        ghcup list \
+            --tool ghc \
+            --show-criteria installed \
+            --raw-format 2>/dev/null |
+        tail -1 | awk '{print $2}'
+    `
+    cd ~/.ghcup/bin
+    ln -sf ghc-$version ghc
+    ln -sf ghci-$version ghci
+)
+
+## Language server
+ghcup install hls
+
+## Code formatting
+ghcup install stack
+stack install brittany # "$HOME/.ghcup/bin" must be in PATH
+
+# Linter and documentation lookup
+ghcup install cabal
+cabal update           # "$HOME/.ghcup/bin" must be in PATH
+cabal install hlint    # "$HOME/.ghcup/bin" must be in PATH
+cabal install hoogle   # "$HOME/.ghcup/bin" must be in PATH
+
 # Install prerequisites for `lang/json` module
 dnf -y install jq
 npm install -g vscode-langservers-extracted
