@@ -704,8 +704,8 @@ ALIASES is a flat list of alias -> command pairs. e.g.
                        (list (file-truename doom-emacs-dir)
                              (file-truename doom-private-dir))))))
 
-(when (and (featurep! :checkers spell)
-           (not (featurep! :checkers spell +flyspell)))
+(when (and (modulep! :checkers spell)
+           (not (modulep! :checkers spell +flyspell)))
   (remove-hook 'text-mode-hook 'spell-fu-mode))
 
 (require 'spell-fu)
@@ -775,7 +775,7 @@ ALIASES is a flat list of alias -> command pairs. e.g.
          body)
        params))))
 
-(when (featurep! :tools lookup +docsets)
+(when (modulep! :tools lookup +docsets)
   (defun my/ensure-docsets ()
     (dolist (docset dash-docs-docsets)
       (dash-docs-ensure-docset-installed (string-replace " " "_" docset))))
@@ -798,7 +798,7 @@ ALIASES is a flat list of alias -> command pairs. e.g.
         ("~/Documents/ref" . 1)))
 
 ;; <https://emacs-lsp.github.io/lsp-mode/page/lsp-terraform-ls/>
-(when (featurep! :tools terraform +lsp)
+(when (modulep! :tools terraform +lsp)
   (setq
     ;; Use the official Hashicorp language server from Hashicorp
     lsp-disabled-clients '(tfls)
@@ -925,7 +925,7 @@ ALIASES is a flat list of alias -> command pairs. e.g.
       (apply f r)))
   (advice-add 'markdown-edit-code-block :around #'my/markdown-edit-code-block))
 
-(when (featurep! :completion ivy)
+(when (modulep! :completion ivy)
   (defalias 'counsel-markdown-goto #'counsel-outline)
   (map! :map markdown-mode-map
         :localleader
@@ -1118,7 +1118,7 @@ to `org-footnote-section'.  Inline definitions are ignored."
   (advice-add 'org-footnote-sort :override #'my/org-footnote-sort))
 
 (use-package! ox-ipynb
-  :when (featurep! :lang org +jupyter)
+  :when (modulep! :lang org +jupyter)
   :after ox
   :config
 
@@ -1163,7 +1163,7 @@ Optional argument INFO is a plist of options."
                                          (pygments_lexer . "bash")))) language-infos)))
 
   ;; Support exporting from `ein-LANG' source blocks
-  (when (featurep! :tools ein)
+  (when (modulep! :tools ein)
     (dolist (pair '((ipython . "python")
                     (sh . "bash")))
       (let* ((key (car pair))
@@ -1216,7 +1216,7 @@ Optional argument INFO is a plist of options."
 
 (map! :map org-mode-map
       :localleader
-      (:when (featurep! :lang org +pomodoro)
+      (:when (modulep! :lang org +pomodoro)
        (:prefix ("c" . "clock")
         "p" #'org-pomodoro
         "P" #'org-pomodoro-extend-last-clock)))
@@ -1298,14 +1298,14 @@ Optional argument INFO is a plist of options."
     (k8s-mode)))
 
 (use-package! kubel-evil
-  :when (featurep! :editor evil +everywhere))
+  :when (modulep! :editor evil +everywhere))
 
 (use-package! kubernetes
   :defer t
   :after kubernetes-evil)
 
 (use-package! kubernetes-evil
-  :when (featurep! :editor evil +everywhere))
+  :when (modulep! :editor evil +everywhere))
 
 (after! elfeed
   (add-hook! 'elfeed-search-mode-hook #'elfeed-update))

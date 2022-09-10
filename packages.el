@@ -54,7 +54,7 @@
 (package! ob-mongo)
 (package! inf-mongo)
 
-(when (featurep! :lang org +jupyter)
+(when (modulep! :lang org +jupyter)
   (package! ox-ipynb
     :recipe (:host github :repo "jkitchin/ox-ipynb")))
 
@@ -76,7 +76,7 @@
 (package! kubedoc)    ;; `kubedoc' command
 (package! kubel)      ;; interaction with pods
 (package! kubernetes) ;; interaction with a cluster
-(when (featurep! :editor evil +everywhere)
+(when (modulep! :editor evil +everywhere)
   (package! kubel-evil)
   (package! kubernetes-evil))
 

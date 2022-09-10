@@ -1060,8 +1060,8 @@ To get started on this, open =+evil-bindings.el= by searching for it with
 "+vc/gutter-hydra/body" in the file.
 
 #+begin_src emacs-lisp :tangle no
-(when (and (featurep! :ui vc-gutter)
-           (featurep! :ui hydra))
+(when (and (modulep! :ui vc-gutter)
+           (modulep! :ui hydra))
 
   (define-key! doom-leader-git-map
     "v" #'+vc/gutter-hydra/body)
@@ -2219,8 +2219,8 @@ sudo dnf -y install aspell
 I like having the option, but I would prefer to enable it manually per buffer.
 
 #+begin_src emacs-lisp :tangle yes
-(when (and (featurep! :checkers spell)
-           (not (featurep! :checkers spell +flyspell)))
+(when (and (modulep! :checkers spell)
+           (not (modulep! :checkers spell +flyspell)))
   (remove-hook 'text-mode-hook 'spell-fu-mode))
 #+end_src
 
@@ -2699,7 +2699,7 @@ For whatever reason, this is not working (does not get called upon entering a
 mode derived from ~prog-mode~, even though ~prog-mode-hook~ does get updated).
 
 #+begin_src emacs-lisp :tangle yes
-(when (featurep! :tools lookup +docsets)
+(when (modulep! :tools lookup +docsets)
   (defun my/ensure-docsets ()
     (dolist (docset dash-docs-docsets)
       (dash-docs-ensure-docset-installed (string-replace " " "_" docset))))
@@ -2869,7 +2869,7 @@ sudo dnf -y install terraform terraform-ls
 
 #+begin_src emacs-lisp :tangle yes
 ;; <https://emacs-lsp.github.io/lsp-mode/page/lsp-terraform-ls/>
-(when (featurep! :tools terraform +lsp)
+(when (modulep! :tools terraform +lsp)
   (setq
     ;; Use the official Hashicorp language server from Hashicorp
     lsp-disabled-clients '(tfls)
@@ -3652,7 +3652,7 @@ This is good for now, but I'll need to revisit this if/when I switch over to
 vertico completion.
 
 #+begin_src emacs-lisp :tangle yes
-(when (featurep! :completion ivy)
+(when (modulep! :completion ivy)
   (defalias 'counsel-markdown-goto #'counsel-outline)
   (map! :map markdown-mode-map
         :localleader
@@ -4083,7 +4083,7 @@ annoying extra step.
 *** Exporting [1/1]
 **** DONE [#A] Support exporting to IPython notebooks
 #+begin_src emacs-lisp :tangle packages.el
-(when (featurep! :lang org +jupyter)
+(when (modulep! :lang org +jupyter)
   (package! ox-ipynb
     :recipe (:host github :repo "jkitchin/ox-ipynb")))
 #+end_src
@@ -4091,7 +4091,7 @@ annoying extra step.
 Inspiration taken from the =org= module's =config.el=.
 #+begin_src emacs-lisp :tangle yes
 (use-package! ox-ipynb
-  :when (featurep! :lang org +jupyter)
+  :when (modulep! :lang org +jupyter)
   :after ox
   :config
 
@@ -4136,7 +4136,7 @@ Optional argument INFO is a plist of options."
                                          (pygments_lexer . "bash")))) language-infos)))
 
   ;; Support exporting from `ein-LANG' source blocks
-  (when (featurep! :tools ein)
+  (when (modulep! :tools ein)
     (dolist (pair '((ipython . "python")
                     (sh . "bash")))
       (let* ((key (car pair))
@@ -4256,7 +4256,7 @@ set to whatever command-line options(s) should be passed to
 #+begin_src emacs-lisp :tangle yes
 (map! :map org-mode-map
       :localleader
-      (:when (featurep! :lang org +pomodoro)
+      (:when (modulep! :lang org +pomodoro)
        (:prefix ("c" . "clock")
         "p" #'org-pomodoro
         "P" #'org-pomodoro-extend-last-clock)))
@@ -4929,7 +4929,7 @@ sudo dnf -y install w3m
 (package! kubedoc)    ;; `kubedoc' command
 (package! kubel)      ;; interaction with pods
 (package! kubernetes) ;; interaction with a cluster
-(when (featurep! :editor evil +everywhere)
+(when (modulep! :editor evil +everywhere)
   (package! kubel-evil)
   (package! kubernetes-evil))
 
@@ -4992,7 +4992,7 @@ Reference:
     (k8s-mode)))
 
 (use-package! kubel-evil
-  :when (featurep! :editor evil +everywhere))
+  :when (modulep! :editor evil +everywhere))
 #+end_src
 
 *** TODO [#A] Configure kubernetes
@@ -5010,7 +5010,7 @@ Reference:
   :after kubernetes-evil)
 
 (use-package! kubernetes-evil
-  :when (featurep! :editor evil +everywhere))
+  :when (modulep! :editor evil +everywhere))
 #+end_src
 
 *** TODO [#B] Add a project mode for Helm charts
