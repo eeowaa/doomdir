@@ -1353,7 +1353,7 @@ shell scripts, so I created my own:
 $0
 #+end_src
 
-** fold [0/2]
+** fold [0/3]
 #+begin_quote
 This module marries hideshow, vimish-fold and outline-minor-mode to bring you
 marker, indent and syntax-based code folding for as many languages as possible.
@@ -1504,6 +1504,11 @@ your annoyance:
 #+end_src
 
 My mind can't even comprehend how broken this is.
+
+*** TODO [#A] Enable Vim fold markers
+References:
++ https://www.reddit.com/r/emacs/comments/5ei7wa/awesome_vimlike_folding_for_evilmode_with_markers/
++ https://emacs.stackexchange.com/questions/37363/vim-triple-braces-code-folding-in-emacs
 
 ** format [0/0] :ARCHIVE:
 #+begin_quote
@@ -4550,7 +4555,13 @@ powered by [[https://www.nongnu.org/geiser/geiser_1.html#introduction][geiser]].
 This module adds support for shell scripting languages.
 #+end_quote
 
-*** STRT [#A] Install prerequisites
+*** TODO [#A] Install prerequisites
+Still need to install PowerShell language server. References:
+
++ =lsp-pwsh=
++ https://emacs-lsp.github.io/lsp-mode/page/lsp-pwsh/
++ https://github.com/PowerShell/PowerShellEditorServices
+
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/sh` module
