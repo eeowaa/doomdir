@@ -3494,12 +3494,43 @@ This module adds support for [[https://www.ledger-cli.org/][ledger]] files. Ledg
 accounting system that works with simple text files holding transactions.
 #+end_quote
 
-** lua [0/0] :ARCHIVE:
+** lua [1/2]
 #+begin_quote
 Adds Lua support to Doom Emacs
 #+end_quote
 
-** markdown [6/10]
+*** OKAY [#A] Install prerequisites
+**** OKAY macOS
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `lang/lua` module
+github_binary_release \
+    --repo sumneko/lua-language-server \
+    --asset 'lua-language-server-.*-linux-x64.tar.gz' \
+    --prefix "$HOME/.local/opt/lua-language-server" \
+    --path . \
+    --binary bin/lua-language-server
+#+end_src
+
+*** STRT [#A] Configure ~lua-language-server~ integration
+- [-] ~+lua-lsp-dir~
+- [ ] ~lsp-clients-lua-language-server-bin~
+
+#+begin_src emacs-lisp :tangle yes
+(after! lua-mode
+  (setq lsp-clients-lua-language-server-install-dir
+        (concat (file-name-as-directory (getenv "HOME"))
+                ".local/opt/lua-language-server")
+
+        lsp-clients-lua-language-server-bin
+        (concat (file-name-as-directory lsp-clients-lua-language-server-install-dir)
+                "bin/lua-language-server")
+
+        lsp-clients-lua-language-server-main-location
+        (concat (file-name-as-directory lsp-clients-lua-language-server-install-dir)
+                "main.lua")))
+#+end_src
+
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:

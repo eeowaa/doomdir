@@ -4,7 +4,7 @@
 :PROPERTIES:
 :CATEGORY: doom/inbox
 :END:
-* Upstream [0/9]
+* Upstream [0/10]
 :PROPERTIES:
 :CATEGORY: doom/upstream
 :END:
@@ -119,6 +119,10 @@ Combine and configure the following packages:
 | company-arduino  | 20160306.1739 | available | melpa   | company-mode for Arduino            | https://github.com/yuutayamada/company-arduino |
 |------------------+---------------+-----------+---------+-------------------------------------+------------------------------------------------|
 |                  | <l>           |           |         |                                     |                                                |
+
+** TODO [#B] Fix documentation for =lua=
+References to the ~lua-lsp-dir~ variable are incorrect. The actual variable name
+is ~+lua-lsp-dir~ (note the leading plus).
 
 ** TODO [#C] Fix documentation for session persistence
 This just doesn't make any sense:

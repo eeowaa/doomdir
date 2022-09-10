@@ -873,6 +873,19 @@ ALIASES is a flat list of alias -> command pairs. e.g.
 
 (add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
 
+(after! lua-mode
+  (setq lsp-clients-lua-language-server-install-dir
+        (concat (file-name-as-directory (getenv "HOME"))
+                ".local/opt/lua-language-server")
+
+        lsp-clients-lua-language-server-bin
+        (concat (file-name-as-directory lsp-clients-lua-language-server-install-dir)
+                "bin/lua-language-server")
+
+        lsp-clients-lua-language-server-main-location
+        (concat (file-name-as-directory lsp-clients-lua-language-server-install-dir)
+                "main.lua")))
+
 (add-to-list 'font-lock-extra-managed-props 'display)
 (font-lock-add-keywords
  'markdown-mode
