@@ -322,14 +322,14 @@ scaled down, because the "$" character is full-sized.
 formats, such as org-mode, markdown, and LaTeX.
 #+end_quote
 
-** doom [2/5]
+** doom [3/5]
 #+begin_quote
 This module gives Doom its signature look: powered by the =doom-one= theme
 (inspired by Atom's One Dark theme) and =solaire-mode=.
 #+end_quote
 
-*** LOOP [#A] Install prerequisites
-**** LOOP macOS
+*** OKAY [#A] Install prerequisites
+**** OKAY macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `ui/doom` module
 brew install font-terminus
@@ -2398,11 +2398,11 @@ pipx install ansible-core
 ansible-galaxy collection install community.general
 #+end_src
 
-** debugger [0/3]
+** debugger [1/3]
 Reference: https://docs.doomemacs.org/latest/modules/tools/debugger/
 
-*** LOOP [#A] Install prerequisites
-**** LOOP macOS
+*** OKAY [#A] Install prerequisites
+**** OKAY macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/debugger` module
 # https://stackoverflow.com/questions/18423124/please-check-gdb-is-codesigned-see-taskgated8-how-to-get-gdb-installed-w
@@ -3011,13 +3011,13 @@ This module adds support for [[https://beancount.github.io/][Beancount]] to Emac
 you [[https://plaintextaccounting.org/][manage your money in plain text]].
 #+end_quote
 
-** cc [0/2]
+** cc [1/2]
 #+begin_quote
 This module adds support for the C-family of languages: C, C++, and Objective-C.
 #+end_quote
 
-*** LOOP [#A] Install prerequisites
-**** LOOP macOS
+*** OKAY [#A] Install prerequisites
+**** OKAY macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/cc` module
 brew install ccls gdb glslang
@@ -3331,14 +3331,14 @@ github_binary_release \
 sudo dnf -y install llvm
 #+end_src
 
-** haskell [1/2]
+** haskell [2/2]
 #+begin_quote
 This module adds [[https://www.haskell.org/][Haskell]] support, powered by either [[https://github.com/jyp/dante][dante]] (the default) or LSP
 (haskell-language-server or ghcide).
 #+end_quote
 
-*** HOLD [#A] Install prerequisites
-**** HOLD macOS
+*** OKAY [#A] Install prerequisites
+**** OKAY macOS
 **** DONE Fedora
 ~ghc~, ~stack~, and ~cabal~ can be installed via ~dnf~, which would
 significantly speed up execution of the following code block. That said, I have
@@ -3507,8 +3507,8 @@ Adds Lua support to Doom Emacs
 This module provides Markdown support for Emacs.
 #+end_quote
 
-*** LOOP [#A] Install prerequisites
-**** LOOP macOS
+*** OKAY [#A] Install prerequisites
+**** OKAY macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/markdown` module
 npm install -g markdownlint-cli marked
@@ -3644,7 +3644,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [18/37]
+** org [20/37]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -3655,8 +3655,8 @@ adjustments, extensions and reasonable defaults to make it more performant and
 intuitive out of the box.
 #+end_quote
 
-*** LOOP [#A] Install prerequisites
-**** LOOP macOS
+*** OKAY [#A] Install prerequisites
+**** OKAY macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/org` module
 brew install gnuplot pandoc graphviz pngpaste
@@ -4241,7 +4241,7 @@ Adds Python support to Doom Emacs.
 #+end_quote
 
 *** DONE [#A] Install prerequisites
-**** LOOP macOS
+**** OKAY macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/python` module
 brew install python
@@ -4363,7 +4363,7 @@ This module provides integration for [[https://github.com/greghendershott/racket
 #+end_quote
 
 *** DONE [#A] Install prerequisites
-**** LOOP macOS
+**** OKAY macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/racket` module
 brew install --cask racket
@@ -4857,13 +4857,13 @@ loaded last*, before =:config= modules.
 ;;; :app
 #+end_src
 
-** Miscellany [1/7]
+** Miscellany [2/7]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-*** HOLD [#A] Install prerequisites
-**** HOLD macOS
+*** OKAY [#A] Install prerequisites
+**** OKAY macOS
 **** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `app/Miscellany`
