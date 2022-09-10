@@ -181,13 +181,13 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (defhydra hydra-table-navigate ()
   "Navigation"
   ("1" (progn (table-goto-top-left-corner)
-              (forward-char) (next-line)))
+              (forward-char) (forward-line)))
   ("2" (progn (table-goto-top-right-corner)
-              (backward-char) (next-line)))
+              (backward-char) (forward-line)))
   ("3" (progn (table-goto-bottom-left-corner)
-              (forward-char) (previous-line)))
+              (forward-char) (forward-line -1)))
   ("4" (progn (table-goto-bottom-right-corner)
-              (backward-char) (previous-line)))
+              (backward-char) (forward-line -1)))
   ("f" table-forward-cell)
   ("b" table-backward-cell)
   ("SPC" hydra-table/body "Menu" :exit 1))
@@ -496,7 +496,7 @@ deleting the final newline before inserting the \")))\"."
 
 (setq disabled-command-function nil)
 
-(when NATIVECOMP
+(when (featurep 'native-compile)
   (setq native-comp-speed 2
         package-native-compile t))
 
@@ -537,7 +537,7 @@ deleting the final newline before inserting the \")))\"."
                    (lambda (dir)
                      (string-match-p dir (expand-file-name default-directory)))
                    (list (file-name-as-directory (xdg-user-dir "DOCUMENTS"))
-                         doom-private-dir))
+                         doom-user-dir))
                 t)))))))
 
 ;; This should already be enabled by emacs/undo/config.el
@@ -702,7 +702,7 @@ ALIASES is a flat list of alias -> command pairs. e.g.
                (mapcan (lambda (config-dir)
                          (directory-files config-dir t "\\.el"))
                        (list (file-truename doom-emacs-dir)
-                             (file-truename doom-private-dir))))))
+                             (file-truename doom-user-dir))))))
 
 (when (and (modulep! :checkers spell)
            (not (modulep! :checkers spell +flyspell)))
@@ -1033,7 +1033,7 @@ just perform a complete cycle of `org-cycle'."
       org-directory "~/org"
 
       ;; Directories to search for agenda files
-      my/org-directories `("work" "life" ,doom-private-dir)
+      my/org-directories `("work" "life" ,doom-user-dir)
       org-agenda-files (mapcar (lambda (f)
                                  (if (file-name-absolute-p f) f
                                    (expand-file-name f org-directory)))
@@ -1330,7 +1330,7 @@ ALIGN should be a keyword :left or :right."
 (after! elfeed
   (setq elfeed-search-remain-on-entry t))
 
-(load! "custom" doom-private-dir t)
+(load! "custom" doom-user-dir t)
 
 ;; Map C-? to DEL
 (define-key key-translation-map (kbd "C-?") (kbd "DEL"))

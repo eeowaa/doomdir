@@ -665,13 +665,13 @@ implementations).
 (defhydra hydra-table-navigate ()
   "Navigation"
   ("1" (progn (table-goto-top-left-corner)
-              (forward-char) (next-line)))
+              (forward-char) (forward-line)))
   ("2" (progn (table-goto-top-right-corner)
-              (backward-char) (next-line)))
+              (backward-char) (forward-line)))
   ("3" (progn (table-goto-bottom-left-corner)
-              (forward-char) (previous-line)))
+              (forward-char) (forward-line -1)))
   ("4" (progn (table-goto-bottom-right-corner)
-              (backward-char) (previous-line)))
+              (backward-char) (forward-line -1)))
   ("f" table-forward-cell)
   ("b" table-backward-cell)
   ("SPC" hydra-table/body "Menu" :exit 1))
@@ -1626,7 +1626,7 @@ Miscellaneous configuration without a corresponding module.
 
 *** DONE [#A] Configure native compilation
 #+begin_src emacs-lisp :tangle yes
-(when NATIVECOMP
+(when (featurep 'native-compile)
   (setq native-comp-speed 2
         package-native-compile t))
 #+end_src
@@ -1724,7 +1724,7 @@ For now, just trust ~projectile-*~ variables as long as they apply to files in
                    (lambda (dir)
                      (string-match-p dir (expand-file-name default-directory)))
                    (list (file-name-as-directory (xdg-user-dir "DOCUMENTS"))
-                         doom-private-dir))
+                         doom-user-dir))
                 t)))))))
 #+end_src
 
@@ -2194,7 +2194,7 @@ and see if Doom is to blame.
                (mapcan (lambda (config-dir)
                          (directory-files config-dir t "\\.el"))
                        (list (file-truename doom-emacs-dir)
-                             (file-truename doom-private-dir))))))
+                             (file-truename doom-user-dir))))))
 #+end_src
 
 ** spell [3/5]
@@ -3953,7 +3953,7 @@ mkdir -p ~/org
       org-directory "~/org"
 
       ;; Directories to search for agenda files
-      my/org-directories `("work" "life" ,doom-private-dir)
+      my/org-directories `("work" "life" ,doom-user-dir)
       org-agenda-files (mapcar (lambda (f)
                                  (if (file-name-absolute-p f) f
                                    (expand-file-name f org-directory)))
@@ -5355,7 +5355,7 @@ Miscellaneous configuration without a corresponding module.
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
-(load! "custom" doom-private-dir t)
+(load! "custom" doom-user-dir t)
 #+end_src
 
 *** DONE [#C] Add ergonomic keybindings for hard-to-reach keys

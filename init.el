@@ -16,7 +16,7 @@
 
 ;; HACK Load code that must be evaluated in init.el but outside of the `doom!'
 ;; block (e.g. CLI modifications and `use-package-hook!' forms)
-(load! "early-init.el" doom-private-dir t)
+(load! "early-init.el" doom-user-dir t)
 
 (doom! :input
        ;;bidi              ; (tfel ot) thgir etirw uoy gnipleh
