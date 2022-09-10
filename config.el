@@ -919,7 +919,7 @@ ALIASES is a flat list of alias -> command pairs. e.g.
 
 (add-to-list 'auto-mode-alist '("\\.mdx\\'" . markdown-mode))
 
-(after! markdown
+(after! markdown-mode
   (defun my/markdown-edit-code-block (f &rest r)
     (let ((display-buffer-overriding-action (list #'display-buffer-same-window)))
       (apply f r)))
