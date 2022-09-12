@@ -3181,7 +3181,7 @@ or [[https://github.com/elixir-lsp/elixir-ls/][elixir-ls]].
 #+end_quote
 
 ** elm [0/0] :ARCHIVE:
-** emacs-lisp [3/4]
+** emacs-lisp [3/3]
 #+begin_quote
 This module extends support for Emacs Lisp in Doom Emacs.
 #+end_quote
@@ -3200,14 +3200,6 @@ This module extends support for Emacs Lisp in Doom Emacs.
        expansion/. Instead, refer to the argument /in the expansion/.
     5. Avoid side-effects on objects constructed /during expansion/, as this can
        cause issues in byte-compiled code.
-
-*** DONE [#A] Add =DOOMDIR/lisp= to ~load-path~
-=DOOMDIR/lisp= is the logical place for ad-hoc libraries, so it's a bit
-surprising that it isn't in ~load-path~ already.
-
-#+begin_src emacs-lisp :tangle yes
-(add-load-path! "lisp")
-#+end_src
 
 *** DONE [#B] Prepend ";; => " to output in Lisp Interaction Mode
 https://www.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_thread/eqrf693?utm_source=share&utm_medium=web2x
@@ -3229,10 +3221,20 @@ https://www.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_thread/eqrf69
 (add-to-list 'auto-mode-alist '("Cask\\'" . lisp-data-mode))
 #+end_src
 
-*** LOOP [#B] Load all of my custom libraries
-I should probably use autoloading instead.
+*** DONE [#A] Load my own local packages
+References:
++ [[id:fb9fd833-7379-41f0-9cfe-d86baef3095e][Using/loading local packages]]
++ [[id:2cef25eb-e326-439e-ab3e-82eb65f074db][=autoload/*.el= OR =autoload.el=]]
++ [[info:elisp#Autoload][elisp#Autoload]]
+
+#+begin_quote
+[Add] the package's location to Emacs' ~load-path~ (...) if you don't need/care
+for autoload cookies or byte-compilation.
+#+end_quote
 
 #+begin_src emacs-lisp :tangle yes
+;; Add $DOOMDIR/lisp to `load-path'
+(add-load-path! (concat doom-user-dir "lisp"))
 (require 'eeowaa-debug)
 (require 'eeowaa-project)
 #+end_src

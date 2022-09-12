@@ -851,8 +851,6 @@ ALIASES is a flat list of alias -> command pairs. e.g.
 (after! ws-butler
   (pushnew! ws-butler-global-exempt-modes 'tsv-mode))
 
-(add-load-path! "lisp")
-
 (defadvice! my/format-result (f &rest r)
   "Prepend \";; =>\"."
   :around #'eval-print-last-sexp
@@ -865,6 +863,8 @@ ALIASES is a flat list of alias -> command pairs. e.g.
 
 (add-to-list 'auto-mode-alist '("Cask\\'" . lisp-data-mode))
 
+;; Add $DOOMDIR/lisp to `load-path'
+(add-load-path! (concat doom-user-dir "lisp"))
 (require 'eeowaa-debug)
 (require 'eeowaa-project)
 
