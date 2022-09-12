@@ -379,6 +379,26 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
 (setq-default truncate-lines t)
 
+(evil-define-command my/evil-quit (&optional force)
+  "Mark the current buffer as \"Done\" when performing a server
+edit; otherwise, just kill the current buffer. Prompt to save the
+current buffer first unless the `force' argument is given."
+  :repeat nil
+  (interactive "<!>")
+  (if (and (boundp 'server-buffer-clients)
+           (fboundp 'server-edit)
+           (fboundp 'server-buffer-done)
+           server-buffer-clients)
+      (if force
+          (server-buffer-done (current-buffer))
+        (server-edit))
+    (when force
+      (set-buffer-modified-p nil))
+    (kill-current-buffer)))
+
+;; Works for all variations of `:q'
+(advice-add 'evil-quit :override #'my/evil-quit)
+
 (pushnew! evil-emacs-state-modes 'noaa-mode)
 
 (after! 5x5
@@ -430,26 +450,6 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     :e "H" #'solitaire-move-left
     :e "K" #'solitaire-move-up
     :e "J" #'solitaire-move-down))
-
-(evil-define-command my/evil-quit (&optional force)
-  "Mark the current buffer as \"Done\" when performing a server
-edit; otherwise, just kill the current buffer. Prompt to save the
-current buffer first unless the `force' argument is given."
-  :repeat nil
-  (interactive "<!>")
-  (if (and (boundp 'server-buffer-clients)
-           (fboundp 'server-edit)
-           (fboundp 'server-buffer-done)
-           server-buffer-clients)
-      (if force
-          (server-buffer-done (current-buffer))
-        (server-edit))
-    (when force
-      (set-buffer-modified-p nil))
-    (kill-current-buffer)))
-
-;; Works for all variations of `:q'
-(advice-add 'evil-quit :override #'my/evil-quit)
 
 (after! projectile
 

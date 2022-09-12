@@ -638,7 +638,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 #+end_src
 
 *** STRT [#B] Add a hydra for table.el
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (global-set-key (kbd "C-c t") 'hydra-table/body)
 (defhydra hydra-table ()
   "table.el"
@@ -650,7 +650,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   ("j" hydra-table-justify/body "Justify" :exit t)
   ("e" hydra-table-export/body "Export" :exit t)
   ("SPC" ignore nil :color red))
-#+END_SRC
+#+end_src
 
 **** TODO Capture and Release
 **** TODO Recognize and Unrecognize
@@ -661,7 +661,7 @@ using regexps.  Looking at the table.el source code might provide some
 inspiration (look for [[help:table-forward-cell][table-forward-cell]] and [[help:table-backward-cell][table-backward-cell]]
 implementations).
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (defhydra hydra-table-navigate ()
   "Navigation"
   ("1" (progn (table-goto-top-left-corner)
@@ -675,10 +675,10 @@ implementations).
   ("f" table-forward-cell)
   ("b" table-backward-cell)
   ("SPC" hydra-table/body "Menu" :exit 1))
-#+END_SRC
+#+end_src
 
 **** DONE Insert
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (defhydra hydra-table-insert ()
   "Insert"
   ("t" table-insert "table")
@@ -686,19 +686,19 @@ implementations).
   ("c" table-insert-column "column")
   ("s" table-insert-sequence "sequence")
   ("SPC" hydra-table/body "Menu" :exit 1))
-#+END_SRC
+#+end_src
 
 **** DONE Delete
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (defhydra hydra-table-delete ()
   "Delete"
   ("r" table-delete-row "row")
   ("c" table-delete-column "column")
   ("SPC" hydra-table/body "Menu" :exit 1))
-#+END_SRC
+#+end_src
 
 **** DONE Span or Split
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (defhydra hydra-table-span-or-split ()
   "Span or Split"
   ("h" (table-span-cell 'left))
@@ -708,10 +708,10 @@ implementations).
   ("|" table-split-cell-horizontally)
   ("-" table-split-cell-vertically)
   ("SPC" hydra-table/body "Menu" :exit 1))
-#+END_SRC
+#+end_src
 
 **** DONE Resize
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (defhydra hydra-table-resize ()
   "Resize"
   ("}" table-heighten-cell "heighten")
@@ -719,20 +719,20 @@ implementations).
   (">" table-widen-cell "widen")
   ("<" table-narrow-cell "narrow")
   ("SPC" hydra-table/body "Menu" :exit 1))
-#+END_SRC
+#+end_src
 
 **** DONE Justify
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (defhydra hydra-table-justify ()
   "Justify"
   ("a" hydra-table-justify-cell/body "Cell" :exit t)
   ("r" hydra-table-justify-row/body "Row" :exit t)
   ("c" hydra-table-justify-column/body "Column" :exit t)
   ("SPC" hydra-table/body "Menu" :exit 1))
-#+END_SRC
+#+end_src
 
 ***** ~a~: Cell
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (defhydra hydra-table-justify-cell ()
   "Justify Cell"
   ("h" (table-justify-cell 'left))
@@ -743,10 +743,10 @@ implementations).
   ("m" (table-justify-cell 'middle) "middle")
   ("n" (table-justify-cell 'none) "none")
   ("SPC" hydra-table/body "Menu" :exit 1))
-#+END_SRC
+#+end_src
 
 ***** ~r~: Row
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (defhydra hydra-table-justify-row ()
   "Justify Row"
   ("h" (table-justify-row 'left))
@@ -757,10 +757,10 @@ implementations).
   ("m" (table-justify-row 'middle) "middle")
   ("n" (table-justify-row 'none) "none")
   ("SPC" hydra-table/body "Menu" :exit 1))
-#+END_SRC
+#+end_src
 
 ***** ~c~: Column
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (defhydra hydra-table-justify-column ()
   "Justify Column"
   ("h" (table-justify-column 'left))
@@ -771,19 +771,19 @@ implementations).
   ("m" (table-justify-column 'middle) "middle")
   ("n" (table-justify-column 'none) "none")
   ("SPC" hydra-table/body "Menu" :exit 1))
-#+END_SRC
+#+end_src
 
 **** STRT Export
 I just need to test this functionality.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (defhydra hydra-table-export ()
   "Export to"
   ("h" (table-generate-source 'html) "HTML")
   ("l" (table-generate-source 'latex) "LaTeX")
   ("c" (table-generate-source 'cals) "CALS")
   ("SPC" hydra-table/body "Menu" :exit 1))
-#+END_SRC
+#+end_src
 
 ** indent-guides [0/0] :ARCHIVE:
 ** ligatures [1/1]
@@ -1205,6 +1205,32 @@ version of Emacs (I have ~HEAD~ of Emacs 28), or just wait until =evil=, =org=
 
 *UPDATE*: After installing gccemacs, this problem went away.
 
+*** DONE [#A] Redefine ~:q~ and ~:wq~ semantics
++ Where applicable, integrate with ~server-edit~ (bound to =C-x #=)
++ Do not ever use to exit Emacs; just for writing and closing buffers
+
+#+begin_src emacs-lisp :tangle yes
+(evil-define-command my/evil-quit (&optional force)
+  "Mark the current buffer as \"Done\" when performing a server
+edit; otherwise, just kill the current buffer. Prompt to save the
+current buffer first unless the `force' argument is given."
+  :repeat nil
+  (interactive "<!>")
+  (if (and (boundp 'server-buffer-clients)
+           (fboundp 'server-edit)
+           (fboundp 'server-buffer-done)
+           server-buffer-clients)
+      (if force
+          (server-buffer-done (current-buffer))
+        (server-edit))
+    (when force
+      (set-buffer-modified-p nil))
+    (kill-current-buffer)))
+
+;; Works for all variations of `:q'
+(advice-add 'evil-quit :override #'my/evil-quit)
+#+end_src
+
 *** DONE [#B] Define modes that should always come up in Emacs state
 #+begin_src emacs-lisp :tangle yes
 (pushnew! evil-emacs-state-modes 'noaa-mode)
@@ -1264,32 +1290,6 @@ builtin game.
     :e "H" #'solitaire-move-left
     :e "K" #'solitaire-move-up
     :e "J" #'solitaire-move-down))
-#+end_src
-
-*** DONE [#A] Redefine ~:q~ and ~:wq~ semantics
-+ Where applicable, integrate with ~server-edit~ (bound to =C-x #=)
-+ Do not ever use to exit Emacs; just for writing and closing buffers
-
-#+begin_src emacs-lisp :tangle yes
-(evil-define-command my/evil-quit (&optional force)
-  "Mark the current buffer as \"Done\" when performing a server
-edit; otherwise, just kill the current buffer. Prompt to save the
-current buffer first unless the `force' argument is given."
-  :repeat nil
-  (interactive "<!>")
-  (if (and (boundp 'server-buffer-clients)
-           (fboundp 'server-edit)
-           (fboundp 'server-buffer-done)
-           server-buffer-clients)
-      (if force
-          (server-buffer-done (current-buffer))
-        (server-edit))
-    (when force
-      (set-buffer-modified-p nil))
-    (kill-current-buffer)))
-
-;; Works for all variations of `:q'
-(advice-add 'evil-quit :override #'my/evil-quit)
 #+end_src
 
 *** TODO [#B] Improve visual line navigation
@@ -5259,10 +5259,10 @@ Read RSS feeds in the comfort of DOOM (Emacs)
 If [[https://github.com/hlissner/doom-emacs/pull/5603][this other PR]] gets merged, I may be able to remove this.
 
 *** DONE [#A] Automatically update feed when opening =elfeed=
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (after! elfeed
   (add-hook! 'elfeed-search-mode-hook #'elfeed-update))
-#+END_SRC
+#+end_src
 
 *** DONE [#B] Allow widening of the description column :hack:
 #+begin_src emacs-lisp :tangle yes
