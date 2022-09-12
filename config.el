@@ -848,6 +848,23 @@ ALIASES is a flat list of alias -> command pairs. e.g.
    (setq tab-width
          (alist-get 'c-basic-offset (assoc "linux" c-style-alist)))))
 
+;; Modified from commit ad6a3d0f3 of lang/csharp/config.el
+(use-package! sharper
+  :when (modulep! +dotnet)
+  :general ("C-c n" #'sharper-main-transient)
+  :config
+  (map! (:map sharper--solution-management-mode-map
+         :nv "RET" #'sharper-transient-solution
+         :nv "gr" #'sharper--solution-management-refresh)
+        (:map sharper--project-references-mode-map
+         :nv "RET" #'sharper-transient-project-references
+         :nv "gr" #'sharper--project-references-refresh)
+        (:map sharper--project-packages-mode-map
+         :nv "RET" #'sharper-transient-project-packages
+         :nv "gr" #'sharper--project-packages-refresh)
+        (:map sharper--nuget-results-mode-map
+         :nv "RET" #'sharper--nuget-search-install)))
+
 (after! ws-butler
   (pushnew! ws-butler-global-exempt-modes 'tsv-mode))
 

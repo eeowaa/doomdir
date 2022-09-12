@@ -3095,7 +3095,7 @@ This module adds [[https://coq.inria.fr][coq]] support, powered by [[https://pro
 This modules adds [[https://crystal-lang.org/][crystal]] support.
 #+end_quote
 
-** csharp [0/1]
+** csharp [1/2]
 #+begin_quote
 This module adds C# support to Emacs. Powered by omnisharp (directly or through
 LSP).
@@ -3133,6 +3133,38 @@ github_binary_release \
     --path netcoredbg \
     --binary netcoredbg
 #+end_src
+
+*** DONE [#A] Replace =C-c d= with =C-c n= :hack:
+=C-c <letter>= keybindings are supposed to be reserved for users, but =C-c d= is
+unconditionally bound to ~sharper-main-transient~ in [[doom-modules:lang/csharp/config.el][lang/csharp/config.el]]. The
+problem is that I want =C-c d= bound to a hydra for elisp debugging.
+
+For now, I'm OK with binding ~sharper-main-transient~ to =C-c n= (the "n" stands
+for the "net" in "dotnet"). To get what I want, I overwrite the ~use-package!~
+declaration for =sharper=:
+
+#+begin_src emacs-lisp :tangle yes
+;; Modified from commit ad6a3d0f3 of lang/csharp/config.el
+(use-package! sharper
+  :when (modulep! +dotnet)
+  :general ("C-c n" #'sharper-main-transient)
+  :config
+  (map! (:map sharper--solution-management-mode-map
+         :nv "RET" #'sharper-transient-solution
+         :nv "gr" #'sharper--solution-management-refresh)
+        (:map sharper--project-references-mode-map
+         :nv "RET" #'sharper-transient-project-references
+         :nv "gr" #'sharper--project-references-refresh)
+        (:map sharper--project-packages-mode-map
+         :nv "RET" #'sharper-transient-project-packages
+         :nv "gr" #'sharper--project-packages-refresh)
+        (:map sharper--nuget-results-mode-map
+         :nv "RET" #'sharper--nuget-search-install)))
+#+end_src
+
+I would rather use ~use-package-hook!~ than rewrite the whole ~use-package!~
+declaration, but I don't know if/how that is possible, because ~:general~ is
+used instead of ~:config~ to specify the keybinding.
 
 ** data [2/2]
 *** DONE [#A] Install prerequisites
