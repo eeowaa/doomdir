@@ -3715,7 +3715,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [20/37]
+** org [20/38]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -3743,7 +3743,7 @@ pipx inject jupyter ipykernel
 mkdir -p ~/org/roam
 #+end_src
 
-*** Document Structure [1/3]
+*** Document Structure [1/4]
 **** DONE [#A] Do not indent headlines
 #+begin_src emacs-lisp :tangle yes
 (after! org
@@ -3813,6 +3813,20 @@ just perform a complete cycle of `org-cycle'."
                                 #'my/org-insert-heading-visibility
                                 #'my/org-insert-heading-evil-state))
 #+end_src
+
+**** TODO [#A] Prevent irreversibly hidden content
+Over the course of a typical editing session, I oftentimes need to kill Org
+buffers and re-open the corresponding Org files (especially this one) because
+text is hidden and cannot be revealed, even after ~widen~ and switching to
+~fundamental-mode~.
+
+Most often, the hidden content is a subtree, but sometimes drawers. In both
+cases, I can see the headline, but I cannot open the object to reveal its
+content.
+
+This has been going on for so long that my workaround (to kill the buffer and
+reload the contents into a fresh buffer) has nearly become muscle memory, but I
+really shouldn't have to do this.
 
 **** TODO [#C] Create headline sorting function
 + Sort by priority, then by by ~TODO~ keyword
