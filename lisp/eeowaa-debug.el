@@ -6,7 +6,7 @@
 (defvar eeowaa-watchpoint--symbols nil
   "A list of symbols with watchpoints.
 This variable should not be modified directly. For that, use
-`eeowaa-watchpoint-set' and `eeowaa-watchpoint-remove'.")
+`eeowaa-watchpoint-set' and `eeowaa-watchpoint-unset'.")
 
 (defun eeowaa-watchpoint--break (symbol newval operation where)
   "Start the debugger when SYMBOL is about to be modified.
@@ -40,7 +40,7 @@ function arguments."
                  (error "No symbol given")
                (intern input))))))
   (remove-variable-watcher symbol #'eeowaa-watchpoint--break)
-  (setq eeowaa-watchpoint--symbols (delete symbol eeowaa-watchpoint--list))
+  (setq eeowaa-watchpoint--symbols (delete symbol eeowaa-watchpoint--symbols))
   (message (format "Removed watchpoint for `%s'" symbol)))
 
 (defun eeowaa-watchpoint-list ()

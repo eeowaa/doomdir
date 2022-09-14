@@ -58,6 +58,51 @@ buffer in current window."
                   ("DEBUG" font-lock-preprocessor-face bold))
                 hl-todo-keyword-faces)))
 
+(defmacro my/defhydra (name body &optional docstring &rest heads)
+  "Define a hydra, expanding `my/hydra-key' forms in HEADS.
+See the help text for `defhydra' for a description of arguments."
+  (declare (indent defun) (doc-string 3))
+  (let ((heads (mapcar (lambda (head)
+                         (if (eq (car head) 'my/hydra-key)
+                             (macroexpand head)
+                           head))
+                       heads)))
+    `(defhydra ,name ,body ,docstring ,@heads)))
+
+(defmacro my/hydra-key (key cmd hint &optional predicate)
+  "Add a key to a hydra defined by `my/defhydra'.
+Press KEY to eval CMD described by HINT.
+
+If PREDICATE is `nil', do not propertize the text.
+
+If PREDICATE is `t', then propertize the text according to the
+variable whose symbol name equals that of CMD. (This is often
+useful when CMD is a function that toggles a minor mode.)
+
+If PREDICATE is any other non-`nil' value, then propertize the
+text according to that value at runtime.
+
+In order to propertize text, the DOCSTRING argument in the
+`my/defhydra' should contain a \"_KEY_: ?LABEL?\" string
+corresponding those arguments of this macro. For example:
+
+  (my/defhydra hydra-minor-modes (:hint nil)
+    \"_v_: ?v?, _r_: ?r?\"
+    (my/hydra-key \"v\" view-mode \"View\" t)
+    (my/hydra-key \"r\"
+                  (read-only-mode 'toggle)
+                  \"Read-Only\"
+                  buffer-read-only)"
+  (if (null predicate)
+      `(,key ,cmd ,hint)
+    `(,key ,cmd (propertize ,hint
+                            'face
+                            (if ,(if (eq t predicate)
+                                     cmd
+                                   predicate)
+                                'bold
+                              'italic)))))
+
 (after! projectile
   (global-set-key (kbd "C-c r") 'hydra-run/body)
   (defhydra hydra-run (:color blue :hint none)
@@ -165,6 +210,53 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   ("s" timeclock-status-string "Status")
   ("r" timeclock-generate-report "Report")
   ("q" nil "Quit"))
+
+(global-set-key (kbd "C-c d") 'hydra-debug/body)
+(defhydra hydra-debug ()
+  "Debug"
+  ("b" hydra-debug-breakpoints/body "Breakpoints" :exit 1)
+  ("w" hydra-debug-watchpoints/body "Watchpoints" :exit t)
+  ("t" hydra-debug-traps/body "Traps" :exit t)
+  ("SPC" ignore nil :color red))
+
+(defhydra hydra-debug-breakpoints ()
+  "Breakpoints"
+  ("s" debug-on-entry "Set")
+  ("u" cancel-debug-on-entry "Unset")
+  ("l" (message "%s" (debug--function-list)) "List")
+  ("SPC" hydra-debug/body "Menu" :exit 1))
+
+(defhydra hydra-debug-watchpoints ()
+  "Watchpoints"
+  ("s" debug-on-variable-change "Set")
+  ("u" cancel-debug-on-variable-change "Unset")
+  ("l" (message "%s" (debug--variable-list)) "List")
+  ("SPC" hydra-debug/body "Menu" :exit 1))
+
+(my/defhydra hydra-debug-traps ()
+  "Traps"
+  (my/hydra-key
+   "e" toggle-debug-on-error "Error" debug-on-error)
+  (my/hydra-key
+   "q" toggle-debug-on-quit "Quit (C-g)" debug-on-quit)
+  (my/hydra-key
+   "u" (lambda (event)
+         (interactive `(,(intern (completing-read "Signal: " '(sigusr1 sigusr2 nil)))))
+         (setq debug-on-event event))
+   "User event" debug-on-event)
+  (my/hydra-key
+   "s" (lambda ()
+         (interactive)
+         (setq debug-on-signal (not debug-on-signal))
+         (message "Debug on Signal %s globally"
+                  (if debug-on-signal "enabled" "disabled")))
+   "Signal" debug-on-signal)
+  (my/hydra-key
+   "m" (lambda (regexp)
+         (interactive `(,(read-regexp "Message regexp: ")))
+         (setq debug-on-message regexp))
+   "Message" (not (or (null debug-on-message) (string-empty-p debug-on-message))))
+  ("SPC" hydra-debug/body "Menu" :exit 1))
 
 (global-set-key (kbd "C-c t") 'hydra-table/body)
 (defhydra hydra-table ()
@@ -517,6 +609,8 @@ deleting the final newline before inserting the \")))\"."
 (setq confirm-kill-processes nil)
 
 (defalias 'ps 'list-processes)
+
+(setq debugger-stack-frame-as-list t)
 
 (after! projectile
   ;; For each atom in `obarray'
