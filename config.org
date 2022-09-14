@@ -764,6 +764,91 @@ immediately triggering the debugger.
   ("SPC" hydra-debug/body "Menu" :exit 1))
 #+end_src
 
+**** TODO Debug
+#+begin_example
+Debugger:
+d                       debugger-step-through
+c                       debugger-continue
+e                       debugger-eval-expression
+R                       debugger-record-expression
+b                       debugger-frame
+j                       debugger-jump
+l                       debugger-list-functions
+q                       debugger-quit
+r                       debugger-return-value
+u                       debugger-frame-clear
+
+Backtrace:
+#                       backtrace-toggle-print-circle
++                       backtrace-multi-line
+-                       backtrace-single-line
+.                       backtrace-expand-ellipses
+:                       backtrace-toggle-print-gensym
+RET                     backtrace-help-follow-symbol
+n                       backtrace-forward-frame
+p                       backtrace-backward-frame
+s                       backtrace-goto-source
+v                       backtrace-toggle-locals
+#+end_example
+
+**** TODO Edebug
+#+begin_example
+=                           edebug-temp-display-freq-count
+?                           edebug-help
+B                           edebug-next-breakpoint
+C                           edebug-Continue-fast-mode
+C-M-i                       completion-at-point
+C-M-q                       indent-pp-sexp
+C-M-q                       indent-sexp
+C-M-q                       prog-indent-sexp
+C-M-x                       eval-defun
+C-c C-c                     edebug-go-mode
+C-c C-d                     edebug-unset-breakpoint
+C-c C-l                     edebug-where
+C-c C-n                     edebug-next-mode
+C-c C-s                     edebug-step-mode
+C-c C-t                     #<anonymous-function>
+C-x C-a C-c                 edebug-go-mode
+C-x C-a C-l                 edebug-where
+C-x C-a C-n                 edebug-next-mode
+C-x C-a C-s                 edebug-step-mode
+C-x C-a RET                 edebug-set-initial-mode
+C-x C-e                     edebug-eval-last-sexp
+C-x SPC                     edebug-set-breakpoint
+D                           edebug-toggle-disable-breakpoint
+DEL                         backward-delete-char-untabify
+E                           edebug-visit-eval-list
+G                           nil
+I                           edebug-instrument-callee
+P                           edebug-view-outside
+Q                           edebug-top-level-nonstop
+S                           edebug-stop
+SPC                         edebug-step-mode
+T                           edebug-Trace-fast-mode
+U                           edebug-unset-breakpoints
+W                           edebug-toggle-save-windows
+X                           edebug-set-global-break-condition
+a                           abort-recursive-edit
+b                           edebug-set-breakpoint
+c                           edebug-continue-mode
+d                           edebug-pop-to-backtrace
+e                           edebug-eval-expression
+f                           edebug-forward-sexp
+g                           nil
+h                           nil
+i                           edebug-step-in
+n                           edebug-next-mode
+o                           edebug-step-out
+p                           edebug-bounce-point
+q                           top-level
+r                           edebug-previous-result
+t                           edebug-trace-mode
+u                           edebug-unset-breakpoint
+v                           edebug-view-outside
+w                           edebug-where
+x                           edebug-set-conditional-breakpoint
+#+end_example
+
 *** STRT [#B] Add a hydra for table.el
 #+begin_src emacs-lisp :tangle yes
 (global-set-key (kbd "C-c t") 'hydra-table/body)
@@ -5351,17 +5436,21 @@ service-shortcut 'Emacs everywhere' 4 e # Command+Option+E
 sudo dnf -y install xclip xdotool xprop xwininfo
 #+end_src
 
-***** TODO Automatically map ~doom everywhere~ to a key on GNOME
-For now, I just manually mapped it to =Super-D=, but I would like to automate
-that. I'm sure it's not too difficult.
-
-***** STRT Get this working on GNOME
+***** DONE Get this working on GNOME
 When I try this on GNOME, I keep getting messages like this:
 : File no longer exists: /tmp/emacs-everywhere-20220715-204508-libreoffice-writer, write buffer to file? (y or n) n
+
+*UPDATE*: It is working for me now on GNOME X11. Maybe it's because I downgraded
+to the Emacs 28.1 packaged by Fedora instead of using the COPR repo for Emacs 29
+(dev). Still haven't tried with Wayland in a while, though.
 
 ***** WAIT Get this working on Wayland
 + Currently a work-in-progress: https://github.com/tecosaur/emacs-everywhere/issues/50
 + I could probably help with this...
+
+***** TODO Automatically map ~doom everywhere~ to a key on GNOME
+For now, I just manually mapped it to =Super-D=, but I would like to automate
+that. I'm sure it's not too difficult.
 
 ** irc [3/5]
 #+begin_quote
