@@ -5428,19 +5428,10 @@ I would much prefer a single =circe= command to do this rather than that whole
 song and dance. See also: https://libera.chat/guides/findingchannels
 
 *** TODO [#C] Figure out how to display inline images
-** rss [3/4]
+** rss [3/5]
 #+begin_quote
 Read RSS feeds in the comfort of DOOM (Emacs)
 #+end_quote
-*** LOOP [#A] Undo breakage caused by unfortunate pull request
-[[https://github.com/hlissner/doom-emacs/pull/5523][This PR]] broke my config. Here is the fix:
-
-#+begin_src emacs-lisp :tangle packages.el
-(package! elfeed-goodies :disable t)
-#+end_src
-
-If [[https://github.com/hlissner/doom-emacs/pull/5603][this other PR]] gets merged, I may be able to remove this.
-
 *** DONE [#A] Automatically update feed when opening =elfeed=
 #+begin_src emacs-lisp :tangle yes
 (after! elfeed
@@ -5477,6 +5468,18 @@ to be highlighted in ~*elfeed-search~ via =hl-line=.
 (after! elfeed
   (setq elfeed-search-remain-on-entry t))
 #+end_src
+
+*** LOOP [#A] Undo breakage caused by unfortunate pull request
+[[https://github.com/hlissner/doom-emacs/pull/5523][This PR]] broke my config. Here is the fix:
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! elfeed-goodies :disable t)
+#+end_src
+
+If [[https://github.com/hlissner/doom-emacs/pull/5603][this other PR]] gets merged, I may be able to remove this.
+
+*** TODO [#A] Fix error message I get when running =M-x =rss RET=
+: if: Symbol’s value as variable is void: string
 
 ** twitter [0/0] :ARCHIVE:
 #+begin_quote
