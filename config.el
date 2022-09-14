@@ -976,8 +976,8 @@ ALIASES is a flat list of alias -> command pairs. e.g.
 
 ;; Add $DOOMDIR/lisp to `load-path'
 (add-load-path! (concat doom-user-dir "lisp"))
-(require 'eeowaa-debug)
 (require 'eeowaa-project)
+;; (require 'eeowaa-debug) NOTE: This is providing nothing of value right now
 
 (after! lsp-haskell
   (setq lsp-haskell-formatting-provider "brittany"))

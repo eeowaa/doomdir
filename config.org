@@ -3402,8 +3402,8 @@ for autoload cookies or byte-compilation.
 #+begin_src emacs-lisp :tangle yes
 ;; Add $DOOMDIR/lisp to `load-path'
 (add-load-path! (concat doom-user-dir "lisp"))
-(require 'eeowaa-debug)
 (require 'eeowaa-project)
+;; (require 'eeowaa-debug) NOTE: This is providing nothing of value right now
 #+end_src
 
 ** erlang [0/0] :ARCHIVE:
