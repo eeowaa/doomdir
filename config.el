@@ -1436,7 +1436,7 @@ ALIGN should be a keyword :left or :right."
                       (if (eq align :left) "-" "")
                       (- width 2)
                       (- width 2))
-              string))))
+              str))))
 
 (after! elfeed
   (setq elfeed-search-remain-on-entry t))

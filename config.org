@@ -5455,7 +5455,7 @@ ALIGN should be a keyword :left or :right."
                       (if (eq align :left) "-" "")
                       (- width 2)
                       (- width 2))
-              string))))
+              str))))
 #+end_src
 
 *** DONE [#C] Leave point on the current entry in the ~*elfeed-search*~ buffer
