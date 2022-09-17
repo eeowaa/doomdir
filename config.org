@@ -1394,13 +1394,55 @@ for standard Emacs bindings (snippet from =+emacs-bindings.el=):
     "C-c p" #'projectile-command-map))
 #+end_src
 
-** zen [0/0]
+** zen [1/1]
 #+begin_quote
 This module provides two minor modes that make Emacs into a more comfortable
 writing or coding environment. Folks familiar with "distraction-free" or "zen"
 modes from other editors -- or [[https://github.com/rnkn/olivetti][olivetti]], [[https://github.com/zk-phi/sublimity][sublimity]], and [[https://github.com/IdoMagal/Tabula-Rasa][tabula-rasa]] (Emacs
 plugins) -- will feel right at home.
 #+end_quote
+
+*** DONE [#C] Unclutter the interface in additional ways
+#+begin_src emacs-lisp :tangle yes
+(after! writeroom-mode
+
+  (defvar my/zen--old-display-line-numbers nil)
+  (defvar my/zen--old-hl-line-mode nil)
+  (defvar my/zen--old-column-highlight-mode nil)
+  (defvar my/zen--old-display-fill-column-indicator-mode nil)
+  (defvar my/zen--old-vi-tilde-fringe-mode nil)
+
+  (add-hook! 'writeroom-mode-hook :append
+    (defun my/zen-toggle-h ()
+      "Toggle distracting features."
+      (if writeroom-mode
+          (progn
+            ;; Save settings
+            (setq my/zen--old-display-line-numbers
+                  (and (boundp 'display-line-numbers) display-line-numbers)
+                  my/zen--old-hl-line-mode
+                  (and (boundp 'hl-line-mode) hl-line-mode)
+                  my/zen--old-column-highlight-mode
+                  (and (boundp 'column-highlight-mode) column-highlight-mode)
+                  my/zen--old-display-fill-column-indicator-mode
+                  (and (boundp 'display-fill-column-indicator-mode) display-fill-column-indicator-mode)
+                  my/zen--old-vi-tilde-fringe-mode
+                  (and (modulep! :ui vi-tilde-fringe) (boundp vi-tilde-fringe-mode) vi-tilde-fringe-mode))
+
+            ;; Remove distractions
+            (setq display-line-numbers nil)
+            (hl-line-mode -1)
+            (column-highlight-mode -1)
+            (display-fill-column-indicator-mode -1)
+            (vi-tilde-fringe-mode -1))
+
+        ;; Restore previous state
+        (setq display-line-numbers my/zen--old-display-line-numbers)
+        (if my/zen--old-hl-line-mode (hl-line-mode +1))
+        (if my/zen--old-column-highlight-mode (column-highlight-mode +1))
+        (if my/zen--old-display-fill-column-indicator-mode (display-fill-column-indicator-mode +1))
+        (if my/zen--old-vi-tilde-fringe-mode (vi-tilde-fringe-mode +1))))))
+#+end_src
 
 * :editor
 #+begin_quote
