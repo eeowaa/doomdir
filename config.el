@@ -49,7 +49,57 @@ buffer in current window."
     `(solaire-hl-line-face :background
                            ,(face-attribute 'ivy-current-match :background))))
 
-(setq doom-font (font-spec :family "Source Code Pro" :size 16))
+;; Define fonts that I like
+(setq my/fonts '(("Iosevka Comfy Fixed" ;; Remove " Fixed" if you want ligatures
+                  :variable-pitch "Iosevka Comfy Duo"
+                  :serif "Iosevka Comfy Motion Fixed"
+                  :default-size 22)
+                 ("Source Code Pro"
+                  :default-size 22)
+                 ("Terminus"
+                  :default-size 30)
+                 ("Comic Mono"
+                  :variable-pitch "Comic Neue"
+                  :default-size 24)))
+
+;; Helper function to read a positive integer from the minibuffer
+(defun my/read-positive-int (&optional prompt default)
+  "Read a positive integer from the minibuffer.
+PROMPT defaults to \"Positive integer: \""
+  (let ((number (read-number (or prompt "Positive integer: ") default)))
+    (if (and (integerp number) (> number 0))
+        number
+      (message "Please enter a positive integer.")
+      (sit-for 1)
+      (my/read-positive-int prompt))))
+
+;; Define a fuction to change the fonts
+(defun my/select-font (font &optional size)
+  "Change the current fonts to a collection in `my/fonts'.
+If SIZE is omitted, the default will be used.
+When called interactively, reload the fonts in the current session."
+  (interactive (list (completing-read "Font family: "
+                                      (mapcar #'car my/fonts) nil t)
+                     nil))
+  (let* ((f (lambda (x y) (and x y (font-spec :family x :size y))))
+         (p (or (alist-get font my/fonts nil nil #'string=)
+                (error "\"%s\" not found in `my/fonts'" font)))
+         (variable-pitch-font (plist-get p :variable-pitch))
+         (serif-font (plist-get p :serif))
+         (default-size (plist-get p :default-size)))
+    (unless size
+      (setq size (if (interactive-p)
+                     (my/read-positive-int "Font size: " default-size)
+                   default-size)))
+    (setq doom-font                (funcall f font size)
+          doom-variable-pitch-font (funcall f variable-pitch-font size)
+          doom-serif-font          (funcall f serif-font size)))
+  (and (interactive-p) (doom/reload-font)))
+
+;; Set the font
+(my/select-font "Iosevka Comfy Fixed")
+
+(setq emojify-download-emojis-p t)
 
 (after! hl-todo
   (setq hl-todo-keyword-faces

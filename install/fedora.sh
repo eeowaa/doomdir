@@ -77,12 +77,24 @@ sudo sudo dnf -y install ripgrep
 # Install prerequisites for `ui/doom` module
 sudo dnf -y install terminus-fonts
 
-# Comic Mono
-# <https://dtinth.github.io/comic-mono-font>
-# <https://docs.fedoraproject.org/en-US/quick-docs/fonts/#unpackaged>
+## Comic Mono
+## <https://dtinth.github.io/comic-mono-font>
+## <https://docs.fedoraproject.org/en-US/quick-docs/fonts/#unpackaged>
 npm install -g comic-mono
 mkdir -p "$XDG_DATA_HOME/fonts"
 ln -s "`npm root -g`/comic-mono" "$XDG_DATA_HOME/fonts"
+
+## Iosevka Comfy
+if [ -e "$XDG_DATA_HOME/fonts/iosevka-comfy/.git" ]
+then
+    git -C "$XDG_DATA_HOME/fonts/iosevka-comfy" pull
+else
+    git clone --depth 1 \
+        'https://git.sr.ht/~protesilaos/iosevka-comfy' \
+        "$XDG_DATA_HOME/fonts/iosevka-comfy"
+fi
+
+## Update fonts
 fc-cache -v
 
 # Install prerequisites for `ui/treemacs` module
