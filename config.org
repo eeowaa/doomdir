@@ -231,7 +231,7 @@ Aesthetic modules that affect the Emacs interface or user experience.
 ;;; :ui
 #+end_src
 
-** Miscellany [5/10]
+** Miscellany [6/11]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -287,6 +287,15 @@ buffer in current window."
 *** DONE [#C] Don't suggest abbreviations for long command names
 #+begin_src emacs-lisp :tangle yes
 (setq extended-command-suggest-shorter nil)
+#+end_src
+
+*** DONE [#C] Create a function to set frame transparency
+https://www.emacswiki.org/emacs/TransparentEmacs
+#+begin_src emacs-lisp :tangle yes
+(defun my/transparency (value)
+  "Sets the transparency of the frame window. 0=transparent/100=opaque"
+  (interactive "nTransparency Value 0 - 100 opaque: ")
+  (set-frame-parameter (selected-frame) 'alpha value))
 #+end_src
 
 *** TODO [#C] Always display Imenu for current buffer in Ilist
@@ -5997,6 +6006,10 @@ More than half the time, I do not want that behavior.
 *** TODO [#A] Prevent the =which-key= popop from "bouncing"
 Sometimes the window overshoots its height and settles back down to where it
 should be. This is an annoying visual distraction.
+
+References:
++ ~which-key-popup-type~
++ ~which-key--update~
 
 *** HOLD [#B] Prevent error related to ~'~ pairs
 :LOGBOOK:

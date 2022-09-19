@@ -33,6 +33,11 @@ buffer in current window."
 
 (setq extended-command-suggest-shorter nil)
 
+(defun my/transparency (value)
+  "Sets the transparency of the frame window. 0=transparent/100=opaque"
+  (interactive "nTransparency Value 0 - 100 opaque: ")
+  (set-frame-parameter (selected-frame) 'alpha value))
+
 ;; `always' is just a no-op that returns `t'
 (defadvice! my/never-hide-modeline (&rest _)
   "Never hide the modeline"
