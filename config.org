@@ -5363,8 +5363,12 @@ Reference:
   :when (modulep! :editor evil +everywhere))
 #+end_src
 
-*** TODO [#A] Configure kubernetes
+*** STRT [#A] Configure kubernetes
 + [X] Activate =kubernetes-evil= before =kubernetes=
++ [X] Display pods that are done executing
++ [-] Do not automatically refresh
+  - [X] https://github.com/kubernetes-el/kubernetes-el/issues/100
+  - [-] https://github.com/kubernetes-el/kubernetes-el/issues/286
 + [ ] Use similar keybindings that Doom Emacs does for Magit
 + [ ] Compare =kubernetes= to Lens; missing features:
   - Display resources across all namespaces
@@ -5374,7 +5378,15 @@ Reference:
 
 #+begin_src emacs-lisp :tangle yes
 (use-package! kubernetes
-  :defer t)
+  :defer t
+  :commands (kubernetes-overview)
+  :config
+  (setq ;; Disable automatic refresh (call `kubernetes-refresh' manually)
+        kubernetes-poll-frequency 3600
+        kubernetes-redraw-frequency 3600
+
+        ;; Display pods even if they are done running
+        kubernetes-pods-display-completed t))
 
 (use-package! kubernetes-evil
   :after kubernetes-modes

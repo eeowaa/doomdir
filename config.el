@@ -1506,7 +1506,15 @@ Optional argument INFO is a plist of options."
   :when (modulep! :editor evil +everywhere))
 
 (use-package! kubernetes
-  :defer t)
+  :defer t
+  :commands (kubernetes-overview)
+  :config
+  (setq ;; Disable automatic refresh (call `kubernetes-refresh' manually)
+        kubernetes-poll-frequency 3600
+        kubernetes-redraw-frequency 3600
+
+        ;; Display pods even if they are done running
+        kubernetes-pods-display-completed t))
 
 (use-package! kubernetes-evil
   :after kubernetes-modes
