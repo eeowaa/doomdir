@@ -1506,10 +1506,10 @@ Optional argument INFO is a plist of options."
   :when (modulep! :editor evil +everywhere))
 
 (use-package! kubernetes
-  :defer t
-  :after kubernetes-evil)
+  :defer t)
 
 (use-package! kubernetes-evil
+  :after kubernetes-modes
   :when (modulep! :editor evil +everywhere))
 
 (after! elfeed
