@@ -1653,8 +1653,8 @@ and uses visual instead."
       (cl-pushnew `((,(format "\\`%s f o\\'" prefix-re)) nil . "Find other file")
                   which-key-replacement-alist))))
 
-;; Function to toggle 1 or 2 spaces at the end of sentences
 (defun my/toggle-sentence-end-double-space ()
+  "Toggle 1 or 2 spaces at the end of sentences."
   (interactive)
   (if (not sentence-end-double-space)
       (progn
@@ -1663,46 +1663,46 @@ and uses visual instead."
     (setq-local sentence-end-double-space nil)
     (message "Sentences end with 1 space")))
 
-;; REVIEW See if there is a better way to do this (e.g. with `map!' or a custom macro)
-(define-key! doom-leader-toggle-map
-  "a" #'auto-fill-mode
-  "B" #'display-battery-mode
-  "c" #'display-fill-column-indicator-mode
-  "C" #'column-highlight-mode
-  "h" #'use-hard-newlines
-  "L" #'hl-line-mode
-  "o" #'overwrite-mode
-  "p" #'page-break-lines-mode
-  "t" #'toggle-truncate-lines
-  "|" #'visual-fill-column-mode
-  "(" #'smartparens-global-mode
-  "." #'my/toggle-sentence-end-double-space
-  "SPC" #'whitespace-mode)
-(after! which-key
-  (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
-    (cl-pushnew `((,(format "\\`%s t a\\'" prefix-re)) nil . "Auto fill")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t B\\'" prefix-re)) nil . "Battery indicator")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t c\\'" prefix-re)) nil . "Fill column indicator")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t C\\'" prefix-re)) nil . "Column highlight")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t h\\'" prefix-re)) nil . "Hard newlines")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t L\\'" prefix-re)) nil . "Line highlight")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t o\\'" prefix-re)) nil . "Overwrite")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t p\\'" prefix-re)) nil . "Page break lines")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t t\\'" prefix-re)) nil . "Truncate lines")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t |\\'" prefix-re)) nil . "Visual fill column")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t (\\'" prefix-re)) nil . "Smartparens")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t \\.\\'" prefix-re)) nil . "Sentence spacing")
-                which-key-replacement-alist)
-    (cl-pushnew `((,(format "\\`%s t SPC\\'" prefix-re)) nil . "Whitespace mode")
-                which-key-replacement-alist)))
+;; FIXME: This only works with single keys, but I designed it to work with
+;; multiple. I don't know why it isn't working.
+(defmacro my/define-toggle-key! (&rest args)
+  "Define a series of toggle key bindings."
+  (unless (= 0 (mod (length args) 3))
+    (error "Arguments must come in groups of 3"))
+  (let (key cmd doc (binds '(_)) (hints '(_)))
+    (while args
+      (setq key (pop args)
+            cmd (pop args)
+            doc (pop args))
+      (nconc binds `(,key ,cmd))
+      (nconc hints `((,key ,doc))))
+    (pop binds)
+    (pop hints)
+    `(progn
+       (define-key! doom-leader-toggle-map ,@binds)
+       (after! which-key
+         (let ((prefix-re (regexp-opt (list doom-leader-key
+                                            doom-leader-alt-key))))
+           (dolist (hint ',hints)
+             (let ((key (pop hint))
+                   (doc (pop hint)))
+               (cl-pushnew
+                (cons (list (format "\\`%s t %s\\'" prefix-re key))
+                      (cons nil doc))
+                which-key-replacement-alist))))))))
+
+;; NOTE: This should be refactored to use one `my/define-toggle-key!' call once
+;; I've fixed that function.
+(my/define-toggle-key! "SPC" #'whitespace-mode                     "Whitespace mode")
+(my/define-toggle-key! "("   #'smartparens-global-mode             "Smartparens")
+(my/define-toggle-key! "."   #'my/toggle-sentence-end-double-space "Sentence spacing")
+(my/define-toggle-key! "a"   #'auto-fill-mode                      "Auto fill")
+(my/define-toggle-key! "B"   #'display-battery-mode                "Battery indicator")
+(my/define-toggle-key! "c"   #'display-fill-column-indicator-mode  "Fill column indicator")
+(my/define-toggle-key! "C"   #'column-highlight-mode               "Column highlight")
+(my/define-toggle-key! "h"   #'use-hard-newlines                   "Hard newlines")
+(my/define-toggle-key! "L"   #'hl-line-mode                        "Line highlight")
+(my/define-toggle-key! "o"   #'overwrite-mode                      "Overwrite")
+(my/define-toggle-key! "t"   #'toggle-truncate-lines               "Truncate lines")
+(my/define-toggle-key! "|"   #'visual-fill-column-mode             "Visual fill column")
+(my/define-toggle-key! "C-l" #'page-break-lines-mode               "Page break lines")
