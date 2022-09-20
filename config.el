@@ -1496,13 +1496,13 @@ Optional argument INFO is a plist of options."
 ;; - kubernetes-el might be closer to Lens in terms of functionality, but I have not tried it yet
 (use-package! kubel
   :defer t
-  :after kubel-evil
   :config
   (defadvice! my/activate-k8s-mode-a (&rest _)
     :after #'kubel-yaml-editing-mode
     (k8s-mode)))
 
 (use-package! kubel-evil
+  :after kubel
   :when (modulep! :editor evil +everywhere))
 
 (use-package! kubernetes
