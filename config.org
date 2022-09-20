@@ -1368,11 +1368,57 @@ cursor may switch to another window after this operation. I would rather create
 a keybinding like =C-w C-w x <window>= that closes the window that I select
 /without/ moving the cursor.
 
-** workspaces [2/3]
+** workspaces [3/4]
 #+begin_quote
 This module adds support for workspaces, powered by persp_mode, as well as a API
 for manipulating them.
 #+end_quote
+
+*** COMMENT Vim documentation
+#+begin_quote
+REORDERING TAB PAGES:
+
+:tabm[ove] [N]                                          :tabm :tabmove
+:[N]tabm[ove]
+                Move the current tab page to after tab page N.  Use zero to
+                the move, thus if the second tab is the current one,
+                :tabmove 1 and :tabmove 2  have no effect.
+                Without N the tab page is made the last one.
+                    :.tabmove   " do nothing
+                    :-tabmove   " move the tab page to the left
+                    :+tabmove   " move the tab page to the right
+                    :0tabmove   " move the tab page to the beginning of the tab
+                                " list
+                    :tabmove 0  " as above
+                    :tabmove    " move the tab page to the last
+                    :$tabmove   " as above
+                    :tabmove $  " as above
+                    :tabmove #  " move the tab page after the last accessed
+                                " tab page
+
+:tabm[ove] +[N]
+:tabm[ove] -[N]
+                Move the current tab page N places to the right (with +) or to
+                the left (with -).
+                    :tabmove -  " move the tab page to the left
+                    :tabmove -1 " as above
+                    :tabmove +  " move the tab page to the right
+                    :tabmove +1 " as above
+
+
+Note that although it is possible to move a tab behind the N-th one by using
+:Ntabmove. And move it by N places by using :+Ntabmove. For clarification what
++N means in this context see [range].
+#+end_quote
+
+*** DONE [#A] Bind ~+workspace/swap-left~ and ~+workspace/swap-right~ to keys
+#+begin_src emacs-lisp :tangle yes
+(map! :leader
+      (:when (modulep! :ui workspaces)
+       (:prefix-map ("TAB" . "workspace")
+        :desc "Move left"  "H" #'+workspace/swap-left
+        :desc "Move right" "L" #'+workspace/swap-right)))
+#+end_src
 
 *** TODO [#B] Create a ~:tabmove~ command for Evil mode
 Reference:

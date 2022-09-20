@@ -505,6 +505,12 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     "J" #'my/treemacs-visit-next
     "K" #'my/treemacs-visit-previous))
 
+(map! :leader
+      (:when (modulep! :ui workspaces)
+       (:prefix-map ("TAB" . "workspace")
+        :desc "Move left"  "H" #'+workspace/swap-left
+        :desc "Move right" "L" #'+workspace/swap-right)))
+
 (after! projectile
   (define-key! projectile-mode-map
     "C-c p" #'projectile-command-map))
