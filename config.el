@@ -511,6 +511,25 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
         :desc "Move left"  "H" #'+workspace/swap-left
         :desc "Move right" "L" #'+workspace/swap-right)))
 
+(evil-define-command my/workspace-move (&optional index)
+  "Move the current workspace to zero-based INDEX.
+Without INDEX, move to the end."
+  (interactive "<c>")
+  (let* ((current-name (+workspace-current-name))
+         (index (cl-position current-name persp-names-cache :test #'equal))
+         (names (remove current-name persp-names-cache)))
+    (unless names
+      (user-error "Only one workspace"))
+    (let ((index (min (max 0 index) (length names))))
+      (setq persp-names-cache
+            (append (cl-subseq names 0 index)
+                    (list current-name)
+                    (cl-subseq names index))))
+    (when (called-interactively-p 'any)
+      (+workspace/display))))
+
+(evil-ex-define-cmd "tabm[ove]" #'my/workspace-move)
+
 (after! projectile
   (define-key! projectile-mode-map
     "C-c p" #'projectile-command-map))

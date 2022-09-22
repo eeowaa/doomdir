@@ -1426,6 +1426,28 @@ Note that although it is possible to move a tab behind the N-th one by using
 Reference:
 + ~+workspace/swap-left~
 + ~+workspace/swap-right~
++ ~my/evil-quit~
+
+#+begin_src emacs-lisp :tangle yes
+(evil-define-command my/workspace-move (&optional index)
+  "Move the current workspace to zero-based INDEX.
+Without INDEX, move to the end."
+  (interactive "<c>")
+  (let* ((current-name (+workspace-current-name))
+         (index (cl-position current-name persp-names-cache :test #'equal))
+         (names (remove current-name persp-names-cache)))
+    (unless names
+      (user-error "Only one workspace"))
+    (let ((index (min (max 0 index) (length names))))
+      (setq persp-names-cache
+            (append (cl-subseq names 0 index)
+                    (list current-name)
+                    (cl-subseq names index))))
+    (when (called-interactively-p 'any)
+      (+workspace/display))))
+
+(evil-ex-define-cmd "tabm[ove]" #'my/workspace-move)
+#+end_src
 
 *** KILL [#A] Uniquify buffer names using file paths
 This is done by setting the ~uniquify-buffer-name-style~ variable to ~forward~,
