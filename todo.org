@@ -302,6 +302,12 @@ I don't really even know what the end result will look like or why it will look
 the way it will (I don't know what I don't know, i.e., there are unknown
 unknowns at this point, which is precisely why I have this listed as an issue)
 
+References:
++ https://emacs.stackexchange.com/questions/44377/how-do-i-see-which-packages-are-loaded
++ [[help:features]]
++ [[help:use-package-compute-statistics]]
++ [[help:use-package-report]]
+
 ** TODO [#C] Figure out how to patch specific functions in Doom
 + =el-patch= looks great: https://github.com/raxod502/el-patch
   - Doesn't look like it's used in Doom Emacs
