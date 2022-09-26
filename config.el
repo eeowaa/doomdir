@@ -1630,8 +1630,13 @@ ALIGN should be a keyword :left or :right."
 
 (remove-hook 'org-mode-hook #'+literate-enable-recompile-h)
 
+(remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
+
 (after! smartparens
-  (smartparens-global-mode -1))
+  (remove-hook 'eval-expression-minibuffer-setup-hook
+               #'doom-init-smartparens-in-eval-expression-h)
+  (remove-hook 'minibuffer-setup-hook
+               #'doom-init-smartparens-in-minibuffer-maybe-h))
 
 (setq which-key-idle-delay 0.5
       which-key-idle-secondary-delay 0.1)
