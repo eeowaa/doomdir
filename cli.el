@@ -1,6 +1,6 @@
 ;;; DOOMDIR/cli.el -*- lexical-binding: t; -*-
 
-(defgroup! "Demos"
+(defcli-group! "Demos"
   :docs "Demonstrations of basic Doom CLI functionality"
   (defcli! echo-hello ()
     "Say \"hello world\" by calling out to echo."
@@ -11,7 +11,7 @@
     "Say \"hello world\" by evaluating print!."
     (print! "hello world")))
 
-(defgroup! "Personal"
+(defcli-group! "Personal"
   :docs "My own custom Doom CLI commands"
 
   (defcli! checkout-main ()
