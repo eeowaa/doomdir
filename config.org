@@ -1507,15 +1507,15 @@ plugins) -- will feel right at home.
           (progn
             ;; Save settings
             (setq my/zen--old-display-line-numbers
-                  (and (boundp 'display-line-numbers) display-line-numbers)
+                  (bound-and-true-p display-line-numbers)
                   my/zen--old-hl-line-mode
-                  (and (boundp 'hl-line-mode) hl-line-mode)
+                  (bound-and-true-p hl-line-mode)
                   my/zen--old-column-highlight-mode
-                  (and (boundp 'column-highlight-mode) column-highlight-mode)
+                  (bound-and-true-p column-highlight-mode)
                   my/zen--old-display-fill-column-indicator-mode
-                  (and (boundp 'display-fill-column-indicator-mode) display-fill-column-indicator-mode)
+                  (bound-and-true-p display-fill-column-indicator-mode)
                   my/zen--old-vi-tilde-fringe-mode
-                  (and (modulep! :ui vi-tilde-fringe) (boundp vi-tilde-fringe-mode) vi-tilde-fringe-mode))
+                  (and (modulep! :ui vi-tilde-fringe) (bound-and-true-p vi-tilde-fringe-mode)))
 
             ;; Remove distractions
             (setq display-line-numbers nil)
