@@ -39,13 +39,13 @@ buffer in current window."
   (set-frame-parameter (selected-frame) 'alpha value))
 
 ;; `always' is just a no-op that returns `t'
-(defadvice! my/never-hide-modeline (&rest _)
+(defadvice! my/never-hide-modeline-a (&rest _)
   "Never hide the modeline"
   :around 'hide-mode-line-mode
   #'always)
 
 (after! doom-themes-ext-treemacs
-  (defadvice! my/show-treemacs-modeline (&rest _)
+  (defadvice! my/show-treemacs-modeline-a (&rest _)
     "Show the treemacs modeline"
     :around 'doom-themes-hide-modeline
     #'always))
@@ -589,7 +589,7 @@ Without INDEX, move to the end."
 (setq recenter-positions '(top bottom middle))
 
 ;; Perform a line feed after jumping to a ^L character
-(defadvice! my/recenter-top (&rest _)
+(defadvice! my/recenter-top-a (&rest _)
   "Perform a line feed after jumping to a ^L character"
   :after #'forward-page
   (recenter 0))
@@ -642,7 +642,7 @@ current buffer first unless the `force' argument is given."
     :e "l" #'forward-char))
 
 (after! pong
-  (defadvice! my/pong-emacs-evil-state (&rest _)
+  (defadvice! my/pong-emacs-evil-state-a (&rest _)
     "Use Emacs evil state in `pong'"
     :after #'pong-init
     (evil-emacs-state))
@@ -719,7 +719,7 @@ deleting the final newline before inserting the \")))\"."
   (setq native-comp-speed 2
         package-native-compile t))
 
-(defadvice! my/doom--sudo-file-path (file)
+(defadvice! my/doom--sudo-file-path-a (file)
   "Use `tramp-system-name' instead of \"localhost\" as the hostname"
   :override #'doom--sudo-file-path
   (let ((host (or (file-remote-p file 'host) tramp-system-name)))
@@ -1089,7 +1089,7 @@ ALIASES is a flat list of alias -> command pairs. e.g.
 (after! ws-butler
   (pushnew! ws-butler-global-exempt-modes 'tsv-mode))
 
-(defadvice! my/format-result (f &rest r)
+(defadvice! my/format-result-a (f &rest r)
   "Prepend \";; =>\"."
   :around #'eval-print-last-sexp
   (let ((p (point)))
@@ -1561,7 +1561,7 @@ Optional argument INFO is a plist of options."
   (setq elfeed-search-title-max-width 1000)
 
   ;; Do not truncate RSS entry tags (just need to shift left by 2 characters)
-  (defadvice! my/elfeed-format-column (str width &optional align)
+  (defadvice! my/elfeed-format-column-a (str width &optional align)
     "Return STRING truncated or padded to WIDTH - 2 following alignment.
 ALIGN should be a keyword :left or :right."
     :override #'elfeed-format-column
