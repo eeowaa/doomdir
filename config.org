@@ -1566,12 +1566,16 @@ https://emacs.stackexchange.com/questions/51989/how-to-truncate-lines-by-default
 (setq-default truncate-lines t)
 #+end_src
 
-** evil [4/6]
+** evil [6/7]
 #+begin_quote
 This holy module brings the vim experience to Emacs.
 #+end_quote
 
-*** DONE [#A] Fix ~evil-visual-block~ in =org= buffers
+*** KILL [#A] Fix ~evil-visual-block~ in =org= buffers
+:LOGBOOK:
+- Note taken on [2022-09-25 Sun 20:27] \\
+  After installing gccemacs, this problem went away.
+:END:
 Oddly, this is a problem I've only encountered in =org= buffers, but when I use
 =C-v= in ~normal~ state (/not/ =C-x SPC= in ~emacs~ state) the visual block
 extends up and/or down further than what I've actually selected. This doesn't
@@ -1583,8 +1587,6 @@ To attempt to fix this problem, I performed a fresh install of Doom Emacs and
 all its packages. However, it looks like maybe I need to install a different
 version of Emacs (I have ~HEAD~ of Emacs 28), or just wait until =evil=, =org=
 (or =evil-org=?) gets updated.
-
-*UPDATE*: After installing gccemacs, this problem went away.
 
 *** DONE [#A] Redefine ~:q~ and ~:wq~ semantics
 + Where applicable, integrate with ~server-edit~ (bound to =C-x #=)
@@ -1714,6 +1716,19 @@ builtin game.
     :e "J" #'solitaire-move-down))
 #+end_src
 
+*** KILL [#C] Bind ~helpful-update~ to an Evil Normal state key
+:LOGBOOK:
+- Note taken on [2022-09-25 Sun 20:27] \\
+  This is now bound to =g r= in Evil Normal state.
+:END:
+~helpful-update~ is the function that is used to redisplay help buffers (useful
+for when a value changes). Currently, I need to switch to Emacs state via =C-z=
+and then hit =g=, finally switching back to Normal state via =C-z=.
+
+Options to look at:
++ ~evil-collection-helpful-maps~
++ ~helpful-mode-map~
+
 *** TODO [#B] Improve visual line navigation
 I would like to use the standard =gj= and =gk= Vim bindings to navigate between
 wrapped visual lines, but a lot of other modes wrap those bindings. An
@@ -1724,15 +1739,6 @@ open issue in Doom Emacs: https://github.com/doomemacs/doomemacs/issues/2447
 A temporary workaround is to switch to Emacs state using =C-z= and then use
 =C-n= and =C-p= to navigate between visual lines. Once finished, use =C-z= again
 to exit Emacs state.
-
-*** TODO [#C] Bind ~helpful-update~ to an Evil Normal state key
-~helpful-update~ is the function that is used to redisplay help buffers (useful
-for when a value changes). Currently, I need to switch to Emacs state via =C-z=
-and then hit =g=, finally switching back to Normal state via =C-z=.
-
-Options to look at:
-+ ~evil-collection-helpful-maps~
-+ ~helpful-mode-map~
 
 ** file-templates [2/2]
 #+begin_quote
