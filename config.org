@@ -2582,7 +2582,56 @@ GUI Emacs, not terminal Emacs. Also, this is only a problem in popup buffers.*
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-** syntax [1/3]
+** syntax [2/4]
+*** DONE [#A] Disable flycheck in all Org source blocks :hack:
+References:
++ [[help:flycheck-may-enable-mode]]
++ [[help:flycheck-ephemeral-buffer-p]]
++ [[info:elisp#Buffer Names][elisp#Buffer Names]]
++ [[info:elisp#Advice Combinators][elisp#Advice Combinators]]
+
+~flycheck-global-mode~ only enables ~flycheck-mode~ in a buffer when
+~flycheck-may-enable-mode~ returns ~t~. One predicate considered by
+~flycheck-may-enable-mode~ is ~flycheck-ephemeral-buffer-p~, whose
+implementation determines that a buffer is ephemeral only if its name begins
+with a space. However, I also consider Org source buffers to be ephemeral,
+despite their names not starting with a space.
+
+By advising ~flycheck-ephemeral-buffer-p~ to also consider Org source buffers as
+ephemeral, I can achieve my goal of disabling flycheck in all Org source
+buffers. The reason why I do this is because Org source buffers are most often
+snippets of a wider context (e.g. literate programs, interpreter sessions) and
+are therefore very prone to syntax errors when viewed independently; *these
+errors should not be reported*.
+
+#+begin_src emacs-lisp :tangle yes
+(after! flycheck
+  (defadvice! my/org-src-a (&rest _)
+    "Consider Org Src buffers as ephemeral (do not enable flycheck)."
+    :after-until #'flycheck-ephemeral-buffer-p
+    (string-prefix-p "*Org Src" (buffer-name))))
+#+end_src
+
+*** KILL [#B] Disable flycheck in Emacs Lisp config files
+:LOGBOOK:
+- Note taken on [2022-09-22 Thu 20:31] \\
+  The following commit removes ~+emacs-lisp-disable-flycheck-in-dirs~:
+  https://github.com/doomemacs/doomemacs/commit/afa154db27fc5ff710e8c76061c7579eee2cd918
+:END:
+#+begin_src emacs-lisp :tangle no
+(mapc (lambda (config-file-dir)
+        (add-to-list '+emacs-lisp-disable-flycheck-in-dirs config-file-dir))
+      ;; Unique directory components of canonical config file paths
+      (delete-dups
+       (mapcar (lambda (config-file)
+                 (file-name-directory (file-chase-links config-file)))
+               ;; Config file paths in canonical config directories
+               (mapcan (lambda (config-dir)
+                         (directory-files config-dir t "\\.el"))
+                       (list (file-truename doom-emacs-dir)
+                             (file-truename doom-user-dir))))))
+#+end_src
+
 *** STRT [#A] Allow dynamic changing of error levels displayed
 I have created a couple commands (~my/flycheck-set-level~ and
 ~my/flycheck-reset-level~) as an interface to Flycheck's error-level toggling
@@ -2645,21 +2694,6 @@ the left margin is currently used by =:ui vc-gutter=).
 
 I should probably use ~doom/sandbox~ (=SPC h d x=) to try this in vanilla Emacs
 and see if Doom is to blame.
-
-*** DONE [#B] Disable flycheck in Emacs Lisp config files
-#+begin_src emacs-lisp :tangle yes
-(mapc (lambda (config-file-dir)
-        (add-to-list '+emacs-lisp-disable-flycheck-in-dirs config-file-dir))
-      ;; Unique directory components of canonical config file paths
-      (delete-dups
-       (mapcar (lambda (config-file)
-                 (file-name-directory (file-chase-links config-file)))
-               ;; Config file paths in canonical config directories
-               (mapcan (lambda (config-dir)
-                         (directory-files config-dir t "\\.el"))
-                       (list (file-truename doom-emacs-dir)
-                             (file-truename doom-user-dir))))))
-#+end_src
 
 ** spell [3/5]
 #+begin_quote

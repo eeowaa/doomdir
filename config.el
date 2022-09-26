@@ -882,6 +882,12 @@ ALIASES is a flat list of alias -> command pairs. e.g.
           (push '("kubectl" "sh -c \"clear; (bash || ash || sh)\"") alist))))
 
 (after! flycheck
+  (defadvice! my/org-src-a (&rest _)
+    "Consider Org Src buffers as ephemeral (do not enable flycheck)."
+    :after-until #'flycheck-ephemeral-buffer-p
+    (string-prefix-p "*Org Src" (buffer-name))))
+
+(after! flycheck
   (defun my/flycheck-set-level (level)
     "Set the Flycheck error level"
     (interactive
@@ -912,18 +918,6 @@ ALIASES is a flat list of alias -> command pairs. e.g.
       ;; Refresh navigation between errors in the source buffer according to the
       ;; global value of `flycheck-navigation-minimum-level'
       (kill-local-variable 'flycheck-navigation-minimum-level))))
-
-(mapc (lambda (config-file-dir)
-        (add-to-list '+emacs-lisp-disable-flycheck-in-dirs config-file-dir))
-      ;; Unique directory components of canonical config file paths
-      (delete-dups
-       (mapcar (lambda (config-file)
-                 (file-name-directory (file-chase-links config-file)))
-               ;; Config file paths in canonical config directories
-               (mapcan (lambda (config-dir)
-                         (directory-files config-dir t "\\.el"))
-                       (list (file-truename doom-emacs-dir)
-                             (file-truename doom-user-dir))))))
 
 (when (and (modulep! :checkers spell)
            (not (modulep! :checkers spell +flyspell)))
