@@ -614,6 +614,37 @@ current buffer first unless the `force' argument is given."
 
 (pushnew! evil-emacs-state-modes 'noaa-mode)
 
+(evil-define-command my/evil-window-split-a (&optional count file)
+  "Same as `+evil-window-split-a', but does not recenter the window."
+  :repeat nil
+  (interactive "P<f>")
+  (let ((origwin (selected-window))
+        window-selection-change-functions)
+    (select-window (split-window origwin count 'below))
+    (unless evil-split-window-below
+      (select-window origwin)))
+  (run-hook-with-args 'window-selection-change-functions nil)
+  (when (and (not count) evil-auto-balance-windows)
+    (balance-windows (window-parent)))
+  (if file (evil-edit file)))
+
+(evil-define-command my/evil-window-vsplit-a (&optional count file)
+  "Same as `+evil-window-vsplit-a', but does not recenter the window."
+  :repeat nil
+  (interactive "P<f>")
+  (let ((origwin (selected-window))
+        window-selection-change-functions)
+    (select-window (split-window origwin count 'right))
+    (unless evil-vsplit-window-right
+      (select-window origwin)))
+  (run-hook-with-args 'window-selection-change-functions nil)
+  (when (and (not count) evil-auto-balance-windows)
+    (balance-windows (window-parent)))
+  (if file (evil-edit file)))
+
+(advice-add #'+evil-window-split-a :override #'my/evil-window-split-a)
+(advice-add #'+evil-window-vsplit-a :override #'my/evil-window-vsplit-a)
+
 (after! 5x5
   (map! :mode 5x5-mode
     :e "k" #'5x5-up

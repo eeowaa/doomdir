@@ -1617,6 +1617,47 @@ current buffer first unless the `force' argument is given."
 (pushnew! evil-emacs-state-modes 'noaa-mode)
 #+end_src
 
+*** DONE [#B] Do not recenter windows after splitting :hack:
+I wanted to use ~:around~ advice with ~cl-flet~ to temporarily redefine the
+~recenter~ function to do nothing, but couldn't quite get that to work (perhaps
+due to complications arising from ~evil-define-command~ and its ~interactive~
+form). Using ~:override~ advice in this case seems brittle, but works for now.
+
+*NOTE*: If this breaks someday, look into Doom's ~letf!~ macro.
+
+#+begin_src emacs-lisp :tangle yes
+(evil-define-command my/evil-window-split-a (&optional count file)
+  "Same as `+evil-window-split-a', but does not recenter the window."
+  :repeat nil
+  (interactive "P<f>")
+  (let ((origwin (selected-window))
+        window-selection-change-functions)
+    (select-window (split-window origwin count 'below))
+    (unless evil-split-window-below
+      (select-window origwin)))
+  (run-hook-with-args 'window-selection-change-functions nil)
+  (when (and (not count) evil-auto-balance-windows)
+    (balance-windows (window-parent)))
+  (if file (evil-edit file)))
+
+(evil-define-command my/evil-window-vsplit-a (&optional count file)
+  "Same as `+evil-window-vsplit-a', but does not recenter the window."
+  :repeat nil
+  (interactive "P<f>")
+  (let ((origwin (selected-window))
+        window-selection-change-functions)
+    (select-window (split-window origwin count 'right))
+    (unless evil-vsplit-window-right
+      (select-window origwin)))
+  (run-hook-with-args 'window-selection-change-functions nil)
+  (when (and (not count) evil-auto-balance-windows)
+    (balance-windows (window-parent)))
+  (if file (evil-edit file)))
+
+(advice-add #'+evil-window-split-a :override #'my/evil-window-split-a)
+(advice-add #'+evil-window-vsplit-a :override #'my/evil-window-vsplit-a)
+#+end_src
+
 *** DONE [#C] Define Vim bindings for games
 =evil-collection= already defines Vim bindings for Tetris, but not for any other
 builtin game.
