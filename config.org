@@ -381,8 +381,17 @@ themes in GUI Emacs.
 ;; `always' is just a no-op that returns `t'
 (defadvice! my/never-hide-modeline (&rest _)
   "Never hide the modeline"
-  :around #'hide-mode-line-mode #'doom-themes-hide-modeline
+  :around 'hide-mode-line-mode
   #'always)
+
+(after! doom-themes-ext-treemacs
+  (defadvice! my/show-treemacs-modeline (&rest _)
+    "Show the treemacs modeline"
+    :around 'doom-themes-hide-modeline
+    #'always))
+
+(remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
+#+end_src
 #+end_src
 
 **** COMMENT Other ways to disable modeline hiding
@@ -395,7 +404,7 @@ exchange of screen real estate.
 (remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
 #+end_src
 
-#+CAPTION: Disable modeline hiding by default in popup buffers:
+#+CAPTION: Disable modeline hiding by default in popup buffers
 #+begin_src emacs-lisp :tangle no
 (plist-put +popup-defaults :modeline t)
 #+end_src

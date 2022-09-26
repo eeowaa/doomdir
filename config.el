@@ -41,8 +41,16 @@ buffer in current window."
 ;; `always' is just a no-op that returns `t'
 (defadvice! my/never-hide-modeline (&rest _)
   "Never hide the modeline"
-  :around #'hide-mode-line-mode #'doom-themes-hide-modeline
+  :around 'hide-mode-line-mode
   #'always)
+
+(after! doom-themes-ext-treemacs
+  (defadvice! my/show-treemacs-modeline (&rest _)
+    "Show the treemacs modeline"
+    :around 'doom-themes-hide-modeline
+    #'always))
+
+(remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
 
 (setq doom-theme
       (if initial-window-system
