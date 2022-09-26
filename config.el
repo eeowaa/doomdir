@@ -478,12 +478,6 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     ;; This is the (<section>) part
     "[ \t]*(\\(" Man-section-regexp "\\))")))
 
-(setq +popup--display-buffer-alist
-      (delq (assoc "^\\*\\(?:Wo\\)?Man " +popup--display-buffer-alist)
-            +popup--display-buffer-alist))
-(when (bound-and-true-p +popup-mode)
-  (setq display-buffer-alist +popup--display-buffer-alist))
-
 (setq Man-notify-method 'pushy)
 
 (setq Man-width-max nil

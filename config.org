@@ -1115,7 +1115,7 @@ certain operations. It highlights regions of text that the last operation (like
 yank) acted on.
 #+end_quote
 
-** popup [5/8]
+** popup [4/7]
 #+begin_quote
 This module provides a customizable popup window management system.
 #+end_quote
@@ -1181,15 +1181,6 @@ to work:
     "[ \t]*(\\(" Man-section-regexp "\\))")))
 #+end_src
 
-*** DONE [#C] Do not open (Wo)Man buffers in a popup window
-#+begin_src emacs-lisp :tangle yes
-(setq +popup--display-buffer-alist
-      (delq (assoc "^\\*\\(?:Wo\\)?Man " +popup--display-buffer-alist)
-            +popup--display-buffer-alist))
-(when (bound-and-true-p +popup-mode)
-  (setq display-buffer-alist +popup--display-buffer-alist))
-#+end_src
-
 *** DONE [#C] Open man pages in the current window
 #+begin_src emacs-lisp :tangle yes
 (setq Man-notify-method 'pushy)
@@ -1221,7 +1212,6 @@ automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
 #+end_src
 
 *** TODO [#B] Configure WoMan for AWS CLI man pages
-*** TODO [#C] Modify popup behavior for Customize buffers
 ** tabs [0/0] :ARCHIVE:
 #+begin_quote
 This module adds an Atom-esque tab bar to the Emacs UI.
