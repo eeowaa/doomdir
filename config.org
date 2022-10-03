@@ -794,20 +794,132 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (global-set-key (kbd "C-c d") 'hydra-debug/body)
 (defhydra hydra-debug ()
   "Debug"
-  ("b" hydra-debug-breakpoints/body "Breakpoints" :exit 1)
+  ("d" hydra-debug-debugger/body "Debugger" :exit t)
+  ("b" hydra-debug-breakpoints/body "Breakpoints" :exit t)
   ("w" hydra-debug-watchpoints/body "Watchpoints" :exit t)
   ("t" hydra-debug-traps/body "Traps" :exit t)
   ("SPC" ignore nil :color red))
 #+end_src
 
+**** STRT Debugger
+The only problem is that the commands for stepping cause the hydra window to
+disappear. I tried the following potential workarounds to no avail:
+
+1. Use ~message~ or ~posframe~ instead of ~lv~ for ~hydra-hint-display-type~
+2. Add ~hydra-debug-debugger/body~ to ~debugger-mode-hook~
+
+For now, I have specified ~:exit t~ for those heads, to prevent confusion. Each
+time you step, you must open the hydra again via =C-c d d=. That said, each of
+the binds in this hydra correspond to bindings in ~debugger-mode-map~, so if you
+have memorized the hydra binds, then you can still use them without the hydra.
+
+#+begin_src emacs-lisp :tangle yes
+(defhydra hydra-debug-debugger (:color pink)
+  ;; Stepping
+  ("d" debugger-step-through "step in" :exit t :column "run")
+  ("J" debugger-jump "step out" :exit t)
+  ("c" debugger-continue "continue" :exit t)
+
+  ;; Breakpoints
+  ("gb" debugger-frame "set" :column "break")
+  ("u" debugger-frame-clear "unset")
+  ("gl" debugger-list-functions "list")
+
+  ;; Evaluation
+  ("E" debugger-eval-expression "print" :column "sexp")
+  ("R" debugger-record-expression "record")
+  ("RET" backtrace-help-follow-symbol "follow")
+
+  ;; Visibility
+  ("zo" backtrace-multi-line "open" :column "fold")
+  ("zc" backtrace-single-line "close")
+  ("." backtrace-expand-ellipses "expand")
+
+  ;; Toggles
+  ("p" backtrace-toggle-locals "locals" :column "toggle")
+  (":" backtrace-toggle-print-gensym "uninterned")
+  ("#" backtrace-toggle-print-circle "circular")
+
+  ;; Exiting
+  ("q" debugger-quit "toplevel nonstop" :column "exit")
+  ("r" debugger-return-value "return with value")
+  ("SPC" hydra-debug/body "Menu" :exit t)
+  ("C-g" ignore nil :exit t))
+
+; Unassigned:
+;   backtrace-forward-frame
+;   backtrace-backward-frame
+#+end_src
+
+**** TODO Edebug
+References:
++ https://github.com/rgrinberg/edebug-hydra/blob/master/edebug-hydra.el
++ edebug-mode-map:
+  #+begin_example
+  =                           edebug-temp-display-freq-count
+  ?                           edebug-help
+  B                           edebug-next-breakpoint
+  C                           edebug-Continue-fast-mode
+  C-M-i                       completion-at-point
+  C-M-q                       indent-pp-sexp
+  C-M-q                       indent-sexp
+  C-M-q                       prog-indent-sexp
+  C-M-x                       eval-defun
+  C-c C-c                     edebug-go-mode
+  C-c C-d                     edebug-unset-breakpoint
+  C-c C-l                     edebug-where
+  C-c C-n                     edebug-next-mode
+  C-c C-s                     edebug-step-mode
+  C-c C-t                     #<anonymous-function>
+  C-x C-a C-c                 edebug-go-mode
+  C-x C-a C-l                 edebug-where
+  C-x C-a C-n                 edebug-next-mode
+  C-x C-a C-s                 edebug-step-mode
+  C-x C-a RET                 edebug-set-initial-mode
+  C-x C-e                     edebug-eval-last-sexp
+  C-x SPC                     edebug-set-breakpoint
+  D                           edebug-toggle-disable-breakpoint
+  DEL                         backward-delete-char-untabify
+  E                           edebug-visit-eval-list
+  G                           nil
+  I                           edebug-instrument-callee
+  P                           edebug-view-outside
+  Q                           edebug-top-level-nonstop
+  S                           edebug-stop
+  SPC                         edebug-step-mode
+  T                           edebug-Trace-fast-mode
+  U                           edebug-unset-breakpoints
+  W                           edebug-toggle-save-windows
+  X                           edebug-set-global-break-condition
+  a                           abort-recursive-edit
+  b                           edebug-set-breakpoint
+  c                           edebug-continue-mode
+  d                           edebug-pop-to-backtrace
+  e                           edebug-eval-expression
+  f                           edebug-forward-sexp
+  g                           nil
+  h                           nil
+  i                           edebug-step-in
+  n                           edebug-next-mode
+  o                           edebug-step-out
+  p                           edebug-bounce-point
+  q                           top-level
+  r                           edebug-previous-result
+  t                           edebug-trace-mode
+  u                           edebug-unset-breakpoint
+  v                           edebug-view-outside
+  w                           edebug-where
+  x                           edebug-set-conditional-breakpoint
+  #+end_example
+
 **** DONE Breakpoints
 #+begin_src emacs-lisp :tangle yes
 (defhydra hydra-debug-breakpoints ()
   "Breakpoints"
-  ("s" debug-on-entry "Set")
+  ("b" debug-on-entry "Set")
   ("u" cancel-debug-on-entry "Unset")
   ("l" (message "%s" (debug--function-list)) "List")
-  ("SPC" hydra-debug/body "Menu" :exit 1))
+  ("SPC" hydra-debug/body "Menu" :exit t))
 #+end_src
 
 **** DONE Watchpoints
@@ -817,7 +929,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   ("s" debug-on-variable-change "Set")
   ("u" cancel-debug-on-variable-change "Unset")
   ("l" (message "%s" (debug--variable-list)) "List")
-  ("SPC" hydra-debug/body "Menu" :exit 1))
+  ("SPC" hydra-debug/body "Menu" :exit t))
 #+end_src
 
 **** DONE Traps
@@ -848,93 +960,8 @@ immediately triggering the debugger.
          (interactive `(,(read-regexp "Message regexp: ")))
          (setq debug-on-message regexp))
    "Message" (not (or (null debug-on-message) (string-empty-p debug-on-message))))
-  ("SPC" hydra-debug/body "Menu" :exit 1))
+  ("SPC" hydra-debug/body "Menu" :exit t))
 #+end_src
-
-**** TODO Debug
-#+begin_example
-Debugger:
-d                       debugger-step-through
-c                       debugger-continue
-e                       debugger-eval-expression
-R                       debugger-record-expression
-b                       debugger-frame
-j                       debugger-jump
-l                       debugger-list-functions
-q                       debugger-quit
-r                       debugger-return-value
-u                       debugger-frame-clear
-
-Backtrace:
-#                       backtrace-toggle-print-circle
-+                       backtrace-multi-line
--                       backtrace-single-line
-.                       backtrace-expand-ellipses
-:                       backtrace-toggle-print-gensym
-RET                     backtrace-help-follow-symbol
-n                       backtrace-forward-frame
-p                       backtrace-backward-frame
-s                       backtrace-goto-source
-v                       backtrace-toggle-locals
-#+end_example
-
-**** TODO Edebug
-#+begin_example
-=                           edebug-temp-display-freq-count
-?                           edebug-help
-B                           edebug-next-breakpoint
-C                           edebug-Continue-fast-mode
-C-M-i                       completion-at-point
-C-M-q                       indent-pp-sexp
-C-M-q                       indent-sexp
-C-M-q                       prog-indent-sexp
-C-M-x                       eval-defun
-C-c C-c                     edebug-go-mode
-C-c C-d                     edebug-unset-breakpoint
-C-c C-l                     edebug-where
-C-c C-n                     edebug-next-mode
-C-c C-s                     edebug-step-mode
-C-c C-t                     #<anonymous-function>
-C-x C-a C-c                 edebug-go-mode
-C-x C-a C-l                 edebug-where
-C-x C-a C-n                 edebug-next-mode
-C-x C-a C-s                 edebug-step-mode
-C-x C-a RET                 edebug-set-initial-mode
-C-x C-e                     edebug-eval-last-sexp
-C-x SPC                     edebug-set-breakpoint
-D                           edebug-toggle-disable-breakpoint
-DEL                         backward-delete-char-untabify
-E                           edebug-visit-eval-list
-G                           nil
-I                           edebug-instrument-callee
-P                           edebug-view-outside
-Q                           edebug-top-level-nonstop
-S                           edebug-stop
-SPC                         edebug-step-mode
-T                           edebug-Trace-fast-mode
-U                           edebug-unset-breakpoints
-W                           edebug-toggle-save-windows
-X                           edebug-set-global-break-condition
-a                           abort-recursive-edit
-b                           edebug-set-breakpoint
-c                           edebug-continue-mode
-d                           edebug-pop-to-backtrace
-e                           edebug-eval-expression
-f                           edebug-forward-sexp
-g                           nil
-h                           nil
-i                           edebug-step-in
-n                           edebug-next-mode
-o                           edebug-step-out
-p                           edebug-bounce-point
-q                           top-level
-r                           edebug-previous-result
-t                           edebug-trace-mode
-u                           edebug-unset-breakpoint
-v                           edebug-view-outside
-w                           edebug-where
-x                           edebug-set-conditional-breakpoint
-#+end_example
 
 *** STRT [#B] Add a hydra for table.el
 #+begin_src emacs-lisp :tangle yes

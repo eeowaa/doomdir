@@ -279,24 +279,61 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (global-set-key (kbd "C-c d") 'hydra-debug/body)
 (defhydra hydra-debug ()
   "Debug"
-  ("b" hydra-debug-breakpoints/body "Breakpoints" :exit 1)
+  ("d" hydra-debug-debugger/body "Debugger" :exit t)
+  ("b" hydra-debug-breakpoints/body "Breakpoints" :exit t)
   ("w" hydra-debug-watchpoints/body "Watchpoints" :exit t)
   ("t" hydra-debug-traps/body "Traps" :exit t)
   ("SPC" ignore nil :color red))
 
+(defhydra hydra-debug-debugger (:color pink)
+  ;; Stepping
+  ("d" debugger-step-through "step in" :exit t :column "run")
+  ("J" debugger-jump "step out" :exit t)
+  ("c" debugger-continue "continue" :exit t)
+
+  ;; Breakpoints
+  ("gb" debugger-frame "set" :column "break")
+  ("u" debugger-frame-clear "unset")
+  ("gl" debugger-list-functions "list")
+
+  ;; Evaluation
+  ("E" debugger-eval-expression "print" :column "sexp")
+  ("R" debugger-record-expression "record")
+  ("RET" backtrace-help-follow-symbol "follow")
+
+  ;; Visibility
+  ("zo" backtrace-multi-line "open" :column "fold")
+  ("zc" backtrace-single-line "close")
+  ("." backtrace-expand-ellipses "expand")
+
+  ;; Toggles
+  ("p" backtrace-toggle-locals "locals" :column "toggle")
+  (":" backtrace-toggle-print-gensym "uninterned")
+  ("#" backtrace-toggle-print-circle "circular")
+
+  ;; Exiting
+  ("q" debugger-quit "toplevel nonstop" :column "exit")
+  ("r" debugger-return-value "return with value")
+  ("SPC" hydra-debug/body "Menu" :exit t)
+  ("C-g" ignore nil :exit t))
+
+; Unassigned:
+;   backtrace-forward-frame
+;   backtrace-backward-frame
+
 (defhydra hydra-debug-breakpoints ()
   "Breakpoints"
-  ("s" debug-on-entry "Set")
+  ("b" debug-on-entry "Set")
   ("u" cancel-debug-on-entry "Unset")
   ("l" (message "%s" (debug--function-list)) "List")
-  ("SPC" hydra-debug/body "Menu" :exit 1))
+  ("SPC" hydra-debug/body "Menu" :exit t))
 
 (defhydra hydra-debug-watchpoints ()
   "Watchpoints"
   ("s" debug-on-variable-change "Set")
   ("u" cancel-debug-on-variable-change "Unset")
   ("l" (message "%s" (debug--variable-list)) "List")
-  ("SPC" hydra-debug/body "Menu" :exit 1))
+  ("SPC" hydra-debug/body "Menu" :exit t))
 
 (my/defhydra hydra-debug-traps ()
   "Traps"
@@ -321,7 +358,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
          (interactive `(,(read-regexp "Message regexp: ")))
          (setq debug-on-message regexp))
    "Message" (not (or (null debug-on-message) (string-empty-p debug-on-message))))
-  ("SPC" hydra-debug/body "Menu" :exit 1))
+  ("SPC" hydra-debug/body "Menu" :exit t))
 
 (global-set-key (kbd "C-c t") 'hydra-table/body)
 (defhydra hydra-table ()
