@@ -5686,9 +5686,14 @@ solution. Alternate font-locking is available via =jinja2-mode=.
   :files "templates/")
 #+end_src
 
-*** TODO [#C] Configure w3m
+*** STRT [#C] Configure w3m
++ [X] Remap =eww= bindings to use =w3m= instead
 + [ ] Redefine some mappings from =evil-collection=
 + [ ] Add mappings for ~w3m-lnum-mode~
+
+#+begin_src emacs-lisp :tangle yes
+(setq +lookup-open-url-fn #'w3m-browse-url)
+#+end_src
 
 ** calendar [0/0] :ARCHIVE:
 #+begin_quote

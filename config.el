@@ -1583,6 +1583,8 @@ Optional argument INFO is a plist of options."
   :after kubernetes-modes
   :when (modulep! :editor evil +everywhere))
 
+(setq +lookup-open-url-fn #'w3m-browse-url)
+
 (after! elfeed
   (add-hook! 'elfeed-search-mode-hook #'elfeed-update))
 
