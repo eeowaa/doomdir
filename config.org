@@ -190,7 +190,7 @@ a unified interface for project search and replace, powered by ripgrep.
 #+end_quote
 
 ** ido [0/0] :ARCHIVE:
-** ivy [2/2]
+** ivy [2/2] :ARCHIVE:
 #+begin_quote
 This module provides Ivy integration for a variety of Emacs commands, as well as
 a unified interface for project search and replace, powered by [[https://github.com/BurntSushi/ripgrep/][ripgrep]].
@@ -214,13 +214,29 @@ sudo sudo dnf -y install ripgrep
 (setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
 #+end_src
 
-** vertico [0/1] :ARCHIVE:
+** vertico [2/2]
 #+begin_quote
 This module enhances the Emacs search and completion experience, and also
 provides a united interface for project search and replace, powered by [[https://github.com/BurntSushi/ripgrep/][ripgrep]].
 #+end_quote
 
-*** TODO Replace =ivy= with =vertico=
+*** DONE [#A] Install prerequisites
+**** DONE macoS
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `completion/vertico` module
+brew install ripgrep
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `completion/vertico` module
+sudo sudo dnf -y install ripgrep
+#+end_src
+
+*** DONE [#B] Replace =ivy= with =vertico=
+- [X] Enable in =init.el=
+- [X] Refactor for =vertico=
+
 * :ui
 #+begin_quote
 Aesthetic modules that affect the Emacs interface or user experience.
@@ -427,23 +443,23 @@ satisfy the following requirements /without modification/ when running in a
 1. Files and directories have different colors in Treemacs
 2. Buffers and modelines have noticeably different background colors even in
    unselected windows
-3. The background color of the current selection in ~ivy~ is never the same as
-   the foreground color of any part of the selection
+3. The background color of the current selection in the completion framework is
+   never the same as the foreground color of any part of the selection
 
 For a 256-color terminal, ~doom-badger~ is OK, but I prefer ~doom-henna~.
 Unfortunately, it does not satisfy the 3rd requirement, so I made a patched copy
-of the theme called ~eeowaa-henna~ which fixes the problem with
-~ivy-current-match~. Note that I created a new theme instead of customizing
-~doom-henna~ because I prefer ~doom-henna~ over ~eeowaa-henna~ in GUI Emacs and
-like using it sometimes.
+of the theme called ~eeowaa-henna~ that fixes the problem. Note that I created a
+new theme instead of customizing ~doom-henna~ because I prefer ~doom-henna~ over
+~eeowaa-henna~ in GUI Emacs and like using it sometimes.
 
 As for GUI Emacs, I love ~doom-outrun-electric~ for its clear separation between
 windows and for its cool color palette. However, the background color of the
 selected item in Treemacs is nearly the same as the regular background color (a
 problem that [[https://www.reddit.com/r/DoomEmacs/comments/pfp39u/customizing_doomtheme/][others have experienced]]), so it is hard to tell what is currently
 selected. To fix the problem, I customized the theme to use the same background
-color as the ~ivy-current-match~ face. Note that this fix also modifies the
-background color of highlighted lines in other windows that use =solaire-mode=.
+color as the face used for the current selection in the completion framework.
+Note that this fix also modifies the background color of highlighted lines in
+other windows that use =solaire-mode=.
 
 #+begin_src emacs-lisp :tangle yes
 (setq doom-theme
@@ -451,10 +467,14 @@ background color of highlighted lines in other windows that use =solaire-mode=.
           'doom-outrun-electric
         'eeowaa-henna))
 
-(after! (solaire-mode ivy)
-  (custom-theme-set-faces! 'doom-outrun-electric
-    `(solaire-hl-line-face :background
-                           ,(face-attribute 'ivy-current-match :background))))
+(after! (:and solaire-mode (:or vertico ivy))
+  (let ((face (cond
+               ((facep 'vertico-current) 'vertico-current)
+               ((facep 'ivy-current-match) 'ivy-current-match)
+               (t (error "Could not determine face")))))
+    (custom-theme-set-faces! 'doom-outrun-electric
+      `(solaire-hl-line-face :background
+                             ,(face-attribute face :background)))))
 #+end_src
 
 Some other themes that I enjoy in GUI Emacs include:
@@ -4105,7 +4125,7 @@ github_binary_release \
                 "main.lua")))
 #+end_src
 
-** markdown [7/10]
+** markdown [8/10]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
@@ -4216,16 +4236,19 @@ which is perfect for ~:around~ advice:
 
 #+end_src
 
-*** LOOP [#B] Create a =SPC m .= binding like in Org mode
-This is good for now, but I'll need to revisit this if/when I switch over to
-vertico completion.
-
+*** DONE [#B] Create a =SPC m .= binding like in Org mode
 #+begin_src emacs-lisp :tangle yes
-(when (modulep! :completion ivy)
+(cond
+ ((modulep! :completion ivy)
   (defalias 'counsel-markdown-goto #'counsel-outline)
   (map! :map markdown-mode-map
         :localleader
         "." #'counsel-markdown-goto))
+ ((modulep! :completion vertico)
+  (defalias 'consult-markdown-goto #'consult-outline)
+  (map! :map markdown-mode-map
+        :localleader
+        "." #'consult-markdown-goto)))
 #+end_src
 
 *** TODO [#B] Live-preview Markdown buffers in an external browser
@@ -4250,7 +4273,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [20/39]
+** org [20/40]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -4438,7 +4461,7 @@ browse-url: No suitable browser for URL https://aws.amazon.com/about-aws/whats-n
 **** TODO [#C] Create method to store Org links from =eshell= buffers
 Just store the current working directory.
 
-*** Todo Items [2/3]
+*** Todo Items [2/4]
 **** DONE [#A] Inherit priority so that subtasks appear under their parents in the agenda
 #+begin_src emacs-lisp :tangle yes
 (after! org
@@ -4467,6 +4490,16 @@ Just store the current working directory.
       (apply f r))
       (setq org-log-into-drawer restore))
   (advice-add 'org-add-note :around #'my/org-add-note-advice))
+#+end_src
+
+**** LOOP [#B] Make it easier to jump to headlines across Org buffers
+:LOGBOOK:
+- Note taken on [2022-10-01 Sat 21:19] \\
+  Refactor for =vertico=.
+:END:
+#+begin_src emacs-lisp :tangle yes
+(when (modulep! :completion ivy)
+  (setq counsel-org-goto-all-outline-path-prefix 'buffer-name))
 #+end_src
 
 **** TODO [#C] Create integration between embedded ~TODO~ and project =todo.org=
@@ -5932,7 +5965,7 @@ for you to customize it yourself. It is best to load these last.
 ;;; :config
 #+end_src
 
-** Miscellany [2/4]
+** Miscellany [2/5]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -6194,7 +6227,12 @@ and uses visual instead."
 (defun my/doom-help-search-source (&optional initial-input)
   "Perform a text search across all files in `doom-emacs-dir'."
   (interactive)
-  (+ivy-file-search
+  (funcall (cond ((fboundp '+ivy-file-search)
+                  #'+ivy-file-search)
+                 ((fboundp '+vertico-file-search)
+                  #'+vertico-file-search)
+                 (t
+                  #'ignore))
     :query initial-input
     :in doom-emacs-dir
     :prompt (format "Search source for: ")))
@@ -6202,7 +6240,12 @@ and uses visual instead."
 (defun my/doom-help-search-modules (&optional initial-input)
   "Perform a text search across all files in `doom-modules-dir'."
   (interactive)
-  (+ivy-file-search
+  (funcall (cond ((fboundp '+ivy-file-search)
+                  #'+ivy-file-search)
+                 ((fboundp '+vertico-file-search)
+                  #'+vertico-file-search)
+                 (t
+                  #'ignore))
     :query initial-input
     :in doom-modules-dir
     :prompt "Search modules for: "))

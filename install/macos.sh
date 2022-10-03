@@ -71,7 +71,7 @@ $func: (recursively) delete? [y/N]: "
     ln -sf "$canonical_path/$binary" "$HOME/.local/bin"
 }
 
-# Install prerequisites for `completion/ivy` module
+# Install prerequisites for `completion/vertico` module
 brew install ripgrep
 
 # Install prerequisites for `ui/doom` module

@@ -1,7 +1,5 @@
 (setq company-idle-delay nil)
 
-(setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
-
 (defun my/toggle-window-dedicated ()
   "Control whether or not Emacs is allowed to display another
 buffer in current window."
@@ -57,10 +55,14 @@ buffer in current window."
           'doom-outrun-electric
         'eeowaa-henna))
 
-(after! (solaire-mode ivy)
-  (custom-theme-set-faces! 'doom-outrun-electric
-    `(solaire-hl-line-face :background
-                           ,(face-attribute 'ivy-current-match :background))))
+(after! (:and solaire-mode (:or vertico ivy))
+  (let ((face (cond
+               ((facep 'vertico-current) 'vertico-current)
+               ((facep 'ivy-current-match) 'ivy-current-match)
+               (t (error "Could not determine face")))))
+    (custom-theme-set-faces! 'doom-outrun-electric
+      `(solaire-hl-line-face :background
+                             ,(face-attribute face :background)))))
 
 ;; Define fonts that I like
 (setq my/fonts '(("Iosevka Comfy Fixed" ;; Remove " Fixed" if you want ligatures
@@ -1182,11 +1184,17 @@ ALIASES is a flat list of alias -> command pairs. e.g.
       (apply f r)))
   (advice-add 'markdown-edit-code-block :around #'my/markdown-edit-code-block))
 
-(when (modulep! :completion ivy)
+(cond
+ ((modulep! :completion ivy)
   (defalias 'counsel-markdown-goto #'counsel-outline)
   (map! :map markdown-mode-map
         :localleader
         "." #'counsel-markdown-goto))
+ ((modulep! :completion vertico)
+  (defalias 'consult-markdown-goto #'consult-outline)
+  (map! :map markdown-mode-map
+        :localleader
+        "." #'consult-markdown-goto)))
 
 (after! org
   (setq org-hide-leading-stars nil
@@ -1281,6 +1289,9 @@ just perform a complete cycle of `org-cycle'."
       (apply f r))
       (setq org-log-into-drawer restore))
   (advice-add 'org-add-note :around #'my/org-add-note-advice))
+
+(when (modulep! :completion ivy)
+  (setq counsel-org-goto-all-outline-path-prefix 'buffer-name))
 
 (after! org
   (setq org-refile-use-outline-path 'full-file-path))
@@ -1691,7 +1702,12 @@ and uses visual instead."
 (defun my/doom-help-search-source (&optional initial-input)
   "Perform a text search across all files in `doom-emacs-dir'."
   (interactive)
-  (+ivy-file-search
+  (funcall (cond ((fboundp '+ivy-file-search)
+                  #'+ivy-file-search)
+                 ((fboundp '+vertico-file-search)
+                  #'+vertico-file-search)
+                 (t
+                  #'ignore))
     :query initial-input
     :in doom-emacs-dir
     :prompt (format "Search source for: ")))
@@ -1699,7 +1715,12 @@ and uses visual instead."
 (defun my/doom-help-search-modules (&optional initial-input)
   "Perform a text search across all files in `doom-modules-dir'."
   (interactive)
-  (+ivy-file-search
+  (funcall (cond ((fboundp '+ivy-file-search)
+                  #'+ivy-file-search)
+                 ((fboundp '+vertico-file-search)
+                  #'+vertico-file-search)
+                 (t
+                  #'ignore))
     :query initial-input
     :in doom-modules-dir
     :prompt "Search modules for: "))
