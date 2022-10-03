@@ -163,6 +163,9 @@ npm install -g vscode-langservers-extracted
 # Install prerequisites for `lang/javascript` module
 npm install -g typescript typescript-language-server eslint trepan-ni
 
+# Install prerequisites for `lang/latex` module
+brew install mactex texlab wget
+
 # Install prerequisites for `lang/markdown` module
 npm install -g markdownlint-cli marked
 

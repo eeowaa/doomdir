@@ -287,6 +287,14 @@ npm install -g vscode-langservers-extracted
 # Install prerequisites for `lang/javascript` module
 npm install -g typescript typescript-language-server eslint trepan-ni
 
+# Install prerequisites for `lang/latex` module
+(cd ~/Documents/src/life/stow-dotfiles && make lua)
+sudo dnf -y install texlive-scheme-basic
+
+## Install lsp server: digestif
+sudo dnf -y install luarocks lua-devel
+luarocks --local install digestif
+
 # Install prerequisites for `lang/lua` module
 github_binary_release \
     --repo sumneko/lua-language-server \

@@ -4064,21 +4064,27 @@ This module adds support for [[https://julialang.org/][the Julia language]] to D
 This module adds Kotlin support to Emacs.
 #+end_quote
 
-** latex [1/1] :ARCHIVE:
+** latex [1/1]
 #+begin_quote
 Provide a helping hand when working with LaTeX documents.
 #+end_quote
 
-*** STRT [#A] Install prerequisites
+*** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/latex` module
 brew install mactex texlab wget
 #+end_src
 
-**** TODO Fedora
+**** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `lang/latex` module
+(cd ~/Documents/src/life/stow-dotfiles && make lua)
+sudo dnf -y install texlive-scheme-basic
+
+## Install lsp server: digestif
+sudo dnf -y install luarocks lua-devel
+luarocks --local install digestif
 #+end_src
 
 ** lean [0/0] :ARCHIVE:
