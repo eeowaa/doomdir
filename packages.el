@@ -39,11 +39,18 @@
 
 ;;; :lang
 
-;; Miscellaneous
-(package! sed-mode)
-(package! jenkinsfile-mode)
+;; Markup
 (package! adoc-mode)
+
+;; Filtering
+(package! sed-mode)
 (package! jq-mode)
+
+;; Config
+(package! systemd)
+
+;; Builds
+(package! jenkinsfile-mode)
 
 ;; Applescript
 (when IS-MAC

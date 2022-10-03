@@ -3536,11 +3536,18 @@ Miscellaneous configuration without a corresponding module.
 
 *** DONE [#A] Install packages
 #+begin_src emacs-lisp :tangle packages.el
-;; Miscellaneous
-(package! sed-mode)
-(package! jenkinsfile-mode)
+;; Markup
 (package! adoc-mode)
+
+;; Filtering
+(package! sed-mode)
 (package! jq-mode)
+
+;; Config
+(package! systemd)
+
+;; Builds
+(package! jenkinsfile-mode)
 
 ;; Applescript
 (when IS-MAC
