@@ -1,0 +1,83 @@
+#!/usr/bin/gawk -f
+## Summarize an Emacs timeclock log given on STDIN
+function die(msg) {
+    printf "ERROR: line %d: %s", NR, msg > "/dev/stderr"
+    exit error = 1
+}
+BEGIN {
+    prev_state = "o"  # "i": in, "o": out
+    prev_unixtime = 0 # seconds since epoch
+    stat_list[1] = "ACTIVE"
+    stat_list[2] = "INACTIVE"
+    stat_list[3] = "TOTAL"
+}
+{
+    state = $1
+    date = $2
+    time = $3
+    comment = $4
+
+    # Enforce i/o state toggling of log entries
+    if (state !~ /^[io]$/)   die("invalid state")
+    if (state == prev_state) die("state did not change")
+
+    # Enforce chronologically-ordered log entries
+    sprintf("date -d \"%s %s\" +%%s", date, time) | getline unixtime
+    if (unixtime < prev_unixtime) die("timestamps out of order")
+
+    # Determine the time difference in minutes
+    timediff = (unixtime - prev_unixtime) / 60
+
+    # Log time for the day
+    if (state == "i") {
+        if (!comment) die("no project specified")
+        if (prev_unixtime) clock["inactive"] += timediff
+    } else {  # "o"
+        clock[prev_comment] += timediff
+    }
+
+    # Save fields to compare against next line
+    prev_state = state
+    prev_unixtime = unixtime
+    prev_comment = comment
+}
+END {
+    # Get current time
+    "date +%s" | getline unixtime
+
+    # Determine the time difference in minutes
+    timediff = (unixtime - prev_unixtime) / 60
+
+    # Log time for the day
+    if (prev_state == "i") {
+        clock[prev_comment] += timediff
+    } else {  # "o"
+        clock["inactive"] += timediff
+    }
+
+    if (!error) {
+        # TODO: Look into `PROCINFO["sorted_in"]' instead of using `asorti'
+        num_projects = asorti(clock, p)
+        for (i = 1; i <= num_projects; ++i) {
+
+            # Update statistics
+            stat["TOTAL"] += clock[p[i]]
+            if (p[i] == "inactive") {
+                stat["INACTIVE"] = clock["inactive"]
+            } else {
+                stat["ACTIVE"] += clock[p[i]]
+                # Print project time in hours and minutes
+                printf "%-20s%s\n", p[i], m2hm(clock[p[i]])
+            }
+        }
+
+        # Print total and active times in hours and minutes
+        print "-------------------------"
+        for (i = 1; i <= length(stat_list); ++i)
+            printf "%-20s%s\n", stat_list[i], m2hm(stat[stat_list[i]])
+    }
+}
+# Convert minutes to hours-and-minutes
+function m2hm(m) {
+    return sprintf("%02d:%02d", (m / 60), (m % 60))
+}

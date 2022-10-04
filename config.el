@@ -287,7 +287,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   ("e" timeclock-visit-timelog "Edit")
   ("g" timeclock-reread-log "Reload")
   ("s" timeclock-status-string "Status")
-  ("r" timeclock-generate-report "Report")
+  ("r" my/timeclock-report "Report")
   ("q" nil "Quit"))
 
 (global-set-key (kbd "C-c d") 'hydra-debug/body)
@@ -816,6 +816,78 @@ deleting the final newline before inserting the \")))\"."
 (defalias 'ps 'list-processes)
 
 (setq debugger-stack-frame-as-list t)
+
+;;; Timeclock reporting
+
+(defvar my/timeclock-report-format 'text
+  "The format of the timeclock report (text or html).")
+
+(defvar my/timeclock-report-file
+  (let ((ext (if (eq my/timeclock-report-format 'html) ".html" "")))
+    (locate-user-emacs-file (concat "timelog-report" ext)
+                            (concat ".timelog-report" ext)))
+  "The location of the generated report file.")
+
+(defun my/timeclock-generate-report ()
+  "Generate a timeclock report and write it to `my/timeclock-report-file'.
+The format of the report is determined by `my/timeclock-report-format'."
+  (interactive)
+  (with-temp-file
+      my/timeclock-report-file
+    (if (eq my/timeclock-report-format 'html)
+        (timeclock-generate-report t)
+      (timeclock-generate-report)
+      (insert "\n\n")
+      (call-process (concat doom-user-dir "bin/timeclock-report")
+                    timeclock-file
+                    (current-buffer)
+                    t))))
+
+(defun my/timeclock-visit-report ()
+  "Open the timeclock report in another window."
+  (interactive)
+  (find-file-other-window my/timeclock-report-file))
+
+(defun my/timeclock-report ()
+  "Generate and view the timeclock report."
+  (interactive)
+  (my/timeclock-generate-report)
+  (my/timeclock-visit-report))
+
+;;; Timeclock exiting
+
+(defun my/timeclock-exit ()
+  "Clock out, always returning successfully.
+This function is the default for `my/timeclock-exit-function'."
+  (ignore-errors (timeclock-out)) t)
+
+(defvar my/timeclock-exit-function #'my/timeclock-exit
+  "Timeclock function to call when exiting Emacs.
+Use this instead of `timeclock-ask-before-exiting'.")
+
+(when (functionp my/timeclock-exit-function)
+  ;; HACK This relies on `custom-file' being a different file!
+  (custom-set-variables
+   '(timeclock-ask-before-exiting nil))
+  (add-hook 'kill-emacs-query-functions my/timeclock-exit-function))
+
+;;; Timeclock switching
+
+(defvar my/timeclock--current-project nil
+  "The current project to be clocked.
+This is automatically set when switching workspaces.")
+
+(add-hook! 'persp-before-switch-functions
+  (defun my/workspace-before-switch-h (name frame)
+    (setq my/timeclock--current-project name)
+    (ignore-errors (timeclock-out))))
+
+(add-hook! 'persp-activated-functions
+  (defun my/workspace-after-switch-h (type)
+    (and (eq type 'frame)
+         (not (string= my/timeclock--current-project +workspaces-main))
+         (ignore-errors
+           (timeclock-in nil my/timeclock--current-project)))))
 
 (after! projectile
   ;; For each atom in `obarray'
