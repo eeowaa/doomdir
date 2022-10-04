@@ -247,7 +247,7 @@ Aesthetic modules that affect the Emacs interface or user experience.
 ;;; :ui
 #+end_src
 
-** Miscellany [6/11]
+** Miscellany [7/12]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -312,6 +312,23 @@ https://www.emacswiki.org/emacs/TransparentEmacs
   "Sets the transparency of the frame window. 0=transparent/100=opaque"
   (interactive "nTransparency Value 0 - 100 opaque: ")
   (set-frame-parameter (selected-frame) 'alpha value))
+#+end_src
+
+*** DONE [#C] Set the frame title
+#+begin_src emacs-lisp :tangle yes
+;; Author: tecosaur
+(setq frame-title-format
+      '(""
+        (:eval
+         (if (s-contains-p org-roam-directory (or buffer-file-name ""))
+             (replace-regexp-in-string
+              ".*/[0-9]*-?" "☰ "
+              (subst-char-in-string ?_ ?  buffer-file-name))
+           "%b"))
+        (:eval
+         (let ((project-name (projectile-project-name)))
+           (unless (string= "-" project-name)
+             (format (if (buffer-modified-p)  " ◉ %s" "  ●  %s") project-name))))))
 #+end_src
 
 *** TODO [#C] Always display Imenu for current buffer in Ilist

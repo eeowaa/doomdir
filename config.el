@@ -36,6 +36,20 @@ buffer in current window."
   (interactive "nTransparency Value 0 - 100 opaque: ")
   (set-frame-parameter (selected-frame) 'alpha value))
 
+;; Author: tecosaur
+(setq frame-title-format
+      '(""
+        (:eval
+         (if (s-contains-p org-roam-directory (or buffer-file-name ""))
+             (replace-regexp-in-string
+              ".*/[0-9]*-?" "☰ "
+              (subst-char-in-string ?_ ?  buffer-file-name))
+           "%b"))
+        (:eval
+         (let ((project-name (projectile-project-name)))
+           (unless (string= "-" project-name)
+             (format (if (buffer-modified-p)  " ◉ %s" "  ●  %s") project-name))))))
+
 ;; `always' is just a no-op that returns `t'
 (defadvice! my/never-hide-modeline-a (&rest _)
   "Never hide the modeline"
