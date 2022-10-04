@@ -157,6 +157,9 @@ cpan install App::Git::Autofixup
 # Install prerequisites for `tools/terraform` module
 sudo dnf -y install terraform terraform-ls
 
+# Install prerequisites for `lang/Miscellany` module
+pipx install nginx-language-server
+
 # Install prerequisites for `lang/cc` module
 
 ## GCC

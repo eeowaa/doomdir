@@ -1112,6 +1112,19 @@ ALIASES is a flat list of alias -> command pairs. e.g.
         mac-option-modifier 'super
         mac-right-option-modifier 'hyper))
 
+(use-package! nginx-mode
+  :mode "nginx.*\\.conf"
+  :config
+  (when (modulep! :tools lsp)
+    (add-hook 'nginx-mode-local-vars-hook #'lsp! 'append))
+  (set-docsets! 'nginx-mode "Nginx"))
+
+(use-package! company-nginx
+  :when (modulep! :completion company)
+  :after nginx-mode
+  :config
+  (set-company-backend! 'nginx-mode 'company-nginx))
+
 (after! cc-mode
   (unless (stringp c-default-style)
     (if (assoc 'c-mode c-default-style)

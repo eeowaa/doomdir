@@ -3556,10 +3556,23 @@ Modules that bring support for a language or group of languages to Emacs.
 ;;; :lang
 #+end_src
 
-** Miscellany [1/2]
+** Miscellany [3/4]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
+
+*** DONE [#A] Install prerequisites
+**** DONE macOS
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/Miscellany` module
+pipx install nginx-language-server
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `lang/Miscellany` module
+pipx install nginx-language-server
+#+end_src
 
 *** DONE [#A] Install packages
 #+begin_src emacs-lisp :tangle packages.el
@@ -3572,6 +3585,9 @@ Miscellaneous configuration without a corresponding module.
 
 ;; Config
 (package! systemd)
+(package! nginx-mode)
+(when (modulep! :completion company)
+  (package! company-nginx))
 
 ;; Builds
 (package! jenkinsfile-mode)
@@ -3588,6 +3604,22 @@ Miscellaneous configuration without a corresponding module.
 
 Note that MongoDB queries use Javascript syntax, so there is no Mongo-specific
 mode derived from ~prog-mode~ (just use ~js-mode~).
+
+*** DONE [#A] Configure =nginx-mode=
+#+begin_src emacs-lisp :tangle yes
+(use-package! nginx-mode
+  :mode "nginx.*\\.conf"
+  :config
+  (when (modulep! :tools lsp)
+    (add-hook 'nginx-mode-local-vars-hook #'lsp! 'append))
+  (set-docsets! 'nginx-mode "Nginx"))
+
+(use-package! company-nginx
+  :when (modulep! :completion company)
+  :after nginx-mode
+  :config
+  (set-company-backend! 'nginx-mode 'company-nginx))
+#+end_src
 
 *** TODO [#A] Configure Perl modes
 Doom Emacs does not have a module for Perl 5. That said, Emacs has a lot of
