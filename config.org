@@ -1631,7 +1631,7 @@ https://emacs.stackexchange.com/questions/51989/how-to-truncate-lines-by-default
 (setq-default truncate-lines t)
 #+end_src
 
-** evil [6/7]
+** evil [5/7]
 #+begin_quote
 This holy module brings the vim experience to Emacs.
 #+end_quote
@@ -1677,11 +1677,6 @@ current buffer first unless the `force' argument is given."
 
 ;; Works for all variations of `:q'
 (advice-add 'evil-quit :override #'my/evil-quit)
-#+end_src
-
-*** DONE [#B] Define modes that should always come up in Emacs state
-#+begin_src emacs-lisp :tangle yes
-(pushnew! evil-emacs-state-modes 'noaa-mode)
 #+end_src
 
 *** DONE [#B] Do not recenter windows after splitting :hack:
@@ -1793,6 +1788,13 @@ and then hit =g=, finally switching back to Normal state via =C-z=.
 Options to look at:
 + ~evil-collection-helpful-maps~
 + ~helpful-mode-map~
+
+*** STRT [#B] Define modes that should always come up in Emacs state
+For whatever reason, ~vterm~ is starting in "insert" state.
+
+#+begin_src emacs-lisp :tangle yes
+(pushnew! evil-emacs-state-modes 'noaa-mode 'vterm-mode)
+#+end_src
 
 *** TODO [#B] Improve visual line navigation
 I would like to use the standard =gj= and =gk= Vim bindings to navigate between
@@ -2615,7 +2617,7 @@ tput: unknown terminal "eterm-color"
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [5/8]
+** vterm [5/9]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
@@ -2732,6 +2734,48 @@ So far, the only remote shell method that's working for me is ANSI Term (=term=)
 via =kubel=, though ideally I'd use =vterm= with =kubernetes= and get rid of
 =kubel= altogether (the working remote shell capability is the only reason why
 I'm keeping that package around).
+
+*** STRT [#A] Get =vterm= working with ~kubernetes~ :hack:
+The trick is to redefine ~kubernetes-utils-vterm-start~, which is called by
+~kubernetes-exec-using-vterm~, which is called by ~kubernetes-exec~. I don't
+know exactly why there is a problem; see the docstring for the advice named
+~my/kubernetes-utils-vterm-start-a~ for more information.
+
+This is just the beginning; more can and should be done:
++ [ ] Allow multiple =vterm= buffers instead of just ~*kubernetes exec vterm*~.
++ [ ] Integrate with =tramp= to allow local editing of files within containers.
++ [ ] Set =popup= rules for these buffers.
+
+#+begin_src emacs-lisp :tangle yes
+(after! vterm
+  (defadvice! my/kubernetes-utils-vterm-start-a (bufname command args)
+    "Fix `kubernetes-utils-vterm-start'.
+The workaround is to `pop-to-buffer' for an existing buffer
+instead of using a `when-let' form to conditionally kill it,
+which causes problems even if there is no existing buffer."
+    :override 'kubernetes-utils-vterm-start
+    (let ((existing (get-buffer bufname)))
+      (if existing
+          ;; Do not kill the buffer!
+          (pop-to-buffer existing)
+        (let* ((vterm-buffer-name bufname)
+               (command-str (format "%s %s" command (string-join args " ")))
+               (vterm-shell command-str))
+          (vterm-other-window))))))
+#+end_src
+
+Example use:
+#+begin_src emacs-lisp :tangle no
+(kubernetes-utils-vterm-start
+ "*kubernetes exec vterm*"
+ "kubectl" '("exec"
+             "--stdin"
+             "--tty"
+             "--namespace=<ns>" ;; replace this
+             "<pod>"            ;; replace this
+             "--"
+             "ash"))
+#+end_src
 
 *** HOLD [#A] Allow scrolling back while output is being written
 https://github.com/akermu/emacs-libvterm/issues/397

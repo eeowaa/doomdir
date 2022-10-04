@@ -665,8 +665,6 @@ current buffer first unless the `force' argument is given."
 ;; Works for all variations of `:q'
 (advice-add 'evil-quit :override #'my/evil-quit)
 
-(pushnew! evil-emacs-state-modes 'noaa-mode)
-
 (evil-define-command my/evil-window-split-a (&optional count file)
   "Same as `+evil-window-split-a', but does not recenter the window."
   :repeat nil
@@ -747,6 +745,8 @@ current buffer first unless the `force' argument is given."
     :e "H" #'solitaire-move-left
     :e "K" #'solitaire-move-up
     :e "J" #'solitaire-move-down))
+
+(pushnew! evil-emacs-state-modes 'noaa-mode 'vterm-mode)
 
 (after! projectile
 
@@ -1030,6 +1030,22 @@ ALIASES is a flat list of alias -> command pairs. e.g.
   (let ((alist (assoc-delete-all "kubectl" vterm-tramp-shells)))
     (setq vterm-tramp-shells
           (push '("kubectl" "sh -c \"clear; (bash || ash || sh)\"") alist))))
+
+(after! vterm
+  (defadvice! my/kubernetes-utils-vterm-start-a (bufname command args)
+    "Fix `kubernetes-utils-vterm-start'.
+The workaround is to `pop-to-buffer' for an existing buffer
+instead of using a `when-let' form to conditionally kill it,
+which causes problems even if there is no existing buffer."
+    :override 'kubernetes-utils-vterm-start
+    (let ((existing (get-buffer bufname)))
+      (if existing
+          ;; Do not kill the buffer!
+          (pop-to-buffer existing)
+        (let* ((vterm-buffer-name bufname)
+               (command-str (format "%s %s" command (string-join args " ")))
+               (vterm-shell command-str))
+          (vterm-other-window))))))
 
 (after! flycheck
   (defadvice! my/org-src-a (&rest _)
