@@ -2186,6 +2186,12 @@ Improvements:
 + [ ] Sort report output by time spent on projects
 + [ ] Allow categorization of projects (for reporting purposes)
 + [ ] Set popup rules for ~timeclock-file~ and ~my/timeclock-report-file~
++ [ ] Use a [[info:elisp#Timers][timer]] to delay switching projects (including clocking out) until a
+  different workspace has been selected for a non-trivial amount of time. This
+  will allow me to cycle between workspaces without clocking into and out of
+  projects that I never put any time into (just navigating through their
+  workspace), both noticeably increasing performance and reducing clutter in
+  ~timeclock-file~.
 
 #+begin_src emacs-lisp :tangle yes
 ;;; Timeclock reporting
