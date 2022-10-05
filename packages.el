@@ -22,6 +22,10 @@
 ;; More pretty themes by prot
 (package! ef-themes)
 
+;; Vim-like diff
+(package! vdiff)
+(package! vdiff-magit)
+
 ;;; :editor
 
 ;;; :emacs

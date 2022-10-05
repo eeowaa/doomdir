@@ -247,7 +247,7 @@ Aesthetic modules that affect the Emacs interface or user experience.
 ;;; :ui
 #+end_src
 
-** Miscellany [7/12]
+** Miscellany [7/13]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -260,6 +260,10 @@ Miscellaneous configuration without a corresponding module.
 
 ;; More pretty themes by prot
 (package! ef-themes)
+
+;; Vim-like diff
+(package! vdiff)
+(package! vdiff-magit)
 #+end_src
 
 *** DONE [#B] Dedicate windows
@@ -330,6 +334,9 @@ https://www.emacswiki.org/emacs/TransparentEmacs
            (unless (string= "-" project-name)
              (format (if (buffer-modified-p)  " ◉ %s" "  ●  %s") project-name))))))
 #+end_src
+
+*** TODO [#B] Configure =vdiff=
+See also: [[file:~/.config/emacs/.local/straight/repos/evil-collection/modes/vdiff/evil-collection-vdiff.el][evil-collection-vdiff]]
 
 *** TODO [#C] Always display Imenu for current buffer in Ilist
 If the current buffer does not have Imenu entries, I do not want old ones to
