@@ -2846,8 +2846,9 @@ integration with git.
 
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
-(add-to-list 'auto-mode-alist '("/git/config\\.d/.+" . gitconfig-mode))
-(add-to-list 'auto-mode-alist '("\\.gitignore\\'" . gitignore-mode))
+(pushnew! auto-mode-alist
+          '("/git/config\\.d/.+" . gitconfig-mode)
+          '("\\.gitignore\\'" . gitignore-mode))
 #+end_src
 
 * :term
@@ -3030,8 +3031,8 @@ These depend on the existence of a ~vterm_cmd~ function. See the =README.md= for
   (defun my/vterm--write-user-emacs-directory (tmpfile)
     "Write the string evaluation of `user-emacs-directory' to TMPFILE."
     (f-write user-emacs-directory 'utf-8 tmpfile))
-  (add-to-list 'vterm-eval-cmds '("my/vterm--write-user-emacs-directory"
-                                  my/vterm--write-user-emacs-directory))
+  (pushnew! vterm-eval-cmds '("my/vterm--write-user-emacs-directory"
+                              my/vterm--write-user-emacs-directory))
 
   (defun my/set-vterm-alias (&rest aliases)
     "Define aliases for vterm.
@@ -3047,7 +3048,7 @@ ALIASES is a flat list of alias -> command pairs. e.g.
       (while aliases
         (let ((alias (pop aliases))
               (command (pop aliases)))
-          (add-to-list 'vterm-eval-cmds (list command (intern command)))
+          (pushnew! vterm-eval-cmds (list command (intern command)))
           (insert (format "alias %s='vterm_cmd %s'\n" alias command))))))
 
   (my/set-vterm-alias
@@ -3208,7 +3209,7 @@ errors should not be reported*.
 :END:
 #+begin_src emacs-lisp :tangle no
 (mapc (lambda (config-file-dir)
-        (add-to-list '+emacs-lisp-disable-flycheck-in-dirs config-file-dir))
+        (pushnew! +emacs-lisp-disable-flycheck-in-dirs config-file-dir))
       ;; Unique directory components of canonical config file paths
       (delete-dups
        (mapcar (lambda (config-file)
@@ -3660,7 +3661,10 @@ npm install -g dockerfile-language-server-nodejs
 
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
-(add-to-list 'auto-mode-alist '("/Containerfile\\'" . dockerfile-mode))
+;; Replace default association with a more generic one
+(delq! "/Dockerfile\\(?:\\.[^/\\]*\\)?\\'" auto-mode-alist #'assoc-string)
+(pushnew! auto-mode-alist
+          '("/[^/\\]*\\<\\(Docker\\|Container\\)file\\>[^/\\]*$" . dockerfile-mode))
 #+end_src
 
 ** editorconfig [1/1]
@@ -3713,7 +3717,7 @@ pipx install --include-deps jupyter
 ;; HACK The machinery provided by `ob-ein-languages' and `ob-ein--babelize-lang'
 ;; is insufficient for bash, so we do it by hand.
 (after! ob
-  (add-to-list 'org-babel-load-languages '(ein . t))
+  (pushnew! org-babel-load-languages '(ein . t))
   (require 'ob-ein)
 
   ;; Execute in an anonymous local session by default
@@ -3727,7 +3731,7 @@ pipx install --include-deps jupyter
     (define-derived-mode bash-mode sh-mode "Bash-script"
       "Major mode for editing bash scripts."
       (sh-set-shell "bash" nil nil)))
-  (add-to-list 'org-src-lang-modes '("ein-bash" . "bash"))
+  (pushnew! org-src-lang-modes '("ein-bash" . "bash"))
 
   ;; Send output from `ein-bash' source blocks back to org buffer
   (let ((alist (assoc-delete-all :results ob-ein-default-header-args:ein)))
@@ -4375,7 +4379,7 @@ https://www.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_thread/eqrf69
 
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
-(add-to-list 'auto-mode-alist '("Cask\\'" . lisp-data-mode))
+(pushnew! auto-mode-alist '("Cask\\'" . lisp-data-mode))
 #+end_src
 
 *** DONE [#A] Load my own local packages
@@ -4611,7 +4615,7 @@ npm install -g typescript typescript-language-server eslint trepan-ni
 
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
-(add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
+(pushnew! auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
 #+end_src
 
 *** TODO [#A] Fix broken filename-mode association for =*.js= files
@@ -4736,7 +4740,7 @@ pipx install grip
 | <a.*>.*</a> |       |
 
 #+begin_src emacs-lisp :tangle yes
-(add-to-list 'font-lock-extra-managed-props 'display)
+(pushnew! font-lock-extra-managed-props 'display)
 (font-lock-add-keywords
  'markdown-mode
  '(("\\(\\\\\\)[[().-]" 1 '(face nil display ""))
@@ -4784,7 +4788,7 @@ Reference: [[*Disable error reporting in sh-mode buffers][Disable error reportin
 
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
-(add-to-list 'auto-mode-alist '("\\.mdx\\'" . markdown-mode))
+(pushnew! auto-mode-alist '("\\.mdx\\'" . markdown-mode))
 #+end_src
 
 *** DONE [#B] Show edit buffer in the current window
@@ -4975,8 +4979,7 @@ References:
 
 #+begin_src emacs-lisp :tangle yes
 (after! org
-  (dolist (ol-module '(ol-man ol-info ol-w3m))
-    (add-to-list 'org-modules ol-module)))
+  (pushnew! org-modules 'ol-man 'ol-info 'ol-w3m))
 #+end_src
 
 **** DONE [#B] Open file links in another window
@@ -5538,8 +5541,8 @@ More than a simple "Hello World":
 
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
-(add-to-list 'auto-mode-alist '("pylint" . conf-mode))
-(add-to-list 'auto-mode-alist '("/activate\\'" . shell-script-mode))
+(pushnew! auto-mode-alist '("pylint" . conf-mode)
+                          '("/activate\\'" . shell-script-mode))
 #+end_src
 
 *** DONE [#A] Fix quirks with keymaps
@@ -5745,9 +5748,8 @@ Reference: https://gagbo.net/post/dap-mode-rust/
 
 *** DONE [#C] Open =Cargo.lock= files as read-only TOML config files
 #+begin_src emacs-lisp :tangle yes
-(dolist (cell '((auto-mode-alist . conf-toml-mode)
-                (auto-minor-mode-alist . read-only-mode)))
-  (add-to-list (car cell) (cons "/Cargo\\.lock\\'" (cdr cell))))
+(pushnew! auto-mode-alist '("/Cargo\\.lock\\'" . conf-toml-mode))
+(pushnew! auto-minor-mode-alist '("/Cargo\\.lock\\'" . read-only-mode))
 #+end_src
 
 ** scala [0/0] :ARCHIVE:
@@ -5828,10 +5830,9 @@ and indicators in ~sh-mode~.
 
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
-(dolist (re '("/\\.config/\\(shell\\|bash\\)/.+"
-              "\\.\\(env\\|cygport\\)\\'"))
-  (add-to-list 'auto-mode-alist
-               `(,re . shell-script-mode)))
+(pushnew! auto-mode-alist
+          '("/\\.config/\\(shell\\|bash\\)/.+" . shell-script-mode)
+          '("\\.\\(env\\|cygport\\)\\'" . shell-script-mode))
 #+end_src
 
 *** TODO [#C] Edit the current region in an indirect buffer
@@ -5954,7 +5955,7 @@ server implementation and corresponding Emacs mode.
                             ":" (one-or-more digit) ":" (one-or-more digit) ":"
                             (id "E" (one-or-more digit)) ":" (message) line-end))
     :modes (yaml-mode))
-    (add-to-list 'flycheck-checkers 'cfn-lint))
+    (pushnew! flycheck-checkers 'cfn-lint))
 #+end_src
 
 A better way to do this would probably be through a project mode. (Refer to
@@ -6840,7 +6841,7 @@ and uses visual instead."
 #+begin_src emacs-lisp :tangle yes
 (when (fboundp 'find-sibling-file)
   ;; Same directory, same base file name, different extension
-  (add-to-list 'find-sibling-rules '("\\([^/]+\\)\\..*\\'" "\\1\\..*\\'"))
+  (pushnew! find-sibling-rules '("\\([^/]+\\)\\..*\\'" "\\1\\..*\\'"))
   (define-key! doom-leader-file-map
     "o" #'find-sibling-file)
   (after! which-key

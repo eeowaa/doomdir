@@ -920,8 +920,9 @@ This is automatically set when switching workspaces.")
 (after! git-commit
   (delq! 'overlong-summary-line git-commit-style-convention-checks))
 
-(add-to-list 'auto-mode-alist '("/git/config\\.d/.+" . gitconfig-mode))
-(add-to-list 'auto-mode-alist '("\\.gitignore\\'" . gitignore-mode))
+(pushnew! auto-mode-alist
+          '("/git/config\\.d/.+" . gitconfig-mode)
+          '("\\.gitignore\\'" . gitignore-mode))
 
 (defun my/with-editor-export ()
   "Run `with-editor-export-editor' for all envvars that I care about"
@@ -982,8 +983,8 @@ This is automatically set when switching workspaces.")
   (defun my/vterm--write-user-emacs-directory (tmpfile)
     "Write the string evaluation of `user-emacs-directory' to TMPFILE."
     (f-write user-emacs-directory 'utf-8 tmpfile))
-  (add-to-list 'vterm-eval-cmds '("my/vterm--write-user-emacs-directory"
-                                  my/vterm--write-user-emacs-directory))
+  (pushnew! vterm-eval-cmds '("my/vterm--write-user-emacs-directory"
+                              my/vterm--write-user-emacs-directory))
 
   (defun my/set-vterm-alias (&rest aliases)
     "Define aliases for vterm.
@@ -999,7 +1000,7 @@ ALIASES is a flat list of alias -> command pairs. e.g.
       (while aliases
         (let ((alias (pop aliases))
               (command (pop aliases)))
-          (add-to-list 'vterm-eval-cmds (list command (intern command)))
+          (pushnew! vterm-eval-cmds (list command (intern command)))
           (insert (format "alias %s='vterm_cmd %s'\n" alias command))))))
 
   (my/set-vterm-alias
@@ -1115,14 +1116,17 @@ which causes problems even if there is no existing buffer."
                 (sort process-environment #'string<)))
     (princ (concat var "\n"))))
 
-(add-to-list 'auto-mode-alist '("/Containerfile\\'" . dockerfile-mode))
+;; Replace default association with a more generic one
+(delq! "/Dockerfile\\(?:\\.[^/\\]*\\)?\\'" auto-mode-alist #'assoc-string)
+(pushnew! auto-mode-alist
+          '("/[^/\\]*\\<\\(Docker\\|Container\\)file\\>[^/\\]*$" . dockerfile-mode))
 
 (setq ein:output-area-inlined-images t)
 
 ;; HACK The machinery provided by `ob-ein-languages' and `ob-ein--babelize-lang'
 ;; is insufficient for bash, so we do it by hand.
 (after! ob
-  (add-to-list 'org-babel-load-languages '(ein . t))
+  (pushnew! org-babel-load-languages '(ein . t))
   (require 'ob-ein)
 
   ;; Execute in an anonymous local session by default
@@ -1136,7 +1140,7 @@ which causes problems even if there is no existing buffer."
     (define-derived-mode bash-mode sh-mode "Bash-script"
       "Major mode for editing bash scripts."
       (sh-set-shell "bash" nil nil)))
-  (add-to-list 'org-src-lang-modes '("ein-bash" . "bash"))
+  (pushnew! org-src-lang-modes '("ein-bash" . "bash"))
 
   ;; Send output from `ein-bash' source blocks back to org buffer
   (let ((alist (assoc-delete-all :results ob-ein-default-header-args:ein)))
@@ -1272,7 +1276,7 @@ which causes problems even if there is no existing buffer."
       (forward-line 1)
       (insert ";; => "))))
 
-(add-to-list 'auto-mode-alist '("Cask\\'" . lisp-data-mode))
+(pushnew! auto-mode-alist '("Cask\\'" . lisp-data-mode))
 
 ;; Add $DOOMDIR/lisp to `load-path'
 (add-load-path! (concat doom-user-dir "lisp"))
@@ -1282,7 +1286,7 @@ which causes problems even if there is no existing buffer."
 (after! lsp-haskell
   (setq lsp-haskell-formatting-provider "brittany"))
 
-(add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
+(pushnew! auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
 
 (after! lua-mode
   (setq lsp-clients-lua-language-server-install-dir
@@ -1297,7 +1301,7 @@ which causes problems even if there is no existing buffer."
         (concat (file-name-as-directory lsp-clients-lua-language-server-install-dir)
                 "main.lua")))
 
-(add-to-list 'font-lock-extra-managed-props 'display)
+(pushnew! font-lock-extra-managed-props 'display)
 (font-lock-add-keywords
  'markdown-mode
  '(("\\(\\\\\\)[[().-]" 1 '(face nil display ""))
@@ -1328,7 +1332,7 @@ which causes problems even if there is no existing buffer."
 (setq-hook! 'markdown-mode-hook
   lsp-diagnostics-provider :none)
 
-(add-to-list 'auto-mode-alist '("\\.mdx\\'" . markdown-mode))
+(pushnew! auto-mode-alist '("\\.mdx\\'" . markdown-mode))
 
 (after! markdown-mode
   (defun my/markdown-edit-code-block (f &rest r)
@@ -1407,8 +1411,7 @@ just perform a complete cycle of `org-cycle'."
                                 #'my/org-insert-heading-evil-state))
 
 (after! org
-  (dolist (ol-module '(ol-man ol-info ol-w3m))
-    (add-to-list 'org-modules ol-module)))
+  (pushnew! org-modules 'ol-man 'ol-info 'ol-w3m))
 
 (after! org
   (setcdr (assoc 'file org-link-frame-setup) #'find-file-other-window))
@@ -1645,8 +1648,8 @@ Optional argument INFO is a plist of options."
   (setq fill-column 79)
   (display-fill-column-indicator-mode))
 
-(add-to-list 'auto-mode-alist '("pylint" . conf-mode))
-(add-to-list 'auto-mode-alist '("/activate\\'" . shell-script-mode))
+(pushnew! auto-mode-alist '("pylint" . conf-mode)
+                          '("/activate\\'" . shell-script-mode))
 
 ;; Add "pipenv" label to "e" prefix key
 (after! pipenv
@@ -1657,9 +1660,8 @@ Optional argument INFO is a plist of options."
 (after! dap-mode
   (setq dap-python-debugger 'debugpy))
 
-(dolist (cell '((auto-mode-alist . conf-toml-mode)
-                (auto-minor-mode-alist . read-only-mode)))
-  (add-to-list (car cell) (cons "/Cargo\\.lock\\'" (cdr cell))))
+(pushnew! auto-mode-alist '("/Cargo\\.lock\\'" . conf-toml-mode))
+(pushnew! auto-minor-mode-alist '("/Cargo\\.lock\\'" . read-only-mode))
 
 (setq-default sh-shell-file "/bin/sh")
 
@@ -1679,10 +1681,9 @@ Optional argument INFO is a plist of options."
 (setq-hook! 'sh-mode-hook
   lsp-diagnostics-provider :none)
 
-(dolist (re '("/\\.config/\\(shell\\|bash\\)/.+"
-              "\\.\\(env\\|cygport\\)\\'"))
-  (add-to-list 'auto-mode-alist
-               `(,re . shell-script-mode)))
+(pushnew! auto-mode-alist
+          '("/\\.config/\\(shell\\|bash\\)/.+" . shell-script-mode)
+          '("\\.\\(env\\|cygport\\)\\'" . shell-script-mode))
 
 (after! lsp-yaml
   (let ((f lsp-yaml-schema-store-local-db))
@@ -1885,7 +1886,7 @@ and uses visual instead."
 
 (when (fboundp 'find-sibling-file)
   ;; Same directory, same base file name, different extension
-  (add-to-list 'find-sibling-rules '("\\([^/]+\\)\\..*\\'" "\\1\\..*\\'"))
+  (pushnew! find-sibling-rules '("\\([^/]+\\)\\..*\\'" "\\1\\..*\\'"))
   (define-key! doom-leader-file-map
     "o" #'find-sibling-file)
   (after! which-key
