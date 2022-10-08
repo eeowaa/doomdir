@@ -1770,6 +1770,20 @@ ALIGN should be a keyword :left or :right."
 (define-key key-translation-map (kbd "C-i") (kbd "TAB"))
 (global-set-key (kbd "C-M-,") #'better-jumper-jump-forward)
 
+(add-hook! 'kill-emacs-query-functions
+  (defun my/check-config-h ()
+    "Check for Doom Emacs config errors before exiting."
+    (let ((config-file (expand-file-name "config.el" doom-user-dir)))
+      (if (not (file-exists-p config-file))
+          (y-or-n-p "WARNING: config.el does not exist! Exit anyway? ")
+        (with-current-buffer (find-file-noselect config-file)
+          (condition-case _ (check-parens)
+            (user-error
+             (cond
+              ((y-or-n-p "WARNING: config.el contains unbalanced parentheses. Edit file? ")
+               (pop-to-buffer (current-buffer)) nil)
+              (t t)))))))))
+
 (setq projectile-project-search-path
       (list
        ;; Standard source directories

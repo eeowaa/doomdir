@@ -6547,7 +6547,7 @@ for you to customize it yourself. It is best to load these last.
 ;;; :config
 #+end_src
 
-** Miscellany [2/5]
+** Miscellany [3/5]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -6644,6 +6644,28 @@ References:
 ;; Map C-i to TAB and provide an alternative mapping for `better-jumper-jump-forward'
 (define-key key-translation-map (kbd "C-i") (kbd "TAB"))
 (global-set-key (kbd "C-M-,") #'better-jumper-jump-forward)
+#+end_src
+
+*** DONE [#A] Detect invalid config before quitting Emacs
+It is very annoying to launch Emacs only to find that your configuration is
+broken. In some cases, this can be prevented by warning the user about an
+invalid config file before quitting Emacs, giving the user a chance to fix
+problem.
+
+#+begin_src emacs-lisp :tangle yes
+(add-hook! 'kill-emacs-query-functions
+  (defun my/check-config-h ()
+    "Check for Doom Emacs config errors before exiting."
+    (let ((config-file (expand-file-name "config.el" doom-user-dir)))
+      (if (not (file-exists-p config-file))
+          (y-or-n-p "WARNING: config.el does not exist! Exit anyway? ")
+        (with-current-buffer (find-file-noselect config-file)
+          (condition-case _ (check-parens)
+            (user-error
+             (cond
+              ((y-or-n-p "WARNING: config.el contains unbalanced parentheses. Edit file? ")
+               (pop-to-buffer (current-buffer)) nil)
+              (t t)))))))))
 #+end_src
 
 *** LOOP [#B] Add search directories for =projectile=
