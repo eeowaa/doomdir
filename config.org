@@ -214,7 +214,7 @@ sudo sudo dnf -y install ripgrep
 (setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
 #+end_src
 
-** vertico [2/2]
+** vertico [2/3]
 #+begin_quote
 This module enhances the Emacs search and completion experience, and also
 provides a united interface for project search and replace, powered by [[https://github.com/BurntSushi/ripgrep/][ripgrep]].
@@ -236,6 +236,11 @@ sudo sudo dnf -y install ripgrep
 *** DONE [#B] Replace =ivy= with =vertico=
 - [X] Enable in =init.el=
 - [X] Refactor for =vertico=
+
+*** TODO [#B] Fix bug with cursor color getting stuck when previewing themes
+When previewing themes with =consult=, sometimes the cursor color gets stuck.
+Changing themes does not change the cursor color, so some themes become
+unreadable (you cannot see the cursor clearly anymore).
 
 * :ui
 #+begin_quote
@@ -3108,6 +3113,9 @@ know exactly why there is a problem; see the docstring for the advice named
 This is just the beginning; more can and should be done:
 + [ ] Allow multiple =vterm= buffers instead of just ~*kubernetes exec vterm*~.
 + [ ] Integrate with =tramp= to allow local editing of files within containers.
+  - =kubernetes-el-tramp= (package)
+  - ~vterm-tramp-shells~ (option)
+  - ~vterm--get-shell~ (function)
 + [ ] Set =popup= rules for these buffers.
 
 #+begin_src emacs-lisp :tangle yes
@@ -3628,7 +3636,7 @@ However, be wary of @purcell's comments on =direnv.el=:
   use the wrong environment. (This is probably quite rare in practice.)
 #+end_quote
 
-** docker [2/2]
+** docker [2/4]
 #+begin_quote
 This module allows you to manipulate Docker images, containers & more from
 Emacs.
@@ -3665,6 +3673,88 @@ npm install -g dockerfile-language-server-nodejs
 (delq! "/Dockerfile\\(?:\\.[^/\\]*\\)?\\'" auto-mode-alist #'assoc-string)
 (pushnew! auto-mode-alist
           '("/[^/\\]*\\<\\(Docker\\|Container\\)file\\>[^/\\]*$" . dockerfile-mode))
+#+end_src
+
+*** TODO [#A] Seamlessly edit files from =vterm= buffers to Docker containers
+1. [ ] Enable directory tracking
+
+   From [[~/.config/emacs/.local/straight/repos/emacs-libvterm/README.md]]:
+   #+begin_src markdown
+   `vterm` supports _directory tracking_. If this feature is enabled, the default
+   directory in Emacs and the current working directory in `vterm` are synced. As a
+   result, interactive functions that ask for a path or a file (e.g., `dired` or
+   `find-file`) will do so starting from the current location.
+   #+end_src
+
+   Setup is shell-dependent. However, busybox's =ash= should hopefully provide a
+   good baseline. From https://programmerall.com/article/72172461332/:
+   #+begin_quote
+   Supported via ~bb_process_escape_sequence~:
+   - ~\a~    ASCII bell character (07)
+   - ~\e~    ASCII escape character (033)
+   - ~\n~    newline
+   - ~\r~    carriage return
+   - ~\\~    backslash
+   - ~\nnn~  char with octal code nnn
+
+   Supported:
+   - ~\$~    if the effective UID is 0, a #, otherwise a $
+   - ~\w~    current working directory, with $HOME abbreviated with a tilde
+             Note: we do not support $PROMPT_DIRTRIM=n feature
+   - ~\W~    basename of the current working directory, with $HOME abbreviated with a tilde
+   - ~\h~    hostname up to the first '.'
+   - ~\H~    hostname
+   - ~\u~    username
+   - ~\[~    begin a sequence of non-printing characters
+   - ~\]~    end a sequence of non-printing characters
+   - ~\T~    current time in 12-hour HH:MM:SS format
+   - ~\@~    current time in 12-hour am/pm format
+   - ~\A~    current time in 24-hour HH:MM format
+   - ~\t~    current time in 24-hour HH:MM:SS format
+
+   (all of the above work as ~\A~)
+
+   Not supported:
+   - ~\!~    history number of this command
+   - ~\#~    command number of this command
+   - ~\j~    number of jobs currently managed by the shell
+   - ~\l~    basename of the shell's terminal device name
+   - ~\s~    name of the shell, the basename of $0 (the portion following the final slash)
+   - ~\V~    release of bash, version + patch level (e.g., 2.00.0)
+   - ~\d~    date in "Weekday Month Date" format (e.g., "Tue May 26")
+   - ~\D{format}~ format is passed to strftime(3).
+             An empty format results in a locale-specific time representation.
+             The braces are required.
+
+   Mishandled by ~bb_process_escape_sequence~:
+   - ~\v~    version of bash (e.g., 2.00)
+   #+end_quote
+
+
+   From https://github.com/brgl/busybox/blob/master/libbb/lineedit.c:
+   #+begin_quote
+   Compatibly with readline, use the ~\[~ escape to begin a sequence of
+   non-printing characters, and the ~\]~ escape to signal the end of such a
+   sequence. Example:
+
+   : PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w \$\[\033[00m\] '
+   #+end_quote
+
+2. [ ] Test =tramp= support (e.g. ~find-file~ opens files correctly via
+   ~default-directory~, managed via =vterm= directory tracking)
+
+   - https://emacs.stackexchange.com/questions/13861/combining-ssh-through-term-with-tramp-to-open-file-in-buffer
+
+3. [ ] Set shell aliases (e.g. to open files in Emacs)
+
+4. [ ] =with-editor= support to export =EDITOR= appropriately.
+
+*** TODO [#B] Enable prompt tracking from =vterm= buffers to Docker containers
+#+begin_src markdown
+And `vterm` supports _prompt tracking_. If this feature is enabled, Emacs knows
+where the prompt ends, you needn't customize `term-prompt-regexp` any more.
+Then you can use `vterm-next-prompt` and `vterm-previous-prompt`
+moving to end of next/previous prompt. The default keybinding is `C-c C-n` and `C-c C-p`.
 #+end_src
 
 ** editorconfig [1/1]
@@ -4064,7 +4154,7 @@ Modules that bring support for a language or group of languages to Emacs.
 ;;; :lang
 #+end_src
 
-** Miscellany [3/4]
+** Miscellany [2/4]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -4113,7 +4203,12 @@ pipx install nginx-language-server
 Note that MongoDB queries use Javascript syntax, so there is no Mongo-specific
 mode derived from ~prog-mode~ (just use ~js-mode~).
 
-*** DONE [#A] Configure =nginx-mode=
+*** TODO [#A] Configure =nginx-mode=
+Things that work sometimes, but that I cannot replicate:
+
+- ~+lookup/documentation~ (provided by LSP)
+- ~company-complete-common~ (provided by company or LSP)
+
 #+begin_src emacs-lisp :tangle yes
 (use-package! nginx-mode
   :mode "nginx.*\\.conf"
