@@ -67,7 +67,7 @@ buffer in current window."
 (setq doom-theme
       (if initial-window-system
           'doom-outrun-electric
-        'eeowaa-henna))
+        'ef-tritanopia-dark))
 
 (after! (:and solaire-mode (:or vertico ivy))
   (let ((face (cond

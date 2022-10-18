@@ -479,7 +479,9 @@ For a 256-color terminal, ~doom-badger~ is OK, but I prefer ~doom-henna~.
 Unfortunately, it does not satisfy the 3rd requirement, so I made a patched copy
 of the theme called ~eeowaa-henna~ that fixes the problem. Note that I created a
 new theme instead of customizing ~doom-henna~ because I prefer ~doom-henna~ over
-~eeowaa-henna~ in GUI Emacs and like using it sometimes.
+~eeowaa-henna~ in GUI Emacs and like using it sometimes. *UPDATE*: The
+=ef-themes= package provides more themes that satisfy all three requirements in
+a 256-color terminal; I have migrated to ~ef-tritanopia-dark~ for now.
 
 As for GUI Emacs, I love ~doom-outrun-electric~ for its clear separation between
 windows and for its cool color palette. However, the background color of the
@@ -494,7 +496,7 @@ other windows that use =solaire-mode=.
 (setq doom-theme
       (if initial-window-system
           'doom-outrun-electric
-        'eeowaa-henna))
+        'ef-tritanopia-dark))
 
 (after! (:and solaire-mode (:or vertico ivy))
   (let ((face (cond
