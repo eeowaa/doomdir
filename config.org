@@ -1428,7 +1428,16 @@ primarily useful for non-English Emacs users, for whom Doom's built-in unicode
 support in insufficient.
 #+end_quote
 
-** vc-gutter [1/2]
+** vc-gutter [2/3]
+*** DONE [#B] Enable =vc-gutter= in terminal Emacs
+TUI Emacs does not have a fringe; however, it does have a margin. Look to Doom
+module documentation for =:ui vc-gutter= and =:os tty= for details.
+
+#+begin_src emacs-lisp :tangle yes
+(after! diff-hl
+  (unless (window-system) (diff-hl-margin-mode)))
+#+end_src
+
 *** KILL [#C] Bind ~+vc/gutter-hydra/body~ to another key
 :LOGBOOK:
 - Note taken on [2022-09-02 Fri 01:09] \\
