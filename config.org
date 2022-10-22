@@ -1428,7 +1428,7 @@ primarily useful for non-English Emacs users, for whom Doom's built-in unicode
 support in insufficient.
 #+end_quote
 
-** vc-gutter [2/3]
+** vc-gutter [3/3]
 *** DONE [#B] Enable =vc-gutter= in terminal Emacs
 TUI Emacs does not have a fringe; however, it does have a margin. Look to Doom
 module documentation for =:ui vc-gutter= and =:os tty= for details.
@@ -1437,6 +1437,14 @@ module documentation for =:ui vc-gutter= and =:os tty= for details.
 (after! diff-hl
   (unless (window-system) (diff-hl-margin-mode)))
 #+end_src
+
+*** DONE [#B] Enable toggling of vcs diff in the fringe
+Unfortunately, when the =vc-gutter= module is enabled, I have found no way to
+persistently disable =git-gutter= in a buffer.
+
+*UPDATE*: With the =+diff-hl= module flag (to use =diff-hl= instead of
+=git-gutter=), I have found that =M-x diff-hl-mode= does what I want. I just
+added a toggle keybinding for this.
 
 *** KILL [#C] Bind ~+vc/gutter-hydra/body~ to another key
 :LOGBOOK:
@@ -1465,10 +1473,6 @@ To get started on this, open =+evil-bindings.el= by searching for it with
       (cl-pushnew `((,(format "\\`%s g v\\'" prefix-re)) nil . "VCGutter")
                   which-key-replacement-alist))))
 #+end_src
-
-*** TODO [#B] Enable toggling of vcs diff in the fringe
-Unfortunately, when the =vc-gutter= module is enabled, I have found no way to
-persistently disable =git-gutter= in a buffer.
 
 ** vi-tilde-fringe [0/0]
 #+begin_quote
@@ -7080,6 +7084,8 @@ References:
 (my/define-toggle-key! "t"   #'toggle-truncate-lines               "Truncate lines")
 (my/define-toggle-key! "|"   #'visual-fill-column-mode             "Visual fill column")
 (my/define-toggle-key! "C-l" #'page-break-lines-mode               "Page break lines")
+(when (modulep! :ui vc-gutter +diff-hl)
+  (my/define-toggle-key! "v" #'diff-hl-mode                        "VCS gutter"))
 #+end_src
 
 * Footers :SCAFFOLDING:

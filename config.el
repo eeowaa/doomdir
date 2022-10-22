@@ -1893,3 +1893,5 @@ and uses visual instead."
 (my/define-toggle-key! "t"   #'toggle-truncate-lines               "Truncate lines")
 (my/define-toggle-key! "|"   #'visual-fill-column-mode             "Visual fill column")
 (my/define-toggle-key! "C-l" #'page-break-lines-mode               "Page break lines")
+(when (modulep! :ui vc-gutter +diff-hl)
+  (my/define-toggle-key! "v" #'diff-hl-mode                        "VCS gutter"))
