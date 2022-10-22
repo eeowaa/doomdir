@@ -1642,7 +1642,7 @@ plugins) -- will feel right at home.
   (defvar my/zen--old-display-fill-column-indicator-mode nil)
   (defvar my/zen--old-vi-tilde-fringe-mode nil)
 
-  (add-hook! 'writeroom-mode-hook :append
+  (add-hook! writeroom-mode :append
     (defun my/zen-toggle-h ()
       "Toggle distracting features."
       (if writeroom-mode
@@ -4374,7 +4374,7 @@ pipx install cmake-language-server
                   c-default-style))))
 
   ;; REVIEW Not sure why this is necessary
-  (add-hook! 'c-mode-hook
+  (add-hook! c-mode
    (setq tab-width
          (alist-get 'c-basic-offset (assoc "linux" c-style-alist)))))
 #+end_src
@@ -6656,7 +6656,7 @@ Read RSS feeds in the comfort of DOOM (Emacs)
 *** DONE [#A] Automatically update feed when opening =elfeed=
 #+begin_src emacs-lisp :tangle yes
 (after! elfeed
-  (add-hook! 'elfeed-search-mode-hook #'elfeed-update))
+  (add-hook! elfeed-search-mode #'elfeed-update))
 #+end_src
 
 *** DONE [#B] Allow widening of the description column :hack:

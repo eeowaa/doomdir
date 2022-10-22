@@ -600,7 +600,7 @@ Without INDEX, move to the end."
   (defvar my/zen--old-display-fill-column-indicator-mode nil)
   (defvar my/zen--old-vi-tilde-fringe-mode nil)
 
-  (add-hook! 'writeroom-mode-hook :append
+  (add-hook! writeroom-mode :append
     (defun my/zen-toggle-h ()
       "Toggle distracting features."
       (if writeroom-mode
@@ -1173,7 +1173,7 @@ which causes problems even if there is no existing buffer."
                   c-default-style))))
 
   ;; REVIEW Not sure why this is necessary
-  (add-hook! 'c-mode-hook
+  (add-hook! c-mode
    (setq tab-width
          (alist-get 'c-basic-offset (assoc "linux" c-style-alist)))))
 
@@ -1670,7 +1670,7 @@ Optional argument INFO is a plist of options."
 (setq +lookup-open-url-fn #'w3m-browse-url)
 
 (after! elfeed
-  (add-hook! 'elfeed-search-mode-hook #'elfeed-update))
+  (add-hook! elfeed-search-mode #'elfeed-update))
 
 (after! elfeed
   ;; Do not truncate RSS entry titles
