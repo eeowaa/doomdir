@@ -1428,7 +1428,7 @@ primarily useful for non-English Emacs users, for whom Doom's built-in unicode
 support in insufficient.
 #+end_quote
 
-** vc-gutter [3/3]
+** vc-gutter [3/4]
 *** DONE [#B] Enable =vc-gutter= in terminal Emacs
 TUI Emacs does not have a fringe; however, it does have a margin. Look to Doom
 module documentation for =:ui vc-gutter= and =:os tty= for details.
@@ -1472,6 +1472,29 @@ To get started on this, open =+evil-bindings.el= by searching for it with
     (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
       (cl-pushnew `((,(format "\\`%s g v\\'" prefix-re)) nil . "VCGutter")
                   which-key-replacement-alist))))
+#+end_src
+
+*** STRT [#C] Do not display vc-gutter in COMMIT_EDITMSG buffers
+This is mainly a nuisance in terminal Emacs, where an empty margin is created.
+
+Observations:
+- These buffers are named "COMMIT_EDITMSG" and visit the corresponding file in
+  the =.git/= directory.
+- The ~use-package!~ declaration for ~diff-hl~ adds ~diff-hl-mode~ to
+  ~find-file-hook~, which is why =diff-hl= gets activated in these buffers.
+- There is no option provided by =diff-hl= that allows one to disable =diff-hl=
+  in specific buffers, except for ~global-diff-hl~ mode, which is not used by
+  the =:ui vc-gutter= module.
+- Hooks for ~git-commit-mode~ should get run after ~find-file~ hooks, so by
+  disabling =diff-hl= in a new ~git-commit-mode~ hook, we should be able to
+  achieve what we want.
+- Unfortunately, the assumptions in the previous observation do not produce the
+  desired outcome.
+
+#+begin_src emacs-lisp :tangle no
+(add-hook! git-commit-mode
+  (when (modulep! :ui vc-gutter +diff-hl)
+    (diff-hl-mode -1)))
 #+end_src
 
 ** vi-tilde-fringe [0/0]
