@@ -6800,7 +6800,8 @@ problem.
              (cond
               ((y-or-n-p "WARNING: config.el contains unbalanced parentheses. Edit file? ")
                (pop-to-buffer (current-buffer)) nil)
-              (t t)))))))))
+              (t t)))
+            (:success t)))))))
 #+end_src
 
 *** LOOP [#B] Add search directories for =projectile=

@@ -1710,7 +1710,8 @@ ALIGN should be a keyword :left or :right."
              (cond
               ((y-or-n-p "WARNING: config.el contains unbalanced parentheses. Edit file? ")
                (pop-to-buffer (current-buffer)) nil)
-              (t t)))))))))
+              (t t)))
+            (:success t)))))))
 
 (setq projectile-project-search-path
       (list
