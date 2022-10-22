@@ -2236,8 +2236,9 @@ Improvements:
   projects that I never put any time into (just navigating through their
   workspace), both noticeably increasing performance and reducing clutter in
   ~timeclock-file~.
+  - This is the reason why I have disabled tangling of the following block
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 ;;; Timeclock reporting
 
 (defvar my/timeclock-report-format 'text
