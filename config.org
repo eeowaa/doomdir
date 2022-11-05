@@ -2348,6 +2348,33 @@ This is automatically set when switching workspaces.")
            (timeclock-in nil my/timeclock--current-project)))))
 #+end_src
 
+*** STRT [#C] Make =C-w o= behave like Vim's ZoomWin package
+This is almost done. Things left to do:
+
++ [ ] Do *not* restore [[info:elisp#Side Windows][side windows]] while "zooming out" if those side windows
+  were deleted when "zoomed in".
++ [ ] Do *not* restore buffer position of the selected window while "zooming
+  out" (the cursor jump is somewhat annoying).
+
+#+begin_src emacs-lisp :tangle yes
+(defun my/zoomwin-toggle ()
+  "Zoom or unzoom the selected window.
+If the current frame has multiple windows, delete other windows.
+If the current frame has one window, restore the previous windows."
+  (interactive)
+  (if (= 1 (length
+            (-remove (lambda (w) (window-parameter w 'no-other-window))
+                     (window-list))))
+      (when-let ((zoomwin-state (persp-parameter 'my/zoomwin-state)))
+        (set-window-configuration zoomwin-state))
+    (set-persp-parameter 'my/zoomwin-state (current-window-configuration))
+    (delete-other-windows)))
+
+(define-key! evil-window-map
+  ;; replaces `doom/window-enlargen'
+  "o" #'my/zoomwin-toggle)
+#+end_src
+
 *** TODO [#A] Modify behavior when opening help buffers
 When selecting a window in which to open a help buffer:
 
