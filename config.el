@@ -635,8 +635,14 @@ Without INDEX, move to the end."
 (use-package! page-break-lines
   :config (global-page-break-lines-mode))
 
-;; Have C-l send the current line to the top of the window
+;; When using vanilla bindings, have C-l send the current line to the top of the
+;; window (like most shells do)
 (setq recenter-positions '(top bottom middle))
+
+;; When using `evil', have C-l redraw the display (like Vim does). Use zt, zz,
+;; and zb to reposition the current line instead of C-l.
+(when (modulep! :editor evil)
+  (global-set-key (kbd "C-l") #'redraw-display))
 
 ;; Perform a line feed after jumping to a ^L character
 (defadvice! my/recenter-top-a (&rest _)
@@ -819,6 +825,23 @@ deleting the final newline before inserting the \")))\"."
 (defalias 'ps 'list-processes)
 
 (setq debugger-stack-frame-as-list t)
+
+(defun my/zoomwin-toggle ()
+  "Zoom or unzoom the selected window.
+If the current frame has multiple windows, delete other windows.
+If the current frame has one window, restore the previous windows."
+  (interactive)
+  (if (= 1 (length
+            (-remove (lambda (w) (window-parameter w 'no-other-window))
+                     (window-list))))
+      (when-let ((zoomwin-state (persp-parameter 'my/zoomwin-state)))
+        (set-window-configuration zoomwin-state))
+    (set-persp-parameter 'my/zoomwin-state (current-window-configuration))
+    (delete-other-windows)))
+
+(define-key! evil-window-map
+  ;; replaces `doom/window-enlargen'
+  "o" #'my/zoomwin-toggle)
 
 (after! projectile
   ;; For each atom in `obarray'

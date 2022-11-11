@@ -1695,8 +1695,14 @@ Miscellaneous configuration without a corresponding module.
 (use-package! page-break-lines
   :config (global-page-break-lines-mode))
 
-;; Have C-l send the current line to the top of the window
+;; When using vanilla bindings, have C-l send the current line to the top of the
+;; window (like most shells do)
 (setq recenter-positions '(top bottom middle))
+
+;; When using `evil', have C-l redraw the display (like Vim does). Use zt, zz,
+;; and zb to reposition the current line instead of C-l.
+(when (modulep! :editor evil)
+  (global-set-key (kbd "C-l") #'redraw-display))
 
 ;; Perform a line feed after jumping to a ^L character
 (defadvice! my/recenter-top-a (&rest _)
