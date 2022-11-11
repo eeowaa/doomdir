@@ -290,6 +290,25 @@ npm install -g vscode-langservers-extracted
 # Install prerequisites for `lang/javascript` module
 npm install -g typescript typescript-language-server eslint trepan-ni
 
+## Debugging
+(
+    set -e
+    mkdir -p "$HOME/.local/src/doom" && cd "$HOME/.local/src/doom"
+    if [ -d vscode-node-debug2 ]
+    then git -C vscode-node-debug2 pull -f
+    else git clone --depth=1 --recursive https://github.com/microsoft/vscode-node-debug2
+    fi
+    cd vscode-node-debug2
+    git clean
+    npm ci
+    npm run package
+    set -- *.vsix
+    test $# -eq 1
+    destdir=$XDG_CONFIG_HOME/emacs/.local/etc/dap-extension/vscode/ms-vscode.node-debug2
+    mkdir -p "$destdir"
+    unzip -o $1 -d "$destdir"
+)
+
 # Install prerequisites for `lang/latex` module
 (cd ~/Documents/src/life/stow-dotfiles && make lua)
 sudo dnf -y install texlive-scheme-basic

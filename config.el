@@ -1240,6 +1240,23 @@ which causes problems even if there is no existing buffer."
 (after! lsp-haskell
   (setq lsp-haskell-formatting-provider "brittany"))
 
+(after! dap-node
+  (defadvice! my/dap-node--populate-start-file-args-a (conf)
+    "Wrap `read-file-name' in an `expand-file-name' form.
+This avoids errors re: non-absolute program paths that prevent
+DAP from working."
+    :override #'dap-node--populate-start-file-args
+    (let ((conf (-> conf
+                    (dap--put-if-absent :dap-server-path dap-node-debug-program)
+                    (dap--put-if-absent :type "node")
+                    (dap--put-if-absent :cwd default-directory)
+                    (dap--put-if-absent :name "Node Debug"))))
+      (if (plist-get conf :args)
+          conf
+        (dap--put-if-absent
+         conf :program (expand-file-name
+                        (read-file-name "Select the file to run:" nil (buffer-file-name) t)))))))
+
 (pushnew! auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
 
 (after! lua-mode

@@ -3607,8 +3607,46 @@ pipx install ansible-core
 ansible-galaxy collection install community.general
 #+end_src
 
-** debugger [1/3]
-Reference: https://docs.doomemacs.org/latest/modules/tools/debugger/
+** debugger [1/5]
+References:
++ https://docs.doomemacs.org/latest/modules/tools/debugger/
++ https://www.youtube.com/watch?v=0bilcQVSlbM
+
+*** COMMENT Documentation
+Basic usage (after configuration):
+1. Set a breakpoint at point with ~dap-breakpoint-add~
+2. Start the debugger with ~dap-debug~
+3. Run ~dap-hydra~ to open a control panel (close it when finished)
+4. Use the mouse to quickly jump between and interact with side windows
+5. Run ~dap-disconnect~ when finished debugging
+
+Cool stuff:
+1. Print expressions or set variables via ~dap-ui-repl~
+2. Log arbitrary expressions in code via ~dap-breakpoint-log-message~
+3. Monitor arbitrary expression values with ~dap-ui-expressions-add~
+4. Set conditional breakpoints with ~dap-breakpoint-condition~ (expression) and
+   ~dap-breakpoint-hit-condition~ (number of hits before stopping)
+
+Problem solving:
+1. Currently, =dap-mode= only supports breakpoint icons in the fringe, not the
+   margin, so indicators will not appear in TTY Emacs. Use the breakpoint window
+   instead.
+2. If breakpoint icons are not showing up even in GUI Emacs, try
+   ~dap--refresh-breakpoints~ (which is a non-interactive function).
+3. If the debugger is not starting and is complaining about =lsp-treemacs=, try
+   killing all Treemacs buffers (=Q= in the buffers) and try again. If there is
+   still a similar error message, try updating and rebuilding packages.
+4. Sometimes debuggers do not get installed correctly, or need to be
+   reinstalled. Don't be too surprised when this happens.
+
+Debugger configs can come from VS Code =launch.json= files, described here:
+https://code.visualstudio.com/docs/editor/debugging (~dap-debug~ will include
+those launch templates in the completing-read candidate list). Pay special
+attention to config variables, which apply to strings in =dap-mode= templates,
+as well. Speaking of, use ~dap-debug-edit-template~ to edit such templates, or
+~dap-register-debug-template~ to add a new one. If you are wondering how nil
+values get interpreted, check the definitions of functions stored in
+~dap--debug-providers~ (e.g. ~dap-node--populate-start-file-args~).
 
 *** OKAY [#A] Install prerequisites
 **** OKAY macOS
@@ -3633,25 +3671,20 @@ See the section for "Realgud" on [[https://docs.doomemacs.org/latest/modules/too
   (dap-gdb-lldb-setup))
 #+end_src
 
-*** TODO [#A] Fix DAP mode error message
-I get this error when I visit a file that invokes ~lsp!~:
-#+begin_example
-(doom-hook-error lsp!
-  (error Recursive load
-    ~/.config/emacs/.local/straight/build-28.0.50/dap-mode/dap-mode.el
-    ~/.config/emacs/.local/straight/build-28.0.50/dap-mode/dap-mode.el
-    ~/.config/emacs/.local/straight/build-28.0.50/dap-mode/dap-mode.el
-    ~/.config/emacs/.local/straight/build-28.0.50/dap-mode/dap-mode.el
-    ~/.config/emacs/.local/straight/build-28.0.50/dap-mode/dap-mode.el
-    ~/.config/emacs/.local/straight/build-28.0.50/lsp-mode/lsp-mode.el))
-#+end_example
+*** WAIT [#B] Fix DAP mode error message re: =lsp-treemacs=
+See here: <https://github.com/Alexander-Miller/treemacs/issues/990>
 
-For now, I might just want to unset ~lsp-enable-dap-auto-configure~ and see if
-that prevents errors. Worst case, I could disable =debugger=.
+If this issue appears, there is a workaround: kill all of the Treemacs
+buffers (don't just close them!) and run ~dap-debug~ again.
 
-*UPDATE*: Unfortunately I was unable to resolve this quickly and opted to
-disable =debugger= for the time being (it's not super-important for me right
-now, anyway).
+*** TODO [#B] Create bindings to deal with DAP side windows
+Bindings should exist to toggle side window visibility, as well as to perform
+all mouse-based functionality currently available in side windows.
+
+*** TODO [#C] Configure which DAP side windows appear at startup
+Reference:
+- <https://www.youtube.com/watch?v=0bilcQVSlbM&t=1007s>
+- ~dap-auto-configure-features~
 
 ** direnv [1/4]
 :LOGBOOK:
@@ -4793,7 +4826,7 @@ This module adds [[https://www.java.com][java]] support to Doom Emacs, including
 =groovy-mode=.
 #+end_quote
 
-** javascript [2/4]
+** javascript [4/4]
 :PROPERTIES:
 :CATEGORY: doom/ts
 :END:
@@ -4805,16 +4838,59 @@ Currently, I am only using TypeScript -- not vanilla JavaScript -- so the
 ~:CATEGORY:~ property for this subtree is set to ~doom/ts~.
 
 *** DONE [#A] Install prerequisites
-**** DONE macOS
+**** OKAY macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/javascript` module
 npm install -g typescript typescript-language-server eslint trepan-ni
 #+end_src
 
-**** DONE Fedora
+**** DONE Fedora :hack:
+Manual installation of the node debugger is now required
+(see <https://github.com/emacs-lsp/dap-mode/issues/554#issuecomment-1171256089>).
+This would be a good thing to mention to the Doom maintainers.
+
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `lang/javascript` module
 npm install -g typescript typescript-language-server eslint trepan-ni
+
+## Debugging
+(
+    set -e
+    mkdir -p "$HOME/.local/src/doom" && cd "$HOME/.local/src/doom"
+    if [ -d vscode-node-debug2 ]
+    then git -C vscode-node-debug2 pull -f
+    else git clone --depth=1 --recursive https://github.com/microsoft/vscode-node-debug2
+    fi
+    cd vscode-node-debug2
+    git clean
+    npm ci
+    npm run package
+    set -- *.vsix
+    test $# -eq 1
+    destdir=$XDG_CONFIG_HOME/emacs/.local/etc/dap-extension/vscode/ms-vscode.node-debug2
+    mkdir -p "$destdir"
+    unzip -o $1 -d "$destdir"
+)
+#+end_src
+
+*** DONE [#B] Set up debugging
+#+begin_src emacs-lisp :tangle yes
+(after! dap-node
+  (defadvice! my/dap-node--populate-start-file-args-a (conf)
+    "Wrap `read-file-name' in an `expand-file-name' form.
+This avoids errors re: non-absolute program paths that prevent
+DAP from working."
+    :override #'dap-node--populate-start-file-args
+    (let ((conf (-> conf
+                    (dap--put-if-absent :dap-server-path dap-node-debug-program)
+                    (dap--put-if-absent :type "node")
+                    (dap--put-if-absent :cwd default-directory)
+                    (dap--put-if-absent :name "Node Debug"))))
+      (if (plist-get conf :args)
+          conf
+        (dap--put-if-absent
+         conf :program (expand-file-name
+                        (read-file-name "Select the file to run:" nil (buffer-file-name) t)))))))
 #+end_src
 
 *** DONE [#C] Filename-mode associations
@@ -4822,15 +4898,15 @@ npm install -g typescript typescript-language-server eslint trepan-ni
 (pushnew! auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
 #+end_src
 
-*** TODO [#A] Fix broken filename-mode association for =*.js= files
+*** KILL [#A] Fix broken filename-mode association for =*.js= files
+:LOGBOOK:
+- Note taken on [2022-11-11 Fri 04:49] \\
+  I no longer see this error
+:END:
 When I open a =*.js= file, I get the following error:
 : File mode specification error: (error Given parent class xref-location is not a class)
 
 I need to manually run =M-x javascript-mode RET= in order to enable JavaScript mode.
-
-*** HOLD [#B] Set up debugging
-+ Try ~dap-mode~ https://www.youtube.com/watch?v=0bilcQVSlbM
-+ Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
 
 ** julia [0/0] :ARCHIVE:
 #+begin_quote
