@@ -1224,12 +1224,17 @@ This module brings a side panel for browsing project files, inspired by vim's
 NERDTree.
 #+end_quote
 
-** ophints [0/0]
+** ophints [0/1]
 #+begin_quote
 This module provides op-hints (operation hinting), i.e. visual feedback for
 certain operations. It highlights regions of text that the last operation (like
 yank) acted on.
 #+end_quote
+
+*** TODO [#C] Flash after =zz=
+Although the middle of the window might seem like an obvious location for the
+eyes to center on, in reality, it can take a moment to find the cursor after
+=zz=. A quick flash would help.
 
 ** popup [4/7]
 #+begin_quote
@@ -2202,7 +2207,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [7/17]
+** Miscellany [7/18]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -2389,6 +2394,7 @@ When selecting a window in which to open a help buffer:
 
 **** COMMENT Reference
 + info:elisp#Windows
++ [[https://www.masteringemacs.org/article/demystifying-emacs-window-manager][Mastering Emacs blog]]
 + [[https://e17i.github.io/articles-emacs-display-1/][e17i blog]]
 + [[https://github.com/e17i/emacs-config/][e17i config]]
 
@@ -2730,6 +2736,7 @@ selected. If none is selected, revert to the default behaviour."
             (setq dedicated-other-window nil)))))
 
 #+end_src
+
 *** TODO [#A] Make windows behave more like ~tmux~ panes
 I would like for Emacs to obey the following precepts:
 
@@ -4408,7 +4415,7 @@ sudo dnf -y install clang clang-tools-extra
 sudo dnf -y install cmake clang clang-devel llvm-devel rapidjson
 (
     set -e
-    mkdir -p "$HOME/.local/src" && cd "$HOME/.local/src"
+    mkdir -p "$HOME/.local/src/doom" && cd "$HOME/.local/src/doom"
     if [ -d ccls ]
     then git -C ccls pull -f
     else git clone --depth=1 --recursive https://github.com/MaskRay/ccls
@@ -5133,7 +5140,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [20/40]
+** org [20/41]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -5161,7 +5168,7 @@ pipx inject jupyter ipykernel
 mkdir -p ~/org/roam
 #+end_src
 
-*** Document Structure [1/4]
+*** Document Structure [1/5]
 **** DONE [#A] Do not indent headlines
 #+begin_src emacs-lisp :tangle yes
 (after! org
@@ -5245,6 +5252,10 @@ content.
 This has been going on for so long that my workaround (to kill the buffer and
 reload the contents into a fresh buffer) has nearly become muscle memory, but I
 really shouldn't have to do this.
+
+**** TODO [#A] Reveal point after ~consult-org-heading~ (=SPC m .=)
+Right now, the point is hidden unless it jumps to a destination that was already
+revealed (no folds). Unfortunately, ~org-reveal~ (=C-c C-r=) does not help.
 
 **** TODO [#C] Create headline sorting function
 + Sort by priority, then by by ~TODO~ keyword
@@ -6525,7 +6536,8 @@ after entering a YAML file that is a Helm chart template:
 
 1. =M-x lsp-disconnect RET= (to remove irrelevant error messages)
 2. =M-x k8s-mode RET= (to add minimal font-locking for k8s keywords)
-3. =M-x ansible-add-font-lock RET= (to font-lock the templating)
+3. =M-: (require 'ansible) RET= (to load the command used in the next step)
+4. =M-x ansible-add-font-lock RET= (to font-lock the templating)
 
 This gives /decent/ font-locking, but is still miles away from an ideal
 solution. Alternate font-locking is available via =jinja2-mode=.

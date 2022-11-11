@@ -172,7 +172,7 @@ sudo dnf -y install clang clang-tools-extra
 sudo dnf -y install cmake clang clang-devel llvm-devel rapidjson
 (
     set -e
-    mkdir -p "$HOME/.local/src" && cd "$HOME/.local/src"
+    mkdir -p "$HOME/.local/src/doom" && cd "$HOME/.local/src/doom"
     if [ -d ccls ]
     then git -C ccls pull -f
     else git clone --depth=1 --recursive https://github.com/MaskRay/ccls
