@@ -68,6 +68,9 @@
 (package! ob-mongo)
 (package! inf-mongo)
 
+;; Graphics
+(package! graphviz-dot-mode)
+
 (when (modulep! :lang org +jupyter)
   (package! ox-ipynb
     :recipe (:host github :repo "jkitchin/ox-ipynb")))
