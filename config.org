@@ -1507,10 +1507,37 @@ Observations:
 Displays a tilde(~) in the left fringe to indicate an empty line, similar to Vi.
 #+end_quote
 
-** window-select [1/1]
+** window-select [2/2]
 #+begin_quote
 This module provides several methods for selecting windows without the use of
 the mouse or spatial navigation (e.g. =C-w {h,j,k,l}=).
+#+end_quote
+
+*** DONE [#B] Allow =ace-window= to operate across frames in graphical Emacs
+By default, =ace-window= operates across all frames, but Doom's =window-select=
+module configures =ace-window= to only operate within the current frame.
+
+When using GUI Emacs, sometimes I like to work across multiple visible frames
+(this is especially nice with a multi-monitor setup), so I'd like =ace-window=
+to work across those visible frames. This makes far less sense for when I am
+using TTY Emacs, because if I am using multiple frames, they are typically
+spread out between multiple =tmux= windows in a single terminal or terminal
+emulator.
+
+#+begin_src emacs-lisp :tangle yes
+(after! ace-window
+  (when initial-window-system
+    (setq aw-scope 'visible)))
+#+end_src
+
+Note that the ~visible~ choice for ~aw-scope~ cannot be relied upon to restrict
+window selection to visible TTY frames, because the mechanism relies on the
+builtin function ~frame-visible-p~, which according to its docstring:
+
+#+begin_quote
+If FRAME is a text terminal frame, this always returns t.
+Such frames are always considered visible, whether or not they are
+currently being displayed on the terminal.
 #+end_quote
 
 *** KILL [#C] Add an =ace-window= keybinding to close windows

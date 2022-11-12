@@ -563,6 +563,10 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (after! diff-hl
   (unless (window-system) (diff-hl-margin-mode)))
 
+(after! ace-window
+  (when initial-window-system
+    (setq aw-scope 'visible)))
+
 (map! :leader
       (:when (modulep! :ui workspaces)
        (:prefix-map ("TAB" . "workspace")
