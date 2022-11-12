@@ -1328,6 +1328,12 @@ DAP from working."
         org-startup-indented nil
         org-adapt-indentation nil))
 
+(defadvice! my/inhibit-indentation-a (f &rest r)
+  "Prevent `org-indent-mode' from running."
+  :around #'doom-docs-org-mode
+  (letf! ((#'org-indent-mode #'ignore))
+    (apply f r)))
+
 (after! org
   (setcdr (assoc 'heading org-blank-before-new-entry) nil)
   (defun my/org-insert-heading-spacing ()

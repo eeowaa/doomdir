@@ -5178,6 +5178,12 @@ mkdir -p ~/org/roam
   (setq org-hide-leading-stars nil
         org-startup-indented nil
         org-adapt-indentation nil))
+
+(defadvice! my/inhibit-indentation-a (f &rest r)
+  "Prevent `org-indent-mode' from running."
+  :around #'doom-docs-org-mode
+  (letf! ((#'org-indent-mode #'ignore))
+    (apply f r)))
 #+end_src
 
 **** STRT [#A] Insert new headlines just how I like them
