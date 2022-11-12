@@ -3614,46 +3614,114 @@ pipx install ansible-core
 ansible-galaxy collection install community.general
 #+end_src
 
-** debugger [1/5]
+** debugger [1/6]
 References:
-+ https://docs.doomemacs.org/latest/modules/tools/debugger/
 + https://www.youtube.com/watch?v=0bilcQVSlbM
++ https://docs.doomemacs.org/latest/modules/tools/debugger/
++ [[~/.config/emacs/.local/straight/repos/dap-mode/docs/page/configuration.md]]
 
 *** COMMENT Documentation
-Basic usage (after configuration):
-1. Set a breakpoint at point with ~dap-breakpoint-add~
-2. Start the debugger with ~dap-debug~
-3. Run ~dap-hydra~ to open a control panel (close it when finished)
-4. Use the mouse to quickly jump between and interact with side windows
-5. Run ~dap-disconnect~ when finished debugging
+**** Basic usage (after configuration)
+1. Ensure that LSP is already enabled in the current buffer
+2. Set a breakpoint at point with ~dap-breakpoint-add~
+3. Start the debugger with ~dap-debug~
+4. Run ~dap-hydra~ to open a control panel (close it when finished)
+5. Use the mouse to quickly jump between and interact with side windows
+6. Run ~dap-disconnect~ when finished debugging
 
-Cool stuff:
+**** Cool stuff
 1. Print expressions or set variables via ~dap-ui-repl~
 2. Log arbitrary expressions in code via ~dap-breakpoint-log-message~
 3. Monitor arbitrary expression values with ~dap-ui-expressions-add~
 4. Set conditional breakpoints with ~dap-breakpoint-condition~ (expression) and
    ~dap-breakpoint-hit-condition~ (number of hits before stopping)
 
-Problem solving:
+**** Runtime exceptions
+1. If you want the debugger to pause execution upon runtime exceptions, you must
+   specifically enable that behavior. The easiest way to accomplish this is
+   through checkbox(es) in the "Breakpoints" side window.
+2. Without breaking upon runtime exceptions, you run the risk of your program
+   exiting before you can use =dap-mode= to debug it. Even if your program does
+   not exit upon an exception, it is a good idea to examine state before
+   continuing.
+3. When an exception does occur, sometimes it can be hard to detect. Look for
+   one or more of the following indicators:
+   1. Program execution will stop on a line that you did not set a breakpoint
+      on. =dap-mode= doesn't do a great job at drawing attention to stopped
+      execution lines (e.g. the icon might be missing), so look out for strange
+      syntax highlighting as a possible giveaway.
+   2. The current session in the "Debug Sessions" side window will have an
+      active line ending with a small comment/note saying "Exception".
+   3. A new message will be written to =*Messages*= in the following format:
+      : LSP :: Exception has occurred: <description>
+      Don't count on the description to contain much information. It could even
+      just be a one-word "ERROR" message.
+   4. For good measure, you can add hooks to ~dap-session-changed-hook~ to draw
+      your attention to an exception. Some ideas include moving the cursor to
+      the line of code or to the "Exception" stack frame in the "Debug Sessions"
+      side window, flashing the cursor, and/or displaying the message mentioned
+      in point 3 in a more prominent fashion, such as in a popup window.
+      - If you decide to do this, make sure that your exception-handling
+        functions in ~dap-session-changed-hook~ only do trigger when the hooks
+        are run from the "stopped" pcase branch of ~dap--on-event~.
+4. When program execution is paused at a breakpoint, the following strategies
+   can help debug (this applies to exceptions or really anywhere in your code
+   where you've hit an error condition):
+   - Examine the "Debug Sessions" side window. It contains a call stack of
+     program execution up to that point (newest frames on top) for each
+     debugging session. If you are lucky, you might even be able to use this
+     multi-session feature to triage issues involving IPC.
+   - View corresponding frame data in the "Locals" side window and evaluate
+     arbitrary expressions in ~dap-ui-repl~.
+   - *Move back up the call stack!* This is helpful in more than just navigating
+     the source code -- it also allows you to examine frame data in the "Locals"
+     window at each function call, modify variables via ~dap-ui-repl~, and
+     replay execution right before the point of failure (which of course allows
+     you to step through different conditional code paths).
+
+More generally speaking: determine the error condition, break on that (via
+standard breakpoints if you know that some code is always buggy, conditional
+breakpoints if the line only sometimes produces an error, or via exceptions),
+and work backwards from there. /NOTE: What about message outputs?/
+
+There is a good chance you won't even see anything in the output, error, or
+message buffers to indicate what happened when an exception is thrown
+(stdout/stderr are not necessarily written to by all execution threads). If this
+is the case in your situation, you might get better output by running the
+program on the console and viewing console output. See the documentation for
+"[[*Untested
+features][untested features]]" below, which may be able to help with that.
+
+**** Known issues and workarounds
 1. Currently, =dap-mode= only supports breakpoint icons in the fringe, not the
    margin, so indicators will not appear in TTY Emacs. Use the breakpoint window
    instead.
-2. If breakpoint icons are not showing up even in GUI Emacs, try
-   ~dap--refresh-breakpoints~ (which is a non-interactive function).
+2. If breakpoint icons are not showing up even in GUI Emacs, run
+   ~(set-window-buffer nil (current-buffer))~. See [[https://github.com/emacs-lsp/dap-mode/issues/374][this dap-mode bug]].
 3. If the debugger is not starting and is complaining about =lsp-treemacs=, try
    killing all Treemacs buffers (=Q= in the buffers) and try again. If there is
    still a similar error message, try updating and rebuilding packages.
 4. Sometimes debuggers do not get installed correctly, or need to be
-   reinstalled. Don't be too surprised when this happens.
+   reinstalled. Don't be too surprised when this happens -- just reinstall it.
 
-Debugger configs can come from VS Code =launch.json= files, described here:
-https://code.visualstudio.com/docs/editor/debugging (~dap-debug~ will include
-those launch templates in the completing-read candidate list). Pay special
-attention to config variables, which apply to strings in =dap-mode= templates,
-as well. Speaking of, use ~dap-debug-edit-template~ to edit such templates, or
-~dap-register-debug-template~ to add a new one. If you are wondering how nil
-values get interpreted, check the definitions of functions stored in
-~dap--debug-providers~ (e.g. ~dap-node--populate-start-file-args~).
+**** Untested features
+1. Set the ~dap-print-io~ option to print all protocol messages. This could be
+   good for debugging issues with debugging!
+2. If the ~kind~ argument in a debug template is set to "external", the program
+   is run in the terminal specified by the ~dap-external-terminal~ option. See
+   also: ~dap-default-terminal-kind~.
+
+**** Notes on configuration
+1. Debugger configs can come from VS Code =launch.json= files, described here:
+   https://code.visualstudio.com/docs/editor/debugging (~dap-debug~ will include
+   those launch templates in the completing-read candidate list). Pay special
+   attention to config variables, most of which apply to strings in =dap-mode=
+   templates, as well. The ~dap-variables-standard-variables~ option contains
+   the full list, and it can be customized.
+2. Speaking of, use ~dap-debug-edit-template~ to edit such templates, or
+   ~dap-register-debug-template~ to add a new one. If you are wondering how nil
+   values get interpreted, check the definitions of functions stored in
+   ~dap--debug-providers~ (e.g. ~dap-node--populate-start-file-args~).
 
 *** OKAY [#A] Install prerequisites
 **** OKAY macOS
@@ -3678,6 +3746,8 @@ See the section for "Realgud" on [[https://docs.doomemacs.org/latest/modules/too
   (dap-gdb-lldb-setup))
 #+end_src
 
+*** TODO [#A] Fix functions that determine path variables
+Reference: ~dap-variables-standard-variables~
 *** WAIT [#B] Fix DAP mode error message re: =lsp-treemacs=
 See here: <https://github.com/Alexander-Miller/treemacs/issues/990>
 
