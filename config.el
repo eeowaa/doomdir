@@ -1066,6 +1066,57 @@ which causes problems even if there is no existing buffer."
         (".envrc")
         (".editorconfig")))
 
+(map! :leader
+      ;;; <leader> d --- debug
+      (:prefix-map ("d" . "debug")
+       :desc "Next"                "n" #'dap-next
+       :desc "Step in"             "i" #'dap-step-in
+       :desc "Step out"            "o" #'dap-step-out
+       :desc "Continue"            "c" #'dap-continue
+       :desc "Restart frame"       "r" #'dap-restart-frame
+       :desc "Disconnect"          "Q" #'dap-disconnect
+       (:prefix ("s" . "switch")
+        :desc "Session"             "s" #'dap-switch-session
+        :desc "Thread"              "t" #'dap-switch-thread
+        :desc "Stack frame"         "f" #'dap-switch-stack-frame
+        :desc "Up stack frame"      "u" #'dap-up-stack-frame
+        :desc "Down stack frame"    "d" #'dap-down-stack-frame)
+       (:prefix ("b" . "breakpoints")
+        :desc "Toggle"              "b" #'dap-breakpoint-toggle
+        :desc "Delete"              "d" #'dap-breakpoint-add
+        :desc "Add"                 "a" #'dap-breakpoint-delete
+        :desc "Set condition"       "c" #'dap-breakpoint-condition
+        :desc "Set hit count"       "h" #'dap-breakpoint-hit-condition
+        :desc "Set log message"     "l" #'dap-breakpoint-log-message)
+       (:prefix ("d" . "debug")
+        :desc "Debug"               "d" #'dap-debug
+        :desc "Debug recent"        "r" #'dap-debug-recent
+        :desc "Debug last"          "l" #'dap-debug-last
+        :desc "Edit debug template" "e" #'dap-debug-edit-template
+        :desc "Debug restart"       "s" #'dap-debug-restart)
+       (:prefix ("e" . "eval")
+        :desc "Eval"                "e" #'dap-eval
+        :desc "Eval region"         "r" #'dap-eval-region
+        :desc "Eval thing at point" "s" #'dap-eval-thing-at-point
+        :desc "Add expression"      "a" #'dap-ui-expressions-add)
+       (:prefix ("w" . "window")
+        :desc "Locals"              "l" #'dap-ui-locals
+        :desc "Breakpoints"         "b" #'dap-ui-breakpoints
+        :desc "Breakpoint List"     "B" #'dap-ui-breakpoints-list
+        :desc "Expressions"         "e" #'dap-ui-expressions
+        :desc "Sessions"            "s" #'dap-ui-sessions
+        :desc "REPL"                "r" #'dap-ui-repl)))
+
+(setq dap-auto-configure-features
+      '(sessions       ;; `dap-ui-sessions'
+        ;; locals      ;; `dap-ui-locals'
+        breakpoints    ;; `dap-ui-breakpoints'
+        ;; expressions ;; `dap-ui-expressions'
+        repl           ;; `dap-ui-repl'
+        ;; controls    ;; FIXME: `dap-ui-controls-mode'
+        ;; tooltip     ;; FIXME: `dap-tooltip-mode'
+        ))
+
 (defun my/aws-envvars ()
   "Print the values of AWS environment variables"
   (interactive)
@@ -1246,20 +1297,22 @@ which causes problems even if there is no existing buffer."
 
 (after! dap-node
   (defadvice! my/dap-node--populate-start-file-args-a (conf)
-    "Wrap `read-file-name' in an `expand-file-name' form.
-This avoids errors re: non-absolute program paths that prevent
-DAP from working."
+    "Fix file paths used by the node debugger.
+1. Use absolute paths by wrapping path strings in `expand-file-name'.
+2. Prompt for the working directory instead of assuming `default-directory'."
     :override #'dap-node--populate-start-file-args
     (let ((conf (-> conf
                     (dap--put-if-absent :dap-server-path dap-node-debug-program)
                     (dap--put-if-absent :type "node")
-                    (dap--put-if-absent :cwd default-directory)
                     (dap--put-if-absent :name "Node Debug"))))
       (if (plist-get conf :args)
           conf
         (dap--put-if-absent
          conf :program (expand-file-name
-                        (read-file-name "Select the file to run:" nil (buffer-file-name) t)))))))
+                        (read-file-name "Select the file to run:" nil (buffer-file-name) t)))
+        (dap--put-if-absent
+         conf :cwd (expand-file-name
+                     (read-directory-name "Select the working directory:" nil default-directory t)))))))
 
 (pushnew! auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
 

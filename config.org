@@ -3641,7 +3641,7 @@ pipx install ansible-core
 ansible-galaxy collection install community.general
 #+end_src
 
-** debugger [1/6]
+** debugger [1/8]
 References:
 + https://www.youtube.com/watch?v=0bilcQVSlbM
 + https://docs.doomemacs.org/latest/modules/tools/debugger/
@@ -3720,16 +3720,60 @@ program on the console and viewing console output. See the documentation for
 features][untested features]]" below, which may be able to help with that.
 
 **** Known issues and workarounds
-1. Currently, =dap-mode= only supports breakpoint icons in the fringe, not the
-   margin, so indicators will not appear in TTY Emacs. Use the breakpoint window
-   instead.
-2. If breakpoint icons are not showing up even in GUI Emacs, run
-   ~(set-window-buffer nil (current-buffer))~. See [[https://github.com/emacs-lsp/dap-mode/issues/374][this dap-mode bug]].
-3. If the debugger is not starting and is complaining about =lsp-treemacs=, try
+***** Execution
+1. If the debugger is not starting and is complaining about =lsp-treemacs=, try
    killing all Treemacs buffers (=Q= in the buffers) and try again. If there is
    still a similar error message, try updating and rebuilding packages.
-4. Sometimes debuggers do not get installed correctly, or need to be
+2. Sometimes debuggers do not get installed correctly, or need to be
    reinstalled. Don't be too surprised when this happens -- just reinstall it.
+3. The following error message can sometimes appear even if you have not
+   knowingly switched sessions:
+   #+begin_quote
+   dap--send-message: Session <name> is already terminated
+   #+end_quote
+   A workaround is to run ~dap-switch-session~, which should restore normal
+   operation, if only temporarily. The best solution is probably to restart
+   Emacs (although this is really just a cop out).
+
+***** Breakpoints
+1. Currently, =dap-mode= only supports breakpoint icons in the fringe, not the
+   margin, so indicators will not appear in TTY Emacs. Use the breakpoint window
+   instead (~dap-ui-breakpoints~ or ~dap-ui-breakpoints-list~).
+2. If breakpoint icons are not showing up even in GUI Emacs, run
+   ~(set-window-buffer nil (current-buffer))~. See [[https://github.com/emacs-lsp/dap-mode/issues/374][this dap-mode bug]].
+   Essentially, this command just restores the buffer's saved settings for
+   display margins, fringe widths, and scroll bars. It is written in C and is
+   pretty fast, so it should be safe to use as a hook.
+3. If you delete a file containing breakpoints without first deleting the
+   breakpoints, you may not be able to open the breakpoints list. The only
+   workaround I am aware of is to remove all breakpoints via
+   ~dap-breakpoint-delete-all~.
+4. Unlike other debugging interfaces, =dap-mode= has no mechanism to temporarily
+   disable breakpoints while still keeping track of them. A workaround is to
+   make the breakpoint conditional and set the condition to a language-specific
+   expression that will always evaluate to false (e.g. ~false~, ~False~, ~0~)
+   via ~dap-breakpoint-condition~.
+5. It can be somewhat unintuitive to determine where the program is stopped. In
+   =dap-mode=, the best way I've found is through the "Debug Sessions" side
+   window: just expand the tree for the current session until you see a process
+   labeled "Breakpoint", "Step", or "Exception" (or possibly some other label),
+   expand the process to view a call stack, and then press =RET= on the top
+   entry (in *bold*, representing the current frame), which will take you to the
+   line of code where execution stopped.
+6. In order to view breakpoint conditions, you need to use
+   ~dap-ui-breakpoints-list~ instead of the standard ~dap-ui-breakpoints~.
+
+***** Expressions
+1. The "Locals" window will cut off values if they do not fit nicely in the
+   window. Try ~dap-eval~ instead. If that still truncates values, you can
+   always evaluate a print statement of the value (again, using ~dap-eval~) so
+   that it gets sent to the DAP output buffer, which never truncates values.
+   Instead of ~dap-eval~, you can also use the REPL (~dap-ui-repl~).
+2. The REPL has no auto-completion. However, LSP-based auto-completion is still
+   possible via temporary (throwaway) edits to source buffers.
+3. The REPL, deriving from =comint-mode=, can be cleared via
+   ~comint-clear-buffer~, bound to =C-c M-o= by default. This isn't really an
+   "issue" so much as it is something that may not be immediately obvious.
 
 **** Untested features
 1. Set the ~dap-print-io~ option to print all protocol messages. This could be
@@ -3765,30 +3809,93 @@ sudo dnf -y install lldb gdb unzip
 nvm install node
 #+end_src
 
-*** LOOP [#A] Configure Realgud
-See the section for "Realgud" on [[https://docs.doomemacs.org/latest/modules/tools/debugger/][this web page]].
+*** TODO [#A] Ensure that breakpoint icons do not vanish :bug:
+See "Known issues and workarounds" above.
 
-#+begin_src emacs-lisp :tangle no
-(after! dap-mode
-  (dap-gdb-lldb-setup))
+*** TODO [#A] Delete breakpoints when their file is deleted :bug:
+Also, when opening a list of breakpoints (via ~dap-ui-breakpoints-list~ or
+~dap-ui-breakpoints~), delete breakpoints from cache when their file does not
+exist.
+
+*** TODO [#A] Allow displaying breakpoints in the margin :feat:
+This is a missing feature of =dap-mode= that would allow it to work well in TTY
+Emacs frames. See documentation on [[info:elisp#Display Margins][Display Margins]] as well as the implementation
+of the =diff-hl= package.
+
+*** STRT [#B] Replace DAP Hydra with prefix map :feat:
+#+begin_src emacs-lisp :tangle yes
+(map! :leader
+      ;;; <leader> d --- debug
+      (:prefix-map ("d" . "debug")
+       :desc "Next"                "n" #'dap-next
+       :desc "Step in"             "i" #'dap-step-in
+       :desc "Step out"            "o" #'dap-step-out
+       :desc "Continue"            "c" #'dap-continue
+       :desc "Restart frame"       "r" #'dap-restart-frame
+       :desc "Disconnect"          "Q" #'dap-disconnect
+       (:prefix ("s" . "switch")
+        :desc "Session"             "s" #'dap-switch-session
+        :desc "Thread"              "t" #'dap-switch-thread
+        :desc "Stack frame"         "f" #'dap-switch-stack-frame
+        :desc "Up stack frame"      "u" #'dap-up-stack-frame
+        :desc "Down stack frame"    "d" #'dap-down-stack-frame)
+       (:prefix ("b" . "breakpoints")
+        :desc "Toggle"              "b" #'dap-breakpoint-toggle
+        :desc "Delete"              "d" #'dap-breakpoint-add
+        :desc "Add"                 "a" #'dap-breakpoint-delete
+        :desc "Set condition"       "c" #'dap-breakpoint-condition
+        :desc "Set hit count"       "h" #'dap-breakpoint-hit-condition
+        :desc "Set log message"     "l" #'dap-breakpoint-log-message)
+       (:prefix ("d" . "debug")
+        :desc "Debug"               "d" #'dap-debug
+        :desc "Debug recent"        "r" #'dap-debug-recent
+        :desc "Debug last"          "l" #'dap-debug-last
+        :desc "Edit debug template" "e" #'dap-debug-edit-template
+        :desc "Debug restart"       "s" #'dap-debug-restart)
+       (:prefix ("e" . "eval")
+        :desc "Eval"                "e" #'dap-eval
+        :desc "Eval region"         "r" #'dap-eval-region
+        :desc "Eval thing at point" "s" #'dap-eval-thing-at-point
+        :desc "Add expression"      "a" #'dap-ui-expressions-add)
+       (:prefix ("w" . "window")
+        :desc "Locals"              "l" #'dap-ui-locals
+        :desc "Breakpoints"         "b" #'dap-ui-breakpoints
+        :desc "Breakpoint List"     "B" #'dap-ui-breakpoints-list
+        :desc "Expressions"         "e" #'dap-ui-expressions
+        :desc "Sessions"            "s" #'dap-ui-sessions
+        :desc "REPL"                "r" #'dap-ui-repl)))
 #+end_src
 
-*** TODO [#A] Fix functions that determine path variables
-Reference: ~dap-variables-standard-variables~
-*** WAIT [#B] Fix DAP mode error message re: =lsp-treemacs=
+*** WAIT [#B] Fix DAP mode error message re: =lsp-treemacs= :bug:
 See here: <https://github.com/Alexander-Miller/treemacs/issues/990>
 
 If this issue appears, there is a workaround: kill all of the Treemacs
 buffers (don't just close them!) and run ~dap-debug~ again.
 
-*** TODO [#B] Create bindings to deal with DAP side windows
-Bindings should exist to toggle side window visibility, as well as to perform
-all mouse-based functionality currently available in side windows.
+*** TODO [#C] Use =projectile= instead of =project= when expanding variables :feat:
+Reference: ~dap-variables-standard-variables~
 
-*** TODO [#C] Configure which DAP side windows appear at startup
+*** TODO [#C] Sort stack frames in numerical order
+Selecting stack frames with ~dap-switch-stack-frame~ presents frames in
+seemingly no logical order. However, each stack frame label begins with a
+number, so it shouldn't be too hard to sort by that, in theory.
+
+*** STRT [#C] Configure which DAP UI elements appear at startup :tweak:
 Reference:
 - <https://www.youtube.com/watch?v=0bilcQVSlbM&t=1007s>
 - ~dap-auto-configure-features~
+
+#+begin_src emacs-lisp :tangle yes
+(setq dap-auto-configure-features
+      '(sessions       ;; `dap-ui-sessions'
+        ;; locals      ;; `dap-ui-locals'
+        breakpoints    ;; `dap-ui-breakpoints'
+        ;; expressions ;; `dap-ui-expressions'
+        repl           ;; `dap-ui-repl'
+        ;; controls    ;; FIXME: `dap-ui-controls-mode'
+        ;; tooltip     ;; FIXME: `dap-tooltip-mode'
+        ))
+#+end_src
 
 ** direnv [1/4]
 :LOGBOOK:
@@ -4984,20 +5091,22 @@ npm install -g typescript typescript-language-server eslint trepan-ni
 #+begin_src emacs-lisp :tangle yes
 (after! dap-node
   (defadvice! my/dap-node--populate-start-file-args-a (conf)
-    "Wrap `read-file-name' in an `expand-file-name' form.
-This avoids errors re: non-absolute program paths that prevent
-DAP from working."
+    "Fix file paths used by the node debugger.
+1. Use absolute paths by wrapping path strings in `expand-file-name'.
+2. Prompt for the working directory instead of assuming `default-directory'."
     :override #'dap-node--populate-start-file-args
     (let ((conf (-> conf
                     (dap--put-if-absent :dap-server-path dap-node-debug-program)
                     (dap--put-if-absent :type "node")
-                    (dap--put-if-absent :cwd default-directory)
                     (dap--put-if-absent :name "Node Debug"))))
       (if (plist-get conf :args)
           conf
         (dap--put-if-absent
          conf :program (expand-file-name
-                        (read-file-name "Select the file to run:" nil (buffer-file-name) t)))))))
+                        (read-file-name "Select the file to run:" nil (buffer-file-name) t)))
+        (dap--put-if-absent
+         conf :cwd (expand-file-name
+                     (read-directory-name "Select the working directory:" nil default-directory t)))))))
 #+end_src
 
 *** DONE [#C] Filename-mode associations
