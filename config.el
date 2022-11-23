@@ -484,7 +484,27 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
 (setq column-number-indicator-zero-based nil)
 
+(after! evil-goggles
 
+  (defcustom my/evil-goggles-enable-jump t
+    "If non-nil, enable jump support."
+    :type 'boolean :group 'evil-goggles)
+
+  (defface my/evil-goggles-jump-face '((t (:inherit evil-goggles-default-face)))
+    "Face for jump action"
+    :group 'evil-goggles-faces)
+
+  (defun my/evil-goggles--jump-advice (&rest _)
+    "Advice for commands that move point across lines."
+    (let ((beg (line-beginning-position))
+          (end (1+ (line-end-position))))
+      (evil-goggles--show-async-hint beg end)))
+
+  (pushnew! evil-goggles--commands
+            '(evil-scroll-line-to-center
+              :face my/evil-goggles-jump-face
+              :switch my/evil-goggles-enable-jump
+              :advice my/evil-goggles--jump-advice)))
 
 (setq doom-themes-treemacs-enable-variable-pitch nil)
 

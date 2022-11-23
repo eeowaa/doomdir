@@ -1224,17 +1224,41 @@ This module brings a side panel for browsing project files, inspired by vim's
 NERDTree.
 #+end_quote
 
-** ophints [0/1]
+** ophints [1/1]
 #+begin_quote
 This module provides op-hints (operation hinting), i.e. visual feedback for
 certain operations. It highlights regions of text that the last operation (like
 yank) acted on.
 #+end_quote
 
-*** TODO [#C] Flash after =zz=
+*** DONE [#C] Flash after =zz=
 Although the middle of the window might seem like an obvious location for the
 eyes to center on, in reality, it can take a moment to find the cursor after
 =zz=. A quick flash would help.
+
+#+begin_src emacs-lisp :tangle yes
+(after! evil-goggles
+
+  (defcustom my/evil-goggles-enable-jump t
+    "If non-nil, enable jump support."
+    :type 'boolean :group 'evil-goggles)
+
+  (defface my/evil-goggles-jump-face '((t (:inherit evil-goggles-default-face)))
+    "Face for jump action"
+    :group 'evil-goggles-faces)
+
+  (defun my/evil-goggles--jump-advice (&rest _)
+    "Advice for commands that move point across lines."
+    (let ((beg (line-beginning-position))
+          (end (1+ (line-end-position))))
+      (evil-goggles--show-async-hint beg end)))
+
+  (pushnew! evil-goggles--commands
+            '(evil-scroll-line-to-center
+              :face my/evil-goggles-jump-face
+              :switch my/evil-goggles-enable-jump
+              :advice my/evil-goggles--jump-advice)))
+#+end_src
 
 ** popup [4/7] :ARCHIVE:
 #+begin_quote
