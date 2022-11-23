@@ -646,7 +646,11 @@ Without INDEX, move to the end."
 ;; When using `evil', have C-l redraw the display (like Vim does). Use zt, zz,
 ;; and zb to reposition the current line instead of C-l.
 (when (modulep! :editor evil)
-  (global-set-key (kbd "C-l") #'redraw-display))
+  (defun my/redraw ()
+    (interactive)
+    (redraw-display)
+    (set-window-buffer nil (current-buffer)))
+  (global-set-key (kbd "C-l") #'my/redraw))
 
 ;; Perform a line feed after jumping to a ^L character
 (defadvice! my/recenter-top-a (&rest _)
@@ -1066,6 +1070,26 @@ which causes problems even if there is no existing buffer."
         (".envrc")
         (".editorconfig")))
 
+(after! dap-mode
+  (defun my/refresh-window (&rest arg)
+    "Refresh the current window's display margins, fringes, and scroll bars."
+    (set-window-buffer nil (current-buffer)))
+  (add-hook! '(+dap-running-session-mode-hook
+               ;; NOTE Uncomment the following lines to get breakpoints to show
+               ;;      most of the time (slows things down a bit):
+               ;; dap-breakpoints-changed-hook
+               ;; dap-continue-hook
+               ;; dap-executed-hook
+               ;; dap-loaded-sources-changed-hook
+               ;; dap-position-changed-hook
+               ;; dap-session-changed-hook
+               ;; dap-session-created-hook
+               ;; dap-stack-frame-changed-hook
+               ;; dap-stopped-hook
+               ;; dap-terminated-hook
+               )
+               :append #'my/refresh-window))
+
 (map! :leader
       ;;; <leader> d --- debug
       (:prefix-map ("d" . "debug")
@@ -1116,6 +1140,9 @@ which causes problems even if there is no existing buffer."
         ;; controls    ;; FIXME: `dap-ui-controls-mode'
         ;; tooltip     ;; FIXME: `dap-tooltip-mode'
         ))
+
+;; Remove hook installed by Doom
+(remove-hook 'dap-ui-mode-hook 'dap-ui-controls-mode)
 
 (defun my/aws-envvars ()
   "Print the values of AWS environment variables"
