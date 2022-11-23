@@ -299,7 +299,7 @@ npm install -g typescript typescript-language-server eslint trepan-ni
     else git clone --depth=1 --recursive https://github.com/microsoft/vscode-node-debug2
     fi
     cd vscode-node-debug2
-    git clean
+    git clean -fd
     npm ci
     npm run package
     set -- *.vsix
