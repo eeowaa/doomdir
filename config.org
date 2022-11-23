@@ -1260,7 +1260,7 @@ eyes to center on, in reality, it can take a moment to find the cursor after
               :advice my/evil-goggles--jump-advice)))
 #+end_src
 
-** popup [4/7] :ARCHIVE:
+** popup [4/7]
 #+begin_quote
 This module provides a customizable popup window management system.
 #+end_quote

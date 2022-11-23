@@ -506,6 +506,58 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
               :switch my/evil-goggles-enable-jump
               :advice my/evil-goggles--jump-advice)))
 
+(map! :leader
+      :desc "Raise popup"
+      "^" #'+popup/raise)
+
+;; Allow any letter to be used a manual section for Man (AWS CLI uses "a")
+(setq Man-section-regexp "[a-zA-Z0-9+]+")
+
+;; Consider "AVAILABLE.*" page sections to be "SEE ALSO"
+(setq Man-see-also-regexp
+      (format "\\(%s\\)"
+              (string-join '("SEE ALSO"
+                             "VOIR AUSSI"
+                             "SIEHE AUCH"
+                             "VÉASE TAMBIÉN"
+                             "VEJA TAMBÉM"
+                             "VEDERE ANCHE"
+                             "ZOBACZ TAKŻE"
+                             "İLGİLİ BELGELER"
+                             "参照"
+                             "参见 SEE ALSO"
+                             "參見 SEE ALSO"
+                             "AVAILABLE.*") ;; For AWS CLI man pages
+                           "\\|")))
+
+;; Allow buttons to be properly overlayed on AWS CLI man page references
+(after! man
+  (setq
+   Man-reference-regexp
+   (concat
+    ;; Ignore bullet points
+    "\\(?:^\\.IP \\\\(bu 2\\n\\|o \\)?"
+    ;; This is the <name> part
+    "\\(" Man-name-regexp
+         "\\("
+              ;; This allow line-continuations for long man page names
+              ;;
+              ;; SEE ALSO
+              ;;     foo(1), bar(1), line-
+              ;;     continuation(1)
+              ;;
+              "\\([-‐]\n\\)?"
+              "[ \t]+" Man-name-regexp
+         "\\)*"
+    "\\)"
+    ;; This is the (<section>) part
+    "[ \t]*(\\(" Man-section-regexp "\\))")))
+
+(after! imenu-list
+  (set-popup-rule! "^\\*Ilist\\*"
+    :side 'right :size 35 :modeline "Ilist")
+  (remove-hook 'imenu-list-major-mode-hook #'imenu-list--set-mode-line))
+
 (setq doom-themes-treemacs-enable-variable-pitch nil)
 
 (setq +treemacs-git-mode 'extended)
