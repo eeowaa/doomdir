@@ -1380,7 +1380,11 @@ which causes problems even if there is no existing buffer."
 (after! org
   (setq org-hide-leading-stars nil
         org-startup-indented nil
-        org-adapt-indentation nil))
+        org-adapt-indentation nil)
+
+  ;; HACK The following `require' line prevents error messages like this:
+  ;; Invalid face reference: org-indent
+  (require 'org-indent))
 
 (defadvice! my/inhibit-indentation-a (f &rest r)
   "Prevent `org-indent-mode' from running."

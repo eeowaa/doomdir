@@ -5441,12 +5441,16 @@ mkdir -p ~/org/roam
 #+end_src
 
 *** Document Structure [1/5]
-**** DONE [#A] Do not indent headlines
+**** DONE [#A] Do not indent headlines :hack:
 #+begin_src emacs-lisp :tangle yes
 (after! org
   (setq org-hide-leading-stars nil
         org-startup-indented nil
-        org-adapt-indentation nil))
+        org-adapt-indentation nil)
+
+  ;; HACK The following `require' line prevents error messages like this:
+  ;; Invalid face reference: org-indent
+  (require 'org-indent))
 
 (defadvice! my/inhibit-indentation-a (f &rest r)
   "Prevent `org-indent-mode' from running."
