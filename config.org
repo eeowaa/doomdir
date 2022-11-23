@@ -1236,7 +1236,7 @@ Although the middle of the window might seem like an obvious location for the
 eyes to center on, in reality, it can take a moment to find the cursor after
 =zz=. A quick flash would help.
 
-** popup [4/7]
+** popup [4/7] :ARCHIVE:
 #+begin_quote
 This module provides a customizable popup window management system.
 #+end_quote
@@ -1301,22 +1301,6 @@ to work:
     ;; This is the (<section>) part
     "[ \t]*(\\(" Man-section-regexp "\\))")))
 #+end_src
-
-*** DONE [#C] Open man pages in the current window
-#+begin_src emacs-lisp :tangle yes
-(setq Man-notify-method 'pushy)
-#+end_src
-
-*** DONE [#C] Do not restrict (Wo)Man buffer width
-#+begin_src emacs-lisp :tangle yes
-(setq Man-width-max nil
-      woman-fill-frame t)
-#+end_src
-
-To redisplay with new width, call ~Man-update-manpage~ in a =Man= buffer (or
-just wait a few seconds after resizing a window for it to get called
-automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
-=R= in Emacs evil state).
 
 *** STRT [#B] Add popup rule for Ilist
 - [ ] Display a similar modeline to that of Treemacs
@@ -2298,6 +2282,22 @@ in the stack trace are elisp functions (not C functions).
 #+begin_src emacs-lisp :tangle yes
 (setq debugger-stack-frame-as-list t)
 #+end_src
+
+*** DONE [#C] Open man pages in the current window
+#+begin_src emacs-lisp :tangle yes
+(setq Man-notify-method 'pushy)
+#+end_src
+
+*** DONE [#C] Do not restrict (Wo)Man buffer width
+#+begin_src emacs-lisp :tangle yes
+(setq Man-width-max nil
+      woman-fill-frame t)
+#+end_src
+
+To redisplay with new width, call ~Man-update-manpage~ in a =Man= buffer (or
+just wait a few seconds after resizing a window for it to get called
+automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
+=R= in Emacs evil state).
 
 *** KILL [#C] Suppress warning for ~Package cl is deprecated~
 Like Henrik said, there is nothing we can do about this:
@@ -5921,11 +5921,12 @@ Optional argument INFO is a plist of options."
 #+begin_src emacs-lisp :tangle yes
 (after! org
   (setq org-src-window-setup 'current-window)
-  (setq +popup--display-buffer-alist
-        (delq (assoc "^\\*Org Src" +popup--display-buffer-alist)
-              +popup--display-buffer-alist))
-  (when (bound-and-true-p +popup-mode)
-    (setq display-buffer-alist +popup--display-buffer-alist)))
+  (when (modulep! :ui popup)
+    (setq +popup--display-buffer-alist
+          (delq (assoc "^\\*Org Src" +popup--display-buffer-alist)
+                +popup--display-buffer-alist))
+    (when (bound-and-true-p +popup-mode)
+      (setq display-buffer-alist +popup--display-buffer-alist))))
 #+end_src
 
 **** LOOP [#B] Make it easy to jump between source and tangled file
