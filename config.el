@@ -508,6 +508,8 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
 (setq doom-themes-treemacs-enable-variable-pitch nil)
 
+(setq +treemacs-git-mode 'extended)
+
 (require 'ace-window)
 
 (after! treemacs-evil

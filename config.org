@@ -1346,7 +1346,7 @@ to work:
 This module adds an Atom-esque tab bar to the Emacs UI.
 #+end_quote
 
-** treemacs [5/7]
+** treemacs [7/8]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -1393,6 +1393,17 @@ See also:
 + [[doom:.local/straight/repos/themes/extensions/doom-themes-ext-treemacs.el][doom-themes-ext-treemacs.el]]
 + =M-x customize-group doom-themes-treemacs RET=
 
+*** DONE [#A] Remove "Invalid face reference" errors
+This comes from incorrect parsing of ~git status --porcelain~, which only
+happens when ~treemacs-git-mode~ is operating in ~simple~ mode. By setting the
+Doom-specific ~+treemacs-git-mode~ variable to ~extended~, we use a ~python3~
+script instead of ~git~ to determine the git status of each file in a project.
+(Alternatively, we could disable ~treemacs-git-mode~ altogether.)
+
+#+begin_src emacs-lisp :tangle yes
+(setq +treemacs-git-mode 'extended)
+#+end_src
+
 *** DONE [#B] Fix ace-window keybindings :hack:
 This slows down startup a bit, but whatever (I'm not obsessed with startup):
 #+begin_src emacs-lisp :tangle yes
@@ -1426,10 +1437,13 @@ not work in the lisp functions.
     "K" #'my/treemacs-visit-previous))
 #+end_src
 
-*** TODO [#A] Prevent Treemacs from scrolling seemingly at random
+*** OKAY [#A] Prevent Treemacs from scrolling seemingly at random
 I don't know why this is happening, but it is very annoying. To debug, I could
 start by setting a watchpoint on a variable that keeps track of the Treemacs
 buffer's vertical position (~eeowaa-watchpoint-set~).
+
+*UPDATE*: I'm guessing this behavior is from ~treemacs-follow-mode~, which is
+disabled by default at this point.
 
 *** TODO [#B] Display "+" and "-" icons in tty emacs
 https://github.com/hlissner/emacs-doom-themes/issues/489
