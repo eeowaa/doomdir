@@ -1346,7 +1346,7 @@ to work:
 This module adds an Atom-esque tab bar to the Emacs UI.
 #+end_quote
 
-** treemacs [7/8]
+** treemacs [9/10]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -1366,6 +1366,15 @@ brew install python3
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `ui/treemacs` module
 sudo dnf -y install python3
+#+end_src
+
+*** DONE [#A] Unpin treemacs packages
+It seems like half of the problems I encounter with =treemacs= and
+=treemacs-lsp= are already solved upstream, so I'm going to roll the dice and
+unpin those packages:
+
+#+begin_src emacs-lisp :tangle packages.el
+(unpin! (:ui treemacs))
 #+end_src
 
 *** DONE [#A] Allow resizable fonts
@@ -1419,6 +1428,12 @@ This slows down startup a bit, but whatever (I'm not obsessed with startup):
 #+end_src
 
 Reference: https://github.com/hlissner/doom-emacs/issues/4555
+
+*** DONE [#B] Do not collapse path strings
+#+begin_src emacs-lisp :tangle yes
+(after! treemacs
+  (setq treemacs-collapse-dirs 0))
+#+end_src
 
 *** KILL [#B] Fix size of NPM logo
 I am no longer seeing this issue as of [2021-01-11 Mon].

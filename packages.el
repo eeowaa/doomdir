@@ -26,6 +26,8 @@
 (package! vdiff)
 (package! vdiff-magit)
 
+(unpin! (:ui treemacs))
+
 ;;; :editor
 
 ;;; :emacs

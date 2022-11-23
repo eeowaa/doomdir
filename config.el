@@ -564,6 +564,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
 (require 'ace-window)
 
+(after! treemacs
+  (setq treemacs-collapse-dirs 0))
+
 (after! treemacs-evil
   (defun my/treemacs-visit-next ()
     "Open the next node in another window."
