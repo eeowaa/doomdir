@@ -1148,7 +1148,9 @@ which causes problems even if there is no existing buffer."
     (define-derived-mode bash-mode sh-mode "Bash-script"
       "Major mode for editing bash scripts."
       (sh-set-shell "bash" nil nil)))
-  (pushnew! org-src-lang-modes '("ein-bash" . "bash"))
+  (pushnew! org-src-lang-modes
+            '("bash" . bash)
+            '("ein-bash" . bash))
 
   ;; Send output from `ein-bash' source blocks back to org buffer
   (let ((alist (assoc-delete-all :results ob-ein-default-header-args:ein)))
