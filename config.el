@@ -1328,6 +1328,11 @@ which causes problems even if there is no existing buffer."
 (after! ws-butler
   (pushnew! ws-butler-global-exempt-modes 'tsv-mode))
 
+;; Add $DOOMDIR/lisp to `load-path'
+(add-load-path! (concat doom-user-dir "lisp"))
+(require 'eeowaa-project)
+;; (require 'eeowaa-debug) NOTE: This is providing nothing of value right now
+
 (defadvice! my/format-result-a (f &rest r)
   "Prepend \";; =>\"."
   :around #'eval-print-last-sexp
@@ -1339,11 +1344,6 @@ which causes problems even if there is no existing buffer."
       (insert ";; => "))))
 
 (pushnew! auto-mode-alist '("Cask\\'" . lisp-data-mode))
-
-;; Add $DOOMDIR/lisp to `load-path'
-(add-load-path! (concat doom-user-dir "lisp"))
-(require 'eeowaa-project)
-;; (require 'eeowaa-debug) NOTE: This is providing nothing of value right now
 
 (after! lsp-haskell
   (setq lsp-haskell-formatting-provider "brittany"))
@@ -1901,8 +1901,6 @@ ALIGN should be a keyword :left or :right."
             (list (abbreviate-file-name f))))
         (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
                                    t "\\`[^.]")))))
-
-(remove-hook 'org-mode-hook #'+literate-enable-recompile-h)
 
 (remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
 

@@ -1404,6 +1404,14 @@ script instead of ~git~ to determine the git status of each file in a project.
 (setq +treemacs-git-mode 'extended)
 #+end_src
 
+*** OKAY [#A] Prevent Treemacs from scrolling seemingly at random
+I don't know why this is happening, but it is very annoying. To debug, I could
+start by setting a watchpoint on a variable that keeps track of the Treemacs
+buffer's vertical position (~eeowaa-watchpoint-set~).
+
+*UPDATE*: I'm guessing this behavior is from ~treemacs-follow-mode~, which is
+disabled by default at this point.
+
 *** DONE [#B] Fix ace-window keybindings :hack:
 This slows down startup a bit, but whatever (I'm not obsessed with startup):
 #+begin_src emacs-lisp :tangle yes
@@ -1437,15 +1445,12 @@ not work in the lisp functions.
     "K" #'my/treemacs-visit-previous))
 #+end_src
 
-*** OKAY [#A] Prevent Treemacs from scrolling seemingly at random
-I don't know why this is happening, but it is very annoying. To debug, I could
-start by setting a watchpoint on a variable that keeps track of the Treemacs
-buffer's vertical position (~eeowaa-watchpoint-set~).
-
-*UPDATE*: I'm guessing this behavior is from ~treemacs-follow-mode~, which is
-disabled by default at this point.
-
-*** TODO [#B] Display "+" and "-" icons in tty emacs
+*** WAIT [#B] Display "+" and "-" icons in tty emacs
+:LOGBOOK:
+- Note taken on [2022-11-23 Wed 11:27] \\
+  This is an open issue with Doom Emacs. It is not so much of a nuisance that I
+  want to fix it myself, so for now, I'll just wait for a fix.
+:END:
 https://github.com/hlissner/emacs-doom-themes/issues/489
 
 ** unicode [0/0] :ARCHIVE:
@@ -2460,6 +2465,9 @@ When selecting a window in which to open a help buffer:
 
 1. If there is an existing window displaying a help buffer, select it
 2. Otherwise, open the new help buffer in the current window
+
+You will probably want to modify ~helpful-switch-buffer-function~ (called by
+~helpful--update-and-switch-buffer~), currently set to ~pop-to-buffer~.
 
 **** COMMENT Reference
 + info:elisp#Windows
@@ -4872,7 +4880,7 @@ or [[https://github.com/elixir-lsp/elixir-ls/][elixir-ls]].
 #+end_quote
 
 ** elm [0/0] :ARCHIVE:
-** emacs-lisp [3/3]
+** emacs-lisp [3/4]
 #+begin_quote
 This module extends support for Emacs Lisp in Doom Emacs.
 #+end_quote
@@ -4891,6 +4899,24 @@ This module extends support for Emacs Lisp in Doom Emacs.
        expansion/. Instead, refer to the argument /in the expansion/.
     5. Avoid side-effects on objects constructed /during expansion/, as this can
        cause issues in byte-compiled code.
+
+*** DONE [#A] Load my own local packages
+References:
++ [[id:fb9fd833-7379-41f0-9cfe-d86baef3095e][Using/loading local packages]]
++ [[id:2cef25eb-e326-439e-ab3e-82eb65f074db][=autoload/*.el= OR =autoload.el=]]
++ [[info:elisp#Autoload][elisp#Autoload]]
+
+#+begin_quote
+[Add] the package's location to Emacs' ~load-path~ (...) if you don't need/care
+for autoload cookies or byte-compilation.
+#+end_quote
+
+#+begin_src emacs-lisp :tangle yes
+;; Add $DOOMDIR/lisp to `load-path'
+(add-load-path! (concat doom-user-dir "lisp"))
+(require 'eeowaa-project)
+;; (require 'eeowaa-debug) NOTE: This is providing nothing of value right now
+#+end_src
 
 *** DONE [#B] Prepend ";; => " to output in Lisp Interaction Mode
 https://www.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_thread/eqrf693?utm_source=share&utm_medium=web2x
@@ -4912,23 +4938,9 @@ https://www.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_thread/eqrf69
 (pushnew! auto-mode-alist '("Cask\\'" . lisp-data-mode))
 #+end_src
 
-*** DONE [#A] Load my own local packages
-References:
-+ [[id:fb9fd833-7379-41f0-9cfe-d86baef3095e][Using/loading local packages]]
-+ [[id:2cef25eb-e326-439e-ab3e-82eb65f074db][=autoload/*.el= OR =autoload.el=]]
-+ [[info:elisp#Autoload][elisp#Autoload]]
-
-#+begin_quote
-[Add] the package's location to Emacs' ~load-path~ (...) if you don't need/care
-for autoload cookies or byte-compilation.
-#+end_quote
-
-#+begin_src emacs-lisp :tangle yes
-;; Add $DOOMDIR/lisp to `load-path'
-(add-load-path! (concat doom-user-dir "lisp"))
-(require 'eeowaa-project)
-;; (require 'eeowaa-debug) NOTE: This is providing nothing of value right now
-#+end_src
+*** TODO [#A] Do not jump to in-buffer definitions when using =K=
+If I want to see the definition, I'll use =gd=. I want =K= to just show the
+documentation and do nothing else.
 
 ** erlang [0/0] :ARCHIVE:
 #+begin_quote
@@ -7309,15 +7321,19 @@ to see how Doom configures Projectile.
 This module enables support for a literate config.
 #+end_quote
 
-*** DONE [#A] Disable tangle upon save
-It just takes too long. 🙁
-
-#+begin_src emacs-lisp :tangle yes
-(remove-hook 'org-mode-hook #'+literate-enable-recompile-h)
-#+end_src
-
 *** DONE [#B] Tangle to =packages.el=
 I would like to make =packages.el= literate instead of "illiterate". 😉
+
+*** KILL [#A] Disable tangle upon save
+:LOGBOOK:
+- Note taken on [2022-11-23 Wed 11:41] \\
+  This is actually not too slow anymore (uses an async process).
+:END:
+It just takes too long. 🙁
+
+#+begin_src emacs-lisp :tangle no
+(remove-hook 'org-mode-hook #'+literate-enable-recompile-h)
+#+end_src
 
 *** TODO [#C] Link tangled blocks back to source
 Refer to your old config.
