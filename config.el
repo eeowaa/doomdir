@@ -1821,6 +1821,8 @@ ALIGN should be a keyword :left or :right."
               (t t)))
             (:success t)))))))
 
+(setq projectile-auto-discover t)
+
 (setq projectile-project-search-path
       (list
        ;; Standard source directories
@@ -1829,7 +1831,6 @@ ALIGN should be a keyword :left or :right."
        (cons (concat (file-name-as-directory (getenv "HOME")) ".local/src") 2)
 
        ;; Personal source directories
-
        (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/work") 2)
        (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/life") 2)))
 

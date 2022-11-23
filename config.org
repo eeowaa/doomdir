@@ -7122,7 +7122,7 @@ for you to customize it yourself. It is best to load these last.
 ;;; :config
 #+end_src
 
-** Miscellany [3/5]
+** Miscellany [5/6]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -7244,7 +7244,14 @@ problem.
             (:success t)))))))
 #+end_src
 
-*** LOOP [#B] Add search directories for =projectile=
+*** DONE [#B] Enable automatic discovery of project directories
+Doom disables this feature for performance reasons. Let's re-enable it.
+
+#+begin_src emacs-lisp :tangle yes
+(setq projectile-auto-discover t)
+#+end_src
+
+*** OKAY [#B] Add search directories for =projectile=
 Some ideas for more project directories:
 - [ ] Doom Emacs source directory
 - [ ] System Emacs source directory
@@ -7258,7 +7265,6 @@ Some ideas for more project directories:
        (cons (concat (file-name-as-directory (getenv "HOME")) ".local/src") 2)
 
        ;; Personal source directories
-
        (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/work") 2)
        (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/life") 2)))
 #+end_src
