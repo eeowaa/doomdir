@@ -1254,11 +1254,7 @@ which causes problems even if there is no existing buffer."
     lsp-disabled-clients '(tfls)
 
     ;; Enable reference counts
-    lsp-terraform-ls-enable-show-reference t
-
-    ;; REVIEW Enable semantic token support
-    lsp-semantic-tokens-enable t
-    lsp-semantic-tokens-honor-refresh-requests t)
+    lsp-terraform-ls-enable-show-reference t)
 
   ;; Set keybindings for LSP (reference existing LSP configurations)
   (after! terraform-mode
@@ -1275,6 +1271,8 @@ which causes problems even if there is no existing buffer."
 ;; Missing from evil-textobj-tree-sitter.el:
 (after! evil-textobj-tree-sitter
   (pushnew! evil-textobj-tree-sitter-major-mode-language-alist '(terraform-mode . "hcl")))
+
+(setq lsp-semantic-tokens-enable nil)
 
 (when IS-MAC
   (setq ;; Comfortable keys that work most of the time

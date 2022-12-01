@@ -4510,11 +4510,7 @@ sudo dnf -y install terraform terraform-ls
     lsp-disabled-clients '(tfls)
 
     ;; Enable reference counts
-    lsp-terraform-ls-enable-show-reference t
-
-    ;; REVIEW Enable semantic token support
-    lsp-semantic-tokens-enable t
-    lsp-semantic-tokens-honor-refresh-requests t)
+    lsp-terraform-ls-enable-show-reference t)
 
   ;; Set keybindings for LSP (reference existing LSP configurations)
   (after! terraform-mode
@@ -4544,10 +4540,17 @@ syntax, so setup should be pretty easy. Refer to how other modules handle the
   (pushnew! evil-textobj-tree-sitter-major-mode-language-alist '(terraform-mode . "hcl")))
 #+end_src
 
-*** TODO [#B] Disable LSP semantic highlighting when tree-sitter is available
+*** STRT [#B] Disable LSP semantic highlighting when tree-sitter is available
 For now, what I do is just manually run =M-x lsp-semantic-tokens-mode= in a
 buffer when I want to disable LSP semantic highlighting in that buffer (for
 example, in ~terraform-mode~ buffers).
+
+As a temporary workaround, since most LSP-supported languages that I use also
+support Tree-Sitter, I will just globally disable LSP semantic tokens:
+
+#+begin_src emacs-lisp :tangle yes
+(setq lsp-semantic-tokens-enable nil)
+#+end_src
 
 ** upload [0/0] :ARCHIVE:
 * :os
