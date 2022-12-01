@@ -4528,6 +4528,14 @@ sudo dnf -y install terraform terraform-ls
 #+end_src
 
 ** tmux [0/0] :ARCHIVE:
+** tree-sitter [0/1]
+*** TODO [#A] Fix tree-sitter syntax highlighting for terraform
+Terraform syntax highlighting uses LSP's semantic highlighting (there is no
+~+tree-sitter~ flag for =:tools treesitter=), which is actually worse than the
+standard syntax highlighting. However, there is support for HCL syntax [[https://github.com/emacs-tree-sitter/tree-sitter-langs/tree/master/repos][parsing]]
+and [[https://github.com/emacs-tree-sitter/tree-sitter-langs/tree/master/queries][highlighting]], so Terraform should get this. Refer to how other modules
+handle the ~+tree-sitter~ flag to implement this yourself.
+
 ** upload [0/0] :ARCHIVE:
 * :os
 #+begin_quote

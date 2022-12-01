@@ -125,12 +125,12 @@
        ;;agda              ; types of types of types of types...
        ;;beancount         ; mind the GAAP
        ;; NOTE `+eglot' adds commands for displaying inheritance type hierarchies
-       (cc +lsp)         ; C/C++/Obj-C madness
+       (cc +lsp +tree-sitter) ; C/C++/Obj-C madness
        ;;clojure           ; java with a lisp
        ;;common-lisp       ; if you've seen one lisp, you've seen them all
        ;;coq               ; proofs-as-programs
        ;;crystal           ; ruby at the speed of c
-       (csharp +lsp +dotnet)
+       (csharp +lsp +tree-sitter +dotnet)
                          ; unity, .NET, and mono shenanigans
        data              ; config/data formats
        ;;(dart +flutter)   ; paint ui and not much else
@@ -151,9 +151,9 @@
        (haskell +lsp)    ; a language that's lazier than I am
        ;;hy                ; readability of scheme w/ speed of python
        ;;idris             ; a language you can depend on
-       (json +lsp)       ; At least it ain't XML
+       (json +lsp +tree-sitter) ; At least it ain't XML
        ;;(java +meghanada) ; the poster child for carpal tunnel syndrome
-       (javascript +lsp) ; all(hope(abandon(ye(who(enter(here))))))
+       (javascript +lsp +tree-sitter) ; all(hope(abandon(ye(who(enter(here))))))
        ;;julia             ; a better, faster MATLAB
        ;;kotlin            ; a better, slicker Java(Script)
        (latex +lsp)      ; writing papers in Emacs has never been so fun
@@ -162,7 +162,7 @@
        (lua +lsp)          ; one-based indices? one-based indices
        (markdown +grip)  ; writing docs for people to ignore
        ;;nim               ; python + lisp at the speed of c
-       nix               ; I hereby declare "nix geht mehr!"
+       (nix +tree-sitter) ; I hereby declare "nix geht mehr!"
        ;;ocaml             ; an objective camel
        (org +dragndrop +gnuplot +jupyter +noter +pandoc +pomodoro +present +roam2)
                          ; organize your plain life in plain text
@@ -177,16 +177,16 @@
        rest              ; Emacs as a REST client
        rst               ; ReST in peace
        ;;(ruby +rails)     ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
-       (rust +lsp)         ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+       (rust +lsp +tree-sitter) ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
        ;;scala             ; java, but good
        ;;(scheme +guile)   ; a fully conniving family of lisps
-       (sh +lsp +fish +powershell)
+       (sh +lsp +tree-sitter +fish +powershell)
                          ; she sells {ba,z,fi}sh shells on the C xor
        ;;sml
        ;;solidity          ; do you need a blockchain? No.
        ;;swift             ; who asked for emoji variables?
        ;;terra             ; Earth and Moon in alignment for performance.
-       (web +lsp)          ; the tubes
+       (web +lsp +tree-sitter) ; the tubes
        (yaml +lsp)         ; JSON, but readable
        ;;zig               ; C, but simpler
 
