@@ -1260,7 +1260,7 @@ eyes to center on, in reality, it can take a moment to find the cursor after
               :advice my/evil-goggles--jump-advice)))
 #+end_src
 
-** popup [4/7]
+** popup [1/3]
 #+begin_quote
 This module provides a customizable popup window management system.
 #+end_quote
@@ -1280,52 +1280,6 @@ to work:
       "SPC ^" #'+popup/raise)
 #+end_src
 
-*** DONE [#B] Configure Man for AWS CLI man pages
-#+begin_src emacs-lisp :tangle yes
-;; Allow any letter to be used a manual section for Man (AWS CLI uses "a")
-(setq Man-section-regexp "[a-zA-Z0-9+]+")
-
-;; Consider "AVAILABLE.*" page sections to be "SEE ALSO"
-(setq Man-see-also-regexp
-      (format "\\(%s\\)"
-              (string-join '("SEE ALSO"
-                             "VOIR AUSSI"
-                             "SIEHE AUCH"
-                             "VÉASE TAMBIÉN"
-                             "VEJA TAMBÉM"
-                             "VEDERE ANCHE"
-                             "ZOBACZ TAKŻE"
-                             "İLGİLİ BELGELER"
-                             "参照"
-                             "参见 SEE ALSO"
-                             "參見 SEE ALSO"
-                             "AVAILABLE.*") ;; For AWS CLI man pages
-                           "\\|")))
-
-;; Allow buttons to be properly overlayed on AWS CLI man page references
-(after! man
-  (setq
-   Man-reference-regexp
-   (concat
-    ;; Ignore bullet points
-    "\\(?:^\\.IP \\\\(bu 2\\n\\|o \\)?"
-    ;; This is the <name> part
-    "\\(" Man-name-regexp
-         "\\("
-              ;; This allow line-continuations for long man page names
-              ;;
-              ;; SEE ALSO
-              ;;     foo(1), bar(1), line-
-              ;;     continuation(1)
-              ;;
-              "\\([-‐]\n\\)?"
-              "[ \t]+" Man-name-regexp
-         "\\)*"
-    "\\)"
-    ;; This is the (<section>) part
-    "[ \t]*(\\(" Man-section-regexp "\\))")))
-#+end_src
-
 *** STRT [#B] Add popup rule for Ilist
 - [ ] Display a similar modeline to that of Treemacs
 - [ ] Use the same popup window as Treemacs (only display one at a time)
@@ -1340,7 +1294,6 @@ to work:
   (remove-hook 'imenu-list-major-mode-hook #'imenu-list--set-mode-line))
 #+end_src
 
-*** TODO [#B] Configure WoMan for AWS CLI man pages
 ** tabs [0/0] :ARCHIVE:
 #+begin_quote
 This module adds an Atom-esque tab bar to the Emacs UI.
@@ -2280,7 +2233,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [9/20]
+** Miscellany [10/22]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -2319,6 +2272,52 @@ This solves the problem for me and allows me to run =SPC f u=
             "sudo:root@" host
             ":" (or (file-remote-p file 'localname)
                     file))))
+#+end_src
+
+*** DONE [#B] Configure Man for AWS CLI man pages
+#+begin_src emacs-lisp :tangle yes
+;; Allow any letter to be used a manual section for Man (AWS CLI uses "a")
+(setq Man-section-regexp "[a-zA-Z0-9+]+")
+
+;; Consider "AVAILABLE.*" page sections to be "SEE ALSO"
+(setq Man-see-also-regexp
+      (format "\\(%s\\)"
+              (string-join '("SEE ALSO"
+                             "VOIR AUSSI"
+                             "SIEHE AUCH"
+                             "VÉASE TAMBIÉN"
+                             "VEJA TAMBÉM"
+                             "VEDERE ANCHE"
+                             "ZOBACZ TAKŻE"
+                             "İLGİLİ BELGELER"
+                             "参照"
+                             "参见 SEE ALSO"
+                             "參見 SEE ALSO"
+                             "AVAILABLE.*") ;; For AWS CLI man pages
+                           "\\|")))
+
+;; Allow buttons to be properly overlayed on AWS CLI man page references
+(after! man
+  (setq
+   Man-reference-regexp
+   (concat
+    ;; Ignore bullet points
+    "\\(?:^\\.IP \\\\(bu 2\\n\\|o \\)?"
+    ;; This is the <name> part
+    "\\(" Man-name-regexp
+         "\\("
+              ;; This allow line-continuations for long man page names
+              ;;
+              ;; SEE ALSO
+              ;;     foo(1), bar(1), line-
+              ;;     continuation(1)
+              ;;
+              "\\([-‐]\n\\)?"
+              "[ \t]+" Man-name-regexp
+         "\\)*"
+    "\\)"
+    ;; This is the (<section>) part
+    "[ \t]*(\\(" Man-section-regexp "\\))")))
 #+end_src
 
 *** DONE [#C] Don't prompt about killing running processing when quitting
@@ -2919,6 +2918,7 @@ identify files that require elevated privileges to open.
             "^AWS_SESSION_TOKEN$"))
 #+end_src
 
+*** TODO [#B] Configure WoMan for AWS CLI man pages
 *** LOOP [#B] Always trust file-location and directory-local variables
 :LOGBOOK:
 - Note taken on [2022-07-14 Thu 10:37] \\
