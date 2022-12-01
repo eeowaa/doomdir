@@ -4524,7 +4524,7 @@ sudo dnf -y install terraform terraform-ls
 #+end_src
 
 ** tmux [0/0] :ARCHIVE:
-** tree-sitter [1/2]
+** tree-sitter [2/3]
 *** DONE [#A] Add tree-sitter syntax highlighting to terraform
 Although there is no ~+tree-sitter~ flag for =:tools treesitter=, there is
 support for HCL syntax [[https://github.com/emacs-tree-sitter/tree-sitter-langs/tree/master/repos][parsing]] and [[https://github.com/emacs-tree-sitter/tree-sitter-langs/tree/master/queries][highlighting]], so Terraform should use this.
@@ -4538,6 +4538,17 @@ syntax, so setup should be pretty easy. Refer to how other modules handle the
 ;; Missing from evil-textobj-tree-sitter.el:
 (after! evil-textobj-tree-sitter
   (pushnew! evil-textobj-tree-sitter-major-mode-language-alist '(terraform-mode . "hcl")))
+#+end_src
+
+*** DONE [#A] Do not use =ts-fold= for modes without a parser :bug:
+There is a comment above the current definition of ~+fold--ts-fold-p~ that says
+"does this need more?", and the answer is "yes":
+
+#+begin_src emacs-lisp :tangle yes
+(defadvice! my/fold--ts-fold-p-a ()
+  "Check for tree-sitter-based folding in the current major mode."
+  :after-while #'+fold--ts-fold-p
+  (assq major-mode ts-fold-range-alist))
 #+end_src
 
 *** STRT [#B] Disable LSP semantic highlighting when tree-sitter is available

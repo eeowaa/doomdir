@@ -1272,6 +1272,11 @@ which causes problems even if there is no existing buffer."
 (after! evil-textobj-tree-sitter
   (pushnew! evil-textobj-tree-sitter-major-mode-language-alist '(terraform-mode . "hcl")))
 
+(defadvice! my/fold--ts-fold-p-a ()
+  "Check for tree-sitter-based folding in the current major mode."
+  :after-while #'+fold--ts-fold-p
+  (assq major-mode ts-fold-range-alist))
+
 (setq lsp-semantic-tokens-enable nil)
 
 (when IS-MAC
