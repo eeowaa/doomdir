@@ -4528,13 +4528,26 @@ sudo dnf -y install terraform terraform-ls
 #+end_src
 
 ** tmux [0/0] :ARCHIVE:
-** tree-sitter [0/1]
-*** TODO [#A] Fix tree-sitter syntax highlighting for terraform
-Terraform syntax highlighting uses LSP's semantic highlighting (there is no
-~+tree-sitter~ flag for =:tools treesitter=), which is actually worse than the
-standard syntax highlighting. However, there is support for HCL syntax [[https://github.com/emacs-tree-sitter/tree-sitter-langs/tree/master/repos][parsing]]
-and [[https://github.com/emacs-tree-sitter/tree-sitter-langs/tree/master/queries][highlighting]], so Terraform should get this. Refer to how other modules
-handle the ~+tree-sitter~ flag to implement this yourself.
+** tree-sitter [1/2]
+*** DONE [#A] Add tree-sitter syntax highlighting to terraform
+Although there is no ~+tree-sitter~ flag for =:tools treesitter=, there is
+support for HCL syntax [[https://github.com/emacs-tree-sitter/tree-sitter-langs/tree/master/repos][parsing]] and [[https://github.com/emacs-tree-sitter/tree-sitter-langs/tree/master/queries][highlighting]], so Terraform should use this.
+Also, ~tree-sitter-major-mode-language-alist~ already ~terraform-mode~ to ~hcl~
+syntax, so setup should be pretty easy. Refer to how other modules handle the
+~+tree-sitter~ flag to implement this yourself.
+
+#+begin_src emacs-lisp :tangle yes
+(add-hook 'terraform-mode-local-vars-hook #'tree-sitter! 'append)
+
+;; Missing from evil-textobj-tree-sitter.el:
+(after! evil-textobj-tree-sitter
+  (pushnew! evil-textobj-tree-sitter-major-mode-language-alist '(terraform-mode . "hcl")))
+#+end_src
+
+*** TODO [#B] Disable LSP semantic highlighting when tree-sitter is available
+For now, what I do is just manually run =M-x lsp-semantic-tokens-mode= in a
+buffer when I want to disable LSP semantic highlighting in that buffer (for
+example, in ~terraform-mode~ buffers).
 
 ** upload [0/0] :ARCHIVE:
 * :os

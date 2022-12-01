@@ -1270,6 +1270,12 @@ which causes problems even if there is no existing buffer."
             :desc "Providers widget" "p" #'lsp-terraform-ls-providers
             :desc "Module calls widget" "m" #'lsp-terraform-ls-module-calls))))
 
+(add-hook 'terraform-mode-local-vars-hook #'tree-sitter! 'append)
+
+;; Missing from evil-textobj-tree-sitter.el:
+(after! evil-textobj-tree-sitter
+  (pushnew! evil-textobj-tree-sitter-major-mode-language-alist '(terraform-mode . "hcl")))
+
 (when IS-MAC
   (setq ;; Comfortable keys that work most of the time
         mac-command-modifier 'control
