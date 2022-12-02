@@ -4356,7 +4356,7 @@ I've done everything that the Doom documentation told me to do, but things
 aren't working very well. Just try it out for yourself and see. Might want to
 open a PR or two.
 
-** lsp [2/4]
+** lsp [3/5]
 *** COMMENT Documentation
 + [[doom-modules:tools/lsp/README.org][tools/lsp module documentation]]
 + [[doom:.local/straight/repos/lsp-mode/README.md][lsp-mode package README]]
@@ -4380,6 +4380,15 @@ won't work for you. Unfortunately, resizing the frame does not help.
 #+begin_src emacs-lisp :tangle yes
 (after! lsp
   (setq lsp-restart 'auto-restart))
+#+end_src
+
+*** DONE [#B] Enable documentation popups upon mouseover
+This is also possible via =SPC c l h g= (~lsp-ui-doc-glance~).
+
+#+begin_src emacs-lisp :tangle yes
+(after! lsp-ui
+  (setq lsp-ui-doc-show-with-mouse t
+        lsp-ui-doc-delay 0.5))
 #+end_src
 
 *** LOOP [#B] Provide better integration with lsp-ui-imenu

@@ -1235,6 +1235,10 @@ which causes problems even if there is no existing buffer."
 (after! lsp
   (setq lsp-restart 'auto-restart))
 
+(after! lsp-ui
+  (setq lsp-ui-doc-show-with-mouse t
+        lsp-ui-doc-delay 0.5))
+
 (define-key! doom-leader-toggle-map
   "i" #'lsp-ui-imenu)
 
