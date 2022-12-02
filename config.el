@@ -1239,6 +1239,14 @@ which causes problems even if there is no existing buffer."
   (setq lsp-ui-doc-show-with-mouse t
         lsp-ui-doc-delay 0.5))
 
+(after! lsp-mode
+  (when (modulep! :ui popup)
+    (setq +popup--display-buffer-alist
+          (delq (assoc "^\\*lsp-\\(help\\|install\\)" +popup--display-buffer-alist)
+                +popup--display-buffer-alist))
+    (set-popup-rule! "^\\*lsp-\\(help\\|install\\)"
+      :size #'+popup-shrink-to-fit :quit t :select t)))
+
 (define-key! doom-leader-toggle-map
   "i" #'lsp-ui-imenu)
 

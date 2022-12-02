@@ -4356,7 +4356,7 @@ I've done everything that the Doom documentation told me to do, but things
 aren't working very well. Just try it out for yourself and see. Might want to
 open a PR or two.
 
-** lsp [3/5]
+** lsp [4/6]
 *** COMMENT Documentation
 + [[doom-modules:tools/lsp/README.org][tools/lsp module documentation]]
 + [[doom:.local/straight/repos/lsp-mode/README.md][lsp-mode package README]]
@@ -4389,6 +4389,19 @@ This is also possible via =SPC c l h g= (~lsp-ui-doc-glance~).
 (after! lsp-ui
   (setq lsp-ui-doc-show-with-mouse t
         lsp-ui-doc-delay 0.5))
+#+end_src
+
+*** DONE [#B] Shrink the LSP help window to its content size
+The help window is invoked with =K= (~+lookup/documentation~).
+
+#+begin_src emacs-lisp :tangle yes
+(after! lsp-mode
+  (when (modulep! :ui popup)
+    (setq +popup--display-buffer-alist
+          (delq (assoc "^\\*lsp-\\(help\\|install\\)" +popup--display-buffer-alist)
+                +popup--display-buffer-alist))
+    (set-popup-rule! "^\\*lsp-\\(help\\|install\\)"
+      :size #'+popup-shrink-to-fit :quit t :select t)))
 #+end_src
 
 *** LOOP [#B] Provide better integration with lsp-ui-imenu
