@@ -4356,7 +4356,7 @@ I've done everything that the Doom documentation told me to do, but things
 aren't working very well. Just try it out for yourself and see. Might want to
 open a PR or two.
 
-** lsp [1/4]
+** lsp [2/4]
 *** COMMENT Documentation
 + [[doom-modules:tools/lsp/README.org][tools/lsp module documentation]]
 + [[doom:.local/straight/repos/lsp-mode/README.md][lsp-mode package README]]
@@ -4364,19 +4364,23 @@ open a PR or two.
   - [[doom:.local/straight/repos/lsp-mode/docs/page/performance.md][performance.md]]
   - [[doom:.local/straight/repos/lsp-mode/docs/page/troubleshooting.md][troubleshooting.md]]
 
-*** DONE [#B] Automatically restart the LSP server when it crashes
-#+begin_src emacs-lisp :tangle yes
-(after! lsp
-  (setq lsp-restart 'auto-restart))
-#+end_src
-
-*** TODO [#A] Fix the size of the popup buffer invoked by =M-x lsp=
+*** OKAY [#A] Fix the size of the popup buffer invoked by =M-x lsp=
+:LOGBOOK:
+- Note taken on [2022-12-02 Fri 11:42] \\
+  I have not seen this issue in a very long time, so I consider it OK for now.
+:END:
 /Note that ~lsp~ is invoked when you enter a buffer, as well/.
 
 When the frame is too small (e.g. its default size), the first few menu items in
 the popup window are cut off, and all you see are options to exclude the file
 from the LSP workspace. Unless you know about the other available options, LSP
 won't work for you. Unfortunately, resizing the frame does not help.
+
+*** DONE [#B] Automatically restart the LSP server when it crashes
+#+begin_src emacs-lisp :tangle yes
+(after! lsp
+  (setq lsp-restart 'auto-restart))
+#+end_src
 
 *** LOOP [#B] Provide better integration with lsp-ui-imenu
 + ~lsp-ui-imenu~ provides a smoother and more aesthetically-pleasing experience
