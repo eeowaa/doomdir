@@ -7556,51 +7556,23 @@ References:
     (setq-local sentence-end-double-space nil)
     (message "Sentences end with 1 space")))
 
-;; FIXME: This only works with single keys, but I designed it to work with
-;; multiple. I don't know why it isn't working.
-(defmacro my/define-toggle-key! (&rest args)
-  "Define a series of toggle key bindings."
-  (unless (= 0 (mod (length args) 3))
-    (error "Arguments must come in groups of 3"))
-  (let (key cmd doc (binds '(_)) (hints '(_)))
-    (while args
-      (setq key (pop args)
-            cmd (pop args)
-            doc (pop args))
-      (nconc binds `(,key ,cmd))
-      (nconc hints `((,key ,doc))))
-    (pop binds)
-    (pop hints)
-    `(progn
-       (define-key! doom-leader-toggle-map ,@binds)
-       (after! which-key
-         (let ((prefix-re (regexp-opt (list doom-leader-key
-                                            doom-leader-alt-key))))
-           (dolist (hint ',hints)
-             (let ((key (pop hint))
-                   (doc (pop hint)))
-               (cl-pushnew
-                (cons (list (format "\\`%s t %s\\'" prefix-re key))
-                      (cons nil doc))
-                which-key-replacement-alist))))))))
-
-;; NOTE: This should be refactored to use one `my/define-toggle-key!' call once
-;; I've fixed that function.
-(my/define-toggle-key! "SPC" #'whitespace-mode                     "Whitespace mode")
-(my/define-toggle-key! "("   #'smartparens-global-mode             "Smartparens")
-(my/define-toggle-key! "."   #'my/toggle-sentence-end-double-space "Sentence spacing")
-(my/define-toggle-key! "a"   #'auto-fill-mode                      "Auto fill")
-(my/define-toggle-key! "B"   #'display-battery-mode                "Battery indicator")
-(my/define-toggle-key! "c"   #'display-fill-column-indicator-mode  "Fill column indicator")
-(my/define-toggle-key! "C"   #'column-highlight-mode               "Column highlight")
-(my/define-toggle-key! "h"   #'use-hard-newlines                   "Hard newlines")
-(my/define-toggle-key! "L"   #'hl-line-mode                        "Line highlight")
-(my/define-toggle-key! "o"   #'overwrite-mode                      "Overwrite")
-(my/define-toggle-key! "t"   #'toggle-truncate-lines               "Truncate lines")
-(my/define-toggle-key! "|"   #'visual-fill-column-mode             "Visual fill column")
-(my/define-toggle-key! "C-l" #'page-break-lines-mode               "Page break lines")
-(when (modulep! :ui vc-gutter +diff-hl)
-  (my/define-toggle-key! "v" #'diff-hl-mode                        "VCS gutter"))
+(map! :leader
+      (:prefix-map ("t" . "toggle")
+       :desc "Whitespace mode"       "SPC" #'whitespace-mode
+       :desc "Smartparens"           "("   #'smartparens-global-mode
+       :desc "Sentence spacing"      "."   #'my/toggle-sentence-end-double-space
+       :desc "Auto fill"             "a"   #'auto-fill-mode
+       :desc "Battery indicator"     "B"   #'display-battery-mode
+       :desc "Fill column indicator" "c"   #'display-fill-column-indicator-mode
+       :desc "Column highlight"      "C"   #'column-highlight-mode
+       :desc "Hard newlines"         "h"   #'use-hard-newlines
+       :desc "Line highlight"        "L"   #'hl-line-mode
+       :desc "Overwrite"             "o"   #'overwrite-mode
+       :desc "Truncate lines"        "t"   #'toggle-truncate-lines
+       :desc "Visual fill column"    "|"   #'visual-fill-column-mode
+       :desc "Page break lines"      "C-l" #'page-break-lines-mode
+       (:when (modulep! :ui vc-gutter +diff-hl)
+        :desc "VCS gutter"            "v"   #'diff-hl-mode)))
 #+end_src
 
 * Footers :SCAFFOLDING:
