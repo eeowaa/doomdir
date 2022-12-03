@@ -198,7 +198,7 @@ completion.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-** company [1/1]
+** company [2/2]
 #+begin_quote
 This module provides code completion, powered by [[https://github.com/company-mode/company-mode][company-mode]]. It is required
 for code completion in many of Doom's :lang modules.
@@ -219,6 +219,26 @@ buffers. I guess I'd like to have spelling completion as an option that I could
 invoke using =C-SPC= (~+company/complete~), but not something that just pops up
 on its own.
 #+end_quote
+
+*** DONE [#A] Ensure that =company-box-doc= popup frames and their content are fully visible
+There were two issues that I was experiencing:
+
+1. Lines of content in documentation frames did not wrap, so documentation was
+   often truncated.
+2. Documentation frames would appear on the right side of the completion
+   candidates even when there was more room on the left side.
+
+The version of =company-box= used by Doom Emacs is 2 years old, and there have
+been recent developments that have fixed both of these issues. I need to unpin
+the package for now to get the following updates:
+
+1. A new ~company-box-doc-no-wrap~ option, set to ~nil~ by default (fixes #1).
+2. An updated ~company-box-doc--set-frame-position~ function (fixes #2).
+
+#+begin_src emacs-lisp :tangle packages.el
+;; If this causes issues, try `(unpin! (:completion company))' instead
+(unpin! company-box)
+#+end_src
 
 ** helm [0/0] :ARCHIVE:
 #+begin_quote
