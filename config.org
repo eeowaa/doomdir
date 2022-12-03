@@ -1260,7 +1260,7 @@ eyes to center on, in reality, it can take a moment to find the cursor after
               :advice my/evil-goggles--jump-advice)))
 #+end_src
 
-** popup [1/3]
+** popup [2/4]
 #+begin_quote
 This module provides a customizable popup window management system.
 #+end_quote
@@ -1278,6 +1278,15 @@ to work:
 #+begin_src emacs-lisp :tangle no
 (map! :map +popup-buffer-mode-map
       "SPC ^" #'+popup/raise)
+#+end_src
+
+*** DONE [#B] Enable line wrapping in buffers before shrinking their popup
+#+begin_src emacs-lisp :tangle yes
+(defadvice! my/+popup-shrink-to-fit-a (&optional window)
+  "Ensure line wrapping is enabled in `window' before shrinking."
+  :before '+popup-shrink-to-fit
+  (with-current-buffer (window-buffer (or window (selected-window)))
+    (toggle-truncate-lines -1)))
 #+end_src
 
 *** STRT [#B] Add popup rule for Ilist

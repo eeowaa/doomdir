@@ -510,6 +510,12 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
       :desc "Raise popup"
       "^" #'+popup/raise)
 
+(defadvice! my/+popup-shrink-to-fit-a (&optional window)
+  "Ensure line wrapping is enabled in `window' before shrinking."
+  :before '+popup-shrink-to-fit
+  (with-current-buffer (window-buffer (or window (selected-window)))
+    (toggle-truncate-lines -1)))
+
 (after! imenu-list
   (set-popup-rule! "^\\*Ilist\\*"
     :side 'right :size 35 :modeline "Ilist")
