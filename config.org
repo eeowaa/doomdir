@@ -294,7 +294,7 @@ sudo sudo dnf -y install ripgrep
 - [X] Enable in =init.el=
 - [X] Refactor for =vertico=
 
-*** TODO [#B] Fix bug with cursor color getting stuck when previewing themes
+*** TODO [#B] Fix bug with cursor color getting stuck when previewing themes :bug:
 When previewing themes with =consult=, sometimes the cursor color gets stuck.
 Changing themes does not change the cursor color, so some themes become
 unreadable (you cannot see the cursor clearly anymore).
@@ -397,10 +397,10 @@ https://www.emacswiki.org/emacs/TransparentEmacs
              (format (if (buffer-modified-p)  " ◉ %s" "  ●  %s") project-name))))))
 #+end_src
 
-*** TODO [#B] Configure =vdiff=
+*** TODO [#B] Configure =vdiff= :feat:
 See also: [[file:~/.config/emacs/.local/straight/repos/evil-collection/modes/vdiff/evil-collection-vdiff.el][evil-collection-vdiff]]
 
-*** TODO [#C] Always display Imenu for current buffer in Ilist
+*** TODO [#C] Always display Imenu for current buffer in Ilist :tweak:
 If the current buffer does not have Imenu entries, I do not want old ones to
 persist in the Ilist, because I find that confusing. Actually, maybe I just want
 Ilist to display entries for the list selected buffer (in the current workspace)
@@ -415,15 +415,16 @@ obvious cases:
 (setq imenu-list-persist-when-imenu-index-unavailable nil)
 #+end_src
 
-*** TODO [#C] Keep Ilist the same same size as before when opening and closing it
+*** TODO [#C] Keep Ilist the same same size as before when opening and closing it :tweak:
 Could hook into ~imenu-list-quit-window~ and save a variable such as
 ~my/imenu-list--popup-size~, and then default to that when opening back up.
+Look at how Treemacs accomplishes this.
 
-*** TODO [#C] Disable the cursor in Ilist buffers (like Treemacs)
-*** TODO [#C] Remap "<" and ">" to window resize functions in Ilist
+*** TODO [#C] Disable the cursor in Ilist buffers (like Treemacs) :tweak:
+*** TODO [#C] Remap "<" and ">" to window resize functions in Ilist :feat:
 Right now, those keys are not being used.
 
-*** TODO [#C] Use a different line truncate character than "$" in Ilist
+*** TODO [#C] Use a different line truncate character than "$" in Ilist :tweak:
 This is especially annoying when lines get truncated despite the text being
 scaled down, because the "$" character is full-sized.
 
@@ -874,7 +875,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   ("q" nil "Quit"))
 #+end_src
 
-*** STRT [#A] Add a hydra for debugging elisp
+*** STRT [#A] Add a hydra for debugging elisp :feat:
 - [X] Setting and unsetting entrypoints
 - [ ] Interface to =debug= (reference ~debugger-mode-map~)
 - [ ] Interface to =edebug= (reference ~edebug-mode-map~)
@@ -1052,7 +1053,7 @@ immediately triggering the debugger.
   ("SPC" hydra-debug/body "Menu" :exit t))
 #+end_src
 
-*** STRT [#B] Add a hydra for table.el
+*** STRT [#B] Add a hydra for table.el :feat:
 #+begin_src emacs-lisp :tangle yes
 (global-set-key (kbd "C-c t") 'hydra-table/body)
 (defhydra hydra-table ()
@@ -1309,7 +1310,7 @@ to work:
     (toggle-truncate-lines -1)))
 #+end_src
 
-*** STRT [#B] Add popup rule for Ilist
+*** STRT [#B] Add popup rule for Ilist :feat:
 - [ ] Display a similar modeline to that of Treemacs
 - [ ] Use the same popup window as Treemacs (only display one at a time)
   - I would rather not take up too much screen real estate
@@ -1323,7 +1324,7 @@ to work:
   (remove-hook 'imenu-list-major-mode-hook #'imenu-list--set-mode-line))
 #+end_src
 
-*** STRT [#B] Display term popups across bottom, but not beneath Treemacs
+*** STRT [#B] Display term popups across bottom, but not beneath Treemacs :bug:
 According to the elisp manual, it seems that I only need to set the
 ~window-sides-vertical~ option to ~t~ using the Customize interface to get the
 behavior that I am looking for.
@@ -1481,7 +1482,7 @@ not work in the lisp functions.
     "K" #'my/treemacs-visit-previous))
 #+end_src
 
-*** WAIT [#B] Display "+" and "-" icons in tty emacs
+*** WAIT [#B] Display "+" and "-" icons in tty emacs :bug:
 :LOGBOOK:
 - Note taken on [2022-11-23 Wed 11:27] \\
   This is an open issue with Doom Emacs. It is not so much of a nuisance that I
@@ -1542,7 +1543,7 @@ To get started on this, open =+evil-bindings.el= by searching for it with
                   which-key-replacement-alist))))
 #+end_src
 
-*** STRT [#C] Do not display vc-gutter in COMMIT_EDITMSG buffers
+*** STRT [#C] Do not display vc-gutter in COMMIT_EDITMSG buffers :tweak:
 This is mainly a nuisance in terminal Emacs, where an empty margin is created.
 
 Observations:
@@ -1668,13 +1669,17 @@ Note that although it is possible to move a tab behind the N-th one by using
         :desc "Move right" "L" #'+workspace/swap-right)))
 #+end_src
 
-*** TODO [#B] Create a ~:tabmove~ command for Evil mode
+*** STRT [#B] Create a ~:tabmove~ command for Evil mode :feat:
+:LOGBOOK:
+- Note taken on [2022-12-05 Mon 13:27] \\
+  This is still not working, but seems pretty close.
+:END:
 Reference:
 + ~+workspace/swap-left~
 + ~+workspace/swap-right~
 + ~my/evil-quit~
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (evil-define-command my/workspace-move (&optional index)
   "Move the current workspace to zero-based INDEX.
 Without INDEX, move to the end."
@@ -1815,7 +1820,7 @@ Miscellaneous configuration without a corresponding module.
 (setq default-input-method "latin-postfix")
 #+end_src
 
-*** STRT [#B] Truncate lines by default
+*** STRT [#B] Truncate lines by default :tweak:
 This doesn't appear to be working...
 https://emacs.stackexchange.com/questions/51989/how-to-truncate-lines-by-default
 
@@ -1981,14 +1986,14 @@ Options to look at:
 + ~evil-collection-helpful-maps~
 + ~helpful-mode-map~
 
-*** STRT [#B] Define modes that should always come up in Emacs state
+*** STRT [#B] Define modes that should always come up in Emacs state :tweak:
 For whatever reason, ~vterm~ is starting in "insert" state.
 
 #+begin_src emacs-lisp :tangle yes
 (pushnew! evil-emacs-state-modes 'noaa-mode 'vterm-mode)
 #+end_src
 
-*** TODO [#B] Improve visual line navigation
+*** TODO [#B] Improve visual line navigation :bug:
 I would like to use the standard =gj= and =gk= Vim bindings to navigate between
 wrapped visual lines, but a lot of other modes wrap those bindings. An
 altnerative solution would be to enable ~evil-respect-visual-line-mode~ in
@@ -2055,6 +2060,7 @@ Emacs has a lot of different packages available for folding, for example:
 + =vimish-fold=
 
 I'm not convinced that Doom utilizes Emacs folding to its full potential.
+*UPDATE*: =tree-sitter= and =ts-fold-mode= might help to improve the situation.
 
 *** Vim help text for folding :noexport:
 This only contains the relevant commands and nothing Vim-internal.
@@ -2144,7 +2150,7 @@ A closed fold is counted as one fold. When a count is used, repeats the command
 A closed fold is counted as one fold. When a count is used, repeats the command
 [count] times. This command can be used after an operator.
 
-*** TODO [#A] Enable fine-grained folding for YAML mode
+*** TODO [#A] Enable fine-grained folding for YAML mode :bug:
 Play around with folding in the following code block and just /try/ to suppress
 your annoyance:
 
@@ -2165,7 +2171,7 @@ quz:
 
 My mind can't even comprehend how broken this is.
 
-*** TODO [#A] Enable fine-grained folding for JSON mode
+*** TODO [#A] Enable fine-grained folding for JSON mode :bug:
 Play around with folding in the following code block and just /try/ to suppress
 your annoyance:
 
@@ -2192,7 +2198,7 @@ your annoyance:
 
 My mind can't even comprehend how broken this is.
 
-*** TODO [#A] Enable Vim fold markers
+*** TODO [#A] Enable Vim fold markers :feat:
 References:
 + https://www.reddit.com/r/emacs/comments/5ei7wa/awesome_vimlike_folding_for_evilmode_with_markers/
 + https://emacs.stackexchange.com/questions/37363/vim-triple-braces-code-folding-in-emacs
@@ -2428,7 +2434,7 @@ automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
 Like Henrik said, there is nothing we can do about this:
 https://github.com/hlissner/doom-emacs/issues/3372
 
-*** STRT [#B] Configure the timeclock
+*** STRT [#B] Configure the timeclock :feat:
 Improvements:
 + [ ] Sort report output by time spent on projects
 + [ ] Allow categorization of projects (for reporting purposes)
@@ -2515,7 +2521,7 @@ This is automatically set when switching workspaces.")
            (timeclock-in nil my/timeclock--current-project)))))
 #+end_src
 
-*** STRT [#C] Make =C-w o= behave like Vim's ZoomWin package
+*** STRT [#C] Make =C-w o= behave like Vim's ZoomWin package :feat:
 This is almost done. Things left to do:
 
 + [ ] Do *not* restore [[info:elisp#Side Windows][side windows]] while "zooming out" if those side windows
@@ -2542,7 +2548,7 @@ If the current frame has one window, restore the previous windows."
   "o" #'my/zoomwin-toggle)
 #+end_src
 
-*** TODO [#A] Modify behavior when opening help buffers
+*** TODO [#A] Modify behavior when opening help buffers :tweak:
 When selecting a window in which to open a help buffer:
 
 1. If there is an existing window displaying a help buffer, select it
@@ -2896,7 +2902,7 @@ selected. If none is selected, revert to the default behaviour."
 
 #+end_src
 
-*** TODO [#A] Make windows behave more like ~tmux~ panes
+*** TODO [#A] Make windows behave more like ~tmux~ panes :feat:
 I would like for Emacs to obey the following precepts:
 
 1. *Always* open buffers in the [[help:selected-window][selected-window]] (i.e. current window).
@@ -2906,7 +2912,7 @@ Override mechanisms should be in place for both precepts, but the ultimate goal
 is that I never want to be surprised by the window layout. The [[info:elisp#Windows][windows section]]
 in the elisp manual should contain information on how to implement all of this.
 
-*** TODO [#A] Implement overarching ~tmux~-like behavior
+*** TODO [#A] Implement overarching ~tmux~-like behavior :feat:
 Additionally, I would like to implement the following behaviors:
 
 1. Do not allow splits when the current window is maximized.
@@ -2961,7 +2967,7 @@ Additionally, I would like to implement the following behaviors:
        + Could reimplement the ~:ls~ evil-ex command to use window history, as
          well. This would be closer to a vim/tmux workflow.
 
-*** TODO [#B] Attempt to open a file with ~sudo~ if needed
+*** TODO [#B] Attempt to open a file with ~sudo~ if needed :feat:
 I might be able to wrap ~find-file~ in a ~condition-case~ form (via ~:around~
 advice) that catches errors like this:
 
@@ -2972,7 +2978,7 @@ See the definition of ~evil-quit~ for an example of ~condition-case~.
 It might also be possible to add a function to ~+lookup-file-functions~ to
 identify files that require elevated privileges to open.
 
-*** TODO [#B] Prevent AWS credentials from being written to ~doom-env-file~
+*** TODO [#B] Prevent AWS credentials from being written to ~doom-env-file~ :tweak:
 - [ ] Look at recent changes to =core/cli/= and =core/core-cli-lib.el= to fix
   this problem and others in =DOOMDIR/cli.el=.
 
@@ -2986,8 +2992,8 @@ identify files that require elevated privileges to open.
             "^AWS_SESSION_TOKEN$"))
 #+end_src
 
-*** TODO [#B] Configure WoMan for AWS CLI man pages
-*** LOOP [#B] Always trust file-location and directory-local variables
+*** TODO [#B] Configure WoMan for AWS CLI man pages :feat:
+*** LOOP [#B] Always trust file-location and directory-local variables :tweak:
 :LOGBOOK:
 - Note taken on [2022-07-14 Thu 10:37] \\
   This stopped working for me at some point. Need to revisit.
@@ -3019,13 +3025,13 @@ For now, just trust ~projectile-*~ variables as long as they apply to files in
                 t)))))))
 #+end_src
 
-*** TODO [#B] Add BitWarden as ~auth-source~ backend
+*** TODO [#B] Add BitWarden as ~auth-source~ backend :feat:
 https://github.com/seanfarley/emacs-bitwarden
 
-*** TODO [#B] Figure out the autosave and backup situation for Doom Emacs
+*** TODO [#B] Figure out the autosave and backup situation for Doom Emacs :tweak:
 Compare with my old config and try to match it.
 
-*** TODO [#B] Fix =image-mode= in running instances of Doom Emacs
+*** TODO [#B] Fix =image-mode= in running instances of Doom Emacs :bug:
 At first, I thought that lack of ImageMagick support was to blame, but the
 following doesn't seem to make much difference:
 #+begin_src emacs-lisp :tangle yes
@@ -3049,7 +3055,7 @@ I have opened Emacs /and then/ attempt to open an image that it will not work. I
 am guessing that the problem is caused by lazy-loaded code that has not loaded
 yet opening an image file from the command line.
 
-*** HOLD [#A] Override builtin ~restart-emacs~ function
+*** HOLD [#A] Override builtin ~restart-emacs~ function :bug:
 :LOGBOOK:
 - Note taken on [2022-07-29 Fri 18:51] \\
   This only matters in Emacs 29, which I am no longer using (I'm back at 28.1, the
@@ -3126,7 +3132,7 @@ This module augments Emacs' built-in undo system to be more intuitive and to
 persist across Emacs sessions.
 #+end_quote
 
-*** STRT [#A] Enable ~undo-tree~
+*** STRT [#A] Enable ~undo-tree~ :bug:
 Sometimes this doesn't seem to work.
 
 #+begin_src emacs-lisp :tangle yes
@@ -3381,7 +3387,7 @@ ALIASES is a flat list of alias -> command pairs. e.g.
     "gg"   "magit-status"))
 #+end_src
 
-*** STRT [#A] Get =vterm= working with ~kubectl~
+*** STRT [#A] Get =vterm= working with ~kubectl~ :bug:
 This seems to work with =kubel= as long as no =vterm= buffers exist:
 
 #+begin_src emacs-lisp :tangle yes
@@ -3404,7 +3410,7 @@ via =kubel=, though ideally I'd use =vterm= with =kubernetes= and get rid of
 =kubel= altogether (the working remote shell capability is the only reason why
 I'm keeping that package around).
 
-*** STRT [#A] Get =vterm= working with ~kubernetes~ :hack:
+*** STRT [#A] Get =vterm= working with ~kubernetes~ :hack:bug:
 The trick is to redefine ~kubernetes-utils-vterm-start~, which is called by
 ~kubernetes-exec-using-vterm~, which is called by ~kubernetes-exec~. I don't
 know exactly why there is a problem; see the docstring for the advice named
@@ -3449,7 +3455,7 @@ Example use:
              "ash"))
 #+end_src
 
-*** HOLD [#A] Allow scrolling back while output is being written
+*** HOLD [#A] Allow scrolling back while output is being written :tweak:
 https://github.com/akermu/emacs-libvterm/issues/397
 
 Right now, =C-c C-t= (~vterm-copy-mode~) can be used to toggle output being
@@ -3457,7 +3463,7 @@ written to the buffer. When there is no output being written, you can freely
 scroll back in the buffer. Unfortunately there is no better way to do this at
 the moment, but it works pretty well anyway.
 
-*** TODO [#C] Prevent ~git-graph~ cutoff
+*** TODO [#C] Prevent ~git-graph~ cutoff :bug:
 The last character ("o" in this case) gets hidden:
 #+begin_example
 $ git graph
@@ -3529,7 +3535,7 @@ errors should not be reported*.
                              (file-truename doom-user-dir))))))
 #+end_src
 
-*** STRT [#A] Allow dynamic changing of error levels displayed
+*** STRT [#A] Allow dynamic changing of error levels displayed :feat:
 I have created a couple commands (~my/flycheck-set-level~ and
 ~my/flycheck-reset-level~) as an interface to Flycheck's error-level toggling
 functionality. (Note that Flycheck is missing the capability to hide errors in
@@ -3577,7 +3583,7 @@ temporarily keep the two new commands unbound to any keys.
       (kill-local-variable 'flycheck-navigation-minimum-level))))
 #+end_src
 
-*** STRT [#B] Show error indicators in the margin when in terminal Emacs
+*** STRT [#B] Show error indicators in the margin when in terminal Emacs :bug:
 Terminal Emacs does not have fringes -- only margins -- so when Emacs is run in
 nongraphical mode, I would like for Flycheck to use the right margin instead of
 the right fringe for error indicators. As far as I can tell, the right margin is
@@ -3671,7 +3677,7 @@ second time to disable it. For now, I'll just always require it:
 (require 'spell-fu)
 #+end_src
 
-*** TODO [#B] Fix ~+spell/add-word~
+*** TODO [#B] Fix ~+spell/add-word~ :bug:
 ~+spell/correct~ (=zg=) spits the following error:
 #+begin_quote
 Cannot add "<word>" to any active dictionary.
@@ -3682,7 +3688,7 @@ Reference:
 - ~spell-fu-word-add~
 - ~spell-fu-dictionaries~
 
-*** HOLD [#B] Fix ~+spell/correct~
+*** HOLD [#B] Fix ~+spell/correct~ :bug:
 :LOGBOOK:
 - Note taken on [2021-06-25 Fri 11:13] \\
   I am no longer seeing this error and cannot replicate it.
@@ -3750,7 +3756,7 @@ Small modules that give Emacs access to external tools & services.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-*** DONE Configure =eeowaa-project= package
+*** DONE [#C] Configure =eeowaa-project= package
 #+begin_src emacs-lisp :tangle yes
 (setq eeowaa-project-init-files-alist
       '(;; Git
@@ -3767,8 +3773,8 @@ Miscellaneous configuration without a corresponding module.
         (".editorconfig")))
 #+end_src
 
-*** TODO Add templates for each file in =eeowaa-project=
-*** TODO Add support to =eeowaa-project= for language-specific files
+*** TODO [#C] Add templates for each file in =eeowaa-project= :feat:
+*** TODO [#C] Add support to =eeowaa-project= for language-specific files :feat:
 + =.gitignore= (steal from https://github.com/github/gitignore.git)
 + Packaging (e.g. =package.json=, =Dockerfile=)
 + Execution (e.g. =package.json=, =docker-compose.yml=)
@@ -3779,7 +3785,7 @@ Could add templates under =stow-dotfiles/<lang>/.local/etc/skel/= (this is what
 I'm currently doing with Python). I could also create subdirectories under
 =skel/= specific to certain project types.
 
-*** TODO Add support to =eeowaa-project= for environment-specific files
+*** TODO [#C] Add support to =eeowaa-project= for environment-specific files :feat:
 + CI/CD (e.g. steal from https://github.com/Microsoft/azure-pipelines-yaml)
 + PR templates (e.g. =.azuredevops/pull_request_template.md=)
 
@@ -4067,7 +4073,7 @@ get updated).
 *** TODO [#C] Use =projectile= instead of =project= when expanding variables :feat:
 Reference: ~dap-variables-standard-variables~
 
-*** TODO [#C] Sort stack frames in numerical order
+*** TODO [#C] Sort stack frames in numerical order :bug:
 Selecting stack frames with ~dap-switch-stack-frame~ presents frames in
 seemingly no logical order. However, each stack frame label begins with a
 number, so it shouldn't be too hard to sort by that, in theory.
@@ -4115,7 +4121,7 @@ brew install direnv
 sudo dnf -y install direnv
 #+end_src
 
-*** TODO [#A] See why =direnv= prevents envvars from propagating between buffers
+*** TODO [#A] See why =direnv= prevents envvars from propagating between buffers :hack:bug:
 This is the original reason why I disabled this module.
 
 *UPDATE*: It looks like the =envrc= package is used by the =direnv= module.
@@ -4134,7 +4140,7 @@ environments". Maybe there is a rule for that.
 
 For the sake of debugging, you might want to try the following function:
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (defun my/aws-envvars ()
   "Print the values of AWS environment variables"
   (interactive)
@@ -4144,7 +4150,7 @@ For the sake of debugging, you might want to try the following function:
     (princ (concat var "\n"))))
 #+end_src
 
-*** TODO [#A] Understand how Emacs handles environment variables
+*** TODO [#A] Understand how Emacs handles environment variables :tweak:
 + [ ] Play around with the following Lisp Interaction buffer
   #+begin_src lisp-interaction :tangle no
   ;; Variables
@@ -4165,7 +4171,7 @@ For the sake of debugging, you might want to try the following function:
 + [ ] See how =envrc= uses those functions and variables (=C-h C-l envrc RET=)
   - [ ] Retrieve =envrc= source (=M-x package-install RET envrc RET=)
 
-*** TODO [#B] Try =direnv.el= instead of =envrc=
+*** TODO [#B] Try =direnv.el= instead of =envrc= :tweak:
 https://github.com/wbolster/emacs-direnv
 
 However, be wary of @purcell's comments on =direnv.el=:
@@ -4223,7 +4229,7 @@ npm install -g dockerfile-language-server-nodejs
           '("/[^/\\]*\\<\\(Docker\\|Container\\)file\\>[^/\\]*$" . dockerfile-mode))
 #+end_src
 
-*** TODO [#A] Seamlessly edit files from =vterm= buffers to Docker containers
+*** TODO [#A] Seamlessly edit files from =vterm= buffers to Docker containers :feat:
 1. [ ] Enable directory tracking
 
    From [[~/.config/emacs/.local/straight/repos/emacs-libvterm/README.md]]:
@@ -4297,7 +4303,7 @@ npm install -g dockerfile-language-server-nodejs
 
 4. [ ] =with-editor= support to export =EDITOR= appropriately.
 
-*** TODO [#B] Enable prompt tracking from =vterm= buffers to Docker containers
+*** TODO [#B] Enable prompt tracking from =vterm= buffers to Docker containers :feat:
 #+begin_src markdown
 And `vterm` supports _prompt tracking_. If this feature is enabled, Emacs knows
 where the prompt ends, you needn't customize `term-prompt-regexp` any more.
@@ -4392,7 +4398,7 @@ pipx install --include-deps jupyter
        params))))
 #+end_src
 
-*** TODO [#C] Exclude result names from =ox-ipynb= output
+*** TODO [#C] Exclude result names from =ox-ipynb= output :tweak:
 In the following example, ~a34ef92b-1a76-41b3-a410-79bdac3f55e9~ would appear
 after the output block of the resulting IPYNB buffer:
 
@@ -4424,7 +4430,7 @@ brew install ripgrep sqlite3
 sudo dnf -y install ripgrep sqlite-3
 #+end_src
 
-*** STRT [#A] Automatically install missing docsets
+*** STRT [#A] Automatically install missing docsets :feat:
 For whatever reason, this is not working (does not get called upon entering a
 mode derived from ~prog-mode~, even though ~prog-mode-hook~ does get updated).
 
@@ -4437,7 +4443,7 @@ mode derived from ~prog-mode~, even though ~prog-mode-hook~ does get updated).
   (add-hook! prog-mode #'my/ensure-docsets))
 #+end_src
 
-*** LOOP [#A] Fix the error "Given parent class xref-location is not a class"
+*** LOOP [#A] Fix the error "Given parent class xref-location is not a class" :bug:
 Upon [[https://github.com/hlissner/doom-emacs/issues/5658#issuecomment-946207769][Henrick's advice]], I've pinned =xref= to the last known working commit. This
 is currently only a problem on Emacs 28.
 
@@ -4446,7 +4452,7 @@ is currently only a problem on Emacs 28.
   (package! xref :pin "a82f459b37b31546bf274388baf8aca79e9c30d9"))
 #+end_src
 
-*** HOLD [#C] Add dictionary and thesaurus backends for =SPC s t/T=
+*** HOLD [#C] Add dictionary and thesaurus backends for =SPC s t/T= :feat:
 I've done everything that the Doom documentation told me to do, but things
 aren't working very well. Just try it out for yourself and see. Might want to
 open a PR or two.
@@ -4499,7 +4505,7 @@ The help window is invoked with =K= (~+lookup/documentation~).
       :size #'+popup-shrink-to-fit :quit t :select t)))
 #+end_src
 
-*** LOOP [#B] Provide better integration with lsp-ui-imenu
+*** LOOP [#B] Provide better integration with lsp-ui-imenu :feat:
 + ~lsp-ui-imenu~ provides a smoother and more aesthetically-pleasing experience
   compared to ~imenu-list~, but there are currently no keybindings to open it.
   - Essentially, I need to map ~lsp-ui-imenu~ to an LSP prefix map
@@ -4522,7 +4528,7 @@ toggle (it just refreshes), but it is nice to have a keybinding.
                 which-key-replacement-alist)))
 #+end_src
 
-*** LOOP [#B] Look into LSP performance improvements
+*** LOOP [#B] Look into LSP performance improvements :tweak:
 Resources:
 + [[help:lsp-doctor][lsp-doctor]]
 + [[doom:.local/straight/repos/lsp-mode/docs/page/performance.md][performance.md]]
@@ -4553,8 +4559,8 @@ Until I get things figured out, I am going to continue to use hash tables.
 (setq lsp-use-plists t)
 #+end_src
 
-** magit [2/2]
-*** STRT [#A] Install prerequisites
+** magit [1/2]
+*** STRT [#A] Install prerequisites :feat:
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/magit` module
@@ -4603,7 +4609,7 @@ sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
 ** prodigy [0/0] :ARCHIVE:
 ** rgb [0/0] :ARCHIVE:
 ** taskrunner [0/0] :ARCHIVE:
-** terraform [1/2]
+** terraform [2/2]
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -4617,7 +4623,7 @@ brew install terraform hashicorp/tap/terraform-ls
 sudo dnf -y install terraform terraform-ls
 #+end_src
 
-*** LOOP [#B] Configure LSP
+*** DONE [#B] Configure LSP
 + [[doom:.local/straight/repos/lsp-mode/docs/manual-language-docs/lsp-terraform-ls.md][lsp-terraform-ls.md]]
 + Need to verify that this all works as intended
 + Probably have more to go to bring LSP up to par with Doom modules having
@@ -4672,7 +4678,7 @@ There is a comment above the current definition of ~+fold--ts-fold-p~ that says
   (assq major-mode ts-fold-range-alist))
 #+end_src
 
-*** STRT [#B] Disable LSP semantic highlighting when tree-sitter is available
+*** STRT [#B] Disable LSP semantic highlighting when tree-sitter is available :tweak:
 For now, what I do is just manually run =M-x lsp-semantic-tokens-mode= in a
 buffer when I want to disable LSP semantic highlighting in that buffer (for
 example, in ~terraform-mode~ buffers).
@@ -4817,7 +4823,7 @@ pipx install nginx-language-server
 Note that MongoDB queries use Javascript syntax, so there is no Mongo-specific
 mode derived from ~prog-mode~ (just use ~js-mode~).
 
-*** TODO [#A] Configure =nginx-mode=
+*** TODO [#A] Configure =nginx-mode= :feat:
 Things that work sometimes, but that I cannot replicate:
 
 - ~+lookup/documentation~ (provided by LSP)
@@ -4838,7 +4844,7 @@ Things that work sometimes, but that I cannot replicate:
   (set-company-backend! 'nginx-mode 'company-nginx))
 #+end_src
 
-*** TODO [#A] Configure Perl modes
+*** TODO [#A] Configure Perl modes :feat:
 Doom Emacs does not have a module for Perl 5. That said, Emacs has a lot of
 built-in functionality for Perl that just needs a little bit of configuration.
 
@@ -4899,7 +4905,9 @@ sudo dnf -y install cmake
 pipx install cmake-language-server
 #+end_src
 
-*** STRT [#B] Use Linux kernel style for C :TESTME:
+*** STRT [#B] Use Linux kernel style for C :tweak:
+Need to test this out once I need to read or write some C code.
+
 #+begin_src emacs-lisp :tangle yes
 (after! cc-mode
   (unless (stringp c-default-style)
@@ -4939,7 +4947,7 @@ This module adds C# support to Emacs. Powered by omnisharp (directly or through
 LSP).
 #+end_quote
 
-*** TODO [#A] Install prerequisites
+*** TODO [#A] Install prerequisites :feat:
 **** TODO macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/csharp` module
@@ -5109,7 +5117,7 @@ https://www.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_thread/eqrf69
 (pushnew! auto-mode-alist '("Cask\\'" . lisp-data-mode))
 #+end_src
 
-*** TODO [#A] Do not jump to in-buffer definitions when using =K=
+*** TODO [#A] Do not jump to in-buffer definitions when using =K= :bug:
 If I want to see the definition, I'll use =gd=. I want =K= to just show the
 documentation and do nothing else.
 
@@ -5152,14 +5160,14 @@ This module adds support for GDScript, the scripting language of the [[http://go
 engine, to Doom Emacs, powered by [[https://github.com/GDQuest/emacs-gdscript-mode][gdscript-mode]].
 #+end_quote
 
-** go [0/1]
+** go [1/1]
 #+begin_quote
 This module adds [[https://golang.org][Go]] support, with optional (but recommended) LSP support via
 [[https://github.com/golang/tools/blob/master/gopls/README.md][gopls]].
 #+end_quote
 
-*** STRT [#A] Install prerequisites
-**** STRT macOS
+*** OKAY [#A] Install prerequisites
+**** OKAY macOS
 Reference the installation code block for Fedora.
 
 #+begin_src sh :tangle install/macos.sh
@@ -5444,7 +5452,7 @@ github_binary_release \
     --binary bin/lua-language-server
 #+end_src
 
-*** STRT [#A] Configure ~lua-language-server~ integration
+*** STRT [#A] Configure ~lua-language-server~ integration :feat:
 - [-] ~+lua-lsp-dir~
 - [ ] ~lsp-clients-lua-language-server-bin~
 
@@ -5589,10 +5597,10 @@ which is perfect for ~:around~ advice:
         "." #'consult-markdown-goto)))
 #+end_src
 
-*** TODO [#B] Live-preview Markdown buffers in an external browser
+*** TODO [#B] Live-preview Markdown buffers in an external browser :tweak:
 Live preview still happens in =eww= buffers.
 
-*** TODO [#C] Replace =font-lock= hiding with native =markdown-mode= hiding
+*** TODO [#C] Replace =font-lock= hiding with native =markdown-mode= hiding :tweak:
 + Open link: [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::defun markdown-toggle-markup-hiding (&optional arg][(defun markdown-toggle-markup-hiding]]
 + Open link: [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][;;; Markup Hiding]]
 
@@ -5611,7 +5619,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [20/41]
+** org [21/41]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -5658,7 +5666,7 @@ mkdir -p ~/org/roam
     (apply f r)))
 #+end_src
 
-**** STRT [#A] Insert new headlines just how I like them
+**** STRT [#A] Insert new headlines just how I like them :tweak:
 This is mostly done, but I do not want there to be a blank line after drawers or
 scheduling information:
 
@@ -5720,7 +5728,7 @@ just perform a complete cycle of `org-cycle'."
                                 #'my/org-insert-heading-evil-state))
 #+end_src
 
-**** TODO [#A] Prevent irreversibly hidden content
+**** TODO [#A] Prevent irreversibly hidden content :bug:
 Over the course of a typical editing session, I oftentimes need to kill Org
 buffers and re-open the corresponding Org files (especially this one) because
 text is hidden and cannot be revealed, even after ~widen~ and switching to
@@ -5734,11 +5742,11 @@ This has been going on for so long that my workaround (to kill the buffer and
 reload the contents into a fresh buffer) has nearly become muscle memory, but I
 really shouldn't have to do this.
 
-**** TODO [#A] Reveal point after ~consult-org-heading~ (=SPC m .=)
+**** TODO [#A] Reveal point after ~consult-org-heading~ (=SPC m .=) :bug:
 Right now, the point is hidden unless it jumps to a destination that was already
 revealed (no folds). Unfortunately, ~org-reveal~ (=C-c C-r=) does not help.
 
-**** TODO [#C] Create headline sorting function
+**** TODO [#C] Create headline sorting function :feat:
 + Sort by priority, then by by ~TODO~ keyword
 + Reference ~org-sort-entries~
 
@@ -5771,7 +5779,7 @@ References:
         #'woman))
 #+end_src
 
-**** TODO [#B] Create method to open links in specified window
+**** TODO [#B] Create method to open links in specified window :feat:
 I have at least a few different options:
 
 1. Allow explicit selection via =ace-window=
@@ -5789,7 +5797,7 @@ I have at least a few different options:
    - [[info:elisp#Frame Layouts with Side Windows][info:elisp#Frame Layouts with Side Windows]]
 4. Temporarily instruct Doom's =popup= module
 
-**** TODO [#B] Open specific URLs in specific browsers
+**** TODO [#B] Open specific URLs in specific browsers :tweak:
 Currently not tangled, as it breaks certain functionality.
 
 #+begin_src emacs-lisp :tangle no
@@ -5809,7 +5817,7 @@ For example, the following form will error out:
 browse-url: No suitable browser for URL https://aws.amazon.com/about-aws/whats-new/2021/09/aws-lambda-privatelink-zones/
 #+end_quote
 
-**** TODO [#C] Create method to store Org links from =eshell= buffers
+**** TODO [#C] Create method to store Org links from =eshell= buffers :feat:
 Just store the current working directory.
 
 *** Todo Items [2/4]
@@ -5843,17 +5851,17 @@ Just store the current working directory.
   (advice-add 'org-add-note :around #'my/org-add-note-advice))
 #+end_src
 
-**** LOOP [#B] Make it easier to jump to headlines across Org buffers
+**** LOOP [#B] Make it easier to jump to headlines across Org buffers :tweak:
 :LOGBOOK:
 - Note taken on [2022-10-01 Sat 21:19] \\
-  Refactor for =vertico=.
+  Refactor for =vertico= (if needed).
 :END:
 #+begin_src emacs-lisp :tangle yes
 (when (modulep! :completion ivy)
   (setq counsel-org-goto-all-outline-path-prefix 'buffer-name))
 #+end_src
 
-**** TODO [#C] Create integration between embedded ~TODO~ and project =todo.org=
+**** TODO [#C] Create integration between embedded ~TODO~ and project =todo.org= :feat:
 Something like this Atlassian VS Code plugin:
 https://support.atlassian.com/bitbucket-cloud/docs/jira-issues-in-vs-code/
 
@@ -5871,7 +5879,7 @@ https://support.atlassian.com/bitbucket-cloud/docs/jira-issues-in-vs-code/
 
 *** Tags [0/0]
 *** Properties and Columns [0/1]
-**** TODO [#C] Fix emoji display in Org column mode
+**** TODO [#C] Fix emoji display in Org column mode :bug:
 :PROPERTIES:
 :COLUMNS: %TODO %ITEM %attentive(👂) %diligent(🚜) %inventive(🔧) %astute(🎯) %curious(🔭) %nurturing(💯) %uncompromising(🎖) %visionary(🌎) %daring(🏈) %frugal(💵) %trustworthy(🤝) %probing(🔎) %assertive(☝) %productive(📦)
 :END:
@@ -5903,7 +5911,7 @@ displayed at all.
 
 *** Dates and Times [0/0]
 *** Refiling and Archiving [0/1]
-**** STRT [#C] Display distinguishable name in refile targets
+**** STRT [#C] Display distinguishable name in refile targets :tweak:
 I've accomplished by goal, but I don't like seeing the entire file path.
 Instead, I would like to see the file-level Org tag (e.g. "doom" for this file).
 
@@ -5970,7 +5978,7 @@ mkdir -p ~/org
 (setq org-agenda-hide-tags-regexp "\\`work\\|life\\|doom\\|todo\\'")
 #+end_src
 
-**** STRT [#B] Set icons for agenda prefix
+**** STRT [#B] Set icons for agenda prefix :feat:
 #+begin_src emacs-lisp :tangle yes
 (setq org-agenda-category-icon-alist
       `(("/inbox\\'"           (,(all-the-icons-faicon     "inbox"      nil nil :height 1.00 :face 'all-the-icons-dred)))
@@ -5997,7 +6005,7 @@ mkdir -p ~/org
         ("\\`doom/misc\\'"     (,(all-the-icons-fileicon   "config"     nil nil :height 0.85 :face 'all-the-icons-lblue)))))
 #+end_src
 
-**** TODO [#C] Display weekly/daily agenda view properly
+**** TODO [#C] Display weekly/daily agenda view properly :feat:
 + https://www.reddit.com/r/orgmode/comments/6ybjjw/aligned_agenda_view_anyway_to_make_this_more/
 + IIRC, this is called the "fancy diary"
 
@@ -6047,7 +6055,7 @@ to `org-footnote-section'.  Inline definitions are ignored."
   (advice-add 'org-footnote-sort :override #'my/org-footnote-sort))
 #+end_src
 
-**** HOLD [#C] Allow 5 lines of emphasized text
+**** HOLD [#C] Allow 5 lines of emphasized text :tweak:
 This appears to cause freezes. For now, I'll get by without.
 
 #+begin_src emacs-lisp :tangle no
@@ -6055,7 +6063,7 @@ This appears to cause freezes. For now, I'll get by without.
   (setcar (nthcdr 4 org-emphasis-regexp-components) 4))
 #+end_src
 
-**** TODO [#C] Ignore surrounding tildes for interactive help functions
+**** TODO [#C] Ignore surrounding tildes for interactive help functions :tweak:
 Doom's org markup convention is to surround elisp symbols with tildes. However,
 this makes it difficult to use commands such as ~counsel-describe-variable~
 (=SPC h v=), ~counsel-describe-function~ (=SPC h f=), and ~find-function~
@@ -6156,7 +6164,7 @@ Optional argument INFO is a plist of options."
       (setq display-buffer-alist +popup--display-buffer-alist))))
 #+end_src
 
-**** LOOP [#B] Make it easy to jump between source and tangled file
+**** LOOP [#B] Make it easy to jump between source and tangled file :feat:
 Right now, I am only considering tangling to Elisp, since that's what I do most
 of the time.
 
@@ -6168,7 +6176,7 @@ of the time.
 #+end_src
 
 *** Miscellaneous [0/1]
-**** TODO [#C] Use Org speed keys
+**** TODO [#C] Use Org speed keys :feat:
 Just apply your old configuration.
 
 *** Contrib [2/3]
@@ -6184,7 +6192,7 @@ brew install ditaa
              (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))))
 #+end_src
 
-**** TODO [#C] Configure screenshot attachment
+**** TODO [#C] Configure screenshot attachment :tweak:
 By default, =+dragndrop= configures =org-download= to store image links as
 attachments rather than hyperlinks. Even after searching on the web, I do not
 understand what concrete advantages attachments have over hyperlinks besides
@@ -6212,7 +6220,7 @@ brew install ditaa
              (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))))
 #+end_src
 
-*** Pomodoro [1/3]
+*** Pomodoro [2/3]
 **** DONE [#A] Always load =org-pomodoro= :hack:
 Would be better to lazy-load this.
 
@@ -6220,7 +6228,21 @@ Would be better to lazy-load this.
 (require 'org-pomodoro)
 #+end_src
 
-**** STRT [#B] Change the chime for =org-pomodoro=
+**** DONE [#B] Add keybindings for ~org-pomodoro~ and ~org-pomodoro-extend-last-clock~
+#+begin_src emacs-lisp :tangle yes
+(map! :map org-mode-map
+      :localleader
+      (:when (modulep! :lang org +pomodoro)
+       (:prefix ("c" . "clock")
+        "p" #'org-pomodoro
+        "P" #'org-pomodoro-extend-last-clock)))
+#+end_src
+
+**** STRT [#B] Change the chime for =org-pomodoro= :tweak:
+:LOGBOOK:
+- Note taken on [2022-12-05 Mon 14:00] \\
+  Should refactor for Linux.
+:END:
 It is obnoxiously loud and shrill. For now, I'm OK with just decreasing the
 volume. To do this, the various ~org-pomodoro-*-sound-args~ variables should be
 set to whatever command-line options(s) should be passed to
@@ -6236,16 +6258,6 @@ set to whatever command-line options(s) should be passed to
           org-pomodoro-killed-sound-args args
           org-pomodoro-short-break-sound-args args
           org-pomodoro-long-break-sound-args args)))
-#+end_src
-
-**** STRT [#B] Add keybindings for ~org-pomodoro~ and ~org-pomodoro-extend-last-clock~
-#+begin_src emacs-lisp :tangle yes
-(map! :map org-mode-map
-      :localleader
-      (:when (modulep! :lang org +pomodoro)
-       (:prefix ("c" . "clock")
-        "p" #'org-pomodoro
-        "P" #'org-pomodoro-extend-last-clock)))
 #+end_src
 
 ** php [0/0] :ARCHIVE:
@@ -6327,7 +6339,7 @@ More than a simple "Hello World":
         :prefix ("e" . "pipenv")))
 #+end_src
 
-*** STRT [#B] Integrate Pipenv with projectile
+*** STRT [#B] Integrate Pipenv with projectile :bug:
 For some reason, the =:lang python= module disables ~pipenv-with-projectile~, so
 I want to re-enable that here.
 
@@ -6366,7 +6378,7 @@ _Verdict_:
    (lambda () (funcall pipenv-projectile-after-switch-function))))
 #+end_src
 
-*** HOLD [#C] Set up debugging
+*** HOLD [#C] Set up debugging :feat:
 + Holding until I complete the following: [[*Fix DAP mode error message][Fix DAP mode error message]]
 + https://docs.doomemacs.org/latest/modules/tools/debugger/
 
@@ -6421,7 +6433,7 @@ This module adds support for the Rust language and integration for its tools,
 e.g. ~cargo~.
 #+end_quote
 
-*** WAIT [#A] Install prerequisites
+*** WAIT [#A] Install prerequisites :feat:
 **** WAIT macOS
 #+begin_src sh :tangle no
 # Install prerequisites for `lang/rust` module
@@ -6485,7 +6497,13 @@ supports debugging for ~rls~ at the moment.
   (setq rustic-lsp-server 'rls))
 #+end_src
 
-*** TODO [#B] Get debugging to work
+*** DONE [#C] Open =Cargo.lock= files as read-only TOML config files
+#+begin_src emacs-lisp :tangle yes
+(pushnew! auto-mode-alist '("/Cargo\\.lock\\'" . conf-toml-mode))
+(pushnew! auto-minor-mode-alist '("/Cargo\\.lock\\'" . read-only-mode))
+#+end_src
+
+*** TODO [#B] Get debugging to work :feat:
 Reference: https://gagbo.net/post/dap-mode-rust/
 
 1. Install =lsp-mode=, =dap-mode=, =gdb=, and =rust-analyzer=
@@ -6519,12 +6537,6 @@ Reference: https://gagbo.net/post/dap-mode-rust/
 3. =M-x dap-cpptools-setup=
 4. Open a project and =M-x dap-edit-debug-template= to set up the template
 
-*** DONE [#C] Open =Cargo.lock= files as read-only TOML config files
-#+begin_src emacs-lisp :tangle yes
-(pushnew! auto-mode-alist '("/Cargo\\.lock\\'" . conf-toml-mode))
-(pushnew! auto-minor-mode-alist '("/Cargo\\.lock\\'" . read-only-mode))
-#+end_src
-
 ** scala [0/0] :ARCHIVE:
 #+begin_quote
 This module adds [[https://www.scala-lang.org][scala]] and [[https://www.scala-sbt.org/][sbt]] support to Doom Emacs.
@@ -6541,14 +6553,14 @@ powered by [[https://www.nongnu.org/geiser/geiser_1.html#introduction][geiser]].
 This module adds support for shell scripting languages.
 #+end_quote
 
-*** TODO [#A] Install prerequisites
+*** TODO [#A] Install prerequisites :feat:
 Still need to install PowerShell language server. References:
 
 + =lsp-pwsh=
 + https://emacs-lsp.github.io/lsp-mode/page/lsp-pwsh/
 + https://github.com/PowerShell/PowerShellEditorServices
 
-**** DONE macOS
+**** OKAY macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/sh` module
 brew install bash zsh fish powershell bashdb zshdb shellcheck
@@ -6608,7 +6620,7 @@ and indicators in ~sh-mode~.
           '("\\.\\(env\\|cygport\\)\\'" . shell-script-mode))
 #+end_src
 
-*** TODO [#C] Edit the current region in an indirect buffer
+*** TODO [#C] Edit the current region in an indirect buffer :feat:
 Shell scripts often include nested scripts in subshells, and it would be nice to
 have the =C-'= keybinding take you to an indirect buffer to edit the subshell.
 Some examples of such subshells are shown below:
@@ -6705,7 +6717,7 @@ saying that the implementation of ~lsp-yaml-download-schema-store-db~ is buggy.
 (put 'lsp-yaml-schemas 'safe-local-variable #'always)
 #+end_src
 
-*** STRT [#A] Integrate ~cfn-lint~ with Flycheck
+*** STRT [#A] Integrate ~cfn-lint~ with Flycheck :feat:
 :LOGBOOK:
 - Note taken on [2021-11-17 Wed 15:06] \\
   I can no longer assume that YAML will almost always be CloudFormation, so I have
@@ -6738,7 +6750,7 @@ tried doing this, I had some errors so decided to back out for now.
 Reference:
 + https://awk.space/blog/cfn-lint/
 
-*** STRT [#B] Use CloudFormation YAML schema
+*** STRT [#B] Use CloudFormation YAML schema :feat:
 :LOGBOOK:
 - Note taken on [2021-11-17 Wed 15:06] \\
   I can no longer assume that YAML will almost always be CloudFormation, so I have
@@ -6762,7 +6774,7 @@ Other references:
 + Help for ~lsp-yaml-schemas~
 + File referenced by ~lsp-yaml-schema-store-local-db~
 
-*** STRT [#B] Disable LSP syntax checking
+*** STRT [#B] Disable LSP syntax checking :tweak:
 :LOGBOOK:
 - Note taken on [2021-11-17 Wed 15:06] \\
   I can no longer assume that YAML will almost always be CloudFormation, so I have
@@ -6781,7 +6793,7 @@ References:
 + https://github.com/emacs-lsp/lsp-mode/issues/1810
 + [[file:~/.config/emacs/modules/lang/yaml/config.el]]
 
-*** HOLD [#C] Add custom CloudFormation tags
+*** HOLD [#C] Add custom CloudFormation tags :feat:
 This is the sort of thing that should probably be set per schema, but again,
 since I pretty much only use YAML for CloudFormation, defining custom tags
 globally should be OK. Unfortunately, I can't figure out how to get this to
@@ -6862,7 +6874,7 @@ Miscellaneous configuration without a corresponding module.
 This module makes Emacs an email client, using ~mu4e~.
 #+end_quote
 
-*** TODO [#B] Set up mu4e with work email
+*** TODO [#B] Set up mu4e with work email :feat:
 This should probably be done in a separate gitignored file (=custom.el=) for
 security's sake.
 
@@ -6921,7 +6933,7 @@ sudo dnf -y install w3m
 (package! w3m) ;; Better than `eww' IMO
 #+end_src
 
-*** STRT [#A] Configure k8s-mode
+*** STRT [#A] Configure k8s-mode :feat:
 + [X] Open k8s manifest files in ~k8s-mode~
   - Configured this with ~:magic~
   - ~:magic~ only works for file-visiting buffers
@@ -6951,7 +6963,7 @@ Reference:
 (use-package! kubedoc)
 #+end_src
 
-*** STRT [#A] Configure kubel
+*** STRT [#A] Configure kubel :feat:
 + [X] Open k8s manifest buffers in ~k8s-mode~
 + [X] Activate =kubel-evil= before =kubel=
 + [ ] Scroll to top of resource buffers after they are populated
@@ -6979,7 +6991,7 @@ Reference:
   :when (modulep! :editor evil +everywhere))
 #+end_src
 
-*** STRT [#A] Configure kubernetes
+*** STRT [#A] Configure kubernetes :feat:
 + [X] Activate =kubernetes-evil= before =kubernetes=
 + [X] Display pods that are done executing
 + [-] Do not automatically refresh
@@ -7009,7 +7021,7 @@ Reference:
   :when (modulep! :editor evil +everywhere))
 #+end_src
 
-*** TODO [#B] Add a project mode for Helm charts
+*** TODO [#B] Add a project mode for Helm charts :feat:
 - https://www.reddit.com/r/emacs/comments/my1npn/kuberneteshelm_file_syntax_highlighting_and/
 - Reference ~+ansible-yaml-mode~.
 
@@ -7031,7 +7043,7 @@ solution. Alternate font-locking is available via =jinja2-mode=.
   :files "templates/")
 #+end_src
 
-*** STRT [#C] Configure w3m
+*** STRT [#C] Configure w3m :tweak:
 + [X] Remap =eww= bindings to use =w3m= instead
 + [ ] Redefine some mappings from =evil-collection=
 + [ ] Add mappings for ~w3m-lnum-mode~
@@ -7057,7 +7069,7 @@ server and [[https://musicpd.org/clients/mpc/][mpc]] to update your music databa
 This module adds system-wide popup Emacs windows for quick edits.
 #+end_quote
 
-*** TODO [#A] Install prerequisites
+*** TODO [#A] Install prerequisites :feat:
 **** WAIT macOS
 ***** WAIT Create an automator service to run a command
 ****** DONE Manual instructions
@@ -7234,7 +7246,7 @@ security's sake.
   - ~#docker~
   - ~#networking~
 
-*** TODO [#B] Find an easier way to search for channels
+*** TODO [#B] Find an easier way to search for channels :tweak:
 This is my current method of searching:
 
 1. Manually enter the following query in a Circe Server buffer:
@@ -7250,8 +7262,8 @@ This is my current method of searching:
 I would much prefer a single =circe= command to do this rather than that whole
 song and dance. See also: https://libera.chat/guides/findingchannels
 
-*** TODO [#C] Figure out how to display inline images
-** rss [3/5]
+*** TODO [#C] Figure out how to display inline images :tweak:
+** rss [5/5]
 #+begin_quote
 Read RSS feeds in the comfort of DOOM (Emacs)
 #+end_quote
@@ -7261,6 +7273,23 @@ Read RSS feeds in the comfort of DOOM (Emacs)
 (after! elfeed
   (add-hook! elfeed-search-mode #'elfeed-update))
 #+end_src
+
+*** OKAY [#A] Undo breakage caused by unfortunate pull request
+[[https://github.com/hlissner/doom-emacs/pull/5523][This PR]] broke my config. Here is the fix:
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! elfeed-goodies :disable t)
+#+end_src
+
+If [[https://github.com/hlissner/doom-emacs/pull/5603][this other PR]] gets merged, I may be able to remove this. *UPDATE*: The PR got
+closed without being merged.
+
+*** KILL [#A] Fix error message I get when running =M-x =rss RET=
+:LOGBOOK:
+- Note taken on [2022-12-05 Mon 14:06] \\
+  I no longer see this error message.
+:END:
+: if: Symbol’s value as variable is void: string
 
 *** DONE [#B] Allow widening of the description column :hack:
 #+begin_src emacs-lisp :tangle yes
@@ -7293,18 +7322,6 @@ to be highlighted in ~*elfeed-search~ via =hl-line=.
   (setq elfeed-search-remain-on-entry t))
 #+end_src
 
-*** LOOP [#A] Undo breakage caused by unfortunate pull request
-[[https://github.com/hlissner/doom-emacs/pull/5523][This PR]] broke my config. Here is the fix:
-
-#+begin_src emacs-lisp :tangle packages.el
-(package! elfeed-goodies :disable t)
-#+end_src
-
-If [[https://github.com/hlissner/doom-emacs/pull/5603][this other PR]] gets merged, I may be able to remove this.
-
-*** TODO [#A] Fix error message I get when running =M-x =rss RET=
-: if: Symbol’s value as variable is void: string
-
 ** twitter [0/0] :ARCHIVE:
 #+begin_quote
 Enjoy twitter from emacs.
@@ -7321,7 +7338,7 @@ for you to customize it yourself. It is best to load these last.
 ;;; :config
 #+end_src
 
-** Miscellany [5/6]
+** Miscellany [6/6]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -7468,7 +7485,11 @@ Some ideas for more project directories:
        (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/life") 2)))
 #+end_src
 
-*** STRT [#B] Remove =straight= package repos from =projectile=
+*** DONE [#B] Remove =straight= package repos from =projectile=
+:LOGBOOK:
+- Note taken on [2022-12-05 Mon 14:09] \\
+  I don't see the problem anymore.
+:END:
 Unfortunately, the =~/.config/emacs/.local/straight/repos/*= are creeping back
 in, so this isn't finished yet. Check =~/.config/emacs/core/core-projects.el=
 to see how Doom configures Projectile.
@@ -7506,10 +7527,10 @@ It just takes too long. 🙁
 (remove-hook 'org-mode-hook #'+literate-enable-recompile-h)
 #+end_src
 
-*** TODO [#C] Link tangled blocks back to source
+*** TODO [#C] Link tangled blocks back to source :feat:
 Refer to your old config.
 
-*** HOLD [#C] Split up my literate config into separate files
+*** HOLD [#C] Split up my literate config into separate files :tweak:
 This can be done with ~#+INCLUDE~ directives. Doing so might make tangling
 faster, but currently I don't have any problems with performance. If and when I
 start to notice a problem, I'll revisit this item.
@@ -7657,7 +7678,7 @@ and uses visual instead."
                   which-key-replacement-alist))))
 #+end_src
 
-*** TODO [#A] Prevent the =which-key= popop from "bouncing"
+*** TODO [#A] Prevent the =which-key= popop from "bouncing" :bug:
 **** Description
 - Sometimes the window overshoots its height and settles back down to where it
   should be. This is an annoying visual distraction.
@@ -7695,7 +7716,7 @@ and uses visual instead."
   then the problem probably resides in Doom and not Emacs)
 - Try experimenting with ~which-key-side-window-*-height~ variables
 
-*** STRT [#B] Add additional toggle keybindings
+*** STRT [#B] Add additional toggle keybindings :tweak:
 #+begin_src emacs-lisp :tangle yes
 (defun my/toggle-sentence-end-double-space ()
   "Toggle 1 or 2 spaces at the end of sentences."

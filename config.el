@@ -558,25 +558,6 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
         :desc "Move left"  "H" #'+workspace/swap-left
         :desc "Move right" "L" #'+workspace/swap-right)))
 
-(evil-define-command my/workspace-move (&optional index)
-  "Move the current workspace to zero-based INDEX.
-Without INDEX, move to the end."
-  (interactive "<c>")
-  (let* ((current-name (+workspace-current-name))
-         (index (cl-position current-name persp-names-cache :test #'equal))
-         (names (remove current-name persp-names-cache)))
-    (unless names
-      (user-error "Only one workspace"))
-    (let ((index (min (max 0 index) (length names))))
-      (setq persp-names-cache
-            (append (cl-subseq names 0 index)
-                    (list current-name)
-                    (cl-subseq names index))))
-    (when (called-interactively-p 'any)
-      (+workspace/display))))
-
-(evil-ex-define-cmd "tabm[ove]" #'my/workspace-move)
-
 (after! projectile
   (define-key! projectile-mode-map
     "C-c p" #'projectile-command-map))
@@ -1180,14 +1161,6 @@ which causes problems even if there is no existing buffer."
 ;; Remove hook installed by Doom
 (remove-hook 'dap-ui-mode-hook 'dap-ui-controls-mode)
 
-(defun my/aws-envvars ()
-  "Print the values of AWS environment variables"
-  (interactive)
-  (dolist (var (seq-filter
-                (lambda (s) (string-match "\\`AWS_" s))
-                (sort process-environment #'string<)))
-    (princ (concat var "\n"))))
-
 ;; Replace default association with a more generic one
 (delq! "/Dockerfile\\(?:\\.[^/\\]*\\)?\\'" auto-mode-alist #'assoc-string)
 (pushnew! auto-mode-alist
@@ -1752,6 +1725,13 @@ Optional argument INFO is a plist of options."
 
 (require 'org-pomodoro)
 
+(map! :map org-mode-map
+      :localleader
+      (:when (modulep! :lang org +pomodoro)
+       (:prefix ("c" . "clock")
+        "p" #'org-pomodoro
+        "P" #'org-pomodoro-extend-last-clock)))
+
 (when (equal org-pomodoro-audio-player "/usr/bin/afplay")
   (let ((args '("-v" "0.125")))
     (setq org-pomodoro-start-sound-args args
@@ -1761,13 +1741,6 @@ Optional argument INFO is a plist of options."
           org-pomodoro-killed-sound-args args
           org-pomodoro-short-break-sound-args args
           org-pomodoro-long-break-sound-args args)))
-
-(map! :map org-mode-map
-      :localleader
-      (:when (modulep! :lang org +pomodoro)
-       (:prefix ("c" . "clock")
-        "p" #'org-pomodoro
-        "P" #'org-pomodoro-extend-last-clock)))
 
 (add-hook! python-mode
   (setq fill-column 79)
