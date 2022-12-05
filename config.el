@@ -906,6 +906,9 @@ If the current frame has one window, restore the previous windows."
                          doom-user-dir))
                 t)))))))
 
+(unless (member "IMAGEMAGICK" (split-string system-configuration-features))
+  (setq imagemagick-types-inhibit t))
+
 ;; This should already be enabled by emacs/undo/config.el
 (global-undo-tree-mode)
 

@@ -1323,6 +1323,45 @@ to work:
   (remove-hook 'imenu-list-major-mode-hook #'imenu-list--set-mode-line))
 #+end_src
 
+*** STRT [#B] Display term popups across bottom, but not beneath Treemacs
+According to the elisp manual, it seems that I only need to set the
+~window-sides-vertical~ option to ~t~ using the Customize interface to get the
+behavior that I am looking for.
+
+Unfortunately, Doom Emacs does not respect this variable and things don't work
+as expected. However, with =:ui popup= disabled:
+
+- Bottom popups appear across the entire bottom when ~window-sides-vertical~ is ~nil~
+- Bottom popups do *not* cut into left or right popups when ~window-sides-vertical~ is ~t~
+
+You can verify the above by running the following elisp code:
+#+begin_src emacs-lisp :tangle no
+(display-buffer-in-side-window (current-buffer) '(:side bottom))
+#+end_src
+
+**** Reference
++ Definitions: =~/.config/emacs/modules/ui/popup/autoload/popup.el=
+
++ ~window-sides-vertical~ is referenced in the following functions:
+  - ~display-buffer-in-side-window~
+    - ~window--make-major-side-window~
+      - ~window--make-major-side-window-next-to~
+  - ~(defcustom window-sides-vertical ... :set)~
+    - ~window--sides-verticalize~
+      - ~window--sides-verticalize-frame~
+
++ ~display-buffer-in-side-window~ is referenced in these files:
+  - =~/.config/emacs/modules/ui/workspaces/config.el=
+  - =~/.config/emacs/.local/straight/build-28.1/company-box/company-box.el=
+  - =~/.config/emacs/.local/straight/build-28.1/which-key/which-key.el=
+  - =~/.config/emacs/.local/straight/build-28.1/treemacs/treemacs-core-utils.el=
+  - =~/.config/emacs/.local/straight/build-28.1/transient/transient.el=
+  - =~/.config/emacs/.local/straight/build-28.1/embrace/embrace.el=
+  - =~/.config/emacs/.local/straight/build-28.1/dap-mode/dap-mode.el=
+  - =~/.config/emacs/.local/straight/build-28.1/lsp-treemacs/lsp-treemacs.el=
+  - =~/.config/emacs/.local/straight/build-28.1/dap-mode/dap-ui.el=
+  - =~/.config/emacs/.local/straight/build-28.1/ccls/ccls-tree.el=
+
 ** tabs [0/0] :ARCHIVE:
 #+begin_quote
 This module adds an Atom-esque tab bar to the Emacs UI.
@@ -2262,7 +2301,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [10/22]
+** Miscellany [10/23]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -2985,6 +3024,30 @@ https://github.com/seanfarley/emacs-bitwarden
 
 *** TODO [#B] Figure out the autosave and backup situation for Doom Emacs
 Compare with my old config and try to match it.
+
+*** TODO [#B] Fix =image-mode= in running instances of Doom Emacs
+At first, I thought that lack of ImageMagick support was to blame, but the
+following doesn't seem to make much difference:
+#+begin_src emacs-lisp :tangle yes
+(unless (member "IMAGEMAGICK" (split-string system-configuration-features))
+  (setq imagemagick-types-inhibit t))
+#+end_src
+
+Errors include:
+#+begin_quote
+image-display-size: Invalid image specification: nil
+Error during redisplay: (eval (doom-modeline-segment--media-info)) signaled (error "Invalid image specification")
+#+end_quote
+
+Function calls:
+1. ~image-mode--display~
+2. ~image-toggle-display-image~
+
+Interestingly, I can successfully view images when passing the image file path
+to a new Emacs instance via ~emacs <file>~ on the command line. It is only when
+I have opened Emacs /and then/ attempt to open an image that it will not work. I
+am guessing that the problem is caused by lazy-loaded code that has not loaded
+yet opening an image file from the command line.
 
 *** HOLD [#A] Override builtin ~restart-emacs~ function
 :LOGBOOK:
@@ -3906,6 +3969,9 @@ nvm install node
 *** LOOP [#A] Ensure that breakpoint icons do not vanish :bug:
 See "Known issues and workarounds" above. For now, I just run ~my/redraw~
 (=C-l=) if I want to display breakpoints.
+
+*UPDATE*: Might want to look into ~window-resize-pixelwise~ and
+~fit-window-to-buffer-horizontally~.
 
 #+begin_src emacs-lisp :tangle yes
 (after! dap-mode
@@ -7592,12 +7658,42 @@ and uses visual instead."
 #+end_src
 
 *** TODO [#A] Prevent the =which-key= popop from "bouncing"
-Sometimes the window overshoots its height and settles back down to where it
-should be. This is an annoying visual distraction.
+**** Description
+- Sometimes the window overshoots its height and settles back down to where it
+  should be. This is an annoying visual distraction.
+- The problem resides either within Doom's popup system or Emacs' side window
+  system, and only seems to happen when the ~window-height~ or ~size~ element of
+  ~display-buffer-alist~ or Doom's corresponding ~+popup--display-buffer-alist~
+  is set a to a resize function such as ~fit-window-to-buffer~ or Doom's
+  ~+popup-shrink-to-fit~.
+- Here is the function call sequence for displaying =which-key= buffers:
+  1. ~(which-key--create-buffer-and-show)~
+  2. ~(which-key--show-page)~
+  3. ~(which-key--show-popup act-popup-dim)~
+  4. ~(funcall which-key-custom-show-popup-function act-popup-dim)~
+     - lambda defined in =~/.config/emacs/modules/ui/popup/+hacks.el=
+  5. ~(which-key--show-buffer-side-window act-popup-dim)~
+  6. ~(+popup-display-buffer-stacked-side-window-fn ...)~
+     - overrides ~display-buffer-in-side-window~
+     - alist defined in ~which-key-custom-show-popup-function~ lambda and in
+       ~which-key--show-buffer-side-window~:
+       #+begin_src emacs-lisp :tangle no
+       `((vslot . -9999)
+         (select . t)
+         (window-width .  ,which-key--fit-buffer-to-window-horizontally)
+         (window-height . (lambda (w) (fit-window-to-buffer w nil 1)))
+         (side . ,which-key-side-window-location)
+         (slot . ,which-key-side-window-slot))
+       #+end_src
+  7. ~(window--display-buffer)~
 
-References:
-+ ~which-key-popup-type~
-+ ~which-key--update~
+**** Debugging ideas
+- Use the Emacs debugger to step through
+  ~+popup-display-buffer-stacked-side-window-fn~ when it is called. You should
+  see the =which-key= window displayed at a taller height before being shrunk.
+- Disable the =:ui popup= module and try to replicate the issue (if you can't,
+  then the problem probably resides in Doom and not Emacs)
+- Try experimenting with ~which-key-side-window-*-height~ variables
 
 *** STRT [#B] Add additional toggle keybindings
 #+begin_src emacs-lisp :tangle yes
