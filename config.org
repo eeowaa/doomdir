@@ -7739,6 +7739,7 @@ and uses visual instead."
        :desc "Column highlight"      "C"   #'column-highlight-mode
        :desc "Hard newlines"         "h"   #'use-hard-newlines
        :desc "Line highlight"        "L"   #'hl-line-mode
+       :desc "Menu bar"              "M"   #'menu-bar-mode
        :desc "Overwrite"             "o"   #'overwrite-mode
        :desc "Truncate lines"        "t"   #'toggle-truncate-lines
        :desc "Visual fill column"    "|"   #'visual-fill-column-mode
