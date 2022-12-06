@@ -5751,6 +5751,14 @@ just perform a complete cycle of `org-cycle'."
                                 #'my/org-insert-heading-evil-state))
 #+end_src
 
+**** HOLD [#A] Reveal point after ~consult-org-heading~ (=SPC m .=) :bug:
+:LOGBOOK:
+- Note taken on [2022-12-05 Mon 16:57] \\
+  I am no longer seeing this error and cannot replicate it.
+:END:
+Right now, the point is hidden unless it jumps to a destination that was already
+revealed (no folds). Unfortunately, ~org-reveal~ (=C-c C-r=) does not help.
+
 **** TODO [#A] Prevent irreversibly hidden content :bug:
 Over the course of a typical editing session, I oftentimes need to kill Org
 buffers and re-open the corresponding Org files (especially this one) because
@@ -5764,10 +5772,6 @@ content.
 This has been going on for so long that my workaround (to kill the buffer and
 reload the contents into a fresh buffer) has nearly become muscle memory, but I
 really shouldn't have to do this.
-
-**** TODO [#A] Reveal point after ~consult-org-heading~ (=SPC m .=) :bug:
-Right now, the point is hidden unless it jumps to a destination that was already
-revealed (no folds). Unfortunately, ~org-reveal~ (=C-c C-r=) does not help.
 
 **** TODO [#C] Create headline sorting function :feat:
 + Sort by priority, then by by ~TODO~ keyword
