@@ -144,6 +144,17 @@ sudo dnf -y install editorconfig
 sudo dnf -y install python3 pipx
 pipx install --include-deps jupyter
 
+## Install the bash_kernel package into the jupyter virtualenv
+pipx inject jupyter bash_kernel
+
+## Run the installer script to install the kernel in the virtualenv
+. "$(pipx environment -v PIPX_LOCAL_VENVS)/jupyter/bin/activate"
+python -m bash_kernel.install --sys-prefix
+deactivate
+
+## Verify that the bash kernel is visible to jupyter
+jupyter kernelspec list
+
 # Install prerequisites for `tools/lookup` module
 sudo dnf -y install ripgrep sqlite-3
 
@@ -333,7 +344,7 @@ pipx install grip
 sudo dnf -y install gnuplot pandoc graphviz sqlite-3
 pipx install --include-deps jupyter
 pipx inject jupyter ipykernel
-mkdir -p ~/org/roam
+sudo dnf -y install zeromq-devel libstdc++-static
 
 # Install prerequisites for `lang/python` module
 sudo dnf -y install python3 pipx

@@ -495,7 +495,6 @@ themes in GUI Emacs.
 
 (remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
 #+end_src
-#+end_src
 
 **** COMMENT Other ways to disable modeline hiding
 In the end, I prefer the heavy-handed approach and like to see modelines beneath
@@ -4365,6 +4364,17 @@ Adds Jupyter notebook integration into emacs.
 # Install prerequisites for `tools/ein` module
 brew install python
 pipx install --include-deps jupyter
+
+## Install the bash_kernel package into the jupyter virtualenv
+pipx inject jupyter bash_kernel
+
+## Run the installer script to install the kernel in the virtualenv
+. "$(pipx environment -v PIPX_LOCAL_VENVS)/jupyter/bin/activate"
+python -m bash_kernel.install --sys-prefix
+deactivate
+
+## Verify that the bash kernel is visible to jupyter
+jupyter kernelspec list
 #+end_src
 
 **** DONE Fedora
@@ -4372,6 +4382,17 @@ pipx install --include-deps jupyter
 # Install prerequisites for `tools/ein` module
 sudo dnf -y install python3 pipx
 pipx install --include-deps jupyter
+
+## Install the bash_kernel package into the jupyter virtualenv
+pipx inject jupyter bash_kernel
+
+## Run the installer script to install the kernel in the virtualenv
+. "$(pipx environment -v PIPX_LOCAL_VENVS)/jupyter/bin/activate"
+python -m bash_kernel.install --sys-prefix
+deactivate
+
+## Verify that the bash kernel is visible to jupyter
+jupyter kernelspec list
 #+end_src
 
 *** DONE [#B] Display inline images in output
@@ -5642,7 +5663,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [21/41]
+** org [23/44]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -5667,7 +5688,7 @@ mkdir -p ~/org/roam
 sudo dnf -y install gnuplot pandoc graphviz sqlite-3
 pipx install --include-deps jupyter
 pipx inject jupyter ipykernel
-mkdir -p ~/org/roam
+sudo dnf -y install zeromq-devel libstdc++-static
 #+end_src
 
 *** Document Structure [1/5]
@@ -6169,7 +6190,7 @@ Optional argument INFO is a plist of options."
 #+end_src
 
 *** Publishing [0/0]
-*** Working with Source Code [2/3]
+*** Working with Source Code [4/6]
 **** DONE [#A] Indent source blocks
 + https://emacs.stackexchange.com/a/9483/21977
 
@@ -6190,6 +6211,102 @@ Optional argument INFO is a plist of options."
     (when (bound-and-true-p +popup-mode)
       (setq display-buffer-alist +popup--display-buffer-alist))))
 #+end_src
+
+**** DONE [#B] Ignore errors in ~jupyter~ :bug:
+If frozen modules are used by the ~jupyter~ system command, the command will
+output an error message like this:
+
+#+begin_quote
+0.00s - Debugger warning: It seems that frozen modules are being used, which may
+0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off
+0.00s - to python to disable frozen modules.
+0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.
+#+end_quote
+
+Unfortunately, the ~jupyter-command~ function will not ignore this output and
+parsing will fail with an error message like this:
+
+#+begin_quote
+json-read: Invalid number format: 5
+#+end_quote
+
+Let's fix that:
+
+#+begin_src emacs-lisp :tangle yes
+(when (modulep! :lang org +jupyter)
+  (after! jupyter-env
+    (defadvice! my/pydevd-disable-file-validation-a (orig-fun &rest args)
+      "Execute ORIG-FUN with the PYDEVD_DISABLE_FILE_VALIDATION envvar set to 1."
+      :around '(jupyter-command jupyter-run-repl)
+      (letenv! (("PYDEVD_DISABLE_FILE_VALIDATION" "1"))
+        (apply orig-fun args)))))
+#+end_src
+
+**** DONE [#B] Add ~bash~ kernel support to ~ob-jupyter~
+#+begin_src emacs-lisp :tangle yes
+(when (modulep! :lang org +jupyter)
+  (after! ob-async
+    (pushnew! ob-async-no-async-languages-alist "jupyter-bash"))
+
+  (after! org-src
+    (cl-pushnew '("jupyter-bash" . bash)
+                  org-src-lang-modes :key #'car)))
+#+end_src
+
+**** TODO [#B] Fix error output by ~jupyter-run-repl~
+I get the following error, even when this file exists:
+: ~/.local/pipx/venvs/jupyter/lib/python3.11/site-packages/ipykernel_launcher.py
+
+#+begin_quote
+Kernel process exited:
+/usr/bin/python: No module named ipykernel_launcher
+
+Process jupyter-kernel-python3 exited abnormally with code 1
+finalizer failed:
+(cl-no-primary-method
+ jupyter-kill-kernel
+ #s(jupyter-kernel-process-manager
+     (#<finalizer used>)
+     jupyter--kernel-managers
+     #s(jupyter-spec-kernel
+         (#<finalizer> #<finalizer used>)
+         ("python3"
+          "/home/sam/.local/pipx/venvs/jupyter/share/jupyter/kernels/python3"
+          :argv ["python" "-m" "ipykernel_launcher" "-f" "{connection_file}"]
+          :env nil
+          :display_name "Python 3 (ipykernel)"
+          :language "python"
+          :interrupt_mode "signal"
+          :metadata (:debugger t))
+         #s(jupyter-session
+             (:kernel_name "python3"
+              :transport "tcp"
+              :ip "127.0.0.1"
+              :signature_scheme "hmac-sha256"
+              :key "ad140b82-add2-47bf-be13-2e430827c54f"
+              :hb_port 44171
+              :stdin_port 34565
+              :control_port 46279
+              :shell_port 44141
+              :iopub_port 36253)
+             "df9493b8-d5a2-4a40-b020-48fb82348f48"
+             "ad140b82-add2-47bf-be13-2e430827c54f")
+         #<process jupyter-kernel-python3>)
+     nil))
+#+end_quote
+
+However, ~jupyter-run-repl~ works for me when I start a non-graphical Emacs
+instance from Jupyter's virtualenv like so:
+
+#+begin_src sh :tangle no
+cd ~/.local/pipx/venvs/jupyter
+. bin/activate
+emacs -nw
+#+end_src
+
+See also:
+- ~jupyter kernelspec list --json~
+- ~jupyter-available-kernelspecs~
 
 **** LOOP [#B] Make it easy to jump between source and tangled file :feat:
 Right now, I am only considering tangling to Elisp, since that's what I do most
