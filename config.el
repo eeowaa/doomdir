@@ -1071,7 +1071,14 @@ which causes problems even if there is no existing buffer."
 
 (require 'spell-fu)
 
-(setq ispell-dictionary "english")
+(when (and (modulep! :checkers spell)
+           (not (modulep! :checkers spell +flyspell)))
+  (setq ispell-dictionary "english"
+        ispell-personal-dictionary
+        (expand-file-name (concat "ispell/" ispell-dictionary ".pws")
+                          doom-data-dir))
+  (unless (file-exists-p ispell-personal-dictionary)
+    (make-empty-file ispell-personal-dictionary t)))
 
 (setq eeowaa-project-init-files-alist
       '(;; Git

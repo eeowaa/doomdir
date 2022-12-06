@@ -3598,7 +3598,7 @@ the left margin is currently used by =:ui vc-gutter=).
 I should probably use ~doom/sandbox~ (=SPC h d x=) to try this in vanilla Emacs
 and see if Doom is to blame.
 
-** spell [3/5]
+** spell [4/5]
 #+begin_quote
 This modules provides spellchecking powered by =aspell=, =hunspell= or =enchant=.
 #+end_quote
@@ -3677,16 +3677,39 @@ second time to disable it. For now, I'll just always require it:
 (require 'spell-fu)
 #+end_src
 
-*** TODO [#B] Fix ~+spell/add-word~ :bug:
-~+spell/correct~ (=zg=) spits the following error:
+*** DONE [#B] Fix ~+spell/add-word~ :bug:
+~+spell/add-word~ (=zg=) spits the following error:
 #+begin_quote
 Cannot add "<word>" to any active dictionary.
 #+end_quote
+
+To test, try adding the word "arity" to your dictionary, which will fail with
+the above error message. ~+lookup/dictionary-definition~ (=SPC s t=) gives us
+the definition of the word:
+
+#+begin_quote
+The number of arguments or operands taken by a function or operator.
+#+end_quote
+
+From this exercise, we can confirm that =:checkers spell= and =:tools lookup
++dictionary= seem to use different dictionaries.
 
 Reference:
 - ~ispell-personal-dictionary~
 - ~spell-fu-word-add~
 - ~spell-fu-dictionaries~
+
+*UPDATE*: The following works for my simple use case:
+#+begin_src emacs-lisp :tangle yes
+(when (and (modulep! :checkers spell)
+           (not (modulep! :checkers spell +flyspell)))
+  (setq ispell-dictionary "english"
+        ispell-personal-dictionary
+        (expand-file-name (concat "ispell/" ispell-dictionary ".pws")
+                          doom-data-dir))
+  (unless (file-exists-p ispell-personal-dictionary)
+    (make-empty-file ispell-personal-dictionary t)))
+#+end_src
 
 *** HOLD [#B] Fix ~+spell/correct~ :bug:
 :LOGBOOK:
@@ -3705,7 +3728,7 @@ rm -rf ~/.config/emacs/.local/etc/ispell
 #+end_src
 
 I also ran the following, but I'm not sure if it made a difference:
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (setq ispell-dictionary "english")
 #+end_src
 
