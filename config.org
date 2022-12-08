@@ -2290,11 +2290,16 @@ deleting the final newline before inserting the \")))\"."
               :override #'my/projectile-skel-dir-locals))
 #+end_src
 
-** word-wrap [0/0]
+** word-wrap [1/1]
 #+begin_quote
 This module adds a minor-mode ~+word-wrap-mode~, which intelligently wraps long
 lines in the buffer without modifying the buffer content.
 #+end_quote
+
+*** DONE [#B] Do not add extra indentation :tweak:
+#+begin_src emacs-lisp :tangle yes
+(setq +word-wrap-extra-indent nil)
+#+end_src
 
 * :emacs
 #+begin_quote

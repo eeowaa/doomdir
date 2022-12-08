@@ -774,6 +774,8 @@ deleting the final newline before inserting the \")))\"."
   (advice-add 'projectile-skel-dir-locals
               :override #'my/projectile-skel-dir-locals))
 
+(setq +word-wrap-extra-indent nil)
+
 (setq disabled-command-function nil)
 
 (when (featurep 'native-compile)
