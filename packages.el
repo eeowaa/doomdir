@@ -22,8 +22,11 @@
 (package! page-break-lines)
 (package! imenu-list)
 
-;; More pretty themes by prot
+;; Collection of themes by prot
 (package! ef-themes)
+
+;; More coloration in *info* buffers
+(package! info-colors)
 
 ;; Vim-like diff
 (package! vdiff)
@@ -76,6 +79,10 @@
 ;; Graphics
 (package! graphviz-dot-mode)
 
+;; Kubernetes config
+(package! k8s-mode)   ;; highlighting, snippets, and `k8s-goto-documents'
+(package! kubedoc)    ;; `kubedoc' command
+
 (when (modulep! :lang org +jupyter)
   (package! ox-ipynb
     :recipe (:host github :repo "jkitchin/ox-ipynb")))
@@ -94,8 +101,6 @@
 (package! nov)
 
 ;; Kubernetes
-(package! k8s-mode)   ;; highlighting, snippets, and `k8s-goto-documents'
-(package! kubedoc)    ;; `kubedoc' command
 (package! kubel)      ;; interaction with pods
 (package! kubernetes) ;; interaction with a cluster
 (when (modulep! :editor evil +everywhere)

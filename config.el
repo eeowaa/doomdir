@@ -1,4 +1,114 @@
+(add-load-path! (concat doom-user-dir "lisp"))
+
+(setq window-sides-vertical t)
+
+;;; Buffer groups
+
+(defvar my/buffer-groups-alist
+  '((diagnostics . ("^\\*\\(?:Messages\\|Warnings\\|Backtrace\\)"
+                    "^\\*\\(?:CPU\\|Memory\\)-Profiler-Report "))
+    (compilation . ("^\\*\\(?:[Cc]ompil\\(?:ation\\|e-Log\\)\\)"))
+    (search      . ("^\\*Occur\\*")) ;; TODO: Add more
+    (internals   . ("^\\*\\(?:Process List\\|timer list\\|Threads\\)\\*"))
+    (undo-tree   . ("^ \\*undo-tree\\*")))
+  "Buffer groups and their `display-buffer-alist' conditions.
+Buffer groups should be identified by symbols, not strings.")
+
+(defun my/buffer-groups ()
+  "Return buffer group identifiers."
+  (mapcar #'car my/buffer-groups-alist))
+
+(defun my/buffer-group-conditions (buffer-group)
+  "List conditions for BUFFER-GROUP membership.
+See `display-buffer-alist' for information about conditions."
+  (alist-get buffer-group my/buffer-groups-alist))
+
+;;; Side windows
+
+(defvar my/buffer-group-side-window-functions
+  '(display-buffer-in-side-window)
+  "Default action functions for buffer-group side windows.
+See `display-buffer-in-side-window' for more information.")
+
+(defvar my/buffer-group-side-window-defaults
+  '((side . bottom)
+    (slot . 0))
+  "Default action alist for buffer-group side windows.
+See `display-buffer-in-side-window' for more information.")
+
+(defun my/buffer-group-side-window-setup (buffer-group &optional alist)
+  "Configure BUFFER-GROUP to display in a side window.
+ALIST is merged with `my/buffer-group-side-window-defaults'."
+  (mapc (lambda (action)
+          (unless (alist-get (car action) alist)
+            (push action alist)))
+        my/buffer-group-side-window-defaults)
+  (dolist (condition (my/buffer-group-conditions buffer-group))
+    (setf (alist-get condition display-buffer-alist)
+          (cons my/buffer-group-side-window-functions alist)))
+  display-buffer-alist)
+
+;;; Window setup
+
+(my/buffer-group-side-window-setup 'diagnostics)
+(my/buffer-group-side-window-setup 'compilation)
+(my/buffer-group-side-window-setup 'search)
+(my/buffer-group-side-window-setup 'internals '((side . top)))
+(my/buffer-group-side-window-setup 'undo-tree '((side . left)))
+
+;; Use the minibuffer instead of a side window to get full horizontal width
+(after! which-key
+  (which-key-setup-minibuffer))
+
+;; This is the default, but it's good to specify it
+(setq treemacs-display-in-side-window t
+      treemacs-position 'left)
+
+(setq imenu-list-mode-line-format "  Ilist"
+      imenu-list-position 'right
+      imenu-list-size 35) ;; same as treemacs
+
+(after! imenu-list
+  (let ((buffer-re (concat "^" (regexp-quote imenu-list-buffer-name) "$")))
+    (push `(imenu . (,buffer-re)) my/buffer-groups-alist)
+    (my/buffer-group-side-window-setup 'imenu `((side . ,imenu-list-position)
+                                                (window-width . ,imenu-list-size)))))
+
+(push '(popup-term . ("^\\*doom:\\(?:v?term\\|e?shell\\)-popup"))
+      my/buffer-groups-alist)
+
+(my/buffer-group-side-window-setup 'popup-term)
+
+(defadvice! +popup--make-case-sensitive-a (fn &rest args)
+  "Make regexps in `display-buffer-alist' case-sensitive.
+
+To reduce fewer edge cases and improve performance when `display-buffer-alist'
+grows larger."
+  :around #'display-buffer-assq-regexp
+  (let (case-fold-search)
+    (apply fn args)))
+
+;; Adapted from `+popup-window-p'
+(defun my/side-window-p (&optional window)
+  "Return non-nil if WINDOW is a side window. Defaults to the current window."
+  (let ((window (or window (selected-window))))
+    (and (windowp window)
+         (window-live-p window)
+         (-contains? '(bottom left right top)
+                     (window-parameter window 'window-side))
+         window)))
+
 (setq company-idle-delay nil)
+
+(when (modulep! company +childframe)
+  (after! company
+    (add-hook! 'evil-normal-state-entry-hook
+      (defun +company-abort-h ()
+        (when company-candidates
+          (company-abort))))))
+
+(unless initial-window-system
+  (remove-hook 'company-mode 'company-box-mode))
 
 (defun my/toggle-window-dedicated ()
   "Control whether or not Emacs is allowed to display another
@@ -31,11 +141,6 @@ buffer in current window."
 
 (setq extended-command-suggest-shorter nil)
 
-(defun my/transparency (value)
-  "Sets the transparency of the frame window. 0=transparent/100=opaque"
-  (interactive "nTransparency Value 0 - 100 opaque: ")
-  (set-frame-parameter (selected-frame) 'alpha value))
-
 ;; Author: tecosaur
 (setq frame-title-format
       '(""
@@ -49,6 +154,11 @@ buffer in current window."
          (let ((project-name (projectile-project-name)))
            (unless (string= "-" project-name)
              (format (if (buffer-modified-p)  " ◉ %s" "  ●  %s") project-name))))))
+
+(use-package! info-colors
+  :commands (info-colors-fontify-node))
+
+(add-hook 'Info-selection-hook 'info-colors-fontify-node)
 
 ;; `always' is just a no-op that returns `t'
 (defadvice! my/never-hide-modeline-a (&rest _)
@@ -506,21 +616,6 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
               :switch my/evil-goggles-enable-jump
               :advice my/evil-goggles--jump-advice)))
 
-(map! :leader
-      :desc "Raise popup"
-      "^" #'+popup/raise)
-
-(defadvice! my/+popup-shrink-to-fit-a (&optional window)
-  "Ensure line wrapping is enabled in `window' before shrinking."
-  :before '+popup-shrink-to-fit
-  (with-current-buffer (window-buffer (or window (selected-window)))
-    (toggle-truncate-lines -1)))
-
-(after! imenu-list
-  (set-popup-rule! "^\\*Ilist\\*"
-    :side 'right :size 35 :modeline "Ilist")
-  (remove-hook 'imenu-list-major-mode-hook #'imenu-list--set-mode-line))
-
 (setq doom-themes-treemacs-enable-variable-pitch nil)
 
 (setq +treemacs-git-mode 'extended)
@@ -544,6 +639,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   (define-key! evil-treemacs-state-map
     "J" #'my/treemacs-visit-next
     "K" #'my/treemacs-visit-previous))
+
+(after! (:and treemacs ace-window)
+  (setq aw-ignored-buffers (delq 'treemacs-mode aw-ignored-buffers)))
 
 (after! diff-hl
   (unless (window-system) (diff-hl-margin-mode)))
@@ -730,6 +828,8 @@ current buffer first unless the `force' argument is given."
     :e "J" #'solitaire-move-down))
 
 (pushnew! evil-emacs-state-modes 'noaa-mode 'vterm-mode)
+
+(setq hs-allow-nesting t)
 
 (after! projectile
 
@@ -1175,6 +1275,11 @@ which causes problems even if there is no existing buffer."
 (pushnew! auto-mode-alist
           '("/[^/\\]*\\<\\(Docker\\|Container\\)file\\>[^/\\]*$" . dockerfile-mode))
 
+(set-popup-rule! "^\\*docker-\\(?:containers\\|images\\|networks\\|volumes\\)"
+  :size 0.25
+  :select t
+  :quit 'current)
+
 (setq ein:output-area-inlined-images t)
 
 ;; HACK The machinery provided by `ob-ein-languages' and `ob-ein--babelize-lang'
@@ -1236,7 +1341,9 @@ which causes problems even if there is no existing buffer."
           (delq (assoc "^\\*lsp-\\(help\\|install\\)" +popup--display-buffer-alist)
                 +popup--display-buffer-alist))
     (set-popup-rule! "^\\*lsp-\\(help\\|install\\)"
-      :size #'+popup-shrink-to-fit :quit t :select t)))
+      :size #'+popup-shrink-to-fit
+      :select nil ;; NOTE I changed this from Doom's default of `t'
+      :quit t)))
 
 (define-key! doom-leader-toggle-map
   "i" #'lsp-ui-imenu)
@@ -1295,6 +1402,27 @@ which causes problems even if there is no existing buffer."
         mac-option-modifier 'super
         mac-right-option-modifier 'hyper))
 
+;; NOTE k8s manifests do not have to begin with "apiVersion", but I've seen that
+;; more often than not. Worst case, if this doesn't end up catching enough, I
+;; can write a function that searches for the "^apiVersion:" regexp in a buffer
+;; visiting a file whose name matches "\\.yml\\'" or "\\.yaml\\'". I can then
+;; replace the "apiVersion:" regex in the :magic form with a call to that function.
+(use-package! k8s-mode
+  :magic ("apiVersion:" . k8s-mode)
+  :config
+  (set-lookup-handlers! 'k8s-mode
+    :documentation #'kubedoc))
+
+;; REVIEW Is there even a point in having an empty `use-package!' declaration?
+(use-package! kubedoc)
+
+(require 'k8s-helm-mode)
+(require 'lsp-k8s-helm)
+(pushnew! auto-mode-alist
+          '("/templates/.+\\.\\(?:ya?ml\\|tpl\\)\\'" . k8s-helm-mode))
+(add-hook 'k8s-helm-mode-hook #'lsp! 0 t)
+;(add-hook 'python-mode-local-vars-hook #'tree-sitter! 'append)
+
 (use-package! nginx-mode
   :mode "nginx.*\\.conf"
   :config
@@ -1343,8 +1471,6 @@ which causes problems even if there is no existing buffer."
 (after! ws-butler
   (pushnew! ws-butler-global-exempt-modes 'tsv-mode))
 
-;; Add $DOOMDIR/lisp to `load-path'
-(add-load-path! (concat doom-user-dir "lisp"))
 (require 'eeowaa-project)
 ;; (require 'eeowaa-debug) NOTE: This is providing nothing of value right now
 
@@ -1816,20 +1942,6 @@ Optional argument INFO is a plist of options."
 
 (put 'lsp-yaml-schemas 'safe-local-variable #'always)
 
-;; NOTE k8s manifests do not have to begin with "apiVersion", but I've seen that
-;; more often than not. Worst case, if this doesn't end up catching enough, I
-;; can write a function that searches for the "^apiVersion:" regexp in a buffer
-;; visiting a file whose name matches "\\.yml\\'" or "\\.yaml\\'". I can then
-;; replace the "apiVersion:" regex in the :magic form with a call to that function.
-(use-package! k8s-mode
-  :magic ("apiVersion:" . k8s-mode)
-  :config
-  (set-lookup-handlers! 'k8s-mode
-    :documentation #'kubedoc))
-
-;; REVIEW Is there even a point in having an empty `use-package!' declaration?
-(use-package! kubedoc)
-
 ;; REVIEW Compare `kubel' with `kubernetes-el'
 ;; - kubel is great for working with pods (listing, examining, modifying, logging, and interacting)
 ;; - kubernetes-el might be closer to Lens in terms of functionality, but I have not tried it yet
@@ -1886,13 +1998,6 @@ ALIGN should be a keyword :left or :right."
 
 (load! "custom" doom-user-dir t)
 
-;; Map C-? to DEL
-(define-key key-translation-map (kbd "C-?") (kbd "DEL"))
-
-;; Map C-i to TAB and provide an alternative mapping for `better-jumper-jump-forward'
-(define-key key-translation-map (kbd "C-i") (kbd "TAB"))
-(global-set-key (kbd "C-M-,") #'better-jumper-jump-forward)
-
 (add-hook! 'kill-emacs-query-functions
   (defun my/check-config-h ()
     "Check for Doom Emacs config errors before exiting."
@@ -1919,7 +2024,10 @@ ALIGN should be a keyword :left or :right."
 
        ;; Personal source directories
        (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/work") 2)
-       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/life") 2)))
+       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/life") 2)
+
+       ;; Helm charts
+       (cons (concat (file-name-as-directory (xdg-cache-home)) "helm/repository") 1)))
 
 ;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
 (after! projectile
@@ -1932,6 +2040,16 @@ ALIGN should be a keyword :left or :right."
             (list (abbreviate-file-name f))))
         (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
                                    t "\\`[^.]")))))
+
+;; Map C-? to DEL
+(define-key key-translation-map (kbd "C-?") (kbd "DEL"))
+
+;; Map C-i to TAB and provide an alternative mapping for `better-jumper-jump-forward'
+(define-key key-translation-map (kbd "C-i") (kbd "TAB"))
+(global-set-key (kbd "C-M-,") #'better-jumper-jump-forward)
+
+(after! projectile
+  (pushnew! projectile-project-root-files "Chart.yaml"))
 
 (remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
 

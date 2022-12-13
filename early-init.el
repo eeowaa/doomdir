@@ -33,5 +33,8 @@ WARNINGS:
                (lambda () ,@body)
                'append)))
 
+(unless initial-window-system
+  (use-package-hook! company-box :pre-config nil))
+
 (use-package-hook! persp-mode
   :pre-init (setq persp-keymap-prefix (kbd "C-c w")))
