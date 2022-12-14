@@ -2,14 +2,22 @@
 
 (setq window-sides-vertical t)
 
+(setq switch-to-buffer-obey-display-actions t)
+
 ;;; Buffer groups
 
 (defvar my/buffer-groups-alist
   '((diagnostics . ("^\\*\\(?:Messages\\|Warnings\\|Backtrace\\)"
-                    "^\\*\\(?:CPU\\|Memory\\)-Profiler-Report "))
-    (compilation . ("^\\*\\(?:[Cc]ompil\\(?:ation\\|e-Log\\)\\)"))
+                    "^\\*\\(?:CPU\\|Memory\\)-Profiler-Report "
+                    "^\\*lsp-log\\*"
+                    "^\\*.*ls\\(?:::stderr\\)?\\*"
+                    "^\\*envrc\\*"))
+    (compilation . ("^\\*\\(?:[Cc]ompil\\(?:ation\\|e-Log\\)\\)"
+                    "^\\*Async-native-compile-log\\*"))
     (search      . ("^\\*Occur\\*")) ;; TODO: Add more
-    (internals   . ("^\\*\\(?:Process List\\|timer list\\|Threads\\)\\*"))
+    (internals   . ("^\\*\\(?:Process List\\|timer-list\\|Threads\\)\\*"
+                    "^\\*\\(?:Ibuffer\\|Buffer List\\)\\*"
+                    "^\\*Bookmark List\\*"))
     (undo-tree   . ("^ \\*undo-tree\\*")))
   "Buffer groups and their `display-buffer-alist' conditions.
 Buffer groups should be identified by symbols, not strings.")
@@ -56,9 +64,17 @@ ALIST is merged with `my/buffer-group-side-window-defaults'."
 (my/buffer-group-side-window-setup 'internals '((side . top)))
 (my/buffer-group-side-window-setup 'undo-tree '((side . left)))
 
-;; Use the minibuffer instead of a side window to get full horizontal width
 (after! which-key
   (which-key-setup-minibuffer))
+
+(push '(help . ("^\\*\\(?:[Hh]elp*\\|Apropos\\)"
+                "^\\*info\\*"
+                "^\\*Shortdoc "
+                "^\\*\\(?:Wo\\)?Man "
+                "^\\*lsp-help"))
+      my/buffer-groups-alist)
+
+(my/buffer-group-side-window-setup 'help '((side . bottom) (slot . 1)))
 
 ;; This is the default, but it's good to specify it
 (setq treemacs-display-in-side-window t
@@ -97,6 +113,12 @@ grows larger."
          (-contains? '(bottom left right top)
                      (window-parameter window 'window-side))
          window)))
+
+(map! "C-`"   #'window-toggle-side-windows)
+   ;; "C-~"   #'+popup/raise
+   ;; "C-x p" #'+popup/other
+
+(add-to-list 'display-buffer-alist '("^[^ ]" display-buffer-same-window) t)
 
 (setq company-idle-delay nil)
 

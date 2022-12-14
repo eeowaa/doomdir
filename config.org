@@ -177,10 +177,17 @@ Doom's way of handling windows (through =:ui popup=) is too magical for my
 liking and forces a specific way of doing things. I've never been able to get
 things working the way I'd like.
 
-** Emacs [2/2]
+** Emacs [3/4]
 *** DONE Use full frame height for left and right side windows
 #+begin_src emacs-lisp :tangle yes
 (setq window-sides-vertical t)
+#+end_src
+
+*** DONE Make ~switch-to-buffer~ respect ~display-buffer-alist~
+https://www.masteringemacs.org/article/demystifying-emacs-window-manager
+
+#+begin_src emacs-lisp :tangle yes
+(setq switch-to-buffer-obey-display-actions t)
 #+end_src
 
 *** DONE Establish system of buffer groups
@@ -189,10 +196,16 @@ things working the way I'd like.
 
 (defvar my/buffer-groups-alist
   '((diagnostics . ("^\\*\\(?:Messages\\|Warnings\\|Backtrace\\)"
-                    "^\\*\\(?:CPU\\|Memory\\)-Profiler-Report "))
-    (compilation . ("^\\*\\(?:[Cc]ompil\\(?:ation\\|e-Log\\)\\)"))
+                    "^\\*\\(?:CPU\\|Memory\\)-Profiler-Report "
+                    "^\\*lsp-log\\*"
+                    "^\\*.*ls\\(?:::stderr\\)?\\*"
+                    "^\\*envrc\\*"))
+    (compilation . ("^\\*\\(?:[Cc]ompil\\(?:ation\\|e-Log\\)\\)"
+                    "^\\*Async-native-compile-log\\*"))
     (search      . ("^\\*Occur\\*")) ;; TODO: Add more
-    (internals   . ("^\\*\\(?:Process List\\|timer list\\|Threads\\)\\*"))
+    (internals   . ("^\\*\\(?:Process List\\|timer-list\\|Threads\\)\\*"
+                    "^\\*\\(?:Ibuffer\\|Buffer List\\)\\*"
+                    "^\\*Bookmark List\\*"))
     (undo-tree   . ("^ \\*undo-tree\\*")))
   "Buffer groups and their `display-buffer-alist' conditions.
 Buffer groups should be identified by symbols, not strings.")
@@ -240,12 +253,36 @@ ALIST is merged with `my/buffer-group-side-window-defaults'."
 (my/buffer-group-side-window-setup 'undo-tree '((side . left)))
 #+end_src
 
+*** TODO Focus on a new window after splitting
 ** Which Key [1/1]
 *** DONE Use full frame width
+Use the minibuffer instead of a side window to get full horizontal width.
+
 #+begin_src emacs-lisp :tangle yes
-;; Use the minibuffer instead of a side window to get full horizontal width
 (after! which-key
   (which-key-setup-minibuffer))
+#+end_src
+
+** Help [2/3]
+*** TODO Builtin configuration
+*** DONE Buffer group definition
+#+begin_src emacs-lisp :tangle yes
+(push '(help . ("^\\*\\(?:[Hh]elp*\\|Apropos\\)"
+                "^\\*info\\*"
+                "^\\*Shortdoc "
+                "^\\*\\(?:Wo\\)?Man "
+                "^\\*lsp-help"))
+      my/buffer-groups-alist)
+#+end_src
+
+*** OKAY Side window configuration
+I think I'd rather have a bit more flexibility in window placement (for example,
+reusing an existing window displaying a buffer with one of the major modes
+corresponding to the regular expressions for the buffer group), but this will
+work OK for now.
+
+#+begin_src emacs-lisp :tangle yes
+(my/buffer-group-side-window-setup 'help '((side . bottom) (slot . 1)))
 #+end_src
 
 ** Treemacs [2/2]
@@ -289,10 +326,11 @@ haven't run into much trouble with it.
 (my/buffer-group-side-window-setup 'popup-term)
 #+end_src
 
-** Doom Hacks [0/0]
+** Doom Hacks [1/2]
 Doom provides a =+hacks.el= file for the =:ui popup= module which contains some
 hacks that are generally useful for managing side windows.
 
+*** DONE Use case-sensitive regexps in ~display-buffer-alist~
 #+begin_src emacs-lisp :tangle yes
 (defadvice! +popup--make-case-sensitive-a (fn &rest args)
   "Make regexps in `display-buffer-alist' case-sensitive.
@@ -302,7 +340,10 @@ grows larger."
   :around #'display-buffer-assq-regexp
   (let (case-fold-search)
     (apply fn args)))
+#+end_src
 
+*** STRT Helper functions
+#+begin_src emacs-lisp :tangle yes
 ;; Adapted from `+popup-window-p'
 (defun my/side-window-p (&optional window)
   "Return non-nil if WINDOW is a side window. Defaults to the current window."
@@ -312,6 +353,31 @@ grows larger."
          (-contains? '(bottom left right top)
                      (window-parameter window 'window-side))
          window)))
+#+end_src
+
+** Keybinds [0/1]
+*** STRT Replacements for =:ui popup= bindings
+#+begin_src emacs-lisp :tangle yes
+(map! "C-`"   #'window-toggle-side-windows)
+   ;; "C-~"   #'+popup/raise
+   ;; "C-x p" #'+popup/other
+#+end_src
+
+** Tab Line [0/1]
+*** TODO Switch to next/previous buffer in window
+Could use ~tab-line-mode~ in side windows with this:
+- ~tab-line-switch-to-next-tab~
+- ~tab-line-switch-to-prev-tab~
+
+=tab-line= uses [[info:elisp#Window History][Window History]] to display buffers. You can manipulate the window
+history in order to "move" tabs; you can probably use your abstraction of
+"buffer groups" to move whole sets of tabs between popup windows.
+
+** Fallbacks [1/1]
+*** DONE Open buffers in the current window by default
+Should be the last rule in the list.
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'display-buffer-alist '("^[^ ]" display-buffer-same-window) t)
 #+end_src
 
 * :input
