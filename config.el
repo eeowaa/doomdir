@@ -1445,6 +1445,9 @@ which causes problems even if there is no existing buffer."
 (add-hook 'k8s-helm-mode-hook #'lsp! 0 t)
 ;(add-hook 'python-mode-local-vars-hook #'tree-sitter! 'append)
 
+(add-to-list 'tree-sitter-major-mode-language-alist
+             '(k8s-helm-mode . gotmpl))
+
 (use-package! nginx-mode
   :mode "nginx.*\\.conf"
   :config
