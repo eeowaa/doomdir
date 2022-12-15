@@ -1443,7 +1443,6 @@ which causes problems even if there is no existing buffer."
 (pushnew! auto-mode-alist
           '("/templates/.+\\.\\(?:ya?ml\\|tpl\\)\\'" . k8s-helm-mode))
 (add-hook 'k8s-helm-mode-hook #'lsp! 0 t)
-;(add-hook 'python-mode-local-vars-hook #'tree-sitter! 'append)
 
 ;;; tree-sitter
 
@@ -1498,6 +1497,8 @@ See also: `ts-fold-summary--get'."
       (message (funcall parser (buffer-substring beg end))))))
 
 ;;; tree-sitter-hl
+
+(setq-hook! 'k8s-helm-mode-hook tree-sitter-hl-use-font-lock-keywords t)
 
 (after! tree-sitter-cli
   (defun my/tree-sitter-cli-queries-directory ()

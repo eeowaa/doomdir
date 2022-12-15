@@ -5276,7 +5276,6 @@ Package definitions:
 (pushnew! auto-mode-alist
           '("/templates/.+\\.\\(?:ya?ml\\|tpl\\)\\'" . k8s-helm-mode))
 (add-hook 'k8s-helm-mode-hook #'lsp! 0 t)
-;(add-hook 'python-mode-local-vars-hook #'tree-sitter! 'append)
 #+end_src
 
 The following doesn't quite work for folding, but gets close (probably need to
@@ -5424,6 +5423,8 @@ See also: `ts-fold-summary--get'."
       (message (funcall parser (buffer-substring beg end))))))
 
 ;;; tree-sitter-hl
+
+(setq-hook! 'k8s-helm-mode-hook tree-sitter-hl-use-font-lock-keywords t)
 
 (after! tree-sitter-cli
   (defun my/tree-sitter-cli-queries-directory ()
