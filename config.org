@@ -5369,8 +5369,53 @@ EOF
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
-(add-to-list 'tree-sitter-major-mode-language-alist
-             '(k8s-helm-mode . gotmpl))
+(add-hook 'k8s-helm-mode-local-vars-hook #'tree-sitter! 'append)
+
+(after! tree-sitter
+  (add-to-list 'tree-sitter-major-mode-language-alist
+               '(k8s-helm-mode . gotmpl)))
+
+(after! ts-fold
+
+  ;; FIXME: Comments and "else" directives
+  (defun ts-fold-parsers-gotmpl ()
+    "Rule sets for Go templates."
+    '((_comment_action  . ts-fold-range-block-comment)
+      (_pipeline_action . ts-fold-range-seq)
+      (if_action        . ts-fold-range-seq)
+      (range_action     . ts-fold-range-seq)
+      (template_action  . ts-fold-range-seq)
+      (define_action    . ts-fold-range-seq)
+      (block_action     . ts-fold-range-seq)
+      (with_action      . ts-fold-range-seq)))
+  (customize-set-variable 'ts-fold-range-alist
+                          (cons `(k8s-helm-mode . ,(ts-fold-parsers-gotmpl))
+                                (assq-delete-all 'k8s-helm-mode ts-fold-range-alist)))
+
+  (defun ts-fold-summary-gotmpl (doc-str)
+    "Extract summary from DOC-STR in Go template block."
+    (let ((first-line (nth 0 (split-string doc-str "\n"))))
+      (string-match "\\`{-? *\\(.*?\\)\\(?: *-?}}\\)? *\\'" first-line)
+      (match-string 1 first-line)))
+  (customize-set-variable 'ts-fold-summary-parsers-alist
+                          (cons `(k8s-helm-mode . ts-fold-summary-gotmpl)
+                                ts-fold-summary-parsers-alist))
+
+  ;; Test function for obtaining fold summaries
+  (defun my/ts-fold-summary-test (&optional summary-parser)
+    "Extract summary text for tree-sitter fold at point.
+SUMMARY-PARSER is a function such as one defined in
+`ts-fold-summary-parsers-alist'. IF SUMMARY-PARSER is omitted, it
+defaults to the one returned by `ts-fold-summary--parser'.
+
+See also: `ts-fold-summary--get'."
+    (interactive)
+    (let* ((parser (or summary-parser (cdr (ts-fold-summary--parser))))
+           (node (ts-fold--foldable-node-at-pos))
+           (range (ts-fold--get-fold-range node))
+           (beg (car range))
+           (end (cdr range)))
+      (message (funcall parser (buffer-substring beg end))))))
 #+end_src
 
 *** STRT [#A] Configure =nginx-mode= :feat:
