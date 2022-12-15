@@ -1452,6 +1452,12 @@ which causes problems even if there is no existing buffer."
   (add-to-list 'tree-sitter-major-mode-language-alist
                '(k8s-helm-mode . gotmpl)))
 
+;;; evil-textobj-tree-sitter
+
+(after! evil-textobj-tree-sitter
+  (add-to-list 'evil-textobj-tree-sitter-major-mode-language-alist
+               '(k8s-helm-mode . gotmpl)))
+
 ;;; ts-fold
 
 (after! ts-fold
