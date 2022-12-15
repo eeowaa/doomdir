@@ -223,9 +223,7 @@ done
 wq
 EOF
 
-    # Copy the highlights file into place
-    # TODO: Modify the highlights file according to the docs
-    # TODO: Determine when and where to copy the highlights file
+    # Copy the highlights file into place (for internal consistency)
     mkdir -p queries/gotmpl
     cp repos/gotmpl/queries/highlights.scm queries/gotmpl
 
@@ -235,6 +233,10 @@ EOF
     # Install the shared object into place
     mkdir -p ~/.tree-sitter/bin
     cp bin/gotmpl.so ~/.tree-sitter/bin
+
+    # Install the highlights file into place
+    mkdir -p ~/.tree-sitter/queries/gotmpl
+    cp queries/gotmpl/highlights.scm ~/.tree-sitter/queries/gotmpl
 )
 
 # Install prerequisites for `lang/cc` module

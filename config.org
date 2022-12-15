@@ -5353,9 +5353,7 @@ done
 wq
 EOF
 
-    # Copy the highlights file into place
-    # TODO: Modify the highlights file according to the docs
-    # TODO: Determine when and where to copy the highlights file
+    # Copy the highlights file into place (for internal consistency)
     mkdir -p queries/gotmpl
     cp repos/gotmpl/queries/highlights.scm queries/gotmpl
 
@@ -5365,15 +5363,23 @@ EOF
     # Install the shared object into place
     mkdir -p ~/.tree-sitter/bin
     cp bin/gotmpl.so ~/.tree-sitter/bin
+
+    # Install the highlights file into place
+    mkdir -p ~/.tree-sitter/queries/gotmpl
+    cp queries/gotmpl/highlights.scm ~/.tree-sitter/queries/gotmpl
 )
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
+;;; tree-sitter
+
 (add-hook 'k8s-helm-mode-local-vars-hook #'tree-sitter! 'append)
 
 (after! tree-sitter
   (add-to-list 'tree-sitter-major-mode-language-alist
                '(k8s-helm-mode . gotmpl)))
+
+;;; ts-fold
 
 (after! ts-fold
 
@@ -5416,6 +5422,26 @@ See also: `ts-fold-summary--get'."
            (beg (car range))
            (end (cdr range)))
       (message (funcall parser (buffer-substring beg end))))))
+
+;;; tree-sitter-hl
+
+(after! tree-sitter-cli
+  (defun my/tree-sitter-cli-queries-directory ()
+    "Return the directory used by tree-sitter CLI to store highlight queries."
+    (file-name-as-directory
+     (concat (tree-sitter-cli-directory) "queries"))))
+
+(defadvice! my/tree-sitter-langs--hl-query-path-local-a (lang-symbol &optional mode)
+  "Search `tree-sitter-cli-directory' for a highlights file first."
+  :before-until #'tree-sitter-langs--hl-query-path
+  (when-let* ((highlights-file (concat (file-name-as-directory
+                                        (concat (my/tree-sitter-cli-queries-directory)
+                                                (symbol-name lang-symbol)))
+                                       (if mode
+                                           (format "highlights.%s.scm" mode)
+                                         "highlights.scm")))
+              (exists (file-exists-p highlights-file)))
+    highlights-file))
 #+end_src
 
 *** STRT [#A] Configure =nginx-mode= :feat:

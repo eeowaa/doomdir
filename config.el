@@ -1445,11 +1445,15 @@ which causes problems even if there is no existing buffer."
 (add-hook 'k8s-helm-mode-hook #'lsp! 0 t)
 ;(add-hook 'python-mode-local-vars-hook #'tree-sitter! 'append)
 
+;;; tree-sitter
+
 (add-hook 'k8s-helm-mode-local-vars-hook #'tree-sitter! 'append)
 
 (after! tree-sitter
   (add-to-list 'tree-sitter-major-mode-language-alist
                '(k8s-helm-mode . gotmpl)))
+
+;;; ts-fold
 
 (after! ts-fold
 
@@ -1492,6 +1496,26 @@ See also: `ts-fold-summary--get'."
            (beg (car range))
            (end (cdr range)))
       (message (funcall parser (buffer-substring beg end))))))
+
+;;; tree-sitter-hl
+
+(after! tree-sitter-cli
+  (defun my/tree-sitter-cli-queries-directory ()
+    "Return the directory used by tree-sitter CLI to store highlight queries."
+    (file-name-as-directory
+     (concat (tree-sitter-cli-directory) "queries"))))
+
+(defadvice! my/tree-sitter-langs--hl-query-path-local-a (lang-symbol &optional mode)
+  "Search `tree-sitter-cli-directory' for a highlights file first."
+  :before-until #'tree-sitter-langs--hl-query-path
+  (when-let* ((highlights-file (concat (file-name-as-directory
+                                        (concat (my/tree-sitter-cli-queries-directory)
+                                                (symbol-name lang-symbol)))
+                                       (if mode
+                                           (format "highlights.%s.scm" mode)
+                                         "highlights.scm")))
+              (exists (file-exists-p highlights-file)))
+    highlights-file))
 
 (use-package! nginx-mode
   :mode "nginx.*\\.conf"
