@@ -7,35 +7,104 @@
 ;;; Buffer groups
 
 (defvar my/buffer-groups-alist
-  '((diagnostics . ("^\\*\\(?:Messages\\|Warnings\\|Backtrace\\)"
-                    "^\\*\\(?:CPU\\|Memory\\)-Profiler-Report "
-                    "^\\*lsp-log\\*"
-                    "^\\*.*ls\\(?:::stderr\\)?\\*"
-                    "^\\*envrc\\*"))
-    (compilation . ("^\\*\\(?:[Cc]ompil\\(?:ation\\|e-Log\\)\\)"
-                    "^\\*Async-native-compile-log\\*"))
-    (search      . ("^\\*Occur\\*")) ;; TODO: Add more
-    (internals   . ("^\\*\\(?:Process List\\|timer-list\\|Threads\\)\\*"
-                    "^\\*\\(?:Ibuffer\\|Buffer List\\)\\*"
-                    "^\\*Bookmark List\\*"))
-    (undo-tree   . ("^ \\*undo-tree\\*")))
-  "Buffer groups and their `display-buffer-alist' conditions.
-Buffer groups should be identified by symbols, not strings.")
+  `((diagnostics
+     :cond ("^\\*\\(?:Messages\\|Warnings\\|Backtrace\\)"
+            "^\\*\\(?:CPU\\|Memory\\)-Profiler-Report "
+            "^\\*lsp-log\\*"
+            "^\\*.*ls\\(?:::stderr\\)?\\*"
+            "^\\*envrc\\*")
+     :hook (lambda ()
+             (my/buffer-group-side-window-setup 'diagnostics)))
+    (compilation
+     :cond ("^\\*\\(?:[Cc]ompil\\(?:ation\\|e-Log\\)\\)"
+            "^\\*Async-native-compile-log\\*")
+     :hook (lambda ()
+             (my/buffer-group-side-window-setup 'compilation)))
+    (search
+     :cond ("^\\*Occur\\*") ;; TODO: Add more conditions
+     :hook (lambda ()
+             (my/buffer-group-side-window-setup 'search)))
+    (internals
+     :cond ("^\\*\\(?:Process List\\|timer-list\\|Threads\\)\\*"
+            "^\\*\\(?:Ibuffer\\|Buffer List\\)\\*"
+            "^\\*Bookmark List\\*")
+     :hook (lambda ()
+             (my/buffer-group-side-window-setup 'internals
+               '((side . top)))))
+    (undo-tree
+     :cond ("^ \\*undo-tree\\*")
+     :hook (lambda ()
+             (my/buffer-group-side-window-setup 'undo-tree
+               '((side . left))))))
+  "An alist of buffer groups corresponding to property plists.
+Each plist supports the following properties:
+
+:cond  A list of conditions recognized by `display-buffer-alist'.
+:hook  A function or list of functions to run when adding conditions.
+
+Use `my/buffer-group-define' to create a new buffer group.
+
+Use `my/buffer-group-add-condition' and `my/buffer-group-add-setup-hook'
+to modify an existing buffer group.
+
+After adding a new setup hook, run `my/buffer-group-run-setup-hooks' to
+ensure that the hook function gets run. Alternatively, add a new condition
+to the buffer group, which will trigger the setup hooks.")
 
 (defun my/buffer-groups ()
   "Return buffer group identifiers."
   (mapcar #'car my/buffer-groups-alist))
 
+(defun my/buffer-group-properties (buffer-group)
+  "Return plist for BUFFER-GROUP."
+  (alist-get buffer-group my/buffer-groups-alist))
+
+(defun my/buffer-group-define (buffer-group &optional properties)
+  "Define or redefine a buffer group.
+See `my/buffer-groups-alist' for more information."
+  (setf (alist-get buffer-group my/buffer-groups-alist) properties)
+  (when properties (my/buffer-group-run-setup-hooks buffer-group)))
+
+;;; Setup hooks
+
+(defun my/buffer-group-setup-hook (buffer-group)
+  "Return setup hook function(s) for BUFFER-GROUP."
+  (plist-get (my/buffer-group-properties buffer-group) :hook))
+
+(defun my/buffer-group-add-setup-hook (buffer-group function &optional depth)
+  "Add FUNCTION to setup hook for BUFFER-GROUP."
+  (let ((properties (my/buffer-group-properties buffer-group))
+        (hook-var (make-symbol "setup-hook"))) ;; trailing "-hook" required
+    (set hook-var (plist-get properties :hook))
+    (add-hook hook-var function depth)
+    (setf properties (plist-put properties :hook (symbol-value hook-var)))))
+
+(defun my/buffer-group-run-setup-hooks (buffer-group)
+  "Run each function in the setup hook for BUFFER-GROUP."
+  (let ((hook-var (make-symbol "setup-hook")))
+    (set hook-var (my/buffer-group-setup-hook buffer-group))
+    (run-hooks hook-var)))
+
+;;; Conditions
+
 (defun my/buffer-group-conditions (buffer-group)
   "List conditions for BUFFER-GROUP membership.
 See `display-buffer-alist' for information about conditions."
-  (alist-get buffer-group my/buffer-groups-alist))
+  (plist-get (my/buffer-group-properties buffer-group) :cond))
+
+(defun my/buffer-group-add-condition (buffer-group condition)
+  "Add CONDITION to BUFFER-GROUP and run setup hooks."
+  (let* ((properties (my/buffer-group-properties buffer-group))
+         (conditions (plist-get properties :cond)))
+    (cl-pushnew condition conditions)
+    (setf properties (plist-put properties :cond conditions))
+    (my/buffer-group-run-setup-hooks buffer-group)))
 
 ;;; Side windows
 
 (defvar my/buffer-group-side-window-functions
   '(display-buffer-in-side-window)
-  "Default action functions for buffer-group side windows.
+  "Action functions for buffer-group side windows.
 See `display-buffer-in-side-window' for more information.")
 
 (defvar my/buffer-group-side-window-defaults
@@ -56,25 +125,24 @@ ALIST is merged with `my/buffer-group-side-window-defaults'."
           (cons my/buffer-group-side-window-functions alist)))
   display-buffer-alist)
 
-;;; Window setup
+;;; Initial setup
 
-(my/buffer-group-side-window-setup 'diagnostics)
-(my/buffer-group-side-window-setup 'compilation)
-(my/buffer-group-side-window-setup 'search)
-(my/buffer-group-side-window-setup 'internals '((side . top)))
-(my/buffer-group-side-window-setup 'undo-tree '((side . left)))
+(dolist (buffer-group (my/buffer-groups))
+  (funcall (my/buffer-group-setup-hook buffer-group)))
 
 (after! which-key
   (which-key-setup-minibuffer))
 
-(push '(help . ("^\\*\\(?:[Hh]elp*\\|Apropos\\)"
-                "^\\*info\\*"
-                "^\\*Shortdoc "
-                "^\\*\\(?:Wo\\)?Man "
-                "^\\*lsp-help"))
-      my/buffer-groups-alist)
-
-(my/buffer-group-side-window-setup 'help '((side . bottom) (slot . 1)))
+(my/buffer-group-define 'help
+  `(:cond ("^\\*\\(?:[Hh]elp*\\|Apropos\\)"
+           "^\\*info\\*"
+           "^\\*Shortdoc "
+           "^\\*\\(?:Wo\\)?Man "
+           "^\\*lsp-help"
+           "^\\*Kubernetes Docs ")
+    :hook (lambda ()
+            (my/buffer-group-side-window-setup 'help
+              '((side . bottom) (slot . 1))))))
 
 ;; This is the default, but it's good to specify it
 (setq treemacs-display-in-side-window t
@@ -86,14 +154,17 @@ ALIST is merged with `my/buffer-group-side-window-defaults'."
 
 (after! imenu-list
   (let ((buffer-re (concat "^" (regexp-quote imenu-list-buffer-name) "$")))
-    (push `(imenu . (,buffer-re)) my/buffer-groups-alist)
-    (my/buffer-group-side-window-setup 'imenu `((side . ,imenu-list-position)
-                                                (window-width . ,imenu-list-size)))))
+    (my/buffer-group-define 'imenu
+      `(:cond (,buffer-re)
+        :hook (lambda ()
+                (my/buffer-group-side-window-setup 'imenu
+                  (list (cons 'side imenu-list-position)
+                        (cons 'window-width imenu-list-size))))))))
 
-(push '(popup-term . ("^\\*doom:\\(?:v?term\\|e?shell\\)-popup"))
-      my/buffer-groups-alist)
-
-(my/buffer-group-side-window-setup 'popup-term)
+(my/buffer-group-define 'popup-term
+  `(:cond ("^\\*doom:\\(?:v?term\\|e?shell\\)-popup")
+    :hook (lambda ()
+            (my/buffer-group-side-window-setup 'popup-term))))
 
 (defadvice! +popup--make-case-sensitive-a (fn &rest args)
   "Make regexps in `display-buffer-alist' case-sensitive.
