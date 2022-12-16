@@ -1768,7 +1768,7 @@ Accepts the same arguments as `display-buffer-in-side-window'. You must set
 This module adds an Atom-esque tab bar to the Emacs UI.
 #+end_quote
 
-** treemacs [10/11]
+** treemacs [10/12]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -1896,6 +1896,22 @@ https://github.com/doomemacs/doomemacs/issues/1177#issuecomment-464936107
   want to fix it myself, so for now, I'll just wait for a fix.
 :END:
 https://github.com/hlissner/emacs-doom-themes/issues/489
+
+*** TODO [#B] Allow switching git worktrees :feat:
+My convention is to put alternate worktrees under =.git/worktree-paths=, which
+is not allowed by Treemacs:
+
+#+begin_quote
+[Treemacs] Project '<name>' is included in '<default worktree path>'. Projects may not overlap.
+#+end_quote
+
+Of course, I could put worktrees somewhere else (I could do something similar to
+=pipx= and how it stores virtualenvs in =~/.local/pipx/venvs=), but doing so
+would break =direnv=, which I heavily rely upon.
+
+Preferably, I would just automatically switch the project root in =treemacs=
+when switching worktrees using =magit=. Perhaps there is a hook that I could
+run, or advice if necessary.
 
 ** unicode [0/0] :ARCHIVE:
 #+begin_quote
