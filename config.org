@@ -394,6 +394,20 @@ will not belong to a buffer group.
             (my/buffer-group-side-window-setup 'popup-term))))
 #+end_src
 
+** Magit [1/1]
+*** DONE Buffer group definition
+I think I'd rather have this buffer open directly above the summary window, but
+this will work OK for now.
+
+#+begin_src emacs-lisp :tangle yes
+(my/buffer-group-define 'magit-edit
+  `(:cond ("^COMMIT_EDITMSG")
+    :hook (lambda ()
+            (my/buffer-group-side-window-setup 'magit-edit
+              '((side . bottom) (slot . 1))))))
+#+end_src
+
+
 ** Doom Hacks [1/2]
 Doom provides a =+hacks.el= file for the =:ui popup= module which contains some
 hacks that are generally useful for managing side windows.

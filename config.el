@@ -166,6 +166,12 @@ ALIST is merged with `my/buffer-group-side-window-defaults'."
     :hook (lambda ()
             (my/buffer-group-side-window-setup 'popup-term))))
 
+(my/buffer-group-define 'magit-edit
+  `(:cond ("^COMMIT_EDITMSG")
+    :hook (lambda ()
+            (my/buffer-group-side-window-setup 'magit-edit
+              '((side . bottom) (slot . 1))))))
+
 (defadvice! +popup--make-case-sensitive-a (fn &rest args)
   "Make regexps in `display-buffer-alist' case-sensitive.
 
