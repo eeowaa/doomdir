@@ -1,9 +1,5 @@
 (add-load-path! (concat doom-user-dir "lisp"))
 
-(setq window-sides-vertical t)
-
-(setq switch-to-buffer-obey-display-actions t)
-
 ;;; Buffer groups
 
 (defvar my/buffer-groups-alist
@@ -62,6 +58,7 @@ to the buffer group, which will trigger the setup hooks.")
 (defun my/buffer-group-define (buffer-group &optional properties)
   "Define or redefine a buffer group.
 See `my/buffer-groups-alist' for more information."
+  (declare (indent defun))
   (setf (alist-get buffer-group my/buffer-groups-alist) properties)
   (when properties (my/buffer-group-run-setup-hooks buffer-group)))
 
@@ -116,6 +113,7 @@ See `display-buffer-in-side-window' for more information.")
 (defun my/buffer-group-side-window-setup (buffer-group &optional alist)
   "Configure BUFFER-GROUP to display in a side window.
 ALIST is merged with `my/buffer-group-side-window-defaults'."
+  (declare (indent defun))
   (mapc (lambda (action)
           (unless (alist-get (car action) alist)
             (push action alist)))
@@ -130,8 +128,18 @@ ALIST is merged with `my/buffer-group-side-window-defaults'."
 (dolist (buffer-group (my/buffer-groups))
   (funcall (my/buffer-group-setup-hook buffer-group)))
 
+(setq window-sides-vertical t)
+
+(setq switch-to-buffer-obey-display-actions t)
+
 (after! which-key
   (which-key-setup-minibuffer))
+
+(setq help-window-select t
+      helpful-switch-buffer-function
+      (lambda (buffer-or-name)
+        (interactive)
+        (pop-to-buffer buffer-or-name #'display-buffer-reuse-mode-window)))
 
 (my/buffer-group-define 'help
   `(:cond ("^\\*\\(?:[Hh]elp*\\|Apropos\\)"
@@ -172,13 +180,23 @@ ALIST is merged with `my/buffer-group-side-window-defaults'."
             (my/buffer-group-side-window-setup 'magit-edit
               '((side . bottom) (slot . 1))))))
 
-(defadvice! +popup--make-case-sensitive-a (fn &rest args)
+(defadvice! my/make-case-sensitive-a (fn &rest args)
   "Make regexps in `display-buffer-alist' case-sensitive.
 
 To reduce fewer edge cases and improve performance when `display-buffer-alist'
 grows larger."
   :around #'display-buffer-assq-regexp
   (let (case-fold-search)
+    (apply fn args)))
+
+;; Users should be able to hop into popups easily, but Elisp shouldn't.
+(defadvice! my/ignore-window-parameters-a (fn &rest args)
+  "Allow *interactive* window moving commands to traverse popups."
+  :around '(windmove-up windmove-down windmove-left windmove-right)
+  (letf! (defun windmove-find-other-window (dir &optional arg window)
+           (window-in-direction
+            (pcase dir (`up 'above) (`down 'below) (_ dir))
+            window t arg windmove-wrap-around t))
     (apply fn args)))
 
 ;; Adapted from `+popup-window-p'
@@ -2266,5 +2284,8 @@ and uses visual instead."
        :desc "Truncate lines"        "t"   #'toggle-truncate-lines
        :desc "Visual fill column"    "|"   #'visual-fill-column-mode
        :desc "Page break lines"      "C-l" #'page-break-lines-mode
+
+       ;; TODO: Make sure that the display text is correct
+       ;; (currently, it is "Visible mode", probably put there by Doom)
        (:when (modulep! :ui vc-gutter +diff-hl)
         :desc "VCS gutter"            "v"   #'diff-hl-mode)))
