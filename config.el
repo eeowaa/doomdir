@@ -17,7 +17,8 @@
      :hook (lambda ()
              (my/buffer-group-side-window-setup 'compilation)))
     (search
-     :cond ("^\\*Occur\\*") ;; TODO: Add more conditions
+     ;; TODO: Add more conditions
+     :cond ("^\\*Occur\\*")
      :hook (lambda ()
              (my/buffer-group-side-window-setup 'search)))
     (internals
@@ -26,12 +27,7 @@
             "^\\*Bookmark List\\*")
      :hook (lambda ()
              (my/buffer-group-side-window-setup 'internals
-               '((side . top)))))
-    (undo-tree
-     :cond ("^ \\*undo-tree\\*")
-     :hook (lambda ()
-             (my/buffer-group-side-window-setup 'undo-tree
-               '((side . left))))))
+               '((side . top))))))
   "An alist of buffer groups corresponding to property plists.
 Each plist supports the following properties:
 
@@ -61,6 +57,9 @@ See `my/buffer-groups-alist' for more information."
   (declare (indent defun))
   (setf (alist-get buffer-group my/buffer-groups-alist) properties)
   (when properties (my/buffer-group-run-setup-hooks buffer-group)))
+
+(defvar my/buffer-group--setup-functions nil
+  "Setup functions for buffer groups.")
 
 ;;; Setup hooks
 
@@ -123,6 +122,9 @@ ALIST is merged with `my/buffer-group-side-window-defaults'."
           (cons my/buffer-group-side-window-functions alist)))
   display-buffer-alist)
 
+(cl-pushnew 'my/buffer-group-side-window-setup
+            my/buffer-group--setup-functions)
+
 ;;; Initial setup
 
 (dolist (buffer-group (my/buffer-groups))
@@ -134,6 +136,31 @@ ALIST is merged with `my/buffer-group-side-window-defaults'."
 
 (after! which-key
   (which-key-setup-minibuffer))
+
+(after! undo-tree
+  (my/buffer-group-define 'undo-tree
+    `(:cond (,(concat "^" (regexp-quote undo-tree-visualizer-buffer-name)))
+      :hook (lambda ()
+              (my/buffer-group-side-window-setup 'undo-tree
+                '((side . left) (slot . 1))))))
+  (my/buffer-group-define 'undo-tree-diff
+    `(:cond (,(concat "^" (regexp-quote undo-tree-diff-buffer-name)))
+      :hook (lambda ()
+              (my/buffer-group-side-window-setup 'undo-tree-diff)))))
+
+(defadvice! my/undo-tree-diff-display-buffer-a (&optional node)
+  "Display an undo-tree diff buffer using `display-buffer'."
+  :override 'undo-tree-visualizer-show-diff
+  (setq undo-tree-visualizer-diff t)
+  (let ((buff (with-current-buffer undo-tree-visualizer-parent-buffer
+                (undo-tree-diff node))))
+    (display-buffer buff)))
+
+(defadvice! my/undo-tree-diff-inhibit-balance-windows (fn &rest args)
+  "Prevent `undo-tree' from balancing all windows in the frame."
+  :around 'undo-tree-visualizer-update-diff
+  (letf! (((symbol-function 'balance-windows) #'ignore))
+    (apply fn args)))
 
 (setq help-window-select t
       helpful-switch-buffer-function
@@ -180,6 +207,70 @@ ALIST is merged with `my/buffer-group-side-window-defaults'."
             (my/buffer-group-side-window-setup 'magit-edit
               '((side . bottom) (slot . 1))))))
 
+(defun my/side-window-p (window)
+  "Return non-nil if WINDOW is a side window."
+  (and (window-live-p window)
+       (member (window-parameter window 'window-side)
+               '(bottom left right top))))
+
+(defun my/side-windows-active-p (frame)
+  "Return non-nil if FRAME contains side windows."
+  (-any? #'my/side-window-p (window-list frame)))
+
+(defun my/window-next-siblings (window)
+  "Return list of WINDOW's next siblings."
+  (when-let ((next (window-next-sibling window)))
+    (cons next (my/window-next-siblings next))))
+
+(defun my/window-children (window)
+  "Return list of WINDOW's direct children."
+  (let ((head (window-child window)))
+    (cons head (my/window-next-siblings head))))
+
+(defun my/window-sibling-group (window)
+  "Return a list including WINDOW and all its siblings."
+  (my/window-children (window-parent window)))
+
+(defun my/side-windows-hide (frame)
+  "Hide side windows in FRAME."
+  (when (my/side-windows-active-p frame)
+    (window-toggle-side-windows frame)))
+
+(defun my/side-windows-show (frame)
+  "Show side windows in FRAME."
+  (unless (my/side-windows-active-p frame)
+    (window-toggle-side-windows frame)))
+
+;; To be used in similar places as +popup-save-a
+(defun my/side-windows-save-a (fn &rest args)
+  "Do not include side windows when balancing windows."
+  (let* ((window-or-frame (car-safe args))
+         (window (when (windowp window-or-frame)
+                   window-or-frame))
+         (frame (cond ((framep window-or-frame) window-or-frame)
+                      (window (window-frame window))
+                      (t (selected-frame)))))
+    (if (not (my/side-windows-active-p frame))
+        (apply fn args)
+      ;; FIXME: When running `balance-windows' in a side window, a non-side
+      ;; window is selected. I was hoping that `save-excursion' would help, but
+      ;; for whatever reason, it doesn't.
+      (save-excursion
+        ;; XXX: If the first element in `args' is a window, we need to ensure
+        ;; that `fn' is given an argument that refers to a window that exists
+        ;; after hiding the side windows. This window may or may not refer to
+        ;; the same window! Useful when advising `balance-windows'.
+        (if window
+            (let ((child (-first
+                          (lambda (window) (not (my/side-window-p window)))
+                          (my/window-children window))))
+              (window-toggle-side-windows frame)
+              (apply fn (cons (window-parent child) (cdr args)))
+              (window-toggle-side-windows frame))
+          (window-toggle-side-windows frame)
+          (apply fn args)
+          (window-toggle-side-windows frame))))))
+
 (defadvice! my/make-case-sensitive-a (fn &rest args)
   "Make regexps in `display-buffer-alist' case-sensitive.
 
@@ -199,15 +290,7 @@ grows larger."
             window t arg windmove-wrap-around t))
     (apply fn args)))
 
-;; Adapted from `+popup-window-p'
-(defun my/side-window-p (&optional window)
-  "Return non-nil if WINDOW is a side window. Defaults to the current window."
-  (let ((window (or window (selected-window))))
-    (and (windowp window)
-         (window-live-p window)
-         (-contains? '(bottom left right top)
-                     (window-parameter window 'window-side))
-         window)))
+(advice-add 'balance-windows :around #'my/side-windows-save-a)
 
 (map! "C-`"   #'window-toggle-side-windows)
    ;; "C-~"   #'+popup/raise
@@ -893,6 +976,8 @@ current buffer first unless the `force' argument is given."
 
 (advice-add #'+evil-window-split-a :override #'my/evil-window-split-a)
 (advice-add #'+evil-window-vsplit-a :override #'my/evil-window-vsplit-a)
+
+(setq evil-auto-balance-windows nil)
 
 (after! 5x5
   (map! :mode 5x5-mode
@@ -1662,11 +1747,9 @@ See also: `ts-fold-summary--get'."
     (pushnew! lsp-diagnostics-disabled-modes 'markdown-mode)
   (setq lsp-diagnostics-disabled-modes '(markdown-mode)))
 
-;; Don't bother checking for an LSP diagnostics provider in sh-mode
+;; Don't bother checking for an LSP diagnostics provider in markdown-mode
 (setq-hook! 'markdown-mode-hook
   lsp-diagnostics-provider :none)
-
-(pushnew! auto-mode-alist '("\\.mdx\\'" . markdown-mode))
 
 (after! markdown-mode
   (defun my/markdown-edit-code-block (f &rest r)
@@ -1685,6 +1768,13 @@ See also: `ts-fold-summary--get'."
   (map! :map markdown-mode-map
         :localleader
         "." #'consult-markdown-goto)))
+
+(pushnew! auto-mode-alist '("\\.mdx\\'" . markdown-mode))
+
+(add-hook! markdown-mode
+  (defun my/markdown-hide-markup-h ()
+    "Hide markdown markup."
+    (markdown-toggle-markup-hiding 1)))
 
 (after! org
   (setq org-hide-leading-stars nil
