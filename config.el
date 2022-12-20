@@ -75,11 +75,13 @@ See `my/buffer-groups-alist' for more information."
     (add-hook hook-var function depth)
     (setf properties (plist-put properties :hook (symbol-value hook-var)))))
 
-(defun my/buffer-group-run-setup-hooks (buffer-group)
-  "Run each function in the setup hook for BUFFER-GROUP."
-  (let ((hook-var (make-symbol "setup-hook")))
-    (set hook-var (my/buffer-group-setup-hook buffer-group))
-    (run-hooks hook-var)))
+(defun my/buffer-group-run-setup-hooks (&rest buffer-groups)
+  "Run each function in the setup hooks for BUFFER-GROUPS.
+If BUFFER-GROUPS is omitted, default to all groups."
+  (dolist (group (or buffer-groups (my/buffer-groups)))
+    (let ((hook-var (make-symbol "setup-hook")))
+      (set hook-var (my/buffer-group-setup-hook group))
+      (run-hooks hook-var))))
 
 ;;; Conditions
 
@@ -109,14 +111,31 @@ See `display-buffer-in-side-window' for more information.")
   "Default action alist for buffer-group side windows.
 See `display-buffer-in-side-window' for more information.")
 
+(defvar my/buffer-group-side-window-preserve-size t
+  "Preserve the \"size\" of a side window by default.
+For top or bottom side windows, preserve window height.
+For left or right side windows, preserve window width.")
+
+(defun my/buffer-group-side-window--defaults (&optional alist)
+  (let ((defaults my/buffer-group-side-window-defaults))
+    (when my/buffer-group-side-window-preserve-size
+      (let ((side (or (alist-get 'side alist)
+                      (alist-get 'side my/buffer-group-side-window-defaults))))
+        (setf (alist-get 'preserve-size defaults)
+              (if (member side '(bottom top))
+                  '(nil . t)
+                '(t . nil)))))
+    defaults))
+
 (defun my/buffer-group-side-window-setup (buffer-group &optional alist)
   "Configure BUFFER-GROUP to display in a side window.
 ALIST is merged with `my/buffer-group-side-window-defaults'."
   (declare (indent defun))
-  (mapc (lambda (action)
-          (unless (alist-get (car action) alist)
-            (push action alist)))
-        my/buffer-group-side-window-defaults)
+  (let ((defaults (my/buffer-group-side-window--defaults alist)))
+    (mapc (lambda (action)
+            (unless (alist-get (car action) alist)
+              (push action alist)))
+          defaults))
   (dolist (condition (my/buffer-group-conditions buffer-group))
     (setf (alist-get condition display-buffer-alist)
           (cons my/buffer-group-side-window-functions alist)))
@@ -127,12 +146,110 @@ ALIST is merged with `my/buffer-group-side-window-defaults'."
 
 ;;; Initial setup
 
-(dolist (buffer-group (my/buffer-groups))
-  (funcall (my/buffer-group-setup-hook buffer-group)))
+(my/buffer-group-run-setup-hooks)
 
 (setq window-sides-vertical t)
 
 (setq switch-to-buffer-obey-display-actions t)
+
+(defun my/side-window-p (window)
+  "Return non-nil if WINDOW is a side window."
+  (and (window-live-p window)
+       (window-parameter window 'window-side)))
+
+(defun my/side-windows-active-p (frame)
+  "Return non-nil if FRAME contains side windows."
+  (window-with-parameter 'window-side nil frame))
+
+(defun my/side-windows (frame)
+  "Return list of side windows in FRAME."
+  (let (result)
+    (dolist (window (window-list frame) result)
+      (when (window-parameter window 'window-side)
+        (push window result)))
+    result))
+
+(defun my/window-next-siblings (window)
+  "Return list of WINDOW's next siblings."
+  (when-let ((next (window-next-sibling window)))
+    (cons next (my/window-next-siblings next))))
+
+(defun my/window-children (window)
+  "Return list of WINDOW's direct children."
+  (let ((head (window-child window)))
+    (cons head (my/window-next-siblings head))))
+
+(defun my/window-sibling-group (window)
+  "Return a list including WINDOW and all its siblings."
+  (my/window-children (window-parent window)))
+
+(defun my/side-windows-hide (frame)
+  "Hide side windows in FRAME."
+  (when (my/side-windows-active-p frame)
+    (window-toggle-side-windows frame)))
+
+(defun my/side-windows-show (frame)
+  "Show side windows in FRAME."
+  (unless (my/side-windows-active-p frame)
+    (window-toggle-side-windows frame)))
+
+;; To be used in similar places as +popup-save-a
+(defun my/side-windows-save-a (fn &rest args)
+  "Temporarily close side windows."
+  (let* ((window-or-frame (car-safe args))
+         (window (when (windowp window-or-frame)
+                   window-or-frame))
+         (frame (cond ((framep window-or-frame) window-or-frame)
+                      (window (window-frame window))
+                      (t (selected-frame)))))
+    (if (not (my/side-windows-active-p frame))
+        (apply fn args)
+      ;; NOTE: For whatever reason, `save-excursion' does not work here.
+      (let ((restorep (window-parameter (selected-window) 'window-side))
+            (buffer (current-buffer)))
+        ;; XXX: If the first element in `args' is a window, we need to ensure
+        ;; that `fn' is given an argument that refers to a window that exists
+        ;; after hiding the side windows. This window may or may not refer to
+        ;; the same window! Useful when advising `balance-windows'.
+        (if window
+            (let ((child (-first
+                          (lambda (window) (not (my/side-window-p window)))
+                          (my/window-children window))))
+              (window-toggle-side-windows frame)
+              (apply fn (cons (window-parent child) (cdr args)))
+              (window-toggle-side-windows frame))
+          (window-toggle-side-windows frame)
+          (apply fn args)
+          (window-toggle-side-windows frame))
+        (when restorep
+          (pop-to-buffer buffer '((display-buffer-reuse-window) . nil)))))))
+
+(defadvice! my/make-case-sensitive-a (fn &rest args)
+  "Make regexps in `display-buffer-alist' case-sensitive.
+
+To reduce fewer edge cases and improve performance when `display-buffer-alist'
+grows larger."
+  :around #'display-buffer-assq-regexp
+  (let (case-fold-search)
+    (apply fn args)))
+
+(defadvice! my/ignore-window-parameters-a (fn &rest args)
+  "Allow *interactive* window moving commands to traverse popups."
+  :around '(windmove-up windmove-down windmove-left windmove-right)
+  (letf! (defun windmove-find-other-window (dir &optional arg window)
+           (window-in-direction
+            (pcase dir (`up 'above) (`down 'below) (_ dir))
+            window t arg windmove-wrap-around t))
+    (apply fn args)))
+
+(advice-add 'balance-windows :around #'my/side-windows-save-a)
+
+(dolist (cmd (list #'+evil--window-swap
+                   #'evil-window-move-very-bottom
+                   #'evil-window-move-very-top
+                   #'evil-window-move-far-left
+                   #'evil-window-move-far-right))
+  (advice-add cmd :around #'my/side-windows-save-a))
 
 (after! which-key
   (which-key-setup-minibuffer))
@@ -150,17 +267,11 @@ ALIST is merged with `my/buffer-group-side-window-defaults'."
 
 (defadvice! my/undo-tree-diff-display-buffer-a (&optional node)
   "Display an undo-tree diff buffer using `display-buffer'."
-  :override 'undo-tree-visualizer-show-diff
+  :override '(undo-tree-visualizer-show-diff undo-tree-visualizer-update-diff)
   (setq undo-tree-visualizer-diff t)
   (let ((buff (with-current-buffer undo-tree-visualizer-parent-buffer
                 (undo-tree-diff node))))
     (display-buffer buff)))
-
-(defadvice! my/undo-tree-diff-inhibit-balance-windows (fn &rest args)
-  "Prevent `undo-tree' from balancing all windows in the frame."
-  :around 'undo-tree-visualizer-update-diff
-  (letf! (((symbol-function 'balance-windows) #'ignore))
-    (apply fn args)))
 
 (setq help-window-select t
       helpful-switch-buffer-function
@@ -201,102 +312,11 @@ ALIST is merged with `my/buffer-group-side-window-defaults'."
     :hook (lambda ()
             (my/buffer-group-side-window-setup 'popup-term))))
 
-(my/buffer-group-define 'magit-edit
-  `(:cond ("^COMMIT_EDITMSG")
-    :hook (lambda ()
-            (my/buffer-group-side-window-setup 'magit-edit
-              '((side . bottom) (slot . 1))))))
-
-(defun my/side-window-p (window)
-  "Return non-nil if WINDOW is a side window."
-  (and (window-live-p window)
-       (member (window-parameter window 'window-side)
-               '(bottom left right top))))
-
-(defun my/side-windows-active-p (frame)
-  "Return non-nil if FRAME contains side windows."
-  (-any? #'my/side-window-p (window-list frame)))
-
-(defun my/window-next-siblings (window)
-  "Return list of WINDOW's next siblings."
-  (when-let ((next (window-next-sibling window)))
-    (cons next (my/window-next-siblings next))))
-
-(defun my/window-children (window)
-  "Return list of WINDOW's direct children."
-  (let ((head (window-child window)))
-    (cons head (my/window-next-siblings head))))
-
-(defun my/window-sibling-group (window)
-  "Return a list including WINDOW and all its siblings."
-  (my/window-children (window-parent window)))
-
-(defun my/side-windows-hide (frame)
-  "Hide side windows in FRAME."
-  (when (my/side-windows-active-p frame)
-    (window-toggle-side-windows frame)))
-
-(defun my/side-windows-show (frame)
-  "Show side windows in FRAME."
-  (unless (my/side-windows-active-p frame)
-    (window-toggle-side-windows frame)))
-
-;; To be used in similar places as +popup-save-a
-(defun my/side-windows-save-a (fn &rest args)
-  "Do not include side windows when balancing windows."
-  (let* ((window-or-frame (car-safe args))
-         (window (when (windowp window-or-frame)
-                   window-or-frame))
-         (frame (cond ((framep window-or-frame) window-or-frame)
-                      (window (window-frame window))
-                      (t (selected-frame)))))
-    (if (not (my/side-windows-active-p frame))
-        (apply fn args)
-      ;; FIXME: When running `balance-windows' in a side window, a non-side
-      ;; window is selected. I was hoping that `save-excursion' would help, but
-      ;; for whatever reason, it doesn't.
-      (save-excursion
-        ;; XXX: If the first element in `args' is a window, we need to ensure
-        ;; that `fn' is given an argument that refers to a window that exists
-        ;; after hiding the side windows. This window may or may not refer to
-        ;; the same window! Useful when advising `balance-windows'.
-        (if window
-            (let ((child (-first
-                          (lambda (window) (not (my/side-window-p window)))
-                          (my/window-children window))))
-              (window-toggle-side-windows frame)
-              (apply fn (cons (window-parent child) (cdr args)))
-              (window-toggle-side-windows frame))
-          (window-toggle-side-windows frame)
-          (apply fn args)
-          (window-toggle-side-windows frame))))))
-
-(defadvice! my/make-case-sensitive-a (fn &rest args)
-  "Make regexps in `display-buffer-alist' case-sensitive.
-
-To reduce fewer edge cases and improve performance when `display-buffer-alist'
-grows larger."
-  :around #'display-buffer-assq-regexp
-  (let (case-fold-search)
-    (apply fn args)))
-
-;; Users should be able to hop into popups easily, but Elisp shouldn't.
-(defadvice! my/ignore-window-parameters-a (fn &rest args)
-  "Allow *interactive* window moving commands to traverse popups."
-  :around '(windmove-up windmove-down windmove-left windmove-right)
-  (letf! (defun windmove-find-other-window (dir &optional arg window)
-           (window-in-direction
-            (pcase dir (`up 'above) (`down 'below) (_ dir))
-            window t arg windmove-wrap-around t))
-    (apply fn args)))
-
-(advice-add 'balance-windows :around #'my/side-windows-save-a)
-
 (map! "C-`"   #'window-toggle-side-windows)
    ;; "C-~"   #'+popup/raise
    ;; "C-x p" #'+popup/other
 
-(add-to-list 'display-buffer-alist '("^[^ ]" display-buffer-same-window) t)
+(setq display-buffer-base-action '((display-buffer-same-window) . nil))
 
 (setq company-idle-delay nil)
 

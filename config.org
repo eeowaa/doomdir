@@ -183,6 +183,43 @@ things working the way I'd like.
 + [[https://e17i.github.io/articles-emacs-display-1/][e17i blog]]
 + [[https://github.com/e17i/emacs-config/][e17i config]]
 
+*** ~display-buffer~ Actions
+- Window content
+  + display-buffer-reuse-window
+  + display-buffer-reuse-mode-window
+
+- Direction
+  + display-buffer-below-selected
+  + display-buffer-in-direction
+
+- Position
+  + display-buffer-at-bottom
+  + display-buffer-in-side-window
+
+- Existence
+  + display-buffer-pop-up-window
+  + display-buffer-use-some-window
+  + display-buffer-no-window
+
+- Temporality
+  + display-buffer-same-window
+  + display-buffer-in-previous-window
+  + display-buffer-use-least-recent-window
+
+- Atomic window
+  + display-buffer-in-atom-window
+
+- Tab
+  + display-buffer-in-tab
+  + display-buffer-in-new-tab
+
+- Frame
+  + display-buffer-pop-up-frame
+  + display-buffer-in-child-frame
+  + display-buffer-other-frame
+  + display-buffer-use-some-frame
+
+*** e17i Configuration
 #+begin_src emacs-lisp :tangle no
 ;;; Blog - Handling of other window
 
@@ -600,11 +637,13 @@ See `my/buffer-groups-alist' for more information."
     (add-hook hook-var function depth)
     (setf properties (plist-put properties :hook (symbol-value hook-var)))))
 
-(defun my/buffer-group-run-setup-hooks (buffer-group)
-  "Run each function in the setup hook for BUFFER-GROUP."
-  (let ((hook-var (make-symbol "setup-hook")))
-    (set hook-var (my/buffer-group-setup-hook buffer-group))
-    (run-hooks hook-var)))
+(defun my/buffer-group-run-setup-hooks (&rest buffer-groups)
+  "Run each function in the setup hooks for BUFFER-GROUPS.
+If BUFFER-GROUPS is omitted, default to all groups."
+  (dolist (group (or buffer-groups (my/buffer-groups)))
+    (let ((hook-var (make-symbol "setup-hook")))
+      (set hook-var (my/buffer-group-setup-hook group))
+      (run-hooks hook-var))))
 
 ;;; Conditions
 
@@ -634,14 +673,31 @@ See `display-buffer-in-side-window' for more information.")
   "Default action alist for buffer-group side windows.
 See `display-buffer-in-side-window' for more information.")
 
+(defvar my/buffer-group-side-window-preserve-size t
+  "Preserve the \"size\" of a side window by default.
+For top or bottom side windows, preserve window height.
+For left or right side windows, preserve window width.")
+
+(defun my/buffer-group-side-window--defaults (&optional alist)
+  (let ((defaults my/buffer-group-side-window-defaults))
+    (when my/buffer-group-side-window-preserve-size
+      (let ((side (or (alist-get 'side alist)
+                      (alist-get 'side my/buffer-group-side-window-defaults))))
+        (setf (alist-get 'preserve-size defaults)
+              (if (member side '(bottom top))
+                  '(nil . t)
+                '(t . nil)))))
+    defaults))
+
 (defun my/buffer-group-side-window-setup (buffer-group &optional alist)
   "Configure BUFFER-GROUP to display in a side window.
 ALIST is merged with `my/buffer-group-side-window-defaults'."
   (declare (indent defun))
-  (mapc (lambda (action)
-          (unless (alist-get (car action) alist)
-            (push action alist)))
-        my/buffer-group-side-window-defaults)
+  (let ((defaults (my/buffer-group-side-window--defaults alist)))
+    (mapc (lambda (action)
+            (unless (alist-get (car action) alist)
+              (push action alist)))
+          defaults))
   (dolist (condition (my/buffer-group-conditions buffer-group))
     (setf (alist-get condition display-buffer-alist)
           (cons my/buffer-group-side-window-functions alist)))
@@ -652,8 +708,7 @@ ALIST is merged with `my/buffer-group-side-window-defaults'."
 
 ;;; Initial setup
 
-(dolist (buffer-group (my/buffer-groups))
-  (funcall (my/buffer-group-setup-hook buffer-group)))
+(my/buffer-group-run-setup-hooks)
 #+end_src
 
 *** DONE Use full frame height for left and right side windows
@@ -752,6 +807,154 @@ Additionally, I would like to implement the following behaviors:
        + Could reimplement the ~:ls~ evil-ex command to use window history, as
          well. This would be closer to a vim/tmux workflow.
 
+** Hacks [5/5]
+Doom provides a =+hacks.el= file for the =:ui popup= module which contains some
+hacks that are generally useful for managing side windows.
+
+*** DONE Helper functions
+#+begin_src emacs-lisp :tangle yes
+(defun my/side-window-p (window)
+  "Return non-nil if WINDOW is a side window."
+  (and (window-live-p window)
+       (window-parameter window 'window-side)))
+
+(defun my/side-windows-active-p (frame)
+  "Return non-nil if FRAME contains side windows."
+  (window-with-parameter 'window-side nil frame))
+
+(defun my/side-windows (frame)
+  "Return list of side windows in FRAME."
+  (let (result)
+    (dolist (window (window-list frame) result)
+      (when (window-parameter window 'window-side)
+        (push window result)))
+    result))
+
+(defun my/window-next-siblings (window)
+  "Return list of WINDOW's next siblings."
+  (when-let ((next (window-next-sibling window)))
+    (cons next (my/window-next-siblings next))))
+
+(defun my/window-children (window)
+  "Return list of WINDOW's direct children."
+  (let ((head (window-child window)))
+    (cons head (my/window-next-siblings head))))
+
+(defun my/window-sibling-group (window)
+  "Return a list including WINDOW and all its siblings."
+  (my/window-children (window-parent window)))
+
+(defun my/side-windows-hide (frame)
+  "Hide side windows in FRAME."
+  (when (my/side-windows-active-p frame)
+    (window-toggle-side-windows frame)))
+
+(defun my/side-windows-show (frame)
+  "Show side windows in FRAME."
+  (unless (my/side-windows-active-p frame)
+    (window-toggle-side-windows frame)))
+#+end_src
+
+*** DONE Advice functions
+#+begin_src emacs-lisp :tangle yes
+;; To be used in similar places as +popup-save-a
+(defun my/side-windows-save-a (fn &rest args)
+  "Temporarily close side windows."
+  (let* ((window-or-frame (car-safe args))
+         (window (when (windowp window-or-frame)
+                   window-or-frame))
+         (frame (cond ((framep window-or-frame) window-or-frame)
+                      (window (window-frame window))
+                      (t (selected-frame)))))
+    (if (not (my/side-windows-active-p frame))
+        (apply fn args)
+      ;; NOTE: For whatever reason, `save-excursion' does not work here.
+      (let ((restorep (window-parameter (selected-window) 'window-side))
+            (buffer (current-buffer)))
+        ;; XXX: If the first element in `args' is a window, we need to ensure
+        ;; that `fn' is given an argument that refers to a window that exists
+        ;; after hiding the side windows. This window may or may not refer to
+        ;; the same window! Useful when advising `balance-windows'.
+        (if window
+            (let ((child (-first
+                          (lambda (window) (not (my/side-window-p window)))
+                          (my/window-children window))))
+              (window-toggle-side-windows frame)
+              (apply fn (cons (window-parent child) (cdr args)))
+              (window-toggle-side-windows frame))
+          (window-toggle-side-windows frame)
+          (apply fn args)
+          (window-toggle-side-windows frame))
+        (when restorep
+          (pop-to-buffer buffer '((display-buffer-reuse-window) . nil)))))))
+#+end_src
+
+**** COMMENT Experiments
+I tried to advise ~balance-windows~ with the following function and it didn't
+work so well. I'm keeping it around for reference and in case I find a use for
+it later.
+
+#+begin_src emacs-lisp :tangle no
+(defun my/side-windows-fixed-a (fn &rest args)
+  "Temporarily fix the size of side windows."
+  (let* ((window-or-frame (car-safe args))
+         (window (when (windowp window-or-frame)
+                   window-or-frame))
+         (frame (cond ((framep window-or-frame) window-or-frame)
+                      (window (window-frame window))
+                      (t (selected-frame))))
+         (side-windows (my/side-windows frame)))
+    (dolist (window side-windows)
+      (with-current-buffer (window-buffer window)
+        (setq-local my/old-window-size-fixed window-size-fixed
+                    window-size-fixed t)))
+    (apply fn args)
+    (dolist (window side-windows)
+      (with-current-buffer (window-buffer window)
+        (setq-local window-size-fixed my/old-window-size-fixed)
+        (makunbound 'my/old-window-size-fixed)))))
+#+end_src
+
+*** DONE Use case-sensitive regexps in ~display-buffer-alist~
+#+begin_src emacs-lisp :tangle yes
+(defadvice! my/make-case-sensitive-a (fn &rest args)
+  "Make regexps in `display-buffer-alist' case-sensitive.
+
+To reduce fewer edge cases and improve performance when `display-buffer-alist'
+grows larger."
+  :around #'display-buffer-assq-regexp
+  (let (case-fold-search)
+    (apply fn args)))
+#+end_src
+
+*** DONE Allow interactive window selection of side windows
+#+begin_src emacs-lisp :tangle yes
+(defadvice! my/ignore-window-parameters-a (fn &rest args)
+  "Allow *interactive* window moving commands to traverse popups."
+  :around '(windmove-up windmove-down windmove-left windmove-right)
+  (letf! (defun windmove-find-other-window (dir &optional arg window)
+           (window-in-direction
+            (pcase dir (`up 'above) (`down 'below) (_ dir))
+            window t arg windmove-wrap-around t))
+    (apply fn args)))
+#+end_src
+
+*** DONE Exclude side windows from ~balance-windows~
+#+begin_src emacs-lisp :tangle yes
+(advice-add 'balance-windows :around #'my/side-windows-save-a)
+#+end_src
+
+** Evil [1/1]
+*** DONE Prevent windows from moving into side windows
+#+begin_src emacs-lisp :tangle yes
+(dolist (cmd (list #'+evil--window-swap
+                   #'evil-window-move-very-bottom
+                   #'evil-window-move-very-top
+                   #'evil-window-move-far-left
+                   #'evil-window-move-far-right))
+  (advice-add cmd :around #'my/side-windows-save-a))
+#+end_src
+
 ** Which Key [1/1]
 *** DONE Use full frame width
 Use the minibuffer instead of a side window to get full horizontal width.
@@ -787,17 +990,11 @@ order to show a diff. It should really be using ~display-buffer~ instead.
 #+begin_src emacs-lisp :tangle yes
 (defadvice! my/undo-tree-diff-display-buffer-a (&optional node)
   "Display an undo-tree diff buffer using `display-buffer'."
-  :override 'undo-tree-visualizer-show-diff
+  :override '(undo-tree-visualizer-show-diff undo-tree-visualizer-update-diff)
   (setq undo-tree-visualizer-diff t)
   (let ((buff (with-current-buffer undo-tree-visualizer-parent-buffer
                 (undo-tree-diff node))))
     (display-buffer buff)))
-
-(defadvice! my/undo-tree-diff-inhibit-balance-windows (fn &rest args)
-  "Prevent `undo-tree' from balancing all windows in the frame."
-  :around 'undo-tree-visualizer-update-diff
-  (letf! (((symbol-function 'balance-windows) #'ignore))
-    (apply fn args)))
 #+end_src
 
 ** Help [2/2]
@@ -877,118 +1074,21 @@ will not belong to a buffer group.
             (my/buffer-group-side-window-setup 'popup-term))))
 #+end_src
 
-** Magit [1/1]
-*** DONE Buffer group definition
+** Magit [0/1]
+*** LOOP Buffer group definition
+:LOGBOOK:
+- Note taken on [2022-12-20 Tue 17:43] \\
+  For now, I am just using Doom's configuration.
+:END:
 I think I'd rather have this buffer open directly above the summary window, but
 this will work OK for now.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (my/buffer-group-define 'magit-edit
   `(:cond ("^COMMIT_EDITMSG")
     :hook (lambda ()
             (my/buffer-group-side-window-setup 'magit-edit
               '((side . bottom) (slot . 1))))))
-#+end_src
-
-** Hacks [3/4]
-Doom provides a =+hacks.el= file for the =:ui popup= module which contains some
-hacks that are generally useful for managing side windows.
-
-*** STRT Helper functions
-#+begin_src emacs-lisp :tangle yes
-(defun my/side-window-p (window)
-  "Return non-nil if WINDOW is a side window."
-  (and (window-live-p window)
-       (member (window-parameter window 'window-side)
-               '(bottom left right top))))
-
-(defun my/side-windows-active-p (frame)
-  "Return non-nil if FRAME contains side windows."
-  (-any? #'my/side-window-p (window-list frame)))
-
-(defun my/window-next-siblings (window)
-  "Return list of WINDOW's next siblings."
-  (when-let ((next (window-next-sibling window)))
-    (cons next (my/window-next-siblings next))))
-
-(defun my/window-children (window)
-  "Return list of WINDOW's direct children."
-  (let ((head (window-child window)))
-    (cons head (my/window-next-siblings head))))
-
-(defun my/window-sibling-group (window)
-  "Return a list including WINDOW and all its siblings."
-  (my/window-children (window-parent window)))
-
-(defun my/side-windows-hide (frame)
-  "Hide side windows in FRAME."
-  (when (my/side-windows-active-p frame)
-    (window-toggle-side-windows frame)))
-
-(defun my/side-windows-show (frame)
-  "Show side windows in FRAME."
-  (unless (my/side-windows-active-p frame)
-    (window-toggle-side-windows frame)))
-
-;; To be used in similar places as +popup-save-a
-(defun my/side-windows-save-a (fn &rest args)
-  "Do not include side windows when balancing windows."
-  (let* ((window-or-frame (car-safe args))
-         (window (when (windowp window-or-frame)
-                   window-or-frame))
-         (frame (cond ((framep window-or-frame) window-or-frame)
-                      (window (window-frame window))
-                      (t (selected-frame)))))
-    (if (not (my/side-windows-active-p frame))
-        (apply fn args)
-      ;; FIXME: When running `balance-windows' in a side window, a non-side
-      ;; window is selected. I was hoping that `save-excursion' would help, but
-      ;; for whatever reason, it doesn't.
-      (save-excursion
-        ;; XXX: If the first element in `args' is a window, we need to ensure
-        ;; that `fn' is given an argument that refers to a window that exists
-        ;; after hiding the side windows. This window may or may not refer to
-        ;; the same window! Useful when advising `balance-windows'.
-        (if window
-            (let ((child (-first
-                          (lambda (window) (not (my/side-window-p window)))
-                          (my/window-children window))))
-              (window-toggle-side-windows frame)
-              (apply fn (cons (window-parent child) (cdr args)))
-              (window-toggle-side-windows frame))
-          (window-toggle-side-windows frame)
-          (apply fn args)
-          (window-toggle-side-windows frame))))))
-#+end_src
-
-*** DONE Use case-sensitive regexps in ~display-buffer-alist~
-#+begin_src emacs-lisp :tangle yes
-(defadvice! my/make-case-sensitive-a (fn &rest args)
-  "Make regexps in `display-buffer-alist' case-sensitive.
-
-To reduce fewer edge cases and improve performance when `display-buffer-alist'
-grows larger."
-  :around #'display-buffer-assq-regexp
-  (let (case-fold-search)
-    (apply fn args)))
-#+end_src
-
-*** DONE Allow interactive window selection of side windows
-#+begin_src emacs-lisp :tangle yes
-;; Users should be able to hop into popups easily, but Elisp shouldn't.
-(defadvice! my/ignore-window-parameters-a (fn &rest args)
-  "Allow *interactive* window moving commands to traverse popups."
-  :around '(windmove-up windmove-down windmove-left windmove-right)
-  (letf! (defun windmove-find-other-window (dir &optional arg window)
-           (window-in-direction
-            (pcase dir (`up 'above) (`down 'below) (_ dir))
-            window t arg windmove-wrap-around t))
-    (apply fn args)))
-#+end_src
-
-*** DONE Exclude side windows from ~balance-windows~
-#+begin_src emacs-lisp :tangle yes
-(advice-add 'balance-windows :around #'my/side-windows-save-a)
 #+end_src
 
 ** Keybinds [0/1]
@@ -1011,10 +1111,18 @@ history in order to "move" tabs; you can probably use your abstraction of
 
 ** Fallbacks [1/1]
 *** DONE Open buffers in the current window by default
-Should be the last rule in the list.
+This is cool, but it screws up some nice things that Doom does for Magit
+(although eventually, I'd like to fine-tune Magit, as well):
+
+#+begin_src emacs-lisp :tangle no
+;; NOTE: Must be the last rule on the list
+(add-to-list 'display-buffer-alist '("^[^ ]" display-buffer-same-window) t)
+#+end_src
+
+Instead of that, let's try something a bit milder and see how it goes:
 
 #+begin_src emacs-lisp :tangle yes
-(add-to-list 'display-buffer-alist '("^[^ ]" display-buffer-same-window) t)
+(setq display-buffer-base-action '((display-buffer-same-window) . nil))
 #+end_src
 
 * :input
@@ -6285,14 +6393,9 @@ Reference: [[*Disable error reporting in sh-mode buffers][Disable error reportin
     (pushnew! lsp-diagnostics-disabled-modes 'markdown-mode)
   (setq lsp-diagnostics-disabled-modes '(markdown-mode)))
 
-;; Don't bother checking for an LSP diagnostics provider in sh-mode
+;; Don't bother checking for an LSP diagnostics provider in markdown-mode
 (setq-hook! 'markdown-mode-hook
   lsp-diagnostics-provider :none)
-#+end_src
-
-*** DONE [#C] Filename-mode associations
-#+begin_src emacs-lisp :tangle yes
-(pushnew! auto-mode-alist '("\\.mdx\\'" . markdown-mode))
 #+end_src
 
 *** DONE [#B] Show edit buffer in the current window
@@ -6333,6 +6436,19 @@ which is perfect for ~:around~ advice:
   (map! :map markdown-mode-map
         :localleader
         "." #'consult-markdown-goto)))
+#+end_src
+
+*** DONE [#C] Filename-mode associations
+#+begin_src emacs-lisp :tangle yes
+(pushnew! auto-mode-alist '("\\.mdx\\'" . markdown-mode))
+#+end_src
+
+*** DONE [#C] Hide markup by default
+#+begin_src emacs-lisp :tangle yes
+(add-hook! markdown-mode
+  (defun my/markdown-hide-markup-h ()
+    "Hide markdown markup."
+    (markdown-toggle-markup-hiding 1)))
 #+end_src
 
 *** TODO [#B] Live-preview Markdown buffers in an external browser :tweak:
