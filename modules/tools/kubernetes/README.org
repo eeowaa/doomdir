@@ -1,0 +1,134 @@
+#+title:    :tools kubernetes
+#+subtitle: Production-grade container orchestration
+
+* Description :unfold:
+This custom module provides features for editing YAML-formatted [[https://kubernetes.io/][Kubernetes]]
+manifests and [[https://helm.sh/][Helm]] charts.
+
+** Maintainers
+- @eeowaa (Author)
+
+** Module flags
+- +lsp ::
+  Enable LSP support for ~k8s-mode~ and ~k8s-helm-mode~. Requires
+  [[doom-module::tools lsp]] and language servers ([[https://github.com/redhat-developer/yaml-language-server][yaml-language-server]] for
+  ~k8s-mode~ and [[https://github.com/mrjosh/helm-ls][helm_ls]] for ~k8s-helm-mode~).
+- +tree-sitter ::
+  Leverages tree-sitter for syntax highlighting and folding in ~k8s-helm-mode~.
+  Requires [[doom-module::tools tree-sitter]] and [[https://github.com/ngalaiko/tree-sitter-go-template][tree-sitter-go-template]] (manual
+  build and integration steps required).
+
+** Packages
+- [[doom-package:k8s-mode]]
+- [[doom-package:kubedoc]]
+
+** Hacks
+- [[doom-package:tree-sitter-hl]] is configured to look in
+  ~+tree-sitter-hl-queries-dir~ for =highlights.scm= files.
+
+** TODO Changelog
+# This section will be machine generated. Don't edit it by hand.
+/This module does not have a changelog yet./
+
+* Installation
+[[id:01cffea4-3329-45e2-a892-95a384ab2338][Enable this module in your ~doom!~ block.]]
+
+** Helm language server
+https://github.com/mrjosh/helm-ls
+
+** Tree-Sitter for Go templates
+With =+tree-sitter=, the dynamic Tree-Sitter module for Go templates must be
+built and installed to a location recognized by the =tree-sitter= package.
+Similarly, the highlights file must be installed to the directory specified by
+~+tree-sitter-hl-queries-dir~.
+
+You can accomplish this by adapting the following shell script to your needs. It
+has been tested on Fedora Linux (make sure to include =$HOME/.local/bin= in your
+=PATH=) with default configuration values in Emacs.
+
+#+begin_src sh :tangle no
+# Install Cask
+if [ -d ~/.local/opt/cask ]
+then
+    git -C ~/.local/opt/cask pull
+else
+    mkdir -p ~/.local/opt
+    git clone https://github.com/cask/cask ~/.local/opt/cask
+    ln -s ~/.local/opt/cask/bin/cask ~/.local/bin
+fi
+
+# Install NodeJS if not already installed
+# (details omitted)
+
+# Install and use the correct version of the tree-sitter CLI
+npm -g install tree-sitter-cli@0.19.3
+for ts in `which -a tree-sitter | sort -u`
+do
+    case `$ts --version` in
+    tree-sitter\ 0.19.3*)
+        export PATH=${ts%/*}:$PATH
+        break ;;
+    esac
+done
+
+# Obtain elisp-tree-sitter source code in its own directory
+[ -d ~/.local/src/emacs/tree-sitter-langs ] || {
+    mkdir -p ~/.local/src/emacs
+    git clone https://github.com/emacs-tree-sitter/tree-sitter-langs \
+        ~/.local/src/emacs/tree-sitter-langs
+}
+
+# Build and install the tree-sitter grammar for Go templates
+(
+    # Install dependencies for tree-sitter-langs
+    cd ~/.local/src/emacs/tree-sitter-langs
+    cask install
+
+    # Register a submodule for tree-sitter-go-template
+    git submodule add -b master -- \
+        https://github.com/ngalaiko/tree-sitter-go-template repos/gotmpl
+    ed .gitmodules <<\EOF
+/\[submodule "repos\/gotmpl"]/a
+	update = none
+	ignore = dirty
+.
+wq
+EOF
+
+    # Copy the highlights file into place (for internal consistency)
+    mkdir -p queries/gotmpl
+    cp repos/gotmpl/queries/highlights.scm queries/gotmpl
+
+    # Build the grammar for Go templates
+    script/compile gotmpl
+
+    # Install the shared object into place
+    mkdir -p ~/.tree-sitter/bin
+    cp bin/gotmpl.so ~/.tree-sitter/bin
+
+    # Install the highlights file into place
+    mkdir -p ~/.tree-sitter/queries/gotmpl
+    cp queries/gotmpl/highlights.scm ~/.tree-sitter/queries/gotmpl
+)
+#+end_src
+
+* TODO Usage
+#+begin_quote
+🔨 This module has no usage documentation yet.
+#+end_quote
+
+* TODO Configuration
+#+begin_quote
+🔨 This module has no configuration documentation yet.
+#+end_quote
+
+* Troubleshooting
+/There are no known problems with this module./
+
+* Frequently asked questions
+/This module has no FAQs yet./
+
+* TODO Appendix
+#+begin_quote
+🔨 This module has no appendix yet.
+#+end_quote

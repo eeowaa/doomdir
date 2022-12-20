@@ -155,27 +155,13 @@ deactivate
 ## Verify that the bash kernel is visible to jupyter
 jupyter kernelspec list
 
-# Install prerequisites for `tools/lookup` module
-sudo dnf -y install ripgrep sqlite-3
+# Install prerequisites for `tools/Kubernetes` module
 
-# Install prerequisites for `tools/magit` module
-(cd ~/Documents/src/life/stow-dotfiles && make perl)
-sudo dnf -y install perl
-# TODO: Find equivalent to git-absorb
-# TODO: Fix cpan install command
-cpan install App::Git::Autofixup
-
-# Install prerequisites for `tools/terraform` module
-sudo dnf -y install terraform terraform-ls
-
-# Install prerequisites for `lang/Miscellany` module
-pipx install nginx-language-server
-
-# Install prerequisites for Helm
+## Helm language server
 curl -L https://github.com/mrjosh/helm-ls/releases/download/master/helm_ls_linux_amd64 \
     --output ~/.local/bin/helm_ls
 
-# Install Cask
+## Install Cask
 if [ -d ~/.local/opt/cask ]
 then
     git -C ~/.local/opt/cask pull
@@ -185,10 +171,10 @@ else
     ln -s ~/.local/opt/cask/bin/cask ~/.local/bin
 fi
 
-# Install NodeJS
-# (should already be installed)
+## Install NodeJS
+## (should already be installed)
 
-# Install and use the correct version of the tree-sitter CLI
+## Install and use the correct version of the tree-sitter CLI
 npm -g install tree-sitter-cli@0.19.3
 for ts in `which -a tree-sitter | sort -u`
 do
@@ -199,14 +185,14 @@ do
     esac
 done
 
-# Obtain elisp-tree-sitter source code in its own directory
+## Obtain elisp-tree-sitter source code in its own directory
 [ -d ~/.local/src/emacs/tree-sitter-langs ] || {
     mkdir -p ~/.local/src/emacs
     git clone https://github.com/emacs-tree-sitter/tree-sitter-langs \
         ~/.local/src/emacs/tree-sitter-langs
 }
 
-# Build and install the tree-sitter grammar for Go templates
+## Build and install the tree-sitter grammar for Go templates
 (
     # Install dependencies for tree-sitter-langs
     cd ~/.local/src/emacs/tree-sitter-langs
@@ -238,6 +224,26 @@ EOF
     mkdir -p ~/.tree-sitter/queries/gotmpl
     cp queries/gotmpl/highlights.scm ~/.tree-sitter/queries/gotmpl
 )
+
+# Install prerequisites for `tools/lookup` module
+sudo dnf -y install ripgrep sqlite-3
+
+# Install prerequisites for `tools/magit` module
+(cd ~/Documents/src/life/stow-dotfiles && make perl)
+sudo dnf -y install perl
+# TODO: Find equivalent to git-absorb
+# TODO: Fix cpan install command
+cpan install App::Git::Autofixup
+
+# Install prerequisites for `tools/terraform` module
+sudo dnf -y install terraform terraform-ls
+
+# Install prerequisites for `lang/Miscellany` module
+pipx install nginx-language-server
+
+# Install prerequisites for `lang/Kubernetes` module
+curl -L https://github.com/mrjosh/helm-ls/releases/download/master/helm_ls_linux_amd64 \
+    --output ~/.local/bin/helm_ls
 
 # Install prerequisites for `lang/cc` module
 

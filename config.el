@@ -1427,7 +1427,7 @@ which causes problems even if there is no existing buffer."
   ;; REVIEW Ensure that `set-docsets!' is only called for modes derived from `prog-mode'
   (add-hook! prog-mode #'my/ensure-docsets))
 
-(after! lsp
+(after! lsp-mode
   (setq lsp-restart 'auto-restart))
 
 (after! lsp-ui
@@ -1486,84 +1486,7 @@ which causes problems even if there is no existing buffer."
   :after-while #'+fold--ts-fold-p
   (assq major-mode ts-fold-range-alist))
 
-(setq lsp-semantic-tokens-enable nil)
-
-(when IS-MAC
-  (setq ;; Comfortable keys that work most of the time
-        mac-command-modifier 'control
-        mac-right-command-modifier 'meta
-
-        ;; Workaround for when system keybindings take precedence
-        mac-control-modifier 'control
-        mac-right-control-modifier 'meta
-
-        ;; For exotic mappings
-        mac-option-modifier 'super
-        mac-right-option-modifier 'hyper))
-
-;; NOTE k8s manifests do not have to begin with "apiVersion", but I've seen that
-;; more often than not. Worst case, if this doesn't end up catching enough, I
-;; can write a function that searches for the "^apiVersion:" regexp in a buffer
-;; visiting a file whose name matches "\\.yml\\'" or "\\.yaml\\'". I can then
-;; replace the "apiVersion:" regex in the :magic form with a call to that function.
-(use-package! k8s-mode
-  :magic ("apiVersion:" . k8s-mode)
-  :config
-  (set-lookup-handlers! 'k8s-mode
-    :documentation #'kubedoc))
-
-;; REVIEW Is there even a point in having an empty `use-package!' declaration?
-(use-package! kubedoc)
-
-(require 'k8s-helm-mode)
-(require 'lsp-k8s-helm)
-(pushnew! auto-mode-alist
-          '("/templates/.+\\.\\(?:ya?ml\\|tpl\\)\\'" . k8s-helm-mode))
-(add-hook 'k8s-helm-mode-hook #'lsp! 0 t)
-
-;;; tree-sitter
-
-(add-hook 'k8s-helm-mode-local-vars-hook #'tree-sitter! 'append)
-
-(after! tree-sitter
-  (add-to-list 'tree-sitter-major-mode-language-alist
-               '(k8s-helm-mode . gotmpl)))
-
-;;; evil-textobj-tree-sitter
-
-(after! evil-textobj-tree-sitter
-  (add-to-list 'evil-textobj-tree-sitter-major-mode-language-alist
-               '(k8s-helm-mode . gotmpl)))
-
-;;; ts-fold
-
 (after! ts-fold
-
-  ;; FIXME: Comments and "else" directives
-  (defun ts-fold-parsers-gotmpl ()
-    "Rule sets for Go templates."
-    '((_comment_action  . ts-fold-range-block-comment)
-      (_pipeline_action . ts-fold-range-seq)
-      (if_action        . ts-fold-range-seq)
-      (range_action     . ts-fold-range-seq)
-      (template_action  . ts-fold-range-seq)
-      (define_action    . ts-fold-range-seq)
-      (block_action     . ts-fold-range-seq)
-      (with_action      . ts-fold-range-seq)))
-  (customize-set-variable 'ts-fold-range-alist
-                          (cons `(k8s-helm-mode . ,(ts-fold-parsers-gotmpl))
-                                (assq-delete-all 'k8s-helm-mode ts-fold-range-alist)))
-
-  (defun ts-fold-summary-gotmpl (doc-str)
-    "Extract summary from DOC-STR in Go template block."
-    (let ((first-line (nth 0 (split-string doc-str "\n"))))
-      (string-match "\\`{-? *\\(.*?\\)\\(?: *-?}}\\)? *\\'" first-line)
-      (match-string 1 first-line)))
-  (customize-set-variable 'ts-fold-summary-parsers-alist
-                          (cons `(k8s-helm-mode . ts-fold-summary-gotmpl)
-                                ts-fold-summary-parsers-alist))
-
-  ;; Test function for obtaining fold summaries
   (defun my/ts-fold-summary-test (&optional summary-parser)
     "Extract summary text for tree-sitter fold at point.
 SUMMARY-PARSER is a function such as one defined in
@@ -1579,27 +1502,20 @@ See also: `ts-fold-summary--get'."
            (end (cdr range)))
       (message (funcall parser (buffer-substring beg end))))))
 
-;;; tree-sitter-hl
+(setq lsp-semantic-tokens-enable nil)
 
-(setq-hook! 'k8s-helm-mode-hook tree-sitter-hl-use-font-lock-keywords t)
+(when IS-MAC
+  (setq ;; Comfortable keys that work most of the time
+        mac-command-modifier 'control
+        mac-right-command-modifier 'meta
 
-(after! tree-sitter-cli
-  (defun my/tree-sitter-cli-queries-directory ()
-    "Return the directory used by tree-sitter CLI to store highlight queries."
-    (file-name-as-directory
-     (concat (tree-sitter-cli-directory) "queries"))))
+        ;; Workaround for when system keybindings take precedence
+        mac-control-modifier 'control
+        mac-right-control-modifier 'meta
 
-(defadvice! my/tree-sitter-langs--hl-query-path-local-a (lang-symbol &optional mode)
-  "Search `tree-sitter-cli-directory' for a highlights file first."
-  :before-until #'tree-sitter-langs--hl-query-path
-  (when-let* ((highlights-file (concat (file-name-as-directory
-                                        (concat (my/tree-sitter-cli-queries-directory)
-                                                (symbol-name lang-symbol)))
-                                       (if mode
-                                           (format "highlights.%s.scm" mode)
-                                         "highlights.scm")))
-              (exists (file-exists-p highlights-file)))
-    highlights-file))
+        ;; For exotic mappings
+        mac-option-modifier 'super
+        mac-right-option-modifier 'hyper))
 
 (use-package! nginx-mode
   :mode "nginx.*\\.conf"
@@ -2225,9 +2141,6 @@ ALIGN should be a keyword :left or :right."
 ;; Map C-i to TAB and provide an alternative mapping for `better-jumper-jump-forward'
 (define-key key-translation-map (kbd "C-i") (kbd "TAB"))
 (global-set-key (kbd "C-M-,") #'better-jumper-jump-forward)
-
-(after! projectile
-  (pushnew! projectile-project-root-files "Chart.yaml"))
 
 (remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
 

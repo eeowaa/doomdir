@@ -11,7 +11,7 @@ This variable should not be modified directly. For that, use
 (defun eeowaa-watchpoint--break (symbol newval operation where)
   "Start the debugger when SYMBOL is about to be modified.
 See the help text for `add-variable-watcher' for an explanation
-function arguments."
+of function arguments."
   (debug))
 
 (defun eeowaa-watchpoint-set (symbol)

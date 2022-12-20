@@ -48,3 +48,5 @@
                         (lsp-package-ensure 'helm-ls callback error-callback))))
 
 (provide 'lsp-k8s-helm)
+
+;;; lsp-k8s-helm.el ends here

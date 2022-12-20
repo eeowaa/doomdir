@@ -1,0 +1,81 @@
+#+title: Kubernetes
+
+* Kubernetes [0/5]
+** TODO Open manifest files in ~k8s-mode~
+Manifests are just YAML files, usually with a generic =.yml= or =.yaml= file
+extension; these files can appear anywhere in a directory structure. Therefore,
+~auto-mode-alist~ cannot be used to identify which files should be opened in
+~k8s-mode~.
+
+Manifests must always (?) contain an ~apiVersion~ dictionary element in each
+top-level resource they describe. This can be detected with a regexp like the
+following, which will only search the first 10 lines of a file:
+
+: "\\`\\(?:.*\n\\)\\{0,10\\}apiVersion:"
+
+It seems safe to assume that most YAML files with an ~apiVersion~ element should
+be opened in ~k8s-mode~, with the exception of files named =Chart.yaml=, which
+contain that element but do not use the Kubernetes YAML schema. Therefore, we
+can add a new ~(MATCH-FUNCTION . MODE-FUNCTION)~ to ~magic-mode-alist~ to
+identify which files to open in ~k8s-mode~, where ~MATCH-FUNCTION~ checks both
+the file name and body content of newly-opened buffers.
+
+** TODO Automatically start LSP in ~k8s-mode~
+We just want to start a YAML language server.
+
+** TODO Use the Kubernetes YAML schema in ~k8s-mode~
+** TODO Documentation lookup
+The following commands should be mapped to localleader keys:
+
+- ~kubedoc~
+- ~k8s-goto-documents~
+
+** TODO Yasnippet integration
+=k8s-mode= comes with snippets.
+
+* Helm [0/5]
+** TODO Write ~package!~ statements for =k8s-helm-mode= and =lsp-k8s-helm=
+Currently, the packages are defined as files in =$DOOMDIR/lisp=, which I have
+added to ~load-path~. It might make more sense to move these files into this
+directory. Long term, I think that it would make sense to publish these modes
+individually (see [[*Polish][Polish]] section).
+
+** TODO Write ~use-package!~ statements for =k8s-helm-mode= and =lsp-k8s-helm=
+** TODO Write a command to preview manifests
+Reference the [[https://github.com/abrochard/kubernetes-helm/blob/master/kubernetes-helm.el][kubernetes-helm]] package.
+
+** TODO Implement syntax highlighting and folding without =+tree-sitter=
+Use go-template mode as the basis of k8s-helm-mode
+This will allow us to get syntax highlighting without =tree-sitter=.
+
+* Polish [0/4]
+** TODO Contribute to =tree-sitter-langs= to avoid the manual build step
+Rather than requiring a manual build and installation of the dynamic library
+from [[https://github.com/ngalaiko/tree-sitter-go-template][tree-sitter-go-template]], it would be much better to contribute my efforts
+upstream to [[https://github.com/emacs-tree-sitter/tree-sitter-langs][tree-sitter-langs]].
+
+Although =tree-sitter-langs= may not work in Emacs 29+, given built-in
+Tree-Sitter support, it would still be nice to contribute to that project to
+support older versions of Emacs.
+
+** TODO Add syntax highlighting to ~k8s-helm-mode~ without =+tree-sitter=
+Refer to the following:
+
+- [[https://github.com/sergusha/emacs.d/blob/master/go-template-mode.el][go-template-mode.el]] (base font-locking for Go templates)
+- [[file:~/.vim/pack/eeowaa/start/vim-helm/syntax/helm.vim][helm.vim]] (more Helm-specific keywords)
+- =yaml-mode= (syntax highlighting via syntax tables)
+- ~ansible-add-font-lock~ (extending the =yaml-mode= syntax table)
+
+** TODO Add folding to ~k8s-helm-mode~ without =+tree-sitter=
+The following doesn't quite work for folding, but gets close (probably need to
+define a ~forward-sexp~ function for the ~k8s-helm-mode~ member of
+~hs-special-modes-alist~):
+
+#+begin_src emacs-lisp :tangle no
+(setq hs-special-modes-alist (assq-delete-all 'k8s-helm-mode hs-special-modes-alist))
+(push '(k8s-mode "{{-?\s+\\(?:if\\|with\\|range\\|define\\)\s+.*?\s+-?}}"
+                 "{{-?\s+end\s+-?}}" "{{/\*" nil nil)
+      hs-special-modes-alist)
+#+end_src
+
+** TODO Add eglot support for =+lsp=

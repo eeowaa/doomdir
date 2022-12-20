@@ -407,7 +407,6 @@ this will work OK for now.
               '((side . bottom) (slot . 1))))))
 #+end_src
 
-
 ** Doom Hacks [1/2]
 Doom provides a =+hacks.el= file for the =:ui popup= module which contains some
 hacks that are generally useful for managing side windows.
@@ -4903,6 +4902,87 @@ A workaround is to simply *not export* the results.
 
 ** eval [0/0]
 ** gist [0/0] :ARCHIVE:
+** kubernetes [1/1] :eeowaa:
+#+begin_quote
+This custom module provides features for editing YAML-formatted Kubernetes
+manifests and Helm charts.
+#+end_quote
+
+*** DONE [#A] Install prerequisites
+**** OKAY macOS
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `tools/Kubernetes` module
+
+## Helm language server
+curl -L https://github.com/mrjosh/helm-ls/releases/download/master/helm_ls_linux_amd64 \
+    --output ~/.local/bin/helm_ls
+
+## Install Cask
+if [ -d ~/.local/opt/cask ]
+then
+    git -C ~/.local/opt/cask pull
+else
+    mkdir -p ~/.local/opt
+    git clone https://github.com/cask/cask ~/.local/opt/cask
+    ln -s ~/.local/opt/cask/bin/cask ~/.local/bin
+fi
+
+## Install NodeJS
+## (should already be installed)
+
+## Install and use the correct version of the tree-sitter CLI
+npm -g install tree-sitter-cli@0.19.3
+for ts in `which -a tree-sitter | sort -u`
+do
+    case `$ts --version` in
+    tree-sitter\ 0.19.3*)
+        export PATH=${ts%/*}:$PATH
+        break ;;
+    esac
+done
+
+## Obtain elisp-tree-sitter source code in its own directory
+[ -d ~/.local/src/emacs/tree-sitter-langs ] || {
+    mkdir -p ~/.local/src/emacs
+    git clone https://github.com/emacs-tree-sitter/tree-sitter-langs \
+        ~/.local/src/emacs/tree-sitter-langs
+}
+
+## Build and install the tree-sitter grammar for Go templates
+(
+    # Install dependencies for tree-sitter-langs
+    cd ~/.local/src/emacs/tree-sitter-langs
+    cask install
+
+    # Register a submodule for tree-sitter-go-template
+    git submodule add -b master -- \
+        https://github.com/ngalaiko/tree-sitter-go-template repos/gotmpl
+    ed .gitmodules <<\EOF
+/\[submodule "repos\/gotmpl"]/a
+	update = none
+	ignore = dirty
+.
+wq
+EOF
+
+    # Copy the highlights file into place (for internal consistency)
+    mkdir -p queries/gotmpl
+    cp repos/gotmpl/queries/highlights.scm queries/gotmpl
+
+    # Build the grammar for Go templates
+    script/compile gotmpl
+
+    # Install the shared object into place
+    mkdir -p ~/.tree-sitter/bin
+    cp bin/gotmpl.so ~/.tree-sitter/bin
+
+    # Install the highlights file into place
+    mkdir -p ~/.tree-sitter/queries/gotmpl
+    cp queries/gotmpl/highlights.scm ~/.tree-sitter/queries/gotmpl
+)
+#+end_src
+
 ** lookup [1/4]
 *** DONE [#A] Install prerequisites
 **** DONE macOS
@@ -4966,7 +5046,7 @@ won't work for you. Unfortunately, resizing the frame does not help.
 
 *** DONE [#B] Automatically restart the LSP server when it crashes
 #+begin_src emacs-lisp :tangle yes
-(after! lsp
+(after! lsp-mode
   (setq lsp-restart 'auto-restart))
 #+end_src
 
@@ -5140,7 +5220,7 @@ sudo dnf -y install terraform terraform-ls
 #+end_src
 
 ** tmux [0/0] :ARCHIVE:
-** tree-sitter [2/3]
+** tree-sitter [3/4]
 *** DONE [#A] Add tree-sitter syntax highlighting to terraform
 Although there is no ~+tree-sitter~ flag for =:tools treesitter=, there is
 support for HCL syntax [[https://github.com/emacs-tree-sitter/tree-sitter-langs/tree/master/repos][parsing]] and [[https://github.com/emacs-tree-sitter/tree-sitter-langs/tree/master/queries][highlighting]], so Terraform should use this.
@@ -5165,6 +5245,25 @@ There is a comment above the current definition of ~+fold--ts-fold-p~ that says
   "Check for tree-sitter-based folding in the current major mode."
   :after-while #'+fold--ts-fold-p
   (assq major-mode ts-fold-range-alist))
+#+end_src
+
+*** DONE [#C] Write test function for obtaining fold summaries
+#+begin_src emacs-lisp :tangle yes
+(after! ts-fold
+  (defun my/ts-fold-summary-test (&optional summary-parser)
+    "Extract summary text for tree-sitter fold at point.
+SUMMARY-PARSER is a function such as one defined in
+`ts-fold-summary-parsers-alist'. IF SUMMARY-PARSER is omitted, it
+defaults to the one returned by `ts-fold-summary--parser'.
+
+See also: `ts-fold-summary--get'."
+    (interactive)
+    (let* ((parser (or summary-parser (cdr (ts-fold-summary--parser))))
+           (node (ts-fold--foldable-node-at-pos))
+           (range (ts-fold--get-fold-range node))
+           (beg (car range))
+           (end (cdr range)))
+      (message (funcall parser (buffer-substring beg end))))))
 #+end_src
 
 *** STRT [#B] Disable LSP semantic highlighting when tree-sitter is available :tweak:
@@ -5260,13 +5359,13 @@ Modules that bring support for a language or group of languages to Emacs.
 ;;; :lang
 #+end_src
 
-** Miscellany [2/6]
+** Miscellany [2/4]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
 *** DONE [#A] Install prerequisites
-**** OKAY macOS
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/Miscellany` module
 pipx install nginx-language-server
@@ -5276,10 +5375,6 @@ pipx install nginx-language-server
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `lang/Miscellany` module
 pipx install nginx-language-server
-
-# Install prerequisites for Helm
-curl -L https://github.com/mrjosh/helm-ls/releases/download/master/helm_ls_linux_amd64 \
-    --output ~/.local/bin/helm_ls
 #+end_src
 
 *** DONE [#A] Install packages
@@ -5311,244 +5406,10 @@ curl -L https://github.com/mrjosh/helm-ls/releases/download/master/helm_ls_linux
 
 ;; Graphics
 (package! graphviz-dot-mode)
-
-;; Kubernetes config
-(package! k8s-mode)   ;; highlighting, snippets, and `k8s-goto-documents'
-(package! kubedoc)    ;; `kubedoc' command
 #+end_src
 
 Note that MongoDB queries use Javascript syntax, so there is no Mongo-specific
 mode derived from ~prog-mode~ (just use ~js-mode~).
-
-*** STRT [#A] Configure =k8s-mode= :feat:
-+ [X] Open k8s manifest files in ~k8s-mode~
-  - Configured this with ~:magic~
-  - ~:magic~ only works for file-visiting buffers
-  - See note in source block for more info
-+ [X] Configure documentation lookup
-  - Use either ~k8s-goto-documents~ or ~kubedoc~
-+ [ ] Fine-tune documentation lookup
-  - Attempt to lookup the symbol under point
-
-Reference:
-+ ~use-package!~ declarations in emacs/modules/tools/magit/config.el
-+ https://blog.chmouel.com/2016/09/07/dealing-with-yaml-in-emacs/
-
-#+begin_src emacs-lisp :tangle yes
-;; NOTE k8s manifests do not have to begin with "apiVersion", but I've seen that
-;; more often than not. Worst case, if this doesn't end up catching enough, I
-;; can write a function that searches for the "^apiVersion:" regexp in a buffer
-;; visiting a file whose name matches "\\.yml\\'" or "\\.yaml\\'". I can then
-;; replace the "apiVersion:" regex in the :magic form with a call to that function.
-(use-package! k8s-mode
-  :magic ("apiVersion:" . k8s-mode)
-  :config
-  (set-lookup-handlers! 'k8s-mode
-    :documentation #'kubedoc))
-
-;; REVIEW Is there even a point in having an empty `use-package!' declaration?
-(use-package! kubedoc)
-#+end_src
-
-*** TODO [#B] Create a mode for Helm charts :feat:
-- https://www.reddit.com/r/emacs/comments/my1npn/kuberneteshelm_file_syntax_highlighting_and/
-- Reference ~+ansible-yaml-mode~.
-
-Right now, a manual workaround is to run the following commands in sequence
-after entering a YAML file that is a Helm chart template:
-
-1. =M-x lsp-disconnect RET= (to remove irrelevant error messages)
-2. =M-x k8s-mode RET= (to add minimal font-locking for k8s keywords)
-3. =M-: (require 'ansible) RET= (to load the command used in the next step)
-4. =M-x ansible-add-font-lock RET= (to font-lock the templating)
-
-This gives /decent/ font-locking, but is still miles away from an ideal
-solution. Alternate font-locking is available via =jinja2-mode=.
-
-Package definitions:
-- =~/.config/doom/lisp/k8s-helm-mode.el=
-- =~/.config/doom/lisp/lsp-k8s-helm.el=
-
-#+begin_src emacs-lisp :tangle yes
-(require 'k8s-helm-mode)
-(require 'lsp-k8s-helm)
-(pushnew! auto-mode-alist
-          '("/templates/.+\\.\\(?:ya?ml\\|tpl\\)\\'" . k8s-helm-mode))
-(add-hook 'k8s-helm-mode-hook #'lsp! 0 t)
-#+end_src
-
-The following doesn't quite work for folding, but gets close (probably need to
-define a ~forward-sexp~ function for the ~k8s-mode~ member of
-~hs-special-modes-alist~):
-
-#+begin_src emacs-lisp :tangle no
-(setq hs-special-modes-alist (assq-delete-all 'k8s-mode hs-special-modes-alist))
-(push '(k8s-mode "{{-?\s+\\(?:if\\|with\\|range\\|define\\)\s+.*?\s+-?}}"
-                 "{{-?\s+end\s+-?}}" "{{/\*" nil nil)
-      hs-special-modes-alist)
-#+end_src
-
-Syntax highlighting can be improved by borrowing regular expressions from
-[[file:~/.vim/pack/eeowaa/start/vim-helm/syntax/helm.vim][helm.vim]]. Refer to =yaml-mode= on how to set up syntax highlighting the
-old-school way using syntax tables. Also refer to ~ansible-add-font-lock~ to see
-how Ansible extends the =yaml-mode= syntax table.
-
-Could also use a mode for go templates that is floating around the internet:
-- https://github.com/sergusha/emacs.d/blob/master/go-template-mode.el
-- https://gist.github.com/grafov/10985431
-- https://gist.github.com/anonymous/1654113
-
-Alternatively, I could also look incorporating the [[https://github.com/ngalaiko/tree-sitter-go-template][tree-sitter-go-template]]
-project into =tree-sitter-langs= to get modern highlighting and folding (via
-=ts-fold=).
-
-#+begin_src sh :tangle install/fedora.sh
-# Install Cask
-if [ -d ~/.local/opt/cask ]
-then
-    git -C ~/.local/opt/cask pull
-else
-    mkdir -p ~/.local/opt
-    git clone https://github.com/cask/cask ~/.local/opt/cask
-    ln -s ~/.local/opt/cask/bin/cask ~/.local/bin
-fi
-
-# Install NodeJS
-# (should already be installed)
-
-# Install and use the correct version of the tree-sitter CLI
-npm -g install tree-sitter-cli@0.19.3
-for ts in `which -a tree-sitter | sort -u`
-do
-    case `$ts --version` in
-    tree-sitter\ 0.19.3*)
-        export PATH=${ts%/*}:$PATH
-        break ;;
-    esac
-done
-
-# Obtain elisp-tree-sitter source code in its own directory
-[ -d ~/.local/src/emacs/tree-sitter-langs ] || {
-    mkdir -p ~/.local/src/emacs
-    git clone https://github.com/emacs-tree-sitter/tree-sitter-langs \
-        ~/.local/src/emacs/tree-sitter-langs
-}
-
-# Build and install the tree-sitter grammar for Go templates
-(
-    # Install dependencies for tree-sitter-langs
-    cd ~/.local/src/emacs/tree-sitter-langs
-    cask install
-
-    # Register a submodule for tree-sitter-go-template
-    git submodule add -b master -- \
-        https://github.com/ngalaiko/tree-sitter-go-template repos/gotmpl
-    ed .gitmodules <<\EOF
-/\[submodule "repos\/gotmpl"]/a
-	update = none
-	ignore = dirty
-.
-wq
-EOF
-
-    # Copy the highlights file into place (for internal consistency)
-    mkdir -p queries/gotmpl
-    cp repos/gotmpl/queries/highlights.scm queries/gotmpl
-
-    # Build the grammar for Go templates
-    script/compile gotmpl
-
-    # Install the shared object into place
-    mkdir -p ~/.tree-sitter/bin
-    cp bin/gotmpl.so ~/.tree-sitter/bin
-
-    # Install the highlights file into place
-    mkdir -p ~/.tree-sitter/queries/gotmpl
-    cp queries/gotmpl/highlights.scm ~/.tree-sitter/queries/gotmpl
-)
-#+end_src
-
-#+begin_src emacs-lisp :tangle yes
-;;; tree-sitter
-
-(add-hook 'k8s-helm-mode-local-vars-hook #'tree-sitter! 'append)
-
-(after! tree-sitter
-  (add-to-list 'tree-sitter-major-mode-language-alist
-               '(k8s-helm-mode . gotmpl)))
-
-;;; evil-textobj-tree-sitter
-
-(after! evil-textobj-tree-sitter
-  (add-to-list 'evil-textobj-tree-sitter-major-mode-language-alist
-               '(k8s-helm-mode . gotmpl)))
-
-;;; ts-fold
-
-(after! ts-fold
-
-  ;; FIXME: Comments and "else" directives
-  (defun ts-fold-parsers-gotmpl ()
-    "Rule sets for Go templates."
-    '((_comment_action  . ts-fold-range-block-comment)
-      (_pipeline_action . ts-fold-range-seq)
-      (if_action        . ts-fold-range-seq)
-      (range_action     . ts-fold-range-seq)
-      (template_action  . ts-fold-range-seq)
-      (define_action    . ts-fold-range-seq)
-      (block_action     . ts-fold-range-seq)
-      (with_action      . ts-fold-range-seq)))
-  (customize-set-variable 'ts-fold-range-alist
-                          (cons `(k8s-helm-mode . ,(ts-fold-parsers-gotmpl))
-                                (assq-delete-all 'k8s-helm-mode ts-fold-range-alist)))
-
-  (defun ts-fold-summary-gotmpl (doc-str)
-    "Extract summary from DOC-STR in Go template block."
-    (let ((first-line (nth 0 (split-string doc-str "\n"))))
-      (string-match "\\`{-? *\\(.*?\\)\\(?: *-?}}\\)? *\\'" first-line)
-      (match-string 1 first-line)))
-  (customize-set-variable 'ts-fold-summary-parsers-alist
-                          (cons `(k8s-helm-mode . ts-fold-summary-gotmpl)
-                                ts-fold-summary-parsers-alist))
-
-  ;; Test function for obtaining fold summaries
-  (defun my/ts-fold-summary-test (&optional summary-parser)
-    "Extract summary text for tree-sitter fold at point.
-SUMMARY-PARSER is a function such as one defined in
-`ts-fold-summary-parsers-alist'. IF SUMMARY-PARSER is omitted, it
-defaults to the one returned by `ts-fold-summary--parser'.
-
-See also: `ts-fold-summary--get'."
-    (interactive)
-    (let* ((parser (or summary-parser (cdr (ts-fold-summary--parser))))
-           (node (ts-fold--foldable-node-at-pos))
-           (range (ts-fold--get-fold-range node))
-           (beg (car range))
-           (end (cdr range)))
-      (message (funcall parser (buffer-substring beg end))))))
-
-;;; tree-sitter-hl
-
-(setq-hook! 'k8s-helm-mode-hook tree-sitter-hl-use-font-lock-keywords t)
-
-(after! tree-sitter-cli
-  (defun my/tree-sitter-cli-queries-directory ()
-    "Return the directory used by tree-sitter CLI to store highlight queries."
-    (file-name-as-directory
-     (concat (tree-sitter-cli-directory) "queries"))))
-
-(defadvice! my/tree-sitter-langs--hl-query-path-local-a (lang-symbol &optional mode)
-  "Search `tree-sitter-cli-directory' for a highlights file first."
-  :before-until #'tree-sitter-langs--hl-query-path
-  (when-let* ((highlights-file (concat (file-name-as-directory
-                                        (concat (my/tree-sitter-cli-queries-directory)
-                                                (symbol-name lang-symbol)))
-                                       (if mode
-                                           (format "highlights.%s.scm" mode)
-                                         "highlights.scm")))
-              (exists (file-exists-p highlights-file)))
-    highlights-file))
-#+end_src
 
 *** STRT [#A] Configure =nginx-mode= :feat:
 Things that work sometimes, but that I cannot replicate:
@@ -5574,6 +5435,21 @@ Things that work sometimes, but that I cannot replicate:
 *** TODO [#A] Configure Perl modes :feat:
 Doom Emacs does not have a module for Perl 5. That said, Emacs has a lot of
 built-in functionality for Perl that just needs a little bit of configuration.
+
+** Kubernetes [1/1]
+There is a lot of configuration required for Kubernetes and Helm (the Kubernetes
+package manager). It truly deserves to have its own module, but for now, I've
+decided to go against convention and create a standalone configuration section
+in this document.
+
+*** DONE [#A] Install prerequisites
+**** OKAY macOS
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `lang/Kubernetes` module
+curl -L https://github.com/mrjosh/helm-ls/releases/download/master/helm_ls_linux_amd64 \
+    --output ~/.local/bin/helm_ls
+#+end_src
 
 ** agda [0/0] :ARCHIVE:
 #+begin_quote
@@ -8270,12 +8146,6 @@ References:
 ;; Map C-i to TAB and provide an alternative mapping for `better-jumper-jump-forward'
 (define-key key-translation-map (kbd "C-i") (kbd "TAB"))
 (global-set-key (kbd "C-M-,") #'better-jumper-jump-forward)
-#+end_src
-
-*** DONE [#C] Recognize Helm chart directories as projects :tweak:
-#+begin_src emacs-lisp :tangle yes
-(after! projectile
-  (pushnew! projectile-project-root-files "Chart.yaml"))
 #+end_src
 
 ** literate [2/4]

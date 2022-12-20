@@ -79,10 +79,6 @@
 ;; Graphics
 (package! graphviz-dot-mode)
 
-;; Kubernetes config
-(package! k8s-mode)   ;; highlighting, snippets, and `k8s-goto-documents'
-(package! kubedoc)    ;; `kubedoc' command
-
 (when (modulep! :lang org +jupyter)
   (package! ox-ipynb
     :recipe (:host github :repo "jkitchin/ox-ipynb")))
