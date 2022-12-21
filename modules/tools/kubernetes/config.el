@@ -3,96 +3,105 @@
 
 ;;; Kubernetes
 
+(use-package! kubedoc)
 (use-package! k8s-mode
   :magic
-  ;; TODO: Open manifest files in `k8s-mode'
+
   ("\\`\\(?:.*\n\\)\\{0,10\\}apiVersion:" . k8s-mode)
 
   :init
-  ;; TODO: Automatically start LSP in `k8s-mode'
-  (after! lsp-mode
-    (add-to-list 'lsp-language-id-configuration '(k8s-mode . "yaml")))
-  (add-hook 'k8s-mode-local-vars-hook #'lsp 'append) ;; `lsp!' does not work well
 
-  ;; TODO: Use the Kubernetes YAML schema in `k8s-mode'
-  (add-hook 'k8s-mode-local-vars-hook
-            (lambda ()
+  ;;; Kubernetes: lsp-mode
+
+  (when (modulep! +lsp)
+    (after! lsp-mode
+      (add-hook! 'k8s-mode-local-vars-hook :append
+        (list
+         ;; NOTE: Doom's `lsp!' does not work well here
+         `(#'lsp
+           ,(defun my/k8s-mode-set-yaml-schema ()
+              "Enable the built-in Kubernetes YAML schema."
               (lsp-yaml-set-buffer-schema
-               (alist-get 'url lsp-yaml--built-in-kubernetes-schema))) 'append))
-
-(use-package! kubedoc)
+               (alist-get 'url lsp-yaml--built-in-kubernetes-schema)))))))))
 
 
 ;;; Helm
 
-;; TODO: Write `use-package!' statements for `k8s-helm-mode' and `lsp-k8s-helm'
-(require 'k8s-helm-mode)
-(require 'lsp-k8s-helm)
-
+(load! "package/kubernetes-helm-mode.el")
 (pushnew! auto-mode-alist
-          '("/templates/.+\\.\\(?:ya?ml\\|tpl\\)\\'" . k8s-helm-mode))
-(add-hook 'k8s-helm-mode-hook #'lsp! 0 t)
+          '("/templates/.+\\.\\(?:ya?ml\\|tpl\\)\\'" . kubernetes-helm-mode))
 
-;; Recognize Helm chart directories as projects
+;;; Helm: projectile
+
 (after! projectile
   (pushnew! projectile-project-root-files "Chart.yaml"))
 
+;;; Helm: lsp-mode
 
-;; Configure tree-sitter
-(add-hook 'k8s-helm-mode-local-vars-hook #'tree-sitter! 'append)
-(after! tree-sitter
-  (add-to-list 'tree-sitter-major-mode-language-alist
-               '(k8s-helm-mode . gotmpl)))
+(when (and (modulep! +lsp)
+           (modulep! :tools lsp)
+           (not (modulep! :tools lsp +eglot)))
+  (load! "staging/lsp-kubernetes-helm.el")
+  (add-hook 'kubernetes-helm-mode-hook #'lsp! 0 t))
 
-;; Configure evil-textobj-tree-sitter
-(after! evil-textobj-tree-sitter
-  (add-to-list 'evil-textobj-tree-sitter-major-mode-language-alist
-               '(k8s-helm-mode . gotmpl)))
+;;; Helm: tree-sitter
 
-;; Configure ts-fold
-(after! ts-fold
+(when (modulep! +tree-sitter)
 
-  ;; FIXME: Comments and "else" directives
-  (defun ts-fold-parsers-gotmpl ()
-    "Rule sets for Go templates."
-    '((_comment_action  . ts-fold-range-block-comment)
-      (_pipeline_action . ts-fold-range-seq)
-      (if_action        . ts-fold-range-seq)
-      (range_action     . ts-fold-range-seq)
-      (template_action  . ts-fold-range-seq)
-      (define_action    . ts-fold-range-seq)
-      (block_action     . ts-fold-range-seq)
-      (with_action      . ts-fold-range-seq)))
-  (customize-set-variable 'ts-fold-range-alist
-                          (cons `(k8s-helm-mode . ,(ts-fold-parsers-gotmpl))
-                                (assq-delete-all 'k8s-helm-mode ts-fold-range-alist)))
+  (add-hook 'kubernetes-helm-mode-local-vars-hook #'tree-sitter! 'append)
+  (after! tree-sitter
+    (add-to-list 'tree-sitter-major-mode-language-alist
+                 '(kubernetes-helm-mode . gotmpl)))
 
-  (defun ts-fold-summary-gotmpl (doc-str)
-    "Extract summary from DOC-STR in Go template block."
-    (let ((first-line (nth 0 (split-string doc-str "\n"))))
-      (string-match "\\`{-? *\\(.*?\\)\\(?: *-?}}\\)? *\\'" first-line)
-      (match-string 1 first-line)))
-  (customize-set-variable 'ts-fold-summary-parsers-alist
-                          (cons `(k8s-helm-mode . ts-fold-summary-gotmpl)
-                                ts-fold-summary-parsers-alist)))
+  ;;; Helm: tree-sitter-hl
 
-;; Configure tree-sitter-hl
-(setq-hook! 'k8s-helm-mode-hook tree-sitter-hl-use-font-lock-keywords t)
+  (setq-hook! 'kubernetes-helm-mode-hook tree-sitter-hl-use-font-lock-keywords t)
 
-(after! tree-sitter-cli
-  (defun my/tree-sitter-cli-queries-directory ()
-    "Return the directory used by tree-sitter CLI to store highlight queries."
-    (file-name-as-directory
-     (concat (tree-sitter-cli-directory) "queries"))))
+  (after! tree-sitter-cli
+    (defvar +tree-sitter-hl-queries-dir
+      (file-name-as-directory (concat (tree-sitter-cli-directory) "queries"))
+      "The directory used by the tree-sitter CLI to store highlight queries."))
 
-(defadvice! my/tree-sitter-langs--hl-query-path-local-a (lang-symbol &optional mode)
-  "Search `tree-sitter-cli-directory' for a highlights file first."
-  :before-until #'tree-sitter-langs--hl-query-path
-  (when-let* ((highlights-file (concat (file-name-as-directory
-                                        (concat (my/tree-sitter-cli-queries-directory)
-                                                (symbol-name lang-symbol)))
-                                       (if mode
-                                           (format "highlights.%s.scm" mode)
-                                         "highlights.scm")))
-              (exists (file-exists-p highlights-file)))
-    highlights-file))
+  (defadvice! my/tree-sitter-langs--hl-query-path-local-a (lang-symbol &optional mode)
+    "Search `tree-sitter-cli-directory' for a highlights file first."
+    :before-until #'tree-sitter-langs--hl-query-path
+    (when-let* ((highlights-file (concat (file-name-as-directory
+                                          (concat +tree-sitter-hl-queries-dir
+                                                  (symbol-name lang-symbol)))
+                                         (if mode
+                                             (format "highlights.%s.scm" mode)
+                                           "highlights.scm")))
+                (exists (file-exists-p highlights-file)))
+      highlights-file))
+
+  ;;; Helm: ts-fold
+
+  (after! ts-fold
+    (defun ts-fold-parsers-gotmpl ()
+      "Rule sets for Go templates."
+      ;; FIXME: Comments and "else" directives
+      '((_comment_action  . ts-fold-range-block-comment)
+        (_pipeline_action . ts-fold-range-seq)
+        (if_action        . ts-fold-range-seq)
+        (range_action     . ts-fold-range-seq)
+        (template_action  . ts-fold-range-seq)
+        (define_action    . ts-fold-range-seq)
+        (block_action     . ts-fold-range-seq)
+        (with_action      . ts-fold-range-seq)))
+    (customize-set-variable 'ts-fold-range-alist
+                            (cons `(kubernetes-helm-mode . ,(ts-fold-parsers-gotmpl))
+                                  (assq-delete-all 'kubernetes-helm-mode ts-fold-range-alist)))
+    (defun ts-fold-summary-gotmpl (doc-str)
+      "Extract summary from DOC-STR in Go template block."
+      (let ((first-line (nth 0 (split-string doc-str "\n"))))
+        (string-match "\\`{-? *\\(.*?\\)\\(?: *-?}}\\)? *\\'" first-line)
+        (match-string 1 first-line)))
+    (customize-set-variable 'ts-fold-summary-parsers-alist
+                            (cons `(kubernetes-helm-mode . ts-fold-summary-gotmpl)
+                                  ts-fold-summary-parsers-alist)))
+
+  ;;; Helm: evil-textobj-tree-sitter
+
+  (after! evil-textobj-tree-sitter
+    (add-to-list 'evil-textobj-tree-sitter-major-mode-language-alist
+                 '(kubernetes-helm-mode . gotmpl))))

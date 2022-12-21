@@ -1,7 +1,8 @@
 #+title: Kubernetes
 
-* Kubernetes [0/5]
-** TODO Open manifest files in ~k8s-mode~
+* [#A] Configuration
+** Kubernetes [2/5]
+*** TODO Open manifest files in ~k8s-mode~
 Manifests are just YAML files, usually with a generic =.yml= or =.yaml= file
 extension; these files can appear anywhere in a directory structure. Therefore,
 ~auto-mode-alist~ cannot be used to identify which files should be opened in
@@ -20,53 +21,77 @@ can add a new ~(MATCH-FUNCTION . MODE-FUNCTION)~ to ~magic-mode-alist~ to
 identify which files to open in ~k8s-mode~, where ~MATCH-FUNCTION~ checks both
 the file name and body content of newly-opened buffers.
 
-** TODO Automatically start LSP in ~k8s-mode~
-We just want to start a YAML language server.
+*** DONE Automatically start LSP in ~k8s-mode~
+Kubernetes does not have its own language server. The best we can do is activate
+the YAML language server in Kubernetes manifest buffers.
 
-** TODO Use the Kubernetes YAML schema in ~k8s-mode~
-** TODO Documentation lookup
+Luckily, ~lsp-language-id-configuration~ contains a regexp entry that associates
+files with a =.yaml= or =.yml= extension with the YAML language server.
+Therefore, we don't need to add a ~k8s-mode~ entry to the alist.
+
+*** TODO Use the Kubernetes YAML schema in ~k8s-mode~
+There is no official YAML schema for Kubernetes resource definitions.
+Thankfully, Red Hat's YAML language server comes with a builtin Kubernetes
+schema recognized by =lsp-yaml=, which we can configure =k8s-mode= to use in our
+=:tools kubernetes= Doom module.
+
+*** TODO Documentation lookup :optional:
 The following commands should be mapped to localleader keys:
 
 - ~kubedoc~
 - ~k8s-goto-documents~
 
-** TODO Yasnippet integration
-=k8s-mode= comes with snippets.
+*** DONE Yasnippet integration :optional:
+=k8s-mode= comes with snippets, which are automatically loaded by =yasnippet=
+and are available in ~k8s-mode~ buffers.
 
-* Helm [0/5]
-** TODO Write ~package!~ statements for =k8s-helm-mode= and =lsp-k8s-helm=
-Currently, the packages are defined as files in =$DOOMDIR/lisp=, which I have
-added to ~load-path~. It might make more sense to move these files into this
-directory. Long term, I think that it would make sense to publish these modes
-individually (see [[*Polish][Polish]] section).
+** Helm [0/3]
+*** TODO Make ~lsp-kubernetes-helm-download-url~ portable
+Right now, the download URL only works for x86-64 Linux machines. It can (and
+should) be extended to support all available platforms.
 
-** TODO Write ~use-package!~ statements for =k8s-helm-mode= and =lsp-k8s-helm=
-** TODO Write a command to preview manifests
-Reference the [[https://github.com/abrochard/kubernetes-helm/blob/master/kubernetes-helm.el][kubernetes-helm]] package.
+*** TODO Fix Tree Sitter folding for "else" directives and comments :optional:
+The ~ts-fold-parsers-gotmpl~ function should be updated to return an alist
+containing correct folding instructions for ~{{ else }}~ statements and
+~{/* comments */}~.
 
-** TODO Implement syntax highlighting and folding without =+tree-sitter=
-Use go-template mode as the basis of k8s-helm-mode
-This will allow us to get syntax highlighting without =tree-sitter=.
+*** TODO Add support for Tree Sitter text object navigation :optional:
+My configuration of =evil-textobj-tree-sitter= seems incomplete.
 
-* Polish [0/4]
-** TODO Contribute to =tree-sitter-langs= to avoid the manual build step
-Rather than requiring a manual build and installation of the dynamic library
-from [[https://github.com/ngalaiko/tree-sitter-go-template][tree-sitter-go-template]], it would be much better to contribute my efforts
-upstream to [[https://github.com/emacs-tree-sitter/tree-sitter-langs][tree-sitter-langs]].
+* [#B] Packages
+** [#A] =gotmpl-mode= [0/6]
+There is currently no de-facto standard major mode for Go templates in Emacs,
+which is the first logical requirement for Helm chart language support.
+Fortunately, there are plenty of existing resources to make this a manageable
+feat for one person.
 
-Although =tree-sitter-langs= may not work in Emacs 29+, given built-in
-Tree-Sitter support, it would still be nice to contribute to that project to
-support older versions of Emacs.
+*** TODO Create a new GitHub repo based on =go-template-mode=
+I would like to fork [[https://github.com/sergusha/emacs.d/blob/master/go-template-mode.el][go-template-mode.el]] to start my own =gotmpl-mode= package.
+The name change is for two reasons:
 
-** TODO Add syntax highlighting to ~k8s-helm-mode~ without =+tree-sitter=
-Refer to the following:
+1. I want to distinguish between the new package and old package.
+2. I want the naming to work well with the Tree Sitter grammar for Go templates,
+   which outputs a =gotmpl.so= dynamic module. Using the same name between a
+   major mode and its corresponding Tree Sitter dynamic module simplifies
+   configuration.
 
-- [[https://github.com/sergusha/emacs.d/blob/master/go-template-mode.el][go-template-mode.el]] (base font-locking for Go templates)
-- [[file:~/.vim/pack/eeowaa/start/vim-helm/syntax/helm.vim][helm.vim]] (more Helm-specific keywords)
-- =yaml-mode= (syntax highlighting via syntax tables)
-- ~ansible-add-font-lock~ (extending the =yaml-mode= syntax table)
+=go-template-mode= was originally published as a GitHub Gist on January
+21st, 2012. There is no copyright or license information attached to the Gist,
+so it might be subject to GitHub's default license for Gists. However, because
+the Gist is so old, this might not be the case.
 
-** TODO Add folding to ~k8s-helm-mode~ without =+tree-sitter=
+/I just commented on the Gist asking about the license/. Hopefully this will
+provide some clarity.
+
+*** TODO Clean up font-locking if needed
+If you find the font-locking provided by =go-template-mode= to be lacking in
+some respects, you might want to refer to the Tree Sitter highlights file for Go
+templates (locally stored at =~/.tree-sitter/queries/gotmpl/highlights.scm=).
+
+*** TODO Add definitions for =hideshow= folding
+/Note that I initially tried to accomplish this with =k8s-mode=, so the
+following comments and code refer to =k8s-mode= instead of =gotmpl-mode=./
+
 The following doesn't quite work for folding, but gets close (probably need to
 define a ~forward-sexp~ function for the ~k8s-helm-mode~ member of
 ~hs-special-modes-alist~):
@@ -78,4 +103,162 @@ define a ~forward-sexp~ function for the ~k8s-helm-mode~ member of
       hs-special-modes-alist)
 #+end_src
 
-** TODO Add eglot support for =+lsp=
+*** TODO Add snipppet files for =yasnippet=
+Refer to how =k8s-mode= and =ansible= provide snippets.
+
+*** TODO Disable base font-locking for =tree-sitter-hl=
+By setting ~tree-sitter-hl-use-font-lock-keywords~ to
+~:except-font-lock-defaults~ in ~gotmpl-mode~ buffers:
+
+1. =tree-sitter-hl= will replace font-locking provided by =gotmpl-mode= with
+   highlighting provided by =tree-sitter-langs= for Go templates.
+2. =tree-sitter-hl= will keep additional font-locking provided by
+   ~font-lock-add-keywords~ in ~gotmpl-mode~ buffers.
+
+This will allow ~gotmpl-mode~ buffers to display font-locking for different
+languages (such as YAML syntax in Helm charts) while replacing Go template
+font-locking with Tree Sitter highlighting.
+
+*** HOLD Publish to MELPA
+Once =gotmpl-mode= is published to [[https://github.com/melpa/melpa][MELPA]], the maintainers of =tree-sitter-langs=
+will probably be more receptive of a PR for adding a grammar for Go templates.
+
+** [#B] =tree-sitter-langs= [0/3]
+Although =tree-sitter-langs= may not work in Emacs 29+, given built-in
+Tree Sitter support, it would still be nice to contribute to that project to
+support older versions of Emacs. Plus I already know how it works.
+
+*** TODO Add a variable holding a directory path to local highlights
+When developing and testing new Tree Sitter grammar integrations for Emacs, it
+would be nice for =tree-sitter-hl= to look in a user-local directory for
+highlight files. =tree-sitter-load= already does something similar with
+directories containing dynamic modules, so this shouldn't be a stretch.
+
+I currently have this implemented as ~+tree-sitter-hl-queries-dir~ and
+referenced in advice for ~tree-sitter-langs--hl-query-path~. When submitting a
+PR to =tree-sitter-langs=, make sure to use their variable naming convention.
+
+*** HOLD Add a new grammar for Go templates
+/I should contribute a =gotmpl-mode= package to MELPA beforehand so that I am
+using a "well-known" (or at least somewhat standard) major mode in my PR./
+
+1. Follow the manual build steps [[file:README.org::*Tree-Sitter for Go templates][that you have outlined]].
+2. Update ~tree-sitter-langs--init-major-mode-alist~ (corresponds to the
+  ~tree-sitter-major-mode-language-alist~ user option).
+3. Open a PR and revise as necessary.
+
+*** HOLD Submit an upstream PR
+https://github.com/emacs-tree-sitter/tree-sitter-langs
+
+** [#C] =ts-fold= [0/2]
+=ts-fold= is a separate project from =tree-sitter-langs=. I think it probably
+makes sense to contribute to =tree-sitter-langs= first, because =ts-fold= relies
+on dynamic modules usually provided by =tree-sitter-langs= (at least in Emacs 28
+and below).
+
+*** HOLD Add support for Go templates
+/I should contribute Go template support to =tree-sitter-langs= beforehand so
+that the dynamic module required for Tree Sitter folding is easily obtainable./
+
+New definitions:
+- ~ts-fold-parsers-gotmpl~
+- ~ts-fold-summary-gotmpl~
+
+Variables to update:
+- ~ts-fold-range-alist~
+- ~ts-fold-summary-parsers-alist~
+
+*** HOLD Submit an upstream PR
+https://github.com/jcs090218/ts-fold
+
+** [#B] =kubernetes-helm= [0/6]
+Similar to how ~ansible~ is a minor mode to be used with the ~yaml-mode~ major
+mode, I would like to re-implement ~k8s-helm-mode~ as a minor mode to be used
+with the ~gotmpl-mode~ major mode. Rather than start from scratch, I would like
+to contribute this new minor mode to the existing [[https://github.com/abrochard/kubernetes-helm][kubernetes-helm]] package,
+offering a similar blend of language features and tooling provided by =ansible=.
+
+*** TODO Install =kubernetes-helm= from a fork of the GitHub repo
+1. Fork the repo on GitHub.
+2. Add a ~package!~ statement to install from the forked repo.
+
+*** TODO Create a =kubernetes-helm= minor mode
+To start, you can can create a simple minor mode with a keymap. You can do this
+right away without needing to implement anything else first.
+
+1. Create a keymap.
+2. Add existing commands to the keymap.
+3. Create a minor mode with the keymap.
+
+Refer to how other minor modes do this, including ~ansible~.
+
+*** TODO Add a manifests preview command
+The output of ~helm template~ can be extracted into invidual manifest files
+corresponding to template files. I would like to wrap this functionality in a
+=kubernetes-helm= command which also displays the output in a buffer.
+
+*** HOLD Extend =gotmpl-mode= font-lock with Helm-specific keywords
+/I should implement the =gotmpl-mode= package first./
+
+Refer to [[file:~/.vim/pack/eeowaa/start/vim-helm/syntax/helm.vim][helm.vim]] for Helm-specific keywords. Also refer to
+~ansible-add-font-lock~ for how to extend an existing syntax table.
+
+*** HOLD Extend =gotmpl-mode= font-lock with YAML keywords
+/I should implement the =gotmpl-mode= package first./
+
+Refer to =yaml-mode= for font-lock definitions.
+
+*** HOLD Submit an upstream PR
+https://github.com/abrochard/kubernetes-helm
+
+** [#C] =lsp-mode= [0/3]
+Once users can easily obtain a ~kubernetes-helm~ minor mode from MELPA, Helm
+language server support should be added to =lsp-mode=. There is no need to
+create a PR for LSP support of Kubernetes manifests, as that is already
+available through =lsp-yaml= and the Kubernetes schema built into Red Hat's YAML
+language server.
+
+*** HOLD Use the Helm language server when ~kubernetes-helm~ is enabled
+/Of course, I need to create the ~kubernetes-helm~ minor mode first./
+
+Implement a function called ~lsp-kubernetes-helm-check-kubernetes-helm-minor-mode~
+and register it as the LSP client activation function in =lsp-kubernetes-helm=.
+
+Reference ~lsp-ansible-check-ansible-minor-mode~ in =lsp-ansible= to see how
+it should be done.
+
+*** HOLD Add a new =lsp-kubernetes-helm= client to =lsp-mode=
+/I need to create a ~kubernetes-helm~ minor mode first and get that published on
+MELPA (preferably in =kubernetes-helm=). I also need to perform the previous
+step to adapt =lsp-kubernetes-helm= to the new minor mode./
+
+This PR should be really easy:
+
+- One new file: =lsp-mode/clients/lsp-kubernetes-helm.el=
+- One variable to update: ~lsp-client-packages~
+
+Note that ~lsp-language-id-configuration~ should be left alone. Refer to
+=lsp-ansible= if things are not working right away.
+
+*** HOLD Submit an upstream PR
+https://github.com/emacs-lsp/lsp-mode
+
+* [#C] Doom
+** Packages [0/2]
+*** HOLD Add ~package!~ statements for new packages
+Only one new package will be published to MELPA: =gotmpl-mode=. Since this will
+be a package that you maintain, you can keep it unpinned.
+
+*** HOLD Add ~package!~ statements to updated packages
+Pinned ~package!~ statements should be added for every repository that you
+contributed to: =tree-sitter-langs=, =ts-fold=, =kubernetes-helm=, and
+=lsp-mode=. Make sure to pin to commits containing your changes.
+
+** Publishing [0/3]
+*** TODO Separate the module into a standalone Git repository
+*** TODO Update the documentation
+*** HOLD Ask the Doom community how to contribute a new module
+** Features [0/3]
+*** TODO Add support for =kubernetes= (client)
+*** TODO Add =eglot= support for =+lsp=
+*** TODO Add support for Emacs 29's built-in Tree Sitter

@@ -1,8 +1,8 @@
 ;; -*- no-byte-compile: t; -*-
 ;;; lang/kubernetes/packages.el
 
-;; highlighting, snippets, imenu, and `k8s-goto-documents'
 (package! k8s-mode)
-
-;; `kubedoc' command
 (package! kubedoc)
+
+;(package! go-template-mode
+;  :recipe (:host nil :url "https://gist.github.com/eeowaa/3c18e0d7ad06ef8032e07ee3229f96e3"))
