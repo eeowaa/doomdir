@@ -25,7 +25,8 @@
     (internals
      :cond ("^\\*\\(?:Process List\\|timer-list\\|Threads\\)\\*"
             "^\\*\\(?:Ibuffer\\|Buffer List\\)\\*"
-            "^\\*Bookmark List\\*")
+            "^\\*Bookmark List\\*"
+            "^\\*Packages\\*")
      :hook (lambda ()
              (my/buffer-group-side-window-setup 'internals
                '((side . top))))))
@@ -52,6 +53,9 @@ to the buffer group, which will trigger the setup hooks.")
   "Return plist for BUFFER-GROUP."
   (alist-get buffer-group my/buffer-groups-alist))
 
+;; TODO: Add `interactive' spec to allow users to create a new buffer group with
+;; no properties. The buffer group should not already exist. Properties can be
+;; interactively added through other functions.
 (defun my/buffer-group-define (buffer-group &optional properties)
   "Define or redefine a buffer group.
 See `my/buffer-groups-alist' for more information."
@@ -68,6 +72,10 @@ See `my/buffer-groups-alist' for more information."
   "Return setup hook function(s) for BUFFER-GROUP."
   (plist-get (my/buffer-group-properties buffer-group) :hook))
 
+;; TODO: Add `interactive' spec to allow users to add a new setup hook to an
+;; existing buffer group. Use buffer hook definitions from existing buffer
+;; groups to build a candidate list for FUNCTION, but allow users to specify
+;; their own definitions. Ignore the DEPTH argument.
 (defun my/buffer-group-add-setup-hook (buffer-group function &optional depth)
   "Add FUNCTION to setup hook for BUFFER-GROUP."
   (let ((properties (my/buffer-group-properties buffer-group))
@@ -76,6 +84,9 @@ See `my/buffer-groups-alist' for more information."
     (add-hook hook-var function depth)
     (setf properties (plist-put properties :hook (symbol-value hook-var)))))
 
+;; TODO: Add `interactive' spec to allow users to select a single buffer group
+;; to run a setup hook for. A prefix argument will run setup hooks for all
+;; buffer groups.
 (defun my/buffer-group-run-setup-hooks (&rest buffer-groups)
   "Run each function in the setup hooks for BUFFER-GROUPS.
 If BUFFER-GROUPS is omitted, default to all groups."
@@ -91,6 +102,9 @@ If BUFFER-GROUPS is omitted, default to all groups."
 See `display-buffer-alist' for information about conditions."
   (plist-get (my/buffer-group-properties buffer-group) :cond))
 
+;; TODO: Add `interactive' spec to allow users to add a new condition to an
+;; existing buffer group. The condition should default to a regexp matching
+;; the start of the current buffer's name.
 (defun my/buffer-group-add-condition (buffer-group condition)
   "Add CONDITION to BUFFER-GROUP and run setup hooks."
   (let* ((properties (my/buffer-group-properties buffer-group))
@@ -312,6 +326,12 @@ grows larger."
   `(:cond ("^\\*doom:\\(?:v?term\\|e?shell\\)-popup")
     :hook (lambda ()
             (my/buffer-group-side-window-setup 'popup-term))))
+
+(my/buffer-group-define 'docker
+  `(:cond ("^\\*docker-\\(?:containers\\|images\\|networks\\|volumes\\)")
+    :hook (lambda ()
+            (my/buffer-group-side-window-setup 'docker
+              '((side . top))))))
 
 (map! "C-`"   #'window-toggle-side-windows)
    ;; "C-~"   #'+popup/raise
