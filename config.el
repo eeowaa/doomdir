@@ -1330,6 +1330,17 @@ ALIASES is a flat list of alias -> command pairs. e.g.
     "w"    "eww-open-file"
     "gg"   "magit-status"))
 
+(setq vterm-buffer-name-string "%s")
+(defadvice! my/vterm-popup-preserve-buffer-name-a (fn &rest args)
+  "Use Doom's standard buffer name for vterm popups."
+  :around #'+vterm/toggle
+  (let ((vterm-environment
+         `(,(format "VTERM_BUFFER_NAME=*doom:vterm-popup:%s*"
+                    (if (bound-and-true-p persp-mode)
+                        (safe-persp-name (get-current-persp))
+                      "main")))))
+    (apply fn args)))
+
 (after! vterm
   (let ((alist (assoc-delete-all "kubectl" vterm-tramp-shells)))
     (setq vterm-tramp-shells

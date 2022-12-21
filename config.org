@@ -1076,12 +1076,8 @@ will not belong to a buffer group.
 
 ** Magit [0/1]
 *** LOOP Buffer group definition
-:LOGBOOK:
-- Note taken on [2022-12-20 Tue 17:43] \\
-  For now, I am just using Doom's configuration.
-:END:
-I think I'd rather have this buffer open directly above the summary window, but
-this will work OK for now.
+For now, I am just using Doom's configuration. It could maybe use a bit of
+improvement, but I'm used to it and generally like it.
 
 #+begin_src emacs-lisp :tangle no
 (my/buffer-group-define 'magit-edit
@@ -3980,7 +3976,7 @@ tput: unknown terminal "eterm-color"
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [5/9]
+** vterm [6/10]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
@@ -4073,6 +4069,25 @@ ALIASES is a flat list of alias -> command pairs. e.g.
     ;; Define aliases for special Emacs functionality
     "w"    "eww-open-file"
     "gg"   "magit-status"))
+#+end_src
+
+*** DONE [#B] Rename ~vterm~ buffers according to the host and directory
+Some extra shell-side configuration is needed for this, which I have stuck in my
+=~/.environ.d/vterm.sh= file. Note that we still want ~vterm~ popup buffers to
+have the same name (~"*doom:vterm-popup:<workspace>*"~) for window management
+purposes, so we need to account for that.
+
+#+begin_src emacs-lisp :tangle yes
+(setq vterm-buffer-name-string "%s")
+(defadvice! my/vterm-popup-preserve-buffer-name-a (fn &rest args)
+  "Use Doom's standard buffer name for vterm popups."
+  :around #'+vterm/toggle
+  (let ((vterm-environment
+         `(,(format "VTERM_BUFFER_NAME=*doom:vterm-popup:%s*"
+                    (if (bound-and-true-p persp-mode)
+                        (safe-persp-name (get-current-persp))
+                      "main")))))
+    (apply fn args)))
 #+end_src
 
 *** STRT [#A] Get =vterm= working with ~kubectl~ :bug:
