@@ -13,7 +13,8 @@
              (my/buffer-group-side-window-setup 'diagnostics)))
     (compilation
      :cond ("^\\*\\(?:[Cc]ompil\\(?:ation\\|e-Log\\)\\)"
-            "^\\*Async-native-compile-log\\*")
+            "^\\*Async-native-compile-log\\*"
+            "^\\*doom eval\\*")
      :hook (lambda ()
              (my/buffer-group-side-window-setup 'compilation)))
     (search
@@ -1408,12 +1409,28 @@ which causes problems even if there is no existing buffer."
 
 (when (and (modulep! :checkers spell)
            (not (modulep! :checkers spell +flyspell)))
-  (setq ispell-dictionary "english"
+  (setq ispell-dictionary "en"
         ispell-personal-dictionary
         (expand-file-name (concat "ispell/" ispell-dictionary ".pws")
                           doom-data-dir))
-  (unless (file-exists-p ispell-personal-dictionary)
-    (make-empty-file ispell-personal-dictionary t)))
+
+  ;; Create `ispell-personal-dictionary' if the file is missing
+  (after! ispell
+    (if (not (file-exists-p
+              (concat (file-name-as-directory ispell-aspell-data-dir) ispell-dictionary ".dat")))
+        (warn (concat "ispell-dictionary \"%s\" has no corresponding .dat file in %s.\n"
+                      "Modify `ispell-dictionary' or install the missing aspell language pack.")
+              ispell-dictionary ispell-aspell-data-dir)
+      (unless (file-exists-p ispell-personal-dictionary)
+        (make-directory (file-name-directory ispell-personal-dictionary) t)
+        (with-temp-file ispell-personal-dictionary
+          (insert (format "personal_ws-1.1 %s 0\n" ispell-dictionary))))))
+
+  ;; Remove Doom's `+spell--create-word-dict-a' advice (which doesn't work
+  ;; for me) and just rely on the existence of `ispell-personal-dictionary'.
+  (after! spell-fu
+    (when (fboundp '+spell--create-word-dict-a)
+      (advice-remove 'spell-fu--word-add-or-remove #'+spell--create-word-dict-a))))
 
 (setq eeowaa-project-init-files-alist
       '(;; Git

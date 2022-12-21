@@ -575,7 +575,8 @@ selected. If none is selected, revert to the default behaviour."
              (my/buffer-group-side-window-setup 'diagnostics)))
     (compilation
      :cond ("^\\*\\(?:[Cc]ompil\\(?:ation\\|e-Log\\)\\)"
-            "^\\*Async-native-compile-log\\*")
+            "^\\*Async-native-compile-log\\*"
+            "^\\*doom eval\\*")
      :hook (lambda ()
              (my/buffer-group-side-window-setup 'compilation)))
     (search
@@ -4301,7 +4302,7 @@ the left margin is currently used by =:ui vc-gutter=).
 I should probably use ~doom/sandbox~ (=SPC h d x=) to try this in vanilla Emacs
 and see if Doom is to blame.
 
-** spell [4/5]
+** spell [5/6]
 #+begin_quote
 This modules provides spellchecking powered by =aspell=, =hunspell= or =enchant=.
 #+end_quote
@@ -4403,18 +4404,35 @@ Reference:
 - ~spell-fu-dictionaries~
 
 *UPDATE*: The following works for my simple use case:
+
 #+begin_src emacs-lisp :tangle yes
 (when (and (modulep! :checkers spell)
            (not (modulep! :checkers spell +flyspell)))
-  (setq ispell-dictionary "english"
+  (setq ispell-dictionary "en"
         ispell-personal-dictionary
         (expand-file-name (concat "ispell/" ispell-dictionary ".pws")
                           doom-data-dir))
-  (unless (file-exists-p ispell-personal-dictionary)
-    (make-empty-file ispell-personal-dictionary t)))
+
+  ;; Create `ispell-personal-dictionary' if the file is missing
+  (after! ispell
+    (if (not (file-exists-p
+              (concat (file-name-as-directory ispell-aspell-data-dir) ispell-dictionary ".dat")))
+        (warn (concat "ispell-dictionary \"%s\" has no corresponding .dat file in %s.\n"
+                      "Modify `ispell-dictionary' or install the missing aspell language pack.")
+              ispell-dictionary ispell-aspell-data-dir)
+      (unless (file-exists-p ispell-personal-dictionary)
+        (make-directory (file-name-directory ispell-personal-dictionary) t)
+        (with-temp-file ispell-personal-dictionary
+          (insert (format "personal_ws-1.1 %s 0\n" ispell-dictionary))))))
+
+  ;; Remove Doom's `+spell--create-word-dict-a' advice (which doesn't work
+  ;; for me) and just rely on the existence of `ispell-personal-dictionary'.
+  (after! spell-fu
+    (when (fboundp '+spell--create-word-dict-a)
+      (advice-remove 'spell-fu--word-add-or-remove #'+spell--create-word-dict-a))))
 #+end_src
 
-*** HOLD [#B] Fix ~+spell/correct~ :bug:
+*** KILL [#B] Fix ~+spell/correct~ :bug:
 :LOGBOOK:
 - Note taken on [2021-06-25 Fri 11:13] \\
   I am no longer seeing this error and cannot replicate it.
@@ -4435,10 +4453,7 @@ I also ran the following, but I'm not sure if it made a difference:
 (setq ispell-dictionary "english")
 #+end_src
 
-**** TODO Prevent this from happening
-I don't know why, but this problem reappears on me.
-
-**** TODO Make spelling corrections match recommendations
+*** TODO [#C] Make spelling corrections match recommendations
 The =company= backend that provides spelling recommendations (via =C-SPC=) must
 use a different dictionary than the =spell= module that highlights errors and
 provides corrections. For example, the word "fluctuant" is highlighted as a
