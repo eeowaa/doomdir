@@ -1,8 +1,10 @@
 #+title: Kubernetes
 
 * [#A] Configuration
-** Kubernetes [2/5]
-*** TODO Open manifest files in ~k8s-mode~
+Be sure to follow [[file:~/.config/emacs/docs/contributing.org::*Doom Naming Conventions][Doom naming conventions]].
+
+** Kubernetes [4/6]
+*** DONE Open manifest files in ~k8s-mode~
 Manifests are just YAML files, usually with a generic =.yml= or =.yaml= file
 extension; these files can appear anywhere in a directory structure. Therefore,
 ~auto-mode-alist~ cannot be used to identify which files should be opened in
@@ -29,11 +31,35 @@ Luckily, ~lsp-language-id-configuration~ contains a regexp entry that associates
 files with a =.yaml= or =.yml= extension with the YAML language server.
 Therefore, we don't need to add a ~k8s-mode~ entry to the alist.
 
-*** TODO Use the Kubernetes YAML schema in ~k8s-mode~
+*** DONE Use the Kubernetes YAML schema in ~k8s-mode~
 There is no official YAML schema for Kubernetes resource definitions.
 Thankfully, Red Hat's YAML language server comes with a builtin Kubernetes
 schema recognized by =lsp-yaml=, which we can configure =k8s-mode= to use in our
 =:tools kubernetes= Doom module.
+
+*** DONE Yasnippet integration :optional:
+=k8s-mode= comes with snippets, which are automatically loaded by =yasnippet=
+and are available in ~k8s-mode~ buffers.
+
+*** STRT Optimize startup :optional:
+I could potentially split ~+kubernetes--k8s-mode-lsp-init~ into two functions:
+
+- ~lsp-deferred~ (the component of ~lsp!~ for =lsp-mode= users)
+- ~lsp-yaml-set-buffer-schema~
+
+The second function gets defined in =lsp-yaml=, which is not loaded until
+~lsp-deferred~ actually calls ~lsp~. I do not know if it is safe to do so, but I
+could autoload the ~lsp-yaml-set-buffer-schema~ function using a ~use-package!~
+directive like so:
+
+#+begin_src emacs-lisp :tangle no
+(use-package! lsp-yaml
+  :when (modulep! +lsp)
+  :commands lsp-yaml-set-buffer-schema)
+#+end_src
+
+For my purposes, my existing solution is good enough, but if I want to
+contribute this to Doom, I might need to standardize on ~lsp!~.
 
 *** TODO Documentation lookup :optional:
 The following commands should be mapped to localleader keys:
@@ -41,14 +67,14 @@ The following commands should be mapped to localleader keys:
 - ~kubedoc~
 - ~k8s-goto-documents~
 
-*** DONE Yasnippet integration :optional:
-=k8s-mode= comes with snippets, which are automatically loaded by =yasnippet=
-and are available in ~k8s-mode~ buffers.
-
-** Helm [0/3]
+** Helm [0/4]
 *** TODO Make ~lsp-kubernetes-helm-download-url~ portable
 Right now, the download URL only works for x86-64 Linux machines. It can (and
 should) be extended to support all available platforms.
+
+*** TODO Configure completion to work in the right places
+Currently, completion only works when point is directly after an opening curly
+brace and not a character beyond that.
 
 *** TODO Fix Tree Sitter folding for "else" directives and comments :optional:
 The ~ts-fold-parsers-gotmpl~ function should be updated to return an alist
