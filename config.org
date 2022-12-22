@@ -1094,6 +1094,15 @@ will not belong to a buffer group.
             (my/buffer-group-side-window-setup 'popup-term))))
 #+end_src
 
+** REPLs [1/1]
+*** DONE Buffer group definition
+#+begin_src emacs-lisp :tangle yes
+(my/buffer-group-define 'repl
+  `(:cond ("^\\*ielm\\*")
+    :hook (lambda ()
+            (my/buffer-group-side-window-setup 'repl))))
+#+end_src
+
 ** Org [0/1]
 *** TODO Show TODO popup in a small side window
 ** Magit [0/2]

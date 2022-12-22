@@ -327,6 +327,11 @@ grows larger."
     :hook (lambda ()
             (my/buffer-group-side-window-setup 'popup-term))))
 
+(my/buffer-group-define 'repl
+  `(:cond ("^\\*ielm\\*")
+    :hook (lambda ()
+            (my/buffer-group-side-window-setup 'repl))))
+
 (my/buffer-group-define 'docker
   `(:cond ("^\\*docker-\\(?:containers\\|images\\|networks\\|volumes\\)")
     :hook (lambda ()
