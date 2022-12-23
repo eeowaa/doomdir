@@ -1596,6 +1596,9 @@ which causes problems even if there is no existing buffer."
          body)
        params))))
 
+(setq eldoc-echo-area-use-multiline-p nil
+      eldoc-echo-area-display-truncation-message nil)
+
 (when (modulep! :tools lookup +docsets)
   (defun my/ensure-docsets ()
     (dolist (docset dash-docs-docsets)

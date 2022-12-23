@@ -5313,7 +5313,7 @@ EOF
 )
 #+end_src
 
-** lookup [1/4]
+** lookup [2/5]
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -5325,6 +5325,12 @@ brew install ripgrep sqlite3
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `tools/lookup` module
 sudo dnf -y install ripgrep sqlite-3
+#+end_src
+
+*** DONE [#B] Truncate eldoc messages to fit in a single minibuffer line
+#+begin_src emacs-lisp :tangle yes
+(setq eldoc-echo-area-use-multiline-p nil
+      eldoc-echo-area-display-truncation-message nil)
 #+end_src
 
 *** STRT [#A] Automatically install missing docsets :feat:
@@ -5349,12 +5355,10 @@ is currently only a problem on Emacs 28.
   (package! xref :pin "a82f459b37b31546bf274388baf8aca79e9c30d9"))
 #+end_src
 
-*** HOLD [#C] Add dictionary and thesaurus backends for =SPC s t/T= :feat:
-I've done everything that the Doom documentation told me to do, but things
-aren't working very well. Just try it out for yourself and see. Might want to
-open a PR or two.
+*** TODO [#C] Add definitions to word completions
+Seems like an offline dictionary will be required for this.
 
-** lsp [4/6]
+** lsp [5/7]
 *** COMMENT Documentation
 + [[doom-modules:tools/lsp/README.org][tools/lsp module documentation]]
 + [[doom:.local/straight/repos/lsp-mode/README.md][lsp-mode package README]]
@@ -5402,6 +5406,19 @@ The help window is invoked with =K= (~+lookup/documentation~).
       :size #'+popup-shrink-to-fit
       :select nil ;; NOTE I changed this from Doom's default of `t'
       :quit t)))
+#+end_src
+
+*** DONE [#A] Unpin package :hack:
+Today (12/23/2022), there are three reasons why I want to unpin =lsp-mode=:
+
+1. Updated =eldoc= support (for [[*Truncate eldoc messages to fit in a single minibuffer line][this item]])
+2. Native =jsonrpc= support (for performance improvements)
+
+This is a fairly risky operation, but let's see how it goes.
+
+#+begin_src emacs-lisp :tangle packages.el
+;; If this causes issues, try `(unpin! (:tools lsp))' instead
+(unpin! lsp-mode)
 #+end_src
 
 *** LOOP [#B] Provide better integration with lsp-ui-imenu :feat:
