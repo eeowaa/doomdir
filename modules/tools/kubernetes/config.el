@@ -57,15 +57,31 @@ lines of the buffer are checked against this regexp. If there is a match,
        (save-excursion
          (goto-char 1)
          (+kubernetes--k8s-mode-search-lines +kubernetes-k8s-mode-match-lines)))))
+
+  (when (modulep! +lsp)
+    (defun +kubernetes--k8s-mode-set-yaml-schema-h ()
+      (let ((buffer (current-buffer)))
+        (with-eval-after-load 'lsp-yaml
+          (with-current-buffer buffer
+            ;; REVIEW The `lsp-yaml-schemas' variable associates YAML schemas to file
+            ;; paths relative to an LSP workspace directory, but the variable is shared
+            ;; by all workspaces. Therefore, it seems plausible that `lsp-yaml' would
+            ;; incorrect apply the schema of a YAML file opened in one workspace to all
+            ;; subsequently-opened YAML files sharing the same relative path in other
+            ;; workspaces, unless `lsp-yaml-set-buffer-schema' is explicitly called for
+            ;; the new buffers. I need to verify this behavior.
+            (lsp-yaml-set-buffer-schema
+             (alist-get 'url lsp-yaml--built-in-kubernetes-schema))
+            (remove-hook 'lsp-mode-hook #'+kubernetes--k8s-mode-set-yaml-schema-h t)))))
+
+    (defun +kubernetes--k8s-mode-lsp-init-h ()
+      (add-hook 'lsp-mode-hook #'+kubernetes--k8s-mode-set-yaml-schema-h 'append t)
+      (lsp!)))
+
   :init
   (add-to-list 'magic-mode-alist '(+kubernetes--k8s-mode-match-fn . k8s-mode))
   (when (modulep! +lsp)
-    (add-hook! 'k8s-mode-local-vars-hook :append
-      (defun +kubernetes--k8s-mode-lsp-init ()
-        "Start the YAML LSP server using the built-in Kubernetes schema."
-        (lsp) ; Do not wait for the buffer to be visible.
-        (lsp-yaml-set-buffer-schema
-         (alist-get 'url lsp-yaml--built-in-kubernetes-schema))))))
+    (add-hook 'k8s-mode-local-vars-hook #'+kubernetes--k8s-mode-lsp-init-h 'append)))
 
 
 ;;; Helm

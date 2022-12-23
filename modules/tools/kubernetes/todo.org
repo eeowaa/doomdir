@@ -3,7 +3,7 @@
 * [#A] Configuration
 Be sure to follow [[file:~/.config/emacs/docs/contributing.org::*Doom Naming Conventions][Doom naming conventions]].
 
-** Kubernetes [4/6]
+** Kubernetes [5/6]
 *** DONE Open manifest files in ~k8s-mode~
 Manifests are just YAML files, usually with a generic =.yml= or =.yaml= file
 extension; these files can appear anywhere in a directory structure. Therefore,
@@ -41,25 +41,18 @@ schema recognized by =lsp-yaml=, which we can configure =k8s-mode= to use in our
 =k8s-mode= comes with snippets, which are automatically loaded by =yasnippet=
 and are available in ~k8s-mode~ buffers.
 
-*** STRT Optimize startup :optional:
-I could potentially split ~+kubernetes--k8s-mode-lsp-init~ into two functions:
+*** DONE Optimize startup :optional:
+If I understand correctly, functions defined in the ~:preface~ section of the
+~use-package!~ statement get byte-compiled. This is especially important for
+~+kubernetes--k8s-mode-match-fn~, which runs every time a file-visiting buffer
+is opened.
 
-- ~lsp-deferred~ (the component of ~lsp!~ for =lsp-mode= users)
-- ~lsp-yaml-set-buffer-schema~
-
-The second function gets defined in =lsp-yaml=, which is not loaded until
-~lsp-deferred~ actually calls ~lsp~. I do not know if it is safe to do so, but I
-could autoload the ~lsp-yaml-set-buffer-schema~ function using a ~use-package!~
-directive like so:
-
-#+begin_src emacs-lisp :tangle no
-(use-package! lsp-yaml
-  :when (modulep! +lsp)
-  :commands lsp-yaml-set-buffer-schema)
-#+end_src
-
-For my purposes, my existing solution is good enough, but if I want to
-contribute this to Doom, I might need to standardize on ~lsp!~.
+Doom's ~lsp!~ function (intended to be used as a buffer-local hook) defers
+execution of ~lsp~ until the buffer is visible. This is good for performance,
+but unfortunately it makes it a bit tricky to instrument additional LSP
+functionality. One potential solution is to wrap ~lsp!~ in another hook function
+that temporarily modifies the buffer-local ~lsp-mode-hook~; this is how I set
+the YAML schema of ~k8s-mode~ buffers.
 
 *** TODO Documentation lookup :optional:
 The following commands should be mapped to localleader keys:
