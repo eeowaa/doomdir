@@ -576,7 +576,8 @@ selected. If none is selected, revert to the default behaviour."
     (compilation
      :cond ("^\\*\\(?:[Cc]ompil\\(?:ation\\|e-Log\\)\\)"
             "^\\*Async-native-compile-log\\*"
-            "^\\*doom eval\\*")
+            "^\\*doom eval\\*"
+            "^ \\*Install vterm\\*")
      :hook (lambda ()
              (my/buffer-group-side-window-setup 'compilation)))
     (search
@@ -805,10 +806,10 @@ Additionally, I would like to implement the following behaviors:
          - When juggling a lot of tasks, the constant display of ~tmux~ windows
            reminds me of the various contexts that I'm working with.
        + Dynamic data
-         - Current date and time
-         - Battery indicator
-         - System load averages
-         - Alerts from the OS and Emacs modes
+         - [ ] Current date and time
+         - [ ] Battery indicator
+         - [ ] System load averages
+         - [ ] Alerts from the OS and Emacs modes
    - Sometimes it would nice to hide the "status line", so the ability to toggle
      its display would be nice. This is what ~tmux~ does.
      * Could use [[help:toggle-frame-tab-bar][toggle-frame-tab-bar]].
@@ -1210,13 +1211,29 @@ completion.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-** company [3/4]
+** company [2/4]
 #+begin_quote
 This module provides code completion, powered by [[https://github.com/company-mode/company-mode][company-mode]]. It is required
 for code completion in many of Doom's :lang modules.
 #+end_quote
 
-*** DONE [#A] Ensure that =company-box-doc= popup frames and their content are fully visible
+*** DONE [#B] Never start completion automatically (require =C-SPC=)
+#+begin_src emacs-lisp :tangle yes
+(setq company-idle-delay nil)
+#+end_src
+
+This was born from a desire to prevent autocompletion of ordinary words in Org
+buffers, but I decided that I don't really need autocompletion anywhere. The
+following are the notes I took when pursuing my original plan:
+
+#+begin_quote
+=M-x company-capf= gives ~company-ispell~ as one completion backend in Org
+buffers. I guess I'd like to have spelling completion as an option that I could
+invoke using =C-SPC= (~+company/complete~), but not something that just pops up
+on its own.
+#+end_quote
+
+*** STRT [#A] Ensure that =company-box-doc= popup frames and their content are fully visible
 There were two issues that I was experiencing:
 
 1. Lines of content in documentation frames did not wrap, so documentation was
@@ -1236,21 +1253,8 @@ the package for now to get the following updates:
 (unpin! company-box)
 #+end_src
 
-*** DONE [#B] Never start completion automatically (require =C-SPC=)
-#+begin_src emacs-lisp :tangle yes
-(setq company-idle-delay nil)
-#+end_src
-
-This was born from a desire to prevent autocompletion of ordinary words in Org
-buffers, but I decided that I don't really need autocompletion anywhere. The
-following are the notes I took when pursuing my original plan:
-
-#+begin_quote
-=M-x company-capf= gives ~company-ispell~ as one completion backend in Org
-buffers. I guess I'd like to have spelling completion as an option that I could
-invoke using =C-SPC= (~+company/complete~), but not something that just pops up
-on its own.
-#+end_quote
+*There is still one more issue*. Documentation frames always appear below point,
+even when point is at the bottom of the frame.
 
 *** DONE [#C] Quit =company-box= when switching modes :bug:
 Doom has the following configuration for =company=:

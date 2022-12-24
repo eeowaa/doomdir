@@ -14,7 +14,8 @@
     (compilation
      :cond ("^\\*\\(?:[Cc]ompil\\(?:ation\\|e-Log\\)\\)"
             "^\\*Async-native-compile-log\\*"
-            "^\\*doom eval\\*")
+            "^\\*doom eval\\*"
+            "^ \\*Install vterm\\*")
      :hook (lambda ()
              (my/buffer-group-side-window-setup 'compilation)))
     (search
