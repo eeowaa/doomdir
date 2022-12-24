@@ -3,7 +3,7 @@
 * [#A] Configuration
 Be sure to follow [[file:~/.config/emacs/docs/contributing.org::*Doom Naming Conventions][Doom naming conventions]].
 
-** Kubernetes [5/6]
+** Kubernetes [6/7]
 *** DONE Open manifest files in ~k8s-mode~
 Manifests are just YAML files, usually with a generic =.yml= or =.yaml= file
 extension; these files can appear anywhere in a directory structure. Therefore,
@@ -37,11 +37,11 @@ Thankfully, Red Hat's YAML language server comes with a builtin Kubernetes
 schema recognized by =lsp-yaml=, which we can configure =k8s-mode= to use in our
 =:tools kubernetes= Doom module.
 
-*** DONE Yasnippet integration :optional:
+*** DONE Yasnippet integration
 =k8s-mode= comes with snippets, which are automatically loaded by =yasnippet=
 and are available in ~k8s-mode~ buffers.
 
-*** DONE Optimize startup :optional:
+*** DONE Optimize startup
 If I understand correctly, functions defined in the ~:preface~ section of the
 ~use-package!~ statement get byte-compiled. This is especially important for
 ~+kubernetes--k8s-mode-match-fn~, which runs every time a file-visiting buffer
@@ -54,11 +54,15 @@ functionality. One potential solution is to wrap ~lsp!~ in another hook function
 that temporarily modifies the buffer-local ~lsp-mode-hook~; this is how I set
 the YAML schema of ~k8s-mode~ buffers.
 
-*** TODO Documentation lookup :optional:
+*** DONE Code folding
+For now, =hideshow= is good enough, although =ts-fold= integration would be
+ideal. In any case, existing YAML folding mechanisms should be used.
+
+*** STRT Documentation lookup
 The following commands should be mapped to localleader keys:
 
-- ~kubedoc~
-- ~k8s-goto-documents~
+- [-] ~kubedoc~
+- [ ] ~k8s-goto-documents~
 
 ** Helm [0/4]
 *** TODO Make ~lsp-kubernetes-helm-download-url~ portable

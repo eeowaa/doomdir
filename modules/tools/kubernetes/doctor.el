@@ -9,3 +9,6 @@
              (and (modulep! :tools lsp)
                   (not (modulep! :tools lsp +eglot))))
          "This module requires (:tools tree-sitter) without the +eglot flag")
+
+(unless (executable-find "kubectl")
+  (warn! "Couldn't find kubectl. API documentation commands (kubedoc) won't work"))

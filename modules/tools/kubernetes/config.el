@@ -1,10 +1,24 @@
 ;;; lang/kubernetes/config.el -*- lexical-binding: t; -*-
 
 
-;;; Kubernetes
+;;; Kubedoc
 
 (use-package! kubedoc
-  :defer t)
+  :commands kubedoc--view-resource
+  :init
+  (defun +kubernetes/kubedoc-current ()
+    "Describe the Kubernetes resource of the current YAML document."
+    (interactive)
+    (save-excursion
+      (let ((pos (point))
+            (end (re-search-forward "^---" (point-max) 'ignore)))
+        (goto-char pos)
+        (re-search-backward "^---" (point-min) 'ignore)
+        (re-search-forward "^[[:space:]]*kind:[[:space:]]+\\(.+\\)" end t)))
+    (kubedoc--view-resource (match-string 1))))
+
+
+;;; Kubernetes
 
 (use-package! k8s-mode
   :defer t
@@ -80,87 +94,96 @@ lines of the buffer are checked against this regexp. If there is a match,
 
   :init
   (add-to-list 'magic-mode-alist '(+kubernetes--k8s-mode-match-fn . k8s-mode))
+
+  :config
   (when (modulep! +lsp)
-    (add-hook 'k8s-mode-local-vars-hook #'+kubernetes--k8s-mode-lsp-init-h 'append)))
+    (add-hook 'k8s-mode-local-vars-hook #'+kubernetes--k8s-mode-lsp-init-h 'append))
+
+  (when (modulep! :editor fold)
+    (after! hideshow
+      (push (cons 'k8s-mode (alist-get 'yaml-mode hs-special-modes-alist))
+            hs-special-modes-alist)))
+
+  (map! :map k8s-mode-map
+        :localleader
+        :desc "explain" "e" #'+kubernetes/kubedoc-current))
 
 
 ;;; Helm
 
-(require 'kubernetes-helm-mode)
-(pushnew! auto-mode-alist
-          '("/templates/.+\\.\\(?:ya?ml\\|tpl\\)\\'" . kubernetes-helm-mode))
+(use-package! kubernetes-helm-mode
+  :defer t
+  :preface
+  (when (modulep! +tree-sitter)
+    (require 'tree-sitter-cli)
+    (defvar +kubernetes--tree-sitter-hl-queries-dir
+            (file-name-as-directory (concat (tree-sitter-cli-directory) "queries"))
+            "The directory used by the tree-sitter CLI to store highlight queries."))
 
-;;; Helm: projectile
+  :init
+  ;; REVIEW The `use-package!' declaration for `web-mode' adds an entry to
+  ;; `auto-mode-alist' that conflicts with ours. We must wait for that entry to
+  ;; be present in the list before we add our own entry. `defer-until!' works,
+  ;; but I don't know if that is the best method.
+  (when (modulep! :lang web)
+    (defer-until! (member '("\\.\\(?:tpl\\|blade\\)\\(?:\\.php\\)?\\'" . web-mode) auto-mode-alist)
+      (add-to-list 'auto-mode-alist '("/templates/.+\\.\\(?:ya?ml\\|tpl\\)\\'" . kubernetes-helm-mode))))
+  (add-to-list 'auto-mode-alist '("/Chart\\.lock\\'" . yaml-mode))
+  (after! projectile
+    (add-to-list 'projectile-project-root-files "Chart.yaml"))
 
-(after! projectile
-  (pushnew! projectile-project-root-files "Chart.yaml"))
+  :config
+  (when (modulep! +lsp)
+    (add-hook 'kubernetes-helm-mode-local-vars-hook #'lsp! 'append)
+    (after! lsp-mode (require 'lsp-kubernetes-helm)))
 
-;;; Helm: lsp-mode
+  (when (modulep! +tree-sitter)
+    (add-hook 'kubernetes-helm-mode-local-vars-hook #'tree-sitter! 'append)
+    (setq-hook! 'kubernetes-helm-mode-hook tree-sitter-hl-use-font-lock-keywords t)
+    (after! tree-sitter
+      (add-to-list 'tree-sitter-major-mode-language-alist
+                   '(kubernetes-helm-mode . gotmpl)))
 
-(when (and (modulep! +lsp)
-           (modulep! :tools lsp)
-           (not (modulep! :tools lsp +eglot)))
-  (require 'lsp-kubernetes-helm)
-  (add-hook 'kubernetes-helm-mode-hook #'lsp! 0 t))
+    ;; tree-sitter-hl
+    (defadvice! +kubernetes--tree-sitter-hl-local-maybe-a (lang-symbol &optional mode)
+      "Search `tree-sitter-cli-directory' for a highlights file first."
+      :before-until #'tree-sitter-langs--hl-query-path
+      (when-let*
+          ((highlights-file (concat (file-name-as-directory
+                                     (concat +kubernetes--tree-sitter-hl-queries-dir
+                                             (symbol-name lang-symbol)))
+                                    (if mode
+                                        (format "highlights.%s.scm" mode)
+                                      "highlights.scm")))
+           (exists (file-exists-p highlights-file)))
+        highlights-file))
 
-;;; Helm: tree-sitter
+    ;; ts-fold
+    (after! ts-fold
+      (defun +kubernetes--ts-fold-parsers-gotmpl ()
+        "Rule sets for Go templates."
+        ;; FIXME Comments and "else" directives
+        '((_comment_action  . ts-fold-range-block-comment)
+          (_pipeline_action . ts-fold-range-seq)
+          (if_action        . ts-fold-range-seq)
+          (range_action     . ts-fold-range-seq)
+          (template_action  . ts-fold-range-seq)
+          (define_action    . ts-fold-range-seq)
+          (block_action     . ts-fold-range-seq)
+          (with_action      . ts-fold-range-seq)))
+      (setq! ts-fold-range-alist
+             (cons `(kubernetes-helm-mode . ,(+kubernetes--ts-fold-parsers-gotmpl))
+                   (assq-delete-all 'kubernetes-helm-mode ts-fold-range-alist)))
+      (defun +kubernetes--ts-fold-summary-gotmpl (doc-str)
+        "Extract summary from DOC-STR in Go template block."
+        (let ((first-line (nth 0 (split-string doc-str "\n"))))
+          (string-match "\\`{-? *\\(.*?\\)\\(?: *-?}}\\)? *\\'" first-line)
+          (match-string 1 first-line)))
+      (setq! ts-fold-summary-parsers-alist
+             (cons `(kubernetes-helm-mode . +kubernetes--ts-fold-summary-gotmpl)
+                   ts-fold-summary-parsers-alist)))
 
-(when (modulep! +tree-sitter)
-
-  (add-hook 'kubernetes-helm-mode-local-vars-hook #'tree-sitter! 'append)
-  (after! tree-sitter
-    (add-to-list 'tree-sitter-major-mode-language-alist
-                 '(kubernetes-helm-mode . gotmpl)))
-
-  ;;; Helm: tree-sitter-hl
-
-  (setq-hook! 'kubernetes-helm-mode-hook tree-sitter-hl-use-font-lock-keywords t)
-
-  (after! tree-sitter-cli
-    (defvar +tree-sitter-hl-queries-dir
-      (file-name-as-directory (concat (tree-sitter-cli-directory) "queries"))
-      "The directory used by the tree-sitter CLI to store highlight queries."))
-
-  (defadvice! my/tree-sitter-langs--hl-query-path-local-a (lang-symbol &optional mode)
-    "Search `tree-sitter-cli-directory' for a highlights file first."
-    :before-until #'tree-sitter-langs--hl-query-path
-    (when-let* ((highlights-file (concat (file-name-as-directory
-                                          (concat +tree-sitter-hl-queries-dir
-                                                  (symbol-name lang-symbol)))
-                                         (if mode
-                                             (format "highlights.%s.scm" mode)
-                                           "highlights.scm")))
-                (exists (file-exists-p highlights-file)))
-      highlights-file))
-
-  ;;; Helm: ts-fold
-
-  (after! ts-fold
-    (defun ts-fold-parsers-gotmpl ()
-      "Rule sets for Go templates."
-      ;; FIXME: Comments and "else" directives
-      '((_comment_action  . ts-fold-range-block-comment)
-        (_pipeline_action . ts-fold-range-seq)
-        (if_action        . ts-fold-range-seq)
-        (range_action     . ts-fold-range-seq)
-        (template_action  . ts-fold-range-seq)
-        (define_action    . ts-fold-range-seq)
-        (block_action     . ts-fold-range-seq)
-        (with_action      . ts-fold-range-seq)))
-    (setq! ts-fold-range-alist
-           (cons `(kubernetes-helm-mode . ,(ts-fold-parsers-gotmpl))
-                 (assq-delete-all 'kubernetes-helm-mode ts-fold-range-alist)))
-    (defun ts-fold-summary-gotmpl (doc-str)
-      "Extract summary from DOC-STR in Go template block."
-      (let ((first-line (nth 0 (split-string doc-str "\n"))))
-        (string-match "\\`{-? *\\(.*?\\)\\(?: *-?}}\\)? *\\'" first-line)
-        (match-string 1 first-line)))
-    (setq! ts-fold-summary-parsers-alist
-           (cons `(kubernetes-helm-mode . ts-fold-summary-gotmpl)
-                 ts-fold-summary-parsers-alist)))
-
-  ;;; Helm: evil-textobj-tree-sitter
-
-  (after! evil-textobj-tree-sitter
-    (add-to-list 'evil-textobj-tree-sitter-major-mode-language-alist
-                 '(kubernetes-helm-mode . gotmpl))))
+    ;; evil-textobj-tree-sitter
+    (after! evil-textobj-tree-sitter
+      (add-to-list 'evil-textobj-tree-sitter-major-mode-language-alist
+                   '(kubernetes-helm-mode . gotmpl)))))

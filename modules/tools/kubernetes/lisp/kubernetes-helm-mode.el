@@ -19,6 +19,7 @@
   :type 'string
   :group 'kubernetes-helm)
 
+;;;###autoload
 (define-derived-mode kubernetes-helm-mode k8s-mode kubernetes-helm-mode-lighter
   "Major mode for editing Kubernetes Helm templates.")
 

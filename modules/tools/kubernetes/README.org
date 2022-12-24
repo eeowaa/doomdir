@@ -10,13 +10,13 @@ manifests and [[https://helm.sh/][Helm]] charts.
 
 ** Module flags
 - +lsp ::
-  Enable LSP support for ~k8s-mode~ and ~k8s-helm-mode~. Requires
+  Enable LSP support for ~k8s-mode~ and ~kubernetes-helm-mode~. Requires
   [[doom-module::tools lsp]] and language servers ([[https://github.com/redhat-developer/yaml-language-server][yaml-language-server]] for
-  ~k8s-mode~ and [[https://github.com/mrjosh/helm-ls][helm_ls]] for ~k8s-helm-mode~).
+  ~k8s-mode~ and [[https://github.com/mrjosh/helm-ls][helm_ls]] for ~kubernetes-helm-mode~).
 - +tree-sitter ::
-  Leverages tree-sitter for syntax highlighting and folding in ~k8s-helm-mode~.
-  Requires [[doom-module::tools tree-sitter]] and [[https://github.com/ngalaiko/tree-sitter-go-template][tree-sitter-go-template]] (manual
-  build and integration steps required).
+  Leverages tree-sitter for syntax highlighting and folding in
+  ~kubernetes-helm-mode~. Requires [[doom-module::tools tree-sitter]] and
+  [[https://github.com/ngalaiko/tree-sitter-go-template][tree-sitter-go-template]] (manual build and integration steps required).
 
 ** Packages
 - [[doom-package:k8s-mode]]
@@ -24,7 +24,7 @@ manifests and [[https://helm.sh/][Helm]] charts.
 
 ** Hacks
 - [[doom-package:tree-sitter-hl]] is configured to look in
-  ~+tree-sitter-hl-queries-dir~ for =highlights.scm= files.
+  ~+kubernetes--tree-sitter-hl-queries-dir~ for =highlights.scm= files.
 
 ** TODO Changelog
 # This section will be machine generated. Don't edit it by hand.
