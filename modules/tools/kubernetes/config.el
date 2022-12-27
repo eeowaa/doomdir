@@ -34,7 +34,12 @@ case-insensitively.
 If a newly-opened file-visiting buffer has any positive regexp
 matches against its file name, the negative regexps are checked.
 If there are no negative matches, `+kubernetes--k8s-mode-match-fn'
-will proceed with its checks against the buffer content.")
+will proceed with its checks against the buffer content.
+
+The `+kubernetes-helm-output-dir' variable overrides the negative
+regexps. That is, if a positively-matched file resides in the
+directory specified by `+kubernetes-helm-output-dir', negative
+regexps are not checked.")
 
   (defvar +kubernetes-k8s-mode-match-lines 10)
   (defvar +kubernetes-k8s-mode-match-regexp "^apiVersion:"
@@ -67,7 +72,10 @@ lines of the buffer are checked against this regexp. If there is a match,
           (push (cdr element) negatives))))
       (and
        (cl-some file-name-string-match-p positives)
-       (cl-notany file-name-string-match-p negatives)
+       (or (and (not (string-empty-p +kubernetes-helm-output-dir))
+                (string-prefix-p (file-name-as-directory +kubernetes-helm-output-dir)
+                                 file-name))
+           (cl-notany file-name-string-match-p negatives))
        (save-excursion
          (goto-char 1)
          (+kubernetes--k8s-mode-search-lines +kubernetes-k8s-mode-match-lines)))))
@@ -114,6 +122,14 @@ lines of the buffer are checked against this regexp. If there is a match,
 (use-package! kubernetes-helm-mode
   :defer t
   :preface
+  (defvar +kubernetes-helm-executable "helm"
+    "Path to helm executable.")
+  (defvar +kubernetes-helm-output-dir
+    (let ((helm-env (shell-command-to-string (format "%s env" +kubernetes-helm-executable))))
+      (when (string-match "^HELM_CACHE_HOME=\"\\(.*\\)\"$" helm-env)
+        (concat (file-name-as-directory (match-string 1 helm-env)) "output")))
+    "Output directory for `helm template'")
+
   (when (modulep! +tree-sitter)
     (require 'tree-sitter-cli)
     (defvar +kubernetes--tree-sitter-hl-queries-dir
