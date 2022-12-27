@@ -140,11 +140,29 @@ lines of the buffer are checked against this regexp. If there is a match,
   ;; REVIEW The `use-package!' declaration for `web-mode' adds an entry to
   ;; `auto-mode-alist' that conflicts with ours. We must wait for that entry to
   ;; be present in the list before we add our own entry. `defer-until!' works,
-  ;; but I don't know if that is the best method.
+  ;; but I don't know if that is the best method. For one, if the entry's regexp
+  ;; changes, this workaround will break.
   (when (modulep! :lang web)
     (defer-until! (member '("\\.\\(?:tpl\\|blade\\)\\(?:\\.php\\)?\\'" . web-mode) auto-mode-alist)
       (add-to-list 'auto-mode-alist '("/templates/.+\\.\\(?:ya?ml\\|tpl\\)\\'" . kubernetes-helm-mode))))
+
   (add-to-list 'auto-mode-alist '("/Chart\\.lock\\'" . yaml-mode))
+  (when (modulep! +lsp)
+    ;; NOTE `lsp-yaml--get-supported-schemas' returns a list with the following
+    ;; entry, so automatic YAML schema selection *should* work, but it doesn't:
+    ;; '((name . "Helm Chart.lock")
+    ;;   (description . "The Chart.lock file locks dependencies from Chart.yaml")
+    ;;   (fileMatch . ["Chart.lock"])
+    ;;   (url . "https://json.schemastore.org/chart-lock.json"))
+    (with-eval-after-load 'lsp-yaml
+      (let* ((schema (cl-find "Helm Chart.lock"
+                              (lsp-yaml--get-supported-schemas)
+                              :test (lambda (name item)
+                                      (string= name (alist-get 'name item)))))
+             (uri-string (alist-get 'url schema))
+             (uri (intern uri-string)))
+        (add-to-list 'lsp-yaml-schemas `(,uri . ["/Chart.lock"])))))
+
   (after! projectile
     (add-to-list 'projectile-project-root-files "Chart.yaml"))
 
