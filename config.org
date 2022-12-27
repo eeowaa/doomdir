@@ -3460,7 +3460,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [10/20]
+** Miscellany [11/21]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -3582,6 +3582,23 @@ To redisplay with new width, call ~Man-update-manpage~ in a =Man= buffer (or
 just wait a few seconds after resizing a window for it to get called
 automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
 =R= in Emacs evil state).
+
+*** DONE [#C] Add a binding to make the current file executable :feat:
+#+begin_src emacs-lisp :tangle yes
+(defun my/make-buffer-file-executable ()
+  "Make the current buffer's file executable."
+  (interactive)
+  (let ((file-name (buffer-file-name)))
+    (cond
+     ((null file-name)
+      (error "Current buffer is not visiting a file"))
+     ((executable-make-buffer-file-executable-if-script-p)
+      (message "Made file executable: %s" file-name)))))
+
+(map! :leader
+      (:prefix-map ("f" . "file")
+       :desc "chmod +x this file" "X" #'my/make-buffer-file-executable))
+#+end_src
 
 *** KILL [#C] Suppress warning for ~Package cl is deprecated~
 Like Henrik said, there is nothing we can do about this:

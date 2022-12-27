@@ -1199,6 +1199,20 @@ deleting the final newline before inserting the \")))\"."
 (setq Man-width-max nil
       woman-fill-frame t)
 
+(defun my/make-buffer-file-executable ()
+  "Make the current buffer's file executable."
+  (interactive)
+  (let ((file-name (buffer-file-name)))
+    (cond
+     ((null file-name)
+      (error "Current buffer is not visiting a file"))
+     ((executable-make-buffer-file-executable-if-script-p)
+      (message "Made file executable: %s" file-name)))))
+
+(map! :leader
+      (:prefix-map ("f" . "file")
+       :desc "chmod +x this file" "X" #'my/make-buffer-file-executable))
+
 (defun my/zoomwin-toggle ()
   "Zoom or unzoom the selected window.
 If the current frame has multiple windows, delete other windows.
