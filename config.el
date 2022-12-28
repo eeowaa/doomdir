@@ -168,6 +168,90 @@ ALIST is merged with `my/buffer-group-side-window-defaults'."
 
 (setq switch-to-buffer-obey-display-actions t)
 
+(use-package! tab-bar
+  :when (modulep! :ui workspaces)
+  :hook (persp-mode . tab-bar-mode)
+  :preface
+  (defun my/+workspace-tabs-fn ()
+    (let ((current (+workspace-current-name)) result)
+      (dolist (workspace (+workspace-list-names) (reverse result))
+        (push (cons (if (string= workspace current) 'current-tab 'tab)
+                    (list (cons 'name workspace)))
+              result))))
+
+  (defun my/+workspace-name-to-index (&optional name)
+    "Return the workspace index corresponding to its name.
+NAME defaults to the current workspace name.
+If NAME is not a workspace name, return nil."
+    (when-let ((index (cl-position (or name (+workspace-current-name))
+                                   (+workspace-list-names)
+                                   :test #'string=)))
+      (1+ index)))
+
+  (defun my/+workspace-index-to-name (&optional index)
+    "Return the workspace name corresponding to its 1-based index.
+INDEX defaults to the current workspace index.
+If INDEX is not a workspace index, return nil."
+    (if (and (integerp index) (cl-plusp index))
+        (elt (+workspace-list-names) (1- index))
+      (+workspace-current-name)))
+
+  :custom (tab-bar-tab-name-function #'+workspace-current-name)
+  :config
+  (setq tab-bar-tabs-function #'my/+workspace-tabs-fn
+        tab-bar-new-button-show nil
+        tab-bar-close-button-show nil
+        tab-bar-format '(tab-bar-format-tabs
+                         tab-bar-separator
+                         tab-bar-format-add-tab
+                         tab-bar-format-align-right))
+
+  (defadvice! my/+workspace--tabline-a ()
+    "Only display the current workspace name in the echo area."
+    :before-until #'+workspace--tabline
+    (when tab-bar-mode
+      (message (+workspace-current-name))))
+
+  (defadvice! my/+workspace--redisplay-tabs-a (&optional _count)
+    "Redisplay tabs when `tab-bar-mode' is already enabled."
+    :after #'+workspace/swap-left
+    (when tab-bar-mode
+      (tab-bar-mode +1)))
+
+  (defadvice! my/+workspace-select-tab-a (&optional tab-number)
+    :override #'tab-bar-select-tab
+    (+workspace/switch-to
+     (1- (or tab-number (my/+workspace-name-to-index)))))
+
+  ;; TODO Define advice for `tab-bar-move-tab-to' (for graphical tab repositioning)
+  (defadvice! my/+workspace-move-tab-to-a (to-number &optional from-number)
+    :override #'tab-bar-move-tab-to
+    (error "Unimplemented"))
+
+  (defadvice! my/+workspace-new-tab-a (&optional _arg _from-number)
+    :override #'tab-bar-new-tab
+    (+workspace/new))
+
+  ;; FIXME Message: "<workspace> | 'nil' workspace doesn't exist"
+  (defadvice! my/+workspace-close-tab-a (&optional tab-number to-number)
+    :override #'tab-bar-close-tab
+    (+workspace/delete (my/+workspace-index-to-name tab-number))
+    (when (and (integerp to-number) (cl-plusp to-number))
+      (+workspace/switch-to (1- to-number))))
+
+  (defadvice! my/+workspace-rename-tab-a (name &optional tab-number)
+    :override #'tab-bar-rename-tab
+    (if tab-number
+        (warn "Unhandled argument: tab-number")
+      (+workspace/rename name)))
+
+  ;; FIXME Doesn't work quite as expected with graphical menu
+  (defadvice! my/+workspace-duplicate-tab-a (&optional _arg from-number)
+    :override #'tab-bar-duplicate-tab
+    (when (and (integerp from-number) (cl-plusp from-number))
+      (+workspace/switch-to (1- from-number)))
+    (+workspace/new nil t)))
+
 (defun my/side-window-p (window)
   "Return non-nil if WINDOW is a side window."
   (and (window-live-p window)
@@ -1664,10 +1748,10 @@ which causes problems even if there is no existing buffer."
     (map! :map terraform-mode-map
           :localleader
           (:prefix ("l" . "LSP")
-            :desc "terraform init" "i" #'lsp-terraform-ls-init
-            :desc "terraform validate" "v" #'lsp-terraform-ls-validate
-            :desc "Providers widget" "p" #'lsp-terraform-ls-providers
-            :desc "Module calls widget" "m" #'lsp-terraform-ls-module-calls))))
+           :desc "terraform init" "i" #'lsp-terraform-ls-init
+           :desc "terraform validate" "v" #'lsp-terraform-ls-validate
+           :desc "Providers widget" "p" #'lsp-terraform-ls-providers
+           :desc "Module calls widget" "m" #'lsp-terraform-ls-module-calls))))
 
 (add-hook 'terraform-mode-local-vars-hook #'tree-sitter! 'append)
 
