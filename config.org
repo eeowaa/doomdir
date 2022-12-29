@@ -2579,10 +2579,11 @@ certain operations. It highlights regions of text that the last operation (like
 yank) acted on.
 #+end_quote
 
-*** DONE [#C] Flash after =zz=
-Although the middle of the window might seem like an obvious location for the
-eyes to center on, in reality, it can take a moment to find the cursor after
-=zz=. A quick flash would help.
+*** DONE [#C] Flash after specific jump operations
+*UPDATE*: The =:ui nav-flash= implements this in a more general-purpose fashion.
+It might be good to use that module instead. It might also solve a limitation in
+my current solution: the flash does not occur when jumping to a hidden buffer
+position (such as in a folded Org subtree).
 
 #+begin_src emacs-lisp :tangle yes
 (after! evil-goggles
@@ -2601,11 +2602,23 @@ eyes to center on, in reality, it can take a moment to find the cursor after
           (end (1+ (line-end-position))))
       (evil-goggles--show-async-hint beg end)))
 
-  (pushnew! evil-goggles--commands
-            '(evil-scroll-line-to-center
-              :face my/evil-goggles-jump-face
-              :switch my/evil-goggles-enable-jump
-              :advice my/evil-goggles--jump-advice)))
+  ;; `my/evil-goggles--jump-advice' is useful in many different contexts:
+  ;; not just as advice, and not just within `evil-goggles'. Defining an alias
+  ;; helps to generalize the function.
+  (defalias 'my/flash-line #'my/evil-goggles--jump-advice "Flash the current line.")
+
+  ;; Adding entries for `better-jumper-jump-{forward,backward}' and/or
+  ;; `evil-jump-{forward,backward}' to `evil-goggles--commands' does not work
+  ;; as expected (the line does not flash after a jump). However, a hook works.
+  (after! better-jumper
+    (add-to-list 'better-jumper-post-jump-hook #'my/flash-line))
+
+  (dolist (command '(evil-scroll-line-to-center))
+    (cl-pushnew `(,command
+                  :face my/evil-goggles-jump-face
+                  :switch my/evil-goggles-enable-jump
+                  :advice my/evil-goggles--jump-advice)
+                evil-goggles--commands)))
 #+end_src
 
 ** popup [4/6] :ARCHIVE:
