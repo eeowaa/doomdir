@@ -620,7 +620,7 @@ selected. If none is selected, revert to the default behaviour."
 
 #+end_src
 
-** Emacs [3/8]
+** Emacs [4/9]
 *** DONE Establish system of buffer groups
 #+begin_src emacs-lisp :tangle yes
 ;;; Buffer groups
@@ -798,6 +798,16 @@ https://www.masteringemacs.org/article/demystifying-emacs-window-manager
 
 #+begin_src emacs-lisp :tangle yes
 (setq switch-to-buffer-obey-display-actions t)
+#+end_src
+
+*** DONE Keep window dividers aligned
+Sometimes, spliting a window will result in jagged window placement, just a few
+pixels off. This can cause issues with selecting windows when point is near a
+jagged border. Doom disabled this feature to prevent crashes... let's hope that
+it doesn't cause any crashes for us.
+
+#+begin_src emacs-lisp :tangle yes
+(setq window-resize-pixelwise t)
 #+end_src
 
 *** TODO Interactive functions to add and remove conditions to buffer groups

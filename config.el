@@ -180,6 +180,8 @@ ALIST is merged with `my/buffer-group-side-window-defaults'."
 
 (setq switch-to-buffer-obey-display-actions t)
 
+(setq window-resize-pixelwise t)
+
 (use-package! tab-bar
   :when (modulep! :ui workspaces)
   :hook (persp-mode . tab-bar-mode)
