@@ -1,5 +1,50 @@
 #!/bin/sh
 
+# Obtain Emacs source code corresponding to installed RPM
+(
+    # Create ~/rpmbuild directory tree
+    sudo dnf -y install rpmdevtools
+    rpmdev-setuptree
+
+    # Download Emacs source RPM into ~/rpmbuild/SRPMS
+    cd "`rpm --eval '%{_srcrpmdir}'`"
+    sourcerpm=`rpm -q --qf '%{sourcerpm}' emacs`
+    [ -f "$sourcerpm" ] || dnf download emacs --source
+
+    # Install Mock to silence rpmbuild warnings (though we'll use rpmbuild directly)
+    # <https://unix.stackexchange.com/questions/459384/how-to-eliminate-the-warnings-mockbuild-does-not-exist>
+    sudo dnf -y install mock
+    grep -q '^mockbuild:' /etc/passwd || sudo useradd -r mock
+    sudo usermod -G mock mockbuild
+    sudo usermod -aG mock `whoami`
+
+    # Unpack sources and apply patches
+    sudo dnf -y install rpm-build
+    rpmbuild -rp "$sourcerpm"
+
+    # Install build dependencies
+    sudo dnf -y builddep --srpm "$sourcerpm"
+
+    # Configure sources to match the installed Emacs package
+    version=`rpm -q --qf '%{version}' emacs`
+    srcdir=`rpm --eval '%{_builddir}'`/emacs-$version
+    flags=`emacs -Q --batch --eval "\
+    (let ((text-quoting-style 'straight))
+      (message system-configuration-options))" 2>&1`
+    cd "$srcdir"
+    eval "./configure $flags"
+
+    # NOTE Unfortunately the spec file does not have a %conf stage. It just has
+    # one big %build stage that unconditionally configures and compiles multiple
+    # builds of Emacs corresponding to different emacs-* packages. The above
+    # script block just configures a single build of Emacs, specifically the one
+    # in use, and does not compile anything.
+
+    # Symlink Emacs source tree to platform-independent source directory
+    mkdir -p ~/.local/src/emacs && cd ~/.local/src/emacs
+    ln -sf "$srcdir" .
+)
+
 # Install NVM to install packages
 curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
     | env PROFILE=/dev/null bash

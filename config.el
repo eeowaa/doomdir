@@ -1215,6 +1215,12 @@ deleting the final newline before inserting the \")))\"."
   (setq native-comp-speed 2
         package-native-compile t))
 
+(let ((srcdir (format "%s.local/src/emacs/emacs-%s/src"
+                      (file-name-as-directory (getenv "HOME"))
+                      emacs-version)))
+  (when (file-directory-p srcdir)
+    (setq find-function-C-source-directory srcdir)))
+
 (defadvice! my/doom--sudo-file-path-a (file)
   "Use `tramp-system-name' instead of \"localhost\" as the hostname"
   :override #'doom--sudo-file-path
