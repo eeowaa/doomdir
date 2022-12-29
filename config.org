@@ -216,6 +216,21 @@ for autoload cookies or byte-compilation.
 (add-load-path! (concat doom-user-dir "lisp"))
 #+end_src
 
+*** DONE [#B] Define helper constructs
+#+begin_src emacs-lisp :tangle yes
+(defmacro my/doom-use-face (face other-face)
+  "Force FACE to be the same as OTHER-FACE.
+Examples:
+
+  (my/doom-use-face tab-bar-tab +workspace-tab-selected-face)
+  (my/doom-use-face tab-bar-tab-inactive +workspace-tab-face)"
+  `(custom-set-faces!
+     '(,face
+       ,@(mapcan (lambda (key) (list key nil))
+                 (doom-plist-keys (face-attr-construct face)))
+       :inherit ,other-face)))
+#+end_src
+
 * Windows
 Window management is such a big problem that I've decided to put it into its own
 top-level section for now, against established convention in this document.

@@ -1,5 +1,17 @@
 (add-load-path! (concat doom-user-dir "lisp"))
 
+(defmacro my/doom-use-face (face other-face)
+  "Force FACE to be the same as OTHER-FACE.
+Examples:
+
+  (my/doom-use-face tab-bar-tab +workspace-tab-selected-face)
+  (my/doom-use-face tab-bar-tab-inactive +workspace-tab-face)"
+  `(custom-set-faces!
+     '(,face
+       ,@(mapcan (lambda (key) (list key nil))
+                 (doom-plist-keys (face-attr-construct face)))
+       :inherit ,other-face)))
+
 ;;; Buffer groups
 
 (defvar my/buffer-groups-alist
