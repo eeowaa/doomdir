@@ -244,7 +244,28 @@ things working the way I'd like.
 + [[https://e17i.github.io/articles-emacs-display-1/][e17i blog]]
 + [[https://github.com/e17i/emacs-config/][e17i config]]
 
-*** ~display-buffer~ Actions
+*** ~display-buffer-alist~ conditions
+The key of each entry in ~display-buffer-alist~ is a condition that matches a
+buffer. The condition is either a regular expression matching a buffer name, or
+a predicate function taking two arguments: a buffer name and an action. The
+documentation doesn't do a great job of explaining how the action argument
+works, so I read the source code to find out.
+
+If ~display-buffer~ was called with an ~ACTION~ argument, it gets passed through
+to ~display-buffer-alist~ predicates; otherwise, nil gets passed. Recall that
+the ~ACTION~ argument of ~display-buffer~ has a lower precedence than the
+~ACTION~ of a matching ~display-buffer-alist~ entry; however, this may not
+always be desirable. By examining the ~ACTION~ argument of ~display-buffer~, a
+~display-buffer-alist~ predicate may decide to return nil when it would have
+otherwise returned non-nil.
+
+Ultimately, this gives authors of ~display-buffer-alist~ predicates a handy tool
+for cooperating with packages that have special window management requirements.
+A package may call ~display-buffer~ with an ~ACTION~ argument containing special
+functions and/or alist entries. A predicate can check for the presence of these
+cues and handle them accordingly.
+
+*** ~display-buffer~ action functions
 - Window content
   + display-buffer-reuse-window
   + display-buffer-reuse-mode-window
@@ -279,6 +300,46 @@ things working the way I'd like.
   + display-buffer-in-child-frame
   + display-buffer-other-frame
   + display-buffer-use-some-frame
+
+*** EBNF grammar
+#+begin_src ebnf
+;; Display buffer alist
+DISPLAY_BUFFER_ALIST       = open {DISPLAY_BUFFER_ALIST_ENTRY || {space}} close .
+DISPLAY_BUFFER_ALIST_ENTRY = open CONDITION dot ACTION close .
+
+;; Display buffer condition
+CONDITION      = REGEXP | PREDICATE .
+REGEXP         = string .
+PREDICATE      = symbol .
+PREDICATE_ARGS = open BUFFER_NAME space+ ACTION close .
+BUFFER_NAME    = string .
+
+;; Display buffer action
+ACTION         = open FUNCTIONS dot ALIST close .
+FUNCTIONS      = FUNCTION | open {FUNCTION || space+} close .
+FUNCTION       = symbol .                            ;; "action function"
+FUNCTION_ARGS  = open BUFFER space+ ALIST .
+BUFFER         = bufferobj .
+ALIST          = open {ALIST_ENTRY || {space}} ")" . ;; "action alist"
+ALIST_ENTRY    = open KEY dot VALUE close .
+KEY = "inhibit-same-window" | "inhibit-switch-frame" | "reusable-frames"
+    | "pop-up-frame-parameters" | "window-height" | "window-width"
+    | "preserve-size" | "window-parameters" | "allow-no-window"
+    | "body-function" | symbol . ;; by no means an exhaustive list
+VALUE = sexp .
+
+;; Literal constructs for lists and cons cells
+open  = "(" {space} .
+dot   = space+ "." space+ .
+close = {space} ")" .
+
+;; Special constructs
+space     = ?elisp whitespace character? .
+symbol    = ?elisp symbol? .
+sexp      = ?elisp s-expression? .
+string    = ?elisp string? .
+bufferobj = ?elisp buffer object? .
+#+end_src
 
 *** e17i Configuration
 #+begin_src emacs-lisp :tangle no
@@ -625,6 +686,14 @@ selected. If none is selected, revert to the default behaviour."
 #+begin_src emacs-lisp :tangle yes
 ;;; Buffer groups
 
+(defvar my/buffer-group:search-modes
+  `(occur-mode grep-mode
+    ,@(when (modulep! :completion vertico)
+        '(embark-collect-mode))))
+(defun my/buffer-group:search--mode-p (buffer-name alist)
+  (with-current-buffer buffer-name
+    (memq major-mode my/buffer-group:search-modes)))
+
 (defvar my/buffer-groups-alist
   `((diagnostics
      :cond ("^\\*\\(?:Messages\\|Warnings\\|Backtrace\\)"
@@ -642,8 +711,7 @@ selected. If none is selected, revert to the default behaviour."
      :hook (lambda ()
              (my/buffer-group-side-window-setup 'compilation)))
     (search
-     ;; TODO: Add more conditions
-     :cond ("^\\*Occur\\*")
+     :cond (my/buffer-group:search--mode-p)
      :hook (lambda ()
              (my/buffer-group-side-window-setup 'search)))
     (internals
@@ -5967,6 +6035,9 @@ pipx install nginx-language-server
 
 ;; Graphics
 (package! graphviz-dot-mode)
+
+;; Metasyntax
+(package! ebnf-mode)
 #+end_src
 
 Note that MongoDB queries use Javascript syntax, so there is no Mongo-specific

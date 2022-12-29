@@ -82,6 +82,9 @@
 ;; Graphics
 (package! graphviz-dot-mode)
 
+;; Metasyntax
+(package! ebnf-mode)
+
 (when (modulep! :lang org +jupyter)
   (package! ox-ipynb
     :recipe (:host github :repo "jkitchin/ox-ipynb")))
