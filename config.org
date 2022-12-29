@@ -872,6 +872,25 @@ Additionally, I would like to implement the following behaviors:
                     (list (cons 'name workspace)))
               result))))
 
+  (defun my/+workspace-tab-face-fn (tab)
+    (if (eq (car tab) 'current-tab)
+        '+workspace-tab-selected-face
+      '+workspace-tab-face))
+
+  (defun my/+workspace-tab-name-format-fn (tab i)
+    (let ((current-p (eq (car tab) 'current-tab)))
+      (propertize
+       (concat " "
+               (if tab-bar-tab-hints (format "[%d] " i) "")
+               (alist-get 'name tab)
+               (or (and tab-bar-close-button-show
+                        (not (eq tab-bar-close-button-show
+                                 (if current-p 'non-selected 'selected)))
+                        (concat " " tab-bar-close-button))
+                   "")
+               " ")
+       'face (funcall tab-bar-tab-face-function tab))))
+
   (defun my/+workspace-name-to-index (&optional name)
     "Return the workspace index corresponding to its name.
 NAME defaults to the current workspace name.
@@ -889,11 +908,19 @@ If INDEX is not a workspace index, return nil."
         (elt (+workspace-list-names) (1- index))
       (+workspace-current-name)))
 
-  :custom (tab-bar-tab-name-function #'+workspace-current-name)
+  :custom
+  (tab-bar-tab-name-function #'+workspace-current-name)
+  (tab-bar-tab-name-format-function #'my/+workspace-tab-name-format-fn)
+
   :config
   (setq tab-bar-tabs-function #'my/+workspace-tabs-fn
+        tab-bar-tab-face-function #'my/+workspace-tab-face-fn
+        tab-bar-tab-hints t
         tab-bar-new-button-show nil
         tab-bar-close-button-show nil
+        tab-bar-close-button (propertize "x"
+                                         'close-tab t
+                                         :help "Click to close tab")
         tab-bar-format '(tab-bar-format-tabs
                          tab-bar-separator
                          tab-bar-format-add-tab
