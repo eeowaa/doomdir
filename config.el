@@ -12,121 +12,126 @@ Examples:
                  (doom-plist-keys (face-attr-construct face)))
        :inherit ,other-face)))
 
-;;; Buffer groups
+;;; Buffer group definitions
 
-(defvar my/buffer-groups-alist
-  `((diagnostics
-     :cond ("^\\*\\(?:Messages\\|Warnings\\|Backtrace\\)"
-            "^\\*\\(?:CPU\\|Memory\\)-Profiler-Report "
-            "^\\*lsp-log\\*"
-            "^\\*.*ls\\(?:::stderr\\)?\\*"
-            "^\\*envrc\\*")
-     :hook (lambda ()
-             (my/buffer-group-side-window-setup 'diagnostics)))
-    (compilation
-     :cond ("^\\*\\(?:[Cc]ompil\\(?:ation\\|e-Log\\)\\)"
-            "^\\*Async-native-compile-log\\*"
-            "^\\*doom eval\\*"
-            "^ \\*Install vterm\\*")
-     :hook (lambda ()
-             (my/buffer-group-side-window-setup 'compilation)))
-    (search
-     ;; TODO: Add more conditions
-     :cond ("^\\*Occur\\*")
-     :hook (lambda ()
-             (my/buffer-group-side-window-setup 'search)))
-    (internals
-     :cond ("^\\*\\(?:Process List\\|timer-list\\|Threads\\)\\*"
-            "^\\*\\(?:Ibuffer\\|Buffer List\\)\\*"
-            "^\\*Bookmark List\\*"
-            "^\\*Packages\\*")
-     :hook (lambda ()
-             (my/buffer-group-side-window-setup 'internals
-               '((side . top))))))
+(defvar my/buffer-group-alist nil
   "An alist of buffer groups corresponding to property plists.
 Each plist supports the following properties:
 
-:cond  A list of conditions recognized by `display-buffer-alist'.
-:hook  A function or list of functions to run when adding conditions.
+:names  A list of buffer name regexps.
+:modes  A list of major mode symbols.
 
 Use `my/buffer-group-define' to create a new buffer group.
+Use `my/buffer-group-plist-put' and `my/buffer-group-property-pushnew'
+to modify properties of an existing buffer group.")
 
-Use `my/buffer-group-add-condition' and `my/buffer-group-add-setup-hook'
-to modify an existing buffer group.
-
-After adding a new setup hook, run `my/buffer-group-run-setup-hooks' to
-ensure that the hook function gets run. Alternatively, add a new condition
-to the buffer group, which will trigger the setup hooks.")
-
-(defun my/buffer-groups ()
-  "Return buffer group identifiers."
-  (mapcar #'car my/buffer-groups-alist))
-
-(defun my/buffer-group-properties (buffer-group)
-  "Return plist for BUFFER-GROUP."
-  (alist-get buffer-group my/buffer-groups-alist))
+(defun my/buffer-group-identifiers ()
+  "Return identifiers for all buffer groups."
+  (mapcar #'car my/buffer-group-alist))
 
 ;; TODO: Add `interactive' spec to allow users to create a new buffer group with
-;; no properties. The buffer group should not already exist. Properties can be
-;; interactively added through other functions.
-(defun my/buffer-group-define (buffer-group &optional properties)
-  "Define or redefine a buffer group.
-See `my/buffer-groups-alist' for more information."
+;; no properties. The buffer group should not already exist.
+(defmacro my/buffer-group-define (buffer-group &optional properties)
+  "Define or redefine a buffer group."
   (declare (indent defun))
-  (setf (alist-get buffer-group my/buffer-groups-alist) properties)
-  (when properties (my/buffer-group-run-setup-hooks buffer-group)))
+  (let ((member-fn (my/buffer-group-display-condition-fn buffer-group)))
+    `(progn
+       (defun ,member-fn (buffer-name _action)
+         (my/buffer-group-member-p ',buffer-group buffer-name))
+       (setf (alist-get ',buffer-group my/buffer-group-alist) ,properties)
+       ',buffer-group)))
 
-(defvar my/buffer-group--setup-functions nil
-  "Setup functions for buffer groups.")
+
+;;; Buffer group properties
 
-;;; Setup hooks
+(defun my/buffer-group-plist (buffer-group)
+  "Return `my/buffer-group-alist' entry for BUFFER-GROUP."
+  (alist-get buffer-group my/buffer-group-alist))
 
-(defun my/buffer-group-setup-hook (buffer-group)
-  "Return setup hook function(s) for BUFFER-GROUP."
-  (plist-get (my/buffer-group-properties buffer-group) :hook))
+(defun my/buffer-group-plist-get (buffer-group property)
+  "Get the value of PROPERTY for BUFFER-GROUP."
+  (plist-get (my/buffer-group-plist buffer-group) property))
 
-;; TODO: Add `interactive' spec to allow users to add a new setup hook to an
-;; existing buffer group. Use buffer hook definitions from existing buffer
-;; groups to build a candidate list for FUNCTION, but allow users to specify
-;; their own definitions. Ignore the DEPTH argument.
-(defun my/buffer-group-add-setup-hook (buffer-group function &optional depth)
-  "Add FUNCTION to setup hook for BUFFER-GROUP."
-  (let ((properties (my/buffer-group-properties buffer-group))
-        (hook-var (make-symbol "setup-hook"))) ;; trailing "-hook" required
-    (set hook-var (plist-get properties :hook))
-    (add-hook hook-var function depth)
-    (setf properties (plist-put properties :hook (symbol-value hook-var)))))
+(defun my/buffer-group-plist-put (buffer-group property value)
+  "Set the value of PROPERTY for BUFFER-GROUP."
+  (let ((plist (alist-get buffer-group my/buffer-group-alist)))
+    (setf plist (plist-put plist property value))))
 
-;; TODO: Add `interactive' spec to allow users to select a single buffer group
-;; to run a setup hook for. A prefix argument will run setup hooks for all
-;; buffer groups.
-(defun my/buffer-group-run-setup-hooks (&rest buffer-groups)
-  "Run each function in the setup hooks for BUFFER-GROUPS.
-If BUFFER-GROUPS is omitted, default to all groups."
-  (dolist (group (or buffer-groups (my/buffer-groups)))
-    (let ((hook-var (make-symbol "setup-hook")))
-      (set hook-var (my/buffer-group-setup-hook group))
-      (run-hooks hook-var))))
+(defun my/buffer-group-property-pushnew (buffer-group property &rest values)
+  "Add VALUES to PROPERTY of BUFFER-GROUP."
+  (let ((plist (alist-get buffer-group my/buffer-group-alist))
+        (value-list (plist-get plist property)))
+    (cl-pushnew values value-list)
+    (setf plist (plist-put plist property value-list))))
 
-;;; Conditions
+(defalias 'my/buffer-group-properties #'my/buffer-group-plist)
+(defalias 'my/buffer-group-property-get #'my/buffer-group-plist-get)
+(defalias 'my/buffer-group-property-put #'my/buffer-group-plist-put)
 
-(defun my/buffer-group-conditions (buffer-group)
-  "List conditions for BUFFER-GROUP membership.
-See `display-buffer-alist' for information about conditions."
-  (plist-get (my/buffer-group-properties buffer-group) :cond))
+
+;;; Buffer group membership
 
-;; TODO: Add `interactive' spec to allow users to add a new condition to an
-;; existing buffer group. The condition should default to a regexp matching
-;; the start of the current buffer's name.
-(defun my/buffer-group-add-condition (buffer-group condition)
-  "Add CONDITION to BUFFER-GROUP and run setup hooks."
-  (let* ((properties (my/buffer-group-properties buffer-group))
-         (conditions (plist-get properties :cond)))
-    (cl-pushnew condition conditions)
-    (setf properties (plist-put properties :cond conditions))
-    (my/buffer-group-run-setup-hooks buffer-group)))
+(defun my/buffer-group-name-match-p (buffer-group &optional buffer-name)
+  "Return non-nil if BUFFER-NAME matches a regexp in BUFFER-GROUP.
+BUFFER-NAME defaults to the current buffer's name."
+  (unless buffer-name
+    (setq buffer-name (buffer-name)))
+  (cl-some (lambda (re) (string-match-p re buffer-name))
+           (my/buffer-group-plist-get buffer-group :names)))
 
-;;; Side windows
+(defun my/buffer-group-mode-match-p (buffer-group &optional buffer-name)
+  "Return non-nil if BUFFER-NAME describes a buffer with major mode in BUFFER-GROUP.
+BUFFER-NAME defaults to the current buffer's name."
+  (with-current-buffer (or buffer-name (buffer-name))
+    (memq major-mode (my/buffer-group-plist-get buffer-group :modes))))
+
+(defun my/buffer-group-member-p (buffer-group &optional buffer-name)
+  "Return non-nil if BUFFER-NAME is a member of BUFFER-GROUP.
+BUFFER-NAME defaults to the current buffer's name."
+  (or (my/buffer-group-name-match-p buffer-group buffer-name)
+      (my/buffer-group-mode-match-p buffer-group buffer-name)))
+
+(defun my/buffer-group-of (buffer-or-name)
+  "Return the buffer group identifier of BUFFER-OR-NAME."
+  (let ((buffer-name (if (bufferp buffer-or-name)
+                         (buffer-name buffer-or-name)
+                       buffer-or-name)))
+    (catch 'match
+      (dolist (buffer-group (my/buffer-group-identifiers))
+        (when (my/buffer-group-member-p buffer-group buffer-name)
+          (throw 'match buffer-group))))))
+
+
+;;; Buffer group display rules
+
+(defun my/buffer-group-display-condition-fn (buffer-group)
+  "Return symbol for `display-buffer-alist' condition of BUFFER-GROUP."
+  (intern (format "my/buffer-group-member-p--%s" buffer-group)))
+
+(defun my/buffer-group-display-rule (buffer-group)
+  "Return `display-buffer-alist' entry for BUFFER-GROUP."
+  (alist-get (my/buffer-group-display-condition-fn buffer-group)
+             display-buffer-alist))
+
+(defun my/buffer-group-display-action (buffer-group)
+  "Return action of `display-buffer-alist' entry for BUFFER-GROUP."
+  (cdr-safe (my/buffer-group-display-rule buffer-group)))
+
+(defun my/buffer-group-display-action-functions (buffer-group)
+  "Return action functions of `display-buffer-alist' entry for BUFFER-GROUP.
+The result is always a list, even if the entry in `display-buffer-alist'
+contains a single function instead of a list of functions."
+  (let ((functions (car-safe (my/buffer-group-display-action buffer-group))))
+    (if (listp functions)
+        functions
+      (list functions))))
+
+(defun my/buffer-group-display-action-alist (buffer-group)
+  "Return action alist of `display-buffer-alist' entry for BUFFER-GROUP."
+  (cdr-safe (my/buffer-group-display-action buffer-group)))
+
+
+;;; Side window configuration
 
 (defvar my/buffer-group-side-window-functions
   '(display-buffer-in-side-window)
@@ -158,23 +163,91 @@ For left or right side windows, preserve window width.")
 (defun my/buffer-group-side-window-setup (buffer-group &optional alist)
   "Configure BUFFER-GROUP to display in a side window.
 ALIST is merged with `my/buffer-group-side-window-defaults'."
-  (declare (indent defun))
-  (let ((defaults (my/buffer-group-side-window--defaults alist)))
+  (let ((defaults (my/buffer-group-side-window--defaults alist))
+        (condition (my/buffer-group-display-condition-fn buffer-group)))
     (mapc (lambda (action)
             (unless (alist-get (car action) alist)
               (push action alist)))
-          defaults))
-  (dolist (condition (my/buffer-group-conditions buffer-group))
+          defaults)
     (setf (alist-get condition display-buffer-alist)
           (cons my/buffer-group-side-window-functions alist)))
   display-buffer-alist)
 
-(cl-pushnew 'my/buffer-group-side-window-setup
-            my/buffer-group--setup-functions)
+
+;;; Reuse window configuration
 
-;;; Initial setup
+(defvar my/buffer-group-reuse-window-functions
+  '(my/buffer-group-display-in-group-window)
+  "Action functions for buffer-group reused windows.")
 
-(my/buffer-group-run-setup-hooks)
+(defun my/buffer-group-display-in-group-window (buffer alist)
+  "Display BUFFER in a window of its buffer group.
+ALIST is an association list of action symbols and values. See
+Info node `(elisp) Buffer Display Action Alists' for details of
+such alists. The following symbol, when used in ALIST, has a
+special meaning:
+
+  `buffer-group' specifies a list of buffer groups to consider
+    when determining a window to select. If nil, use the buffer
+    group of BUFFER as determined by `my/buffer-group-of'.
+
+This is an action function for buffer display, see Info node
+`(elisp) Buffer Display Action Functions'. It should be called
+only by `display-buffer' or a function directly or indirectly
+called by the latter."
+  (let* ((buffer-groups (or (alist-get 'buffer-group alist)
+                            (list (my/buffer-group-of buffer))))
+         (window (get-window-with-predicate
+                  (lambda (win)
+                    (let ((bufname (buffer-name (window-buffer win))))
+                      (cl-some (lambda (bufgroup)
+                                 (my/buffer-group-member-p bufgroup bufname))
+                               buffer-groups))))))
+    (when window
+      (window--display-buffer buffer window 'reuse))))
+
+(defun my/buffer-group-reuse-window-setup (buffer-group)
+  "Configure BUFFER-GROUP to display in reused windows."
+  (let ((condition (my/buffer-group-display-condition-fn buffer-group))
+        (alist nil))
+    (setf (alist-get condition display-buffer-alist)
+          (cons my/buffer-group-reuse-window-functions alist)))
+  display-buffer-alist)
+
+
+;;; Default buffer groups
+
+(my/buffer-group-side-window-setup
+ (my/buffer-group-define diagnostics
+   `(:names ("^\\*Warnings"
+             "^\\*\\(?:CPU\\|Memory\\)-Profiler-Report "
+             "^\\*lsp-log\\*"
+             "^\\*.*ls\\(?:::stderr\\)?\\*"
+             "^\\*envrc\\*")
+     :modes (messages-buffer-mode debugger-mode))))
+
+(my/buffer-group-side-window-setup
+ (my/buffer-group-define search
+   `(:modes (occur-mode grep-mode
+             ,@(when (modulep! :completion vertico)
+                 '(embark-collect-mode))))))
+
+(my/buffer-group-side-window-setup
+ (my/buffer-group-define compilation
+   `(:names ("^\\*\\(?:[Cc]ompil\\(?:ation\\|e-Log\\)\\)"
+             "^\\*Async\\(?: Shell Command\\|-native-compile-log\\)\\*"
+             "^\\*doom eval\\*"
+             "^ \\*Install vterm\\*")
+     :modes (compilation-mode
+             native-comp-limple-mode))))
+
+(my/buffer-group-side-window-setup
+ (my/buffer-group-define internals
+   `(:modes (process-menu-mode timer-list-mode thread-list-mode
+             Buffer-menu-mode ibuffer-mode
+             bookmark-bmenu-mode
+             package-menu-mode)))
+ '((side . top)))
 
 (setq window-sides-vertical t)
 
@@ -396,15 +469,14 @@ grows larger."
   (which-key-setup-minibuffer))
 
 (after! undo-tree
-  (my/buffer-group-define 'undo-tree
-    `(:cond (,(concat "^" (regexp-quote undo-tree-visualizer-buffer-name)))
-      :hook (lambda ()
-              (my/buffer-group-side-window-setup 'undo-tree
-                '((side . left) (slot . 1))))))
-  (my/buffer-group-define 'undo-tree-diff
-    `(:cond (,(concat "^" (regexp-quote undo-tree-diff-buffer-name)))
-      :hook (lambda ()
-              (my/buffer-group-side-window-setup 'undo-tree-diff)))))
+  (my/buffer-group-side-window-setup
+   (my/buffer-group-define undo-tree
+     `(:names (,(concat "^" (regexp-quote undo-tree-visualizer-buffer-name)))))
+   '((side . left) (slot . 1)))
+
+  (my/buffer-group-side-window-setup
+   (my/buffer-group-define undo-tree-diff
+     `(:names (,(concat "^" (regexp-quote undo-tree-diff-buffer-name)))))))
 
 (defadvice! my/undo-tree-diff-display-buffer-a (&optional node)
   "Display an undo-tree diff buffer using `display-buffer'."
@@ -420,16 +492,15 @@ grows larger."
         (interactive)
         (pop-to-buffer buffer-or-name #'display-buffer-reuse-mode-window)))
 
-(my/buffer-group-define 'help
-  `(:cond ("^\\*\\(?:[Hh]elp*\\|Apropos\\)"
-           "^\\*info\\*"
-           "^\\*Shortdoc "
-           "^\\*\\(?:Wo\\)?Man "
-           "^\\*lsp-help"
-           "^\\*Kubernetes Docs ")
-    :hook (lambda ()
-            (my/buffer-group-side-window-setup 'help
-              '((side . bottom) (slot . 1))))))
+(my/buffer-group-side-window-setup
+ (my/buffer-group-define help
+   `(:modes (helpful-mode help-mode apropos-mode
+             lsp-help-mode
+             Info-mode
+             shortdoc-mode
+             Man-mode woman-mode
+             kubedoc-mode)))
+ '((slot . 1)))
 
 ;; This is the default, but it's good to specify it
 (setq treemacs-display-in-side-window t
@@ -440,29 +511,27 @@ grows larger."
       imenu-list-size 35) ;; same as treemacs
 
 (after! imenu-list
-  (let ((buffer-re (concat "^" (regexp-quote imenu-list-buffer-name) "$")))
-    (my/buffer-group-define 'imenu
-      `(:cond (,buffer-re)
-        :hook (lambda ()
-                (my/buffer-group-side-window-setup 'imenu
-                  (list (cons 'side imenu-list-position)
-                        (cons 'window-width imenu-list-size))))))))
+  (my/buffer-group-side-window-setup
+   (my/buffer-group-define imenu
+     `(:modes (imenu-list-major-mode)))
+   `((side . ,imenu-list-position)
+     (window-width . ,imenu-list-size))))
 
-(my/buffer-group-define 'popup-term
-  `(:cond ("^\\*doom:\\(?:v?term\\|e?shell\\)-popup")
-    :hook (lambda ()
-            (my/buffer-group-side-window-setup 'popup-term))))
+(my/buffer-group-side-window-setup
+ (my/buffer-group-define popup-term
+   `(:names ("^\\*doom:\\(?:v?term\\|e?shell\\)-popup"))))
 
-(my/buffer-group-define 'repl
-  `(:cond ("^\\*ielm\\*")
-    :hook (lambda ()
-            (my/buffer-group-side-window-setup 'repl))))
+(my/buffer-group-side-window-setup
+ (my/buffer-group-define repl
+   `(:modes (inferior-emacs-lisp-mode))))
 
-(my/buffer-group-define 'docker
-  `(:cond ("^\\*docker-\\(?:containers\\|images\\|networks\\|volumes\\)")
-    :hook (lambda ()
-            (my/buffer-group-side-window-setup 'docker
-              '((side . top))))))
+(my/buffer-group-side-window-setup
+ (my/buffer-group-define docker
+   `(:modes (docker-container-mode
+             docker-image-mode
+             docker-volume-mode
+             docker-network-mode)))
+ '((side . top)))
 
 (map! "C-`"   #'window-toggle-side-windows)
    ;; "C-~"   #'+popup/raise
