@@ -1009,6 +1009,17 @@ containing a matching entry for corresponding help buffers.
         (pop-to-buffer buffer-or-name #'display-buffer-reuse-mode-window)))
 #+end_src
 
+Setting ~Man-noficy-method~ to ~pushy~ is supposed to just use
+~switch-to-buffer~ to open new Man buffers. However, it doesn't quite obey
+~display-buffer-alist~ when invoking ~man~ from ~vterm~. In some ways, this is
+sort of nice behavior, but I wish it was more predictable (running ~man~ from
+~vterm~ to open an existing Man buffer *will* obey ~display-buffer-alist~). See
+the definition of function ~Man-notify-when-ready~ for more info.
+
+#+begin_src emacs-lisp :tangle yes
+(setq Man-notify-method 'pushy)
+#+end_src
+
 *** DONE Buffer group definition
 I think I'd rather have a bit more flexibility in window placement (for example,
 reusing an existing window displaying a buffer with one of the major modes
@@ -1020,11 +1031,14 @@ work OK for now.
  (my/buffer-group-define help
    `(:modes (helpful-mode help-mode apropos-mode
              lsp-help-mode
-             Info-mode
-             shortdoc-mode
-             Man-mode woman-mode
-             kubedoc-mode)))
+             shortdoc-mode)))
  '((slot . 1)))
+
+(my/buffer-group-reuse-window-setup
+ (my/buffer-group-define reference
+   `(:modes (Info-mode
+             Man-mode woman-mode
+             kubedoc-mode))))
 #+end_src
 
 ** Treemacs [2/2]
@@ -3446,7 +3460,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [12/22]
+** Miscellany [11/21]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -3560,11 +3574,6 @@ in the stack trace are elisp functions (not C functions).
 
 #+begin_src emacs-lisp :tangle yes
 (setq debugger-stack-frame-as-list t)
-#+end_src
-
-*** DONE [#C] Open man pages in the current window
-#+begin_src emacs-lisp :tangle yes
-(setq Man-notify-method 'pushy)
 #+end_src
 
 *** DONE [#C] Do not restrict (Wo)Man buffer width

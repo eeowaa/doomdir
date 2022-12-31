@@ -492,15 +492,20 @@ grows larger."
         (interactive)
         (pop-to-buffer buffer-or-name #'display-buffer-reuse-mode-window)))
 
+(setq Man-notify-method 'pushy)
+
 (my/buffer-group-side-window-setup
  (my/buffer-group-define help
    `(:modes (helpful-mode help-mode apropos-mode
              lsp-help-mode
-             Info-mode
-             shortdoc-mode
-             Man-mode woman-mode
-             kubedoc-mode)))
+             shortdoc-mode)))
  '((slot . 1)))
+
+(my/buffer-group-reuse-window-setup
+ (my/buffer-group-define reference
+   `(:modes (Info-mode
+             Man-mode woman-mode
+             kubedoc-mode))))
 
 ;; This is the default, but it's good to specify it
 (setq treemacs-display-in-side-window t
@@ -1405,8 +1410,6 @@ deleting the final newline before inserting the \")))\"."
 (defalias 'ps 'list-processes)
 
 (setq debugger-stack-frame-as-list t)
-
-(setq Man-notify-method 'pushy)
 
 (setq Man-width-max nil
       woman-fill-frame t)
