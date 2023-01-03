@@ -556,6 +556,14 @@ grows larger."
      :modes (inferior-emacs-lisp-mode))))
 
 (my/buffer-group-side-window-setup
+ (my/buffer-group-define magit-select
+   `(:modes (magit-log-select-mode))))
+
+(my/buffer-group-side-window-setup
+ (my/buffer-group-define diff-hl
+   `(:names ("^\\*diff-hl\\*$"))))
+
+(my/buffer-group-side-window-setup
  (my/buffer-group-define docker
    `(:names ("^\\*docker-\\(?:containers\\|images\\|networks\\|volumes\\)")
      :modes (docker-container-mode

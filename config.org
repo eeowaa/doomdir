@@ -1129,7 +1129,25 @@ Add mode:
  '((side . bottom) (slot . 1)))
 #+end_src
 
-*** TODO Fix "Instant fixup" windows (=cF=)
+*** DONE Show log selection windows in a side window
+One use case is with "instant fixup" windows.
+
+#+begin_src emacs-lisp :tangle yes
+(my/buffer-group-side-window-setup
+ (my/buffer-group-define magit-select
+   `(:modes (magit-log-select-mode))))
+#+end_src
+
+*** DONE Show hunk revert windows in a side window
+There are more use cases for =diff-hl= that may require different window
+arrangements, but this is all that matters to me right now.
+
+#+begin_src emacs-lisp :tangle yes
+(my/buffer-group-side-window-setup
+ (my/buffer-group-define diff-hl
+   `(:names ("^\\*diff-hl\\*$"))))
+#+end_src
+
 ** Docker [1/2]
 *** DONE Buffer group definition
 #+begin_src emacs-lisp :tangle yes
