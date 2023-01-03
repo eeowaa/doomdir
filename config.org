@@ -1033,9 +1033,14 @@ sort of nice behavior, but I wish it was more predictable (running ~man~ from
 ~vterm~ to open an existing Man buffer *will* obey ~display-buffer-alist~). See
 the definition of function ~Man-notify-when-ready~ for more info.
 
+*UPDATE*: When adding buffer name regexps back into the buffer group definition,
+man pages started opening as I intended. The reason could potentially be that
+~Man-mode~ buffers get displayed before the major mode is set.
+
 #+begin_src emacs-lisp :tangle yes
 (setq Man-notify-method 'pushy)
 #+end_src
+
 
 *** DONE Buffer group definition
 I think I'd rather have a bit more flexibility in window placement (for example,
