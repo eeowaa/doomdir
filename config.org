@@ -1112,15 +1112,58 @@ haven't run into much trouble with it.
      :modes (inferior-emacs-lisp-mode))))
 #+end_src
 
-** Org [0/1]
-*** TODO Show TODO popup in a small side window
-** Magit [0/2]
-*** LOOP Buffer group definition
-For now, I am just using Doom's configuration. It could maybe use a bit of
-improvement, but I'm used to it and generally like it.
+** Org [2/6]
+*** DONE Suppress deletion of other windows
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (defadvice! my/suppress-delete-other-windows-a (fn &rest args)
+    "`+popup--suppress-delete-other-windows-a'
+Org has a scorched-earth window management policy I'm not fond of. i.e. it
+kills all other windows just so it can monopolize the frame. No thanks. We can
+do better."
+    :around #'org-add-log-note
+    :around #'org-capture-place-template
+    :around #'org-export--dispatch-ui
+    :around #'org-agenda-get-restriction-and-command
+    :around #'org-goto-location
+    :around #'org-fast-tag-selection
+    :around #'org-fast-todo-selection
+    (letf! ((#'delete-other-windows #'ignore)
+            (#'delete-window        #'ignore))
+      (apply fn args))))
+#+end_src
 
-Add mode:
-- ~magit-log-select-mode~
+*** DONE Save org source edit buffers when switching workspaces
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (defadvice! my/org-edit-src-exit-a (fn &rest args)
+    "`+popup--org-edit-src-exit-a'
+If you switch workspaces or the src window is recreated..."
+    :around #'org-edit-src-exit
+    (let* ((window (selected-window))
+           (side-p (my/side-window-p window)))
+      (prog1 (apply fn args)
+        (when (and side-p (window-live-p window))
+          (delete-window window))))))
+#+end_src
+
+*** STRT Buffer group definition
+For more buffer names, search for ~get-buffer-create~ in the Org package.
+
+#+begin_src emacs-lisp :tangle yes
+(my/buffer-group-side-window-setup
+ (my/buffer-group-define org-prompt
+   `(:names ("^ \\*Org todo\\*$")))
+ '((slot . 1)))
+#+end_src
+
+*** TODO Advise ~org-goto-location~
+*** TODO Advise ~org-fast-tag-selection~
+*** TODO Advise ~org-fast-todo-selection~
+** Magit [2/3]
+*** LOOP Buffer group definition
+For now, I am mostly just using Doom's configuration. It could maybe use a bit
+of improvement, but I'm used to it and generally like it.
 
 #+begin_src emacs-lisp :tangle no
 (my/buffer-group-side-window-setup

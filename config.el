@@ -555,6 +555,39 @@ grows larger."
    `(:names ("^\\*ielm\\*")
      :modes (inferior-emacs-lisp-mode))))
 
+(after! org
+  (defadvice! my/suppress-delete-other-windows-a (fn &rest args)
+    "`+popup--suppress-delete-other-windows-a'
+Org has a scorched-earth window management policy I'm not fond of. i.e. it
+kills all other windows just so it can monopolize the frame. No thanks. We can
+do better."
+    :around #'org-add-log-note
+    :around #'org-capture-place-template
+    :around #'org-export--dispatch-ui
+    :around #'org-agenda-get-restriction-and-command
+    :around #'org-goto-location
+    :around #'org-fast-tag-selection
+    :around #'org-fast-todo-selection
+    (letf! ((#'delete-other-windows #'ignore)
+            (#'delete-window        #'ignore))
+      (apply fn args))))
+
+(after! org
+  (defadvice! my/org-edit-src-exit-a (fn &rest args)
+    "`+popup--org-edit-src-exit-a'
+If you switch workspaces or the src window is recreated..."
+    :around #'org-edit-src-exit
+    (let* ((window (selected-window))
+           (side-p (my/side-window-p window)))
+      (prog1 (apply fn args)
+        (when (and side-p (window-live-p window))
+          (delete-window window))))))
+
+(my/buffer-group-side-window-setup
+ (my/buffer-group-define org-prompt
+   `(:names ("^ \\*Org todo\\*$")))
+ '((slot . 1)))
+
 (my/buffer-group-side-window-setup
  (my/buffer-group-define magit-select
    `(:modes (magit-log-select-mode))))
