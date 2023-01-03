@@ -259,6 +259,18 @@ called by the latter."
 
 (setq window-resize-pixelwise t)
 
+(setq doom-modeline-display-misc-in-all-mode-lines nil
+      doom-modeline-time nil)
+
+(after! doom-modeline
+  (remove-hook 'display-battery-mode-hook #'doom-modeline-override-battery-modeline)
+  (remove-hook 'doom-modeline-mode-hook #'doom-modeline-override-battery-modeline)
+  (advice-remove #'battery-update #'doom-modeline-update-battery-status)
+  (dolist (var '(doom-modeline-fn-alist doom-modeline-var-alist))
+    (when-let* ((alist (eval var))
+                (element (assq 'battery alist)))
+      (set var (remove element alist)))))
+
 (use-package! tab-bar
   :when (modulep! :ui workspaces)
   :hook (persp-mode . tab-bar-mode)
@@ -322,7 +334,8 @@ If INDEX is not a workspace index, return nil."
         tab-bar-format '(tab-bar-format-tabs
                          tab-bar-separator
                          tab-bar-format-add-tab
-                         tab-bar-format-align-right))
+                         tab-bar-format-align-right
+                         tab-bar-format-global))
 
   (defadvice! my/+workspace--tabline-a ()
     "Only display the current workspace name in the echo area."
