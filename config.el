@@ -243,7 +243,11 @@ called by the latter."
 
 (my/buffer-group-side-window-setup
  (my/buffer-group-define internals
-   `(:modes (process-menu-mode timer-list-mode thread-list-mode
+   `(:names ("^\\*\\(?:Process List\\|timer-list\\|Threads\\)\\*"
+             "^\\*\\(?:Ibuffer\\|Buffer List\\)\\*"
+             "^\\*Bookmark List\\*"
+             "^\\*Packages\\*")
+     :modes (process-menu-mode timer-list-mode thread-list-mode
              Buffer-menu-mode ibuffer-mode
              bookmark-bmenu-mode
              package-menu-mode)))
@@ -496,14 +500,20 @@ grows larger."
 
 (my/buffer-group-side-window-setup
  (my/buffer-group-define help
-   `(:modes (helpful-mode help-mode apropos-mode
+   `(:names ("^\\*\\(?:[Hh]elp*\\|Apropos\\)"
+             "^\\*lsp-help"
+             "^\\*Shortdoc ")
+     :modes (helpful-mode help-mode apropos-mode
              lsp-help-mode
              shortdoc-mode)))
  '((slot . 1)))
 
 (my/buffer-group-reuse-window-setup
  (my/buffer-group-define reference
-   `(:modes (Info-mode
+   `(:names ("^\\*info\\*"
+             "^\\*\\(?:Wo\\)?Man "
+             "^\\*Kubernetes Docs ")
+     :modes (Info-mode
              Man-mode woman-mode
              kubedoc-mode))))
 
@@ -518,7 +528,8 @@ grows larger."
 (after! imenu-list
   (my/buffer-group-side-window-setup
    (my/buffer-group-define imenu
-     `(:modes (imenu-list-major-mode)))
+     `(:names (,(concat "^" (regexp-quote imenu-list-buffer-name) "$"))
+       :modes (imenu-list-major-mode)))
    `((side . ,imenu-list-position)
      (window-width . ,imenu-list-size))))
 
@@ -528,11 +539,13 @@ grows larger."
 
 (my/buffer-group-side-window-setup
  (my/buffer-group-define repl
-   `(:modes (inferior-emacs-lisp-mode))))
+   `(:names ("^\\*ielm\\*")
+     :modes (inferior-emacs-lisp-mode))))
 
 (my/buffer-group-side-window-setup
  (my/buffer-group-define docker
-   `(:modes (docker-container-mode
+   `(:names ("^\\*docker-\\(?:containers\\|images\\|networks\\|volumes\\)")
+     :modes (docker-container-mode
              docker-image-mode
              docker-volume-mode
              docker-network-mode)))
