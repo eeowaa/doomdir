@@ -73,7 +73,7 @@ BUFFER-NAME defaults to the current buffer's name."
            (buffer-group-plist-get buffer-group :names)))
 
 (defun buffer-group-mode-match-p (buffer-group &optional buffer-name)
-  "Return non-nil if BUFFER-NAME describes a buffer with major mode in BUFFER-GROUP.
+  "Return non-nil if BUFFER-NAME names a buffer with major mode in BUFFER-GROUP.
 BUFFER-NAME defaults to the current buffer's name."
   (with-current-buffer (or buffer-name (buffer-name))
     (memq major-mode (buffer-group-plist-get buffer-group :modes))))

@@ -2947,7 +2947,7 @@ foo:
     - 4
     - 5
     - 6
-quz:
+qux:
   - hello
   - goodbye
 #+end_src
@@ -2978,7 +2978,7 @@ your annoyance:
       6
     ]
   },
-  "quz": [
+  "qux": [
     "hello",
     "goodbye"
   ]
