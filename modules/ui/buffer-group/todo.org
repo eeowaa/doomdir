@@ -1,0 +1,35 @@
+#+title: Buffer-Group
+
+* Documentation [0/5]
+** TODO Buffer name regexps vs. major modes
+** TODO Incompatibility with =:ui popup=
+** TODO Order is important in ~display-buffer-alist~
+** TODO Use of the ~window-sides-vertical~ option
+** TODO Migrate reference documentation from private config
+* Configuration [0/5]
+** TODO Split =buffer-group.el= into multiple files
+One file for buffer groups, another file for display rules. Should also include
+a file explaining how to use the package.
+
+** TODO Define buffer groups in =config.el=
+** TODO Define display rules when =+defaults= is given
+** TODO Add =+all= flag to set ~switch-to-buffer-obey-display-actions~
+** TODO Add =+hacks.el= file
+* Features [0/3]
+** TODO Improve syntax of ~buffer-group-define~ macro
+** TODO Interactive functions to add and remove conditions to buffer groups
+I would like to make ~buffer-group-property-pushnew~ interactive and allow the
+user to select a regexp (defaulting to the current buffer's name) and/or a major
+mode (defaulting to the current buffer's major mode) to add as a condition to an
+existing buffer group. I would also like to allow interactive selection of a
+buffer group.
+
+Beyond that, I would like to create a new function named
+~buffer-group-property-remove~ and allow interactive selection of the buffer
+group and condition(s).
+
+** TODO Interactive ~display-buffer-alist~ setup for buffer groups
+I would like to create a function that allows users to interactively select a
+buffer group and a corresponding ~display-buffer-alist~ action for that buffer
+group. Before that can happen, I'll need to lay some groundwork for the creation
+and management of such actions. Perhaps another alist?
