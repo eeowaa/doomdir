@@ -829,6 +829,8 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   (defvar my/zen--old-hl-line-mode nil)
   (defvar my/zen--old-column-highlight-mode nil)
   (defvar my/zen--old-display-fill-column-indicator-mode nil)
+  (defvar my/zen--old-tab-bar-mode nil)
+  (defvar my/zen--old-tab-line-mode nil)
   (defvar my/zen--old-vi-tilde-fringe-mode nil)
 
   (add-hook! writeroom-mode :append
@@ -845,6 +847,10 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
                   (bound-and-true-p column-highlight-mode)
                   my/zen--old-display-fill-column-indicator-mode
                   (bound-and-true-p display-fill-column-indicator-mode)
+                  my/zen--old-tab-bar-mode
+                  (bound-and-true-p tab-bar-mode)
+                  my/zen--old-tab-line-mode
+                  (bound-and-true-p tab-line-mode)
                   my/zen--old-vi-tilde-fringe-mode
                   (and (modulep! :ui vi-tilde-fringe) (bound-and-true-p vi-tilde-fringe-mode)))
 
@@ -853,6 +859,8 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
             (hl-line-mode -1)
             (column-highlight-mode -1)
             (display-fill-column-indicator-mode -1)
+            (tab-bar-mode -1)
+            (tab-line-mode -1)
             (vi-tilde-fringe-mode -1))
 
         ;; Restore previous state
@@ -860,6 +868,8 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
         (if my/zen--old-hl-line-mode (hl-line-mode +1))
         (if my/zen--old-column-highlight-mode (column-highlight-mode +1))
         (if my/zen--old-display-fill-column-indicator-mode (display-fill-column-indicator-mode +1))
+        (if my/zen--old-tab-bar-mode (tab-bar-mode +1))
+        (if my/zen--old-tab-line-mode (tab-line-mode +1))
         (if my/zen--old-vi-tilde-fringe-mode (vi-tilde-fringe-mode +1))))))
 
 ;; Display ^L characters as horizontal lines
