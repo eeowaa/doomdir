@@ -33,6 +33,7 @@
        (vertico +icons)  ; the search engine of the future
 
        :ui
+       buffer-group      ; XXX user module
        ;;deft              ; notational velocity for Emacs
        doom              ; what makes DOOM look the way it does
        ;;doom-dashboard    ; a nifty splash screen for Emacs
@@ -49,7 +50,7 @@
        ;;neotree           ; a project drawer, like NERDTree for vim
        ophints           ; highlight the region an operation acts on
        ;;popup             ; tame sudden yet inevitable temporary windows
-       ;;tabs              ; a tab bar for Emacs
+       tabs              ; XXX user module
        (treemacs +lsp)   ; a project drawer, like neotree but cooler
        ;;unicode           ; extended unicode support for various languages
        (vc-gutter +pretty +diff-hl)
@@ -102,7 +103,7 @@
        ein               ; tame Jupyter notebooks with emacs
        (eval +overlay)     ; run code, run (also, repls)
        ;;gist              ; interacting with github gists
-       (kubernetes +lsp +tree-sitter)
+       (kubernetes +lsp +tree-sitter) ; XXX user module
        (lookup +dictionary +docsets)
                          ; navigate your code and its documentation
        (lsp +peek)         ; M-x vscode

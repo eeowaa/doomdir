@@ -19,8 +19,10 @@ to modify properties of an existing buffer group.")
   "Return identifiers for all buffer groups."
   (mapcar #'car buffer-group-alist))
 
-;; TODO: Add `interactive' spec to allow users to create a new buffer group with
+;; TODO Add `interactive' spec to allow users to create a new buffer group with
 ;; no properties. The buffer group should not already exist.
+
+;;;###autoload
 (defmacro buffer-group-define (buffer-group &optional properties)
   "Define or redefine a buffer group."
   (declare (indent defun))
@@ -151,6 +153,7 @@ For left or right side windows, preserve window width.")
                 '(t . nil)))))
     defaults))
 
+;;;###autoload
 (defun buffer-group-side-window-setup (buffer-group &optional alist)
   "Configure BUFFER-GROUP to display in a side window.
 ALIST is merged with `buffer-group-side-window-defaults'."
@@ -197,6 +200,7 @@ called by the latter."
     (when window
       (window--display-buffer buffer window 'reuse))))
 
+;;;###autoload
 (defun buffer-group-reuse-window-setup (buffer-group)
   "Configure BUFFER-GROUP to display in reused windows."
   (let ((condition (buffer-group-display-condition-fn buffer-group))
