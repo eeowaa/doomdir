@@ -556,6 +556,143 @@ If INDEX is not a workspace index, return nil."
        + Could reimplement the ~:ls~ evil-ex command to use window history, as
          well. This would be closer to a vim/tmux workflow.
 
+#+begin_src emacs-lisp :tangle yes
+(use-package! tab-line
+  :hook (persp-mode . global-tab-line-mode)
+  :preface
+  ;; Two window parameters are used to track tabs:
+  ;;
+  ;; `my/tab-line-tab-list': A list of buffers.
+  ;; `my/tab-line-tab-index': 0-based index of currently-selected tab.
+  ;;
+  (add-to-list 'window-persistent-parameters '(my/tab-line-tab-list . t))
+  (add-to-list 'window-persistent-parameters '(my/tab-line-tab-index . t))
+
+  (defun my/tab-line-update-tabs-h ()
+    "Update the selected window's tabs."
+    (when tab-line-mode
+      (let* ((window (selected-window))
+             (buffer (window-buffer window))
+             (tabs (window-parameter window 'my/tab-line-tab-list))
+             (index (window-parameter window 'my/tab-line-tab-index)))
+        (setf (nth index tabs) buffer)
+        (set-window-parameter window 'my/tab-line-tab-list tabs))))
+
+  (defun my/tab-line-tabs-fn ()
+    "Return the selected window's tabs."
+    (let ((window (selected-window)))
+      (or (window-parameter window 'my/tab-line-tab-list)
+          (prog1
+            (set-window-parameter window 'my/tab-line-tab-list (list (window-buffer window)))
+            (set-window-parameter window 'my/tab-line-tab-index 0)))))
+
+  (defun my/tab-line-new-tab-choice-fn ()
+    "Function to call when adding a new window tab."
+    (let* ((buffer (generate-new-buffer "*new*"))
+           (window (selected-window))
+           (old-tabs (window-parameter window 'my/tab-line-tab-list))
+           (new-tabs (set-window-parameter window 'my/tab-line-tab-list
+                                           (append old-tabs (list buffer))))
+           (tab-count (length new-tabs)))
+      (set-window-parameter window 'my/tab-line-tab-index (1- tab-count))
+      (set-window-buffer window buffer)
+      (with-current-buffer buffer
+        (funcall (default-value 'major-mode)))))
+
+  (defun my/tab-line-close-tab-fn (_tab)
+    "Close the current tab."
+    (let* ((window (selected-window))
+           (tabs (window-parameter window 'my/tab-line-tab-list))
+           (index (window-parameter window 'my/tab-line-tab-index)))
+      (set-window-parameter window 'my/tab-line-tab-list
+                            (delq (setcar (nthcdr index tabs)
+                                          (cons nil nil))
+                                  tabs))
+      (set-window-parameter window 'my/tab-line-tab-index
+                            (max 0 (1- (length tabs))))))
+
+  (defun my/tab-line-tab-name-format-fn (tab tabs)
+    (let* ((buffer-p (bufferp tab))
+           (selected-p (if buffer-p
+                           (eq tab (window-buffer))
+                         (cdr (assq 'selected tab))))
+           (name (if buffer-p
+                     (funcall tab-line-tab-name-function tab tabs)
+                   (cdr (assq 'name tab))))
+           (face (if selected-p
+                     (if (eq (selected-window) (old-selected-window))
+                         'tab-line-tab-current
+                       'tab-line-tab)
+                   'tab-line-tab-inactive)))
+      (dolist (fn tab-line-tab-face-functions)
+        (setf face (funcall fn tab tabs face buffer-p selected-p)))
+      (apply 'propertize
+             (concat " "
+                     (propertize name
+                                 'keymap tab-line-tab-map
+                                 ;; Don't turn mouse-1 into mouse-2 (bug#49247)
+                                 'follow-link 'ignore)
+                     (or (and (or buffer-p (assq 'buffer tab) (assq 'close tab))
+                              tab-line-close-button-show
+                              (not (eq tab-line-close-button-show
+                                       (if selected-p 'non-selected 'selected)))
+                              tab-line-close-button)
+                         "")
+                     " ")
+             `(tab ,tab
+               ,@(if selected-p '(selected t))
+               face ,face
+               mouse-face tab-line-highlight))))
+
+  :custom
+  (tab-line-tabs-function #'my/tab-line-tabs-fn)
+  (tab-line-new-tab-choice #'my/tab-line-new-tab-choice-fn)
+  (tab-line-close-tab-function #'my/tab-line-close-tab-fn)
+  (tab-line-tab-name-format-function #'my/tab-line-tab-name-format-fn)
+
+  :config
+  (add-hook 'doom-switch-buffer-hook #'my/tab-line-update-tabs-h)
+
+  (setq tab-line-new-button-show nil
+        tab-line-close-button-show nil
+        tab-line-switch-cycling t)
+
+  ;; TODO Add ":tabnew"
+  (map! :n "gt" #'tab-line-switch-to-next-tab
+        :n "gT" #'tab-line-switch-to-prev-tab)
+
+  (evil-define-command my/tab-line:new ()
+    "Ex wrapper around `tab-line-new-tab'."
+    (interactive)
+    (funcall #'tab-line-new-tab))
+
+  (evil-define-command my/tab-line:close ()
+    "Ex wrapper around `tab-line-close-tab'."
+    (interactive)
+    (funcall #'tab-line-close-tab))
+
+  (evil-define-command my/tab-line:next (&optional count)
+    "Ex wrapper around `tab-line-switch-to-next-tab'."
+    (interactive "<c>")
+    (dotimes (i count)
+      (funcall #'tab-line-switch-to-next-tab)))
+
+  (evil-define-command my/tab-line:prev (&optional count)
+    "Ex wrapper around `tab-line-switch-to-prev-tab'."
+    (interactive "<c>")
+    (dotimes (i count)
+      (funcall #'tab-line-switch-to-prev-tab)))
+
+  (evil-ex-define-cmd "tabnew"     #'my/tab-line:new)
+  (evil-ex-define-cmd "tabc[lose]" #'my/tab-line:close)
+  (evil-ex-define-cmd "tabn[ext]"  #'my/tab-line:next)
+  (evil-ex-define-cmd "tabp[rev]"  #'my/tab-line:prev))
+#+end_src
+
+=tab-line= uses [[info:elisp#Window History][Window History]] to display buffers. You can manipulate the window
+history in order to "move" tabs; you can probably use your abstraction of
+"buffer groups" to move whole sets of tabs between popup windows.
+
 ** Hacks [5/6]
 Doom provides a =+hacks.el= file for the =:ui popup= module which contains some
 hacks that are generally useful for managing side windows.
@@ -960,16 +1097,6 @@ Doom sets this option in the Magit configuration. I don't know if I like that.
    ;; "C-~"   #'+popup/raise
    ;; "C-x p" #'+popup/other
 #+end_src
-
-** Tab Line [0/1]
-*** TODO Switch to next/previous buffer in window
-Could use ~tab-line-mode~ in side windows with this:
-- ~tab-line-switch-to-next-tab~
-- ~tab-line-switch-to-prev-tab~
-
-=tab-line= uses [[info:elisp#Window History][Window History]] to display buffers. You can manipulate the window
-history in order to "move" tabs; you can probably use your abstraction of
-"buffer groups" to move whole sets of tabs between popup windows.
 
 ** Fallbacks [1/1]
 *** DONE Open buffers in the current window by default
