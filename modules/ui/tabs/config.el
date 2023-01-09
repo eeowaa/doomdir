@@ -53,14 +53,23 @@ If INDEX is not a workspace index, return nil."
   :init
   (when (modulep! :ui modeline)
     (setq doom-modeline-display-misc-in-all-mode-lines nil
-          doom-modeline-time nil)
+          doom-modeline-time nil
+          doom-modeline-battery nil)
     (after! doom-modeline
-      (remove-hook 'display-battery-mode-hook #'doom-modeline-override-battery-modeline)
-      (remove-hook 'doom-modeline-mode-hook #'doom-modeline-override-battery-modeline)
+      ;; Battery
       (advice-remove #'battery-update #'doom-modeline-update-battery-status)
+      (remove-hook! '(display-battery-mode-hook doom-modeline-mode-hook)
+        #'doom-modeline-override-battery-modeline)
+
+      ;; Time
+      (remove-hook! '(display-time-mode-hook doom-modeline-mode-hook)
+        #'doom-modeline-override-display-time-modeline)
+
+      ;; Battery and Time
       (dolist (var '(doom-modeline-fn-alist doom-modeline-var-alist))
         (when-let* ((alist (eval var))
-                    (element (assq 'battery alist)))
+                    (element (or (assq 'battery alist)
+                                 (assq 'time alist))))
           (set var (remove element alist))))))
 
   :custom
@@ -68,6 +77,9 @@ If INDEX is not a workspace index, return nil."
   (tab-bar-tab-name-format-function #'+tabs-workspace-tab-name-format-fn)
 
   :config
+  (display-time-mode +1)
+  (display-battery-mode +1)
+
   (setq tab-bar-tabs-function #'+tabs-workspace-tabs-fn
         tab-bar-tab-face-function #'+tabs-workspace-tab-face-fn
         tab-bar-tab-hints t
