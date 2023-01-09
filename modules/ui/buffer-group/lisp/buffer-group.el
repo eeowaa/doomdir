@@ -1,6 +1,9 @@
 ;;; buffer-group.el --- Create and operate on groups of buffers -*- lexical-binding: t; -*-
 
 ;;; Code:
+
+(require 'cl-lib)
+
 
 ;;; Buffer group definitions
 
@@ -114,10 +117,7 @@ BUFFER-NAME defaults to the current buffer's name."
   "Return action functions of `display-buffer-alist' entry for BUFFER-GROUP.
 The result is always a list, even if the entry in `display-buffer-alist'
 contains a single function instead of a list of functions."
-  (let ((functions (car-safe (buffer-group-display-action buffer-group))))
-    (if (listp functions)
-        functions
-      (list functions))))
+  (ensure-list (car-safe (buffer-group-display-action buffer-group))))
 
 (defun buffer-group-display-action-alist (buffer-group)
   "Return action alist of `display-buffer-alist' entry for BUFFER-GROUP."
@@ -214,12 +214,15 @@ called by the latter."
 
 (buffer-group-side-window-setup
  (buffer-group-define diagnostics
-   `(:names ("^\\*Warnings"
+   `(:names ("^\\*Messages\\*"
+             "^\\*\\(?:Edebug \\)?Backtrace\\*"
+             "^\\*Warnings\\*"
+             "^\\*trace-output\\*"
              "^\\*\\(?:CPU\\|Memory\\)-Profiler-Report "
              "^\\*lsp-log\\*"
              "^\\*.*ls\\(?:::stderr\\)?\\*"
              "^\\*envrc\\*")
-     :modes (messages-buffer-mode debugger-mode))))
+     :modes (messages-buffer-mode backtrace-mode debugger-mode))))
 
 (buffer-group-side-window-setup
  (buffer-group-define search
