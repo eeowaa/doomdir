@@ -1186,6 +1186,21 @@ If the current frame has one window, restore the previous windows."
 (unless (member "IMAGEMAGICK" (split-string system-configuration-features))
   (setq imagemagick-types-inhibit t))
 
+(defun my/+dired-split-jump ()
+  (interactive)
+  (select-window (split-window-below))
+  (dired-jump))
+
+(defun my/+dired-vsplit-jump ()
+  (interactive)
+  (select-window (split-window-right))
+  (dired-jump))
+
+(after! evil-ex
+  (evil-ex-define-cmd "Ex[plore]"  #'dired-jump)
+  (evil-ex-define-cmd "Sex[plore]" #'my/+dired-split-jump)
+  (evil-ex-define-cmd "Vex[plore]" #'my/+dired-vsplit-jump))
+
 ;; This should already be enabled by emacs/undo/config.el
 (global-undo-tree-mode)
 
