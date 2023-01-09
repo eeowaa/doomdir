@@ -74,6 +74,7 @@ When NOERROR is provided, do not signal an error."
 
 ;; TODO See about adding window parameters set by `tab-line':
 ;; `tab-line-groups', `tab-line-group', `tab-line-hscroll', `tab-line-cache'
+(cl-pushnew '(tab-line-cache . writable) window-persistent-parameters)
 
 
 ;;; Tab alists
@@ -163,6 +164,42 @@ Creates new window parameters if they are missing or corrupted."
              mouse-face tab-line-highlight))))
 
 (vimish-tab--set 'tab-line-tab-name-format-function #'vimish-tab-name-format)
+
+(defvar vimish-tab-show 1
+  "Analogous to `tab-bar-show', except for the tab-line.")
+
+(defun vimish-tab-show-p (&rest _)
+  "Whether or not to display tabs for the current window."
+  (or (eq vimish-tab-show t)
+      (and (integerp vimish-tab-show)
+           (> (length (vimish-tab-list)) vimish-tab-show))))
+
+;; TODO Completely disable the display of the tab-line instead of just showing
+;; any empty tab-line (like the following forms do):
+;;
+;;   (advice-add 'tab-line-format-template :before-while #'vimish-tab-show-p)
+;;   (advice-add 'tab-line-format :before-while #'vimish-tab-show-p)
+;;
+;; Unfortunately, unlike the tab-bar, which can be hidden by setting the
+;; tab-bar-lines frame parameter to 0, tab-line does not have such a construct.
+;; Instead, the `tab-line-format' variable is consulted instead; see
+;; `mode-line-format' for how it is evaluated.
+;;
+;; After some trail and error, it seems that setting `tab-line-format' to nil is
+;; the only way to hide the tab line; setting `tab-line-format' to (:eval
+;; (tab-line-format)) and making that function return nil will just display an
+;; empty tab line.
+;;
+;; Unfortunately, let-binding `tab-line-format' to nil and performing
+;; `force-mode-line-update' is not a valid workaround; neither is temporarily
+;; setting the buffer-local `tab-line-format' in a similar fashion.
+;;
+;;   (let ((tab-line-format
+;;          (when (vimish-tab-show-p) '(:eval tab-line-format))))
+;;     (force-mode-line-update))
+;;
+;; This seems like a problem for #emacs or the mailing list. I don't think I can
+;; resolve it myself.
 
 
 ;;; Selecting tabs
