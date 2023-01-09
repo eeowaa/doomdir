@@ -1,6 +1,14 @@
 #+title: Tabs
 
-* TODO Make windows behave more like ~tmux~ panes
+* Packaging [0/2]
+** TODO Create a =vimish-tab= global minor mode
+Sort of like ~global-tab-line-mode~.
+
+** TODO Create a =vimish-tab-evil= library
+Migrate evil bindings from Doom module config.
+
+* Uncategorized [0/2]
+** TODO Make windows behave more like ~tmux~ panes
 I would like for Emacs to obey the following precepts:
 
 1. *Always* open buffers in the [[help:selected-window][selected-window]] (i.e. current window).
@@ -10,7 +18,7 @@ Override mechanisms should be in place for both precepts, but the ultimate goal
 is that I never want to be surprised by the window layout. The [[info:elisp#Windows][windows section]]
 in the elisp manual should contain information on how to implement all of this.
 
-* TODO Implement overarching ~tmux~-like behavior
+** TODO Implement overarching ~tmux~-like behavior
 Additionally, I would like to implement the following behaviors:
 
 1. Do not allow splits when the current window is maximized.

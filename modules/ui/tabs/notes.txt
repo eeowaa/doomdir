@@ -1,0 +1,54 @@
+((selected . <bool>)    ;; `(eq tab (window-buffer))'
+ (name . <string>)      ;; customize `tab-line-tab-name-function'
+ (buffer . <buffer>)    ;; `tab'
+ (close . <function>)   ;; customize `tab-line-close-tab-function'
+ (select . <function>)) ;; advise `tab-line-select-tab-buffer'
+
+Problems:
+
+- I want buffers to be able to display a single buffer in multiple tabs.
+  On the surface, it seems like I need to use alists to represent tabs, so
+  that I can represent selected tabs using a different method than just
+  matching buffer names. However, I think that I might be able to get away
+  with that via customizing `tab-line-tab-name-format-function'.
+
+- What about the `tab-line-cache' window parameter?
+
+- `tab-line-select-tab-buffer' switches to a specified buffer in the selected
+  window. It does not have a concept of tab indices. There are two potential
+  workarounds:
+
+  1. Define tabs as alists. Each tab will have a `select' alist entry whose
+     value is a sharp-quoted function. The function will ensure that the
+     `selected' alist entry is set to `t' for the selected tab and `nil' for all
+     other tabs. With this workaround, there cannot be a `buffer' alist entry,
+     otherwise, `tab-bar-select-tab-buffer' will be called by
+     `tab-line-select-tab'. What we need is to store the buffer in another alist
+     entry, perhaps `buffer-object' or something like that. Unfortunately, other
+     these functions rely on the presence of of a `buffer' alist entry:
+
+     - `tab-line-switch-to-prev-tab'
+     - `tab-line-switch-to-next-tab'
+     - `tab-line-close-tab' (OK)
+     - `tab-line-tab-name-format-default'
+
+     All these other functions assume that the a buffer only appears once in
+     the tab line, which is not what I want. Looks like I need to override the
+     definitions of a lot of functions, just like with `tab-bar'.
+
+
+[X] tab-line-new-tab
+    - No advice needed
+    - Just define `tab-line-new-tab-choice'
+[X] tab-line-close-tab
+    - Option 1: override advice
+    - Option 2: define tabs as alists and...
+      - Option 2.1: use `close' alist entry
+        - Does not take any arguments
+        - Cannot work on any tab except for the current one
+        - Loss of functionality compared to other options
+      - Option 2.2: define `tab-line-close-tab-function'
+        - Can start by only working on the current tab (done)
+        - Can improve by branching out to a selected tab
+[ ] tab-line-switch-to-next-tab
+[ ] tab-line-switch-to-prev-tab

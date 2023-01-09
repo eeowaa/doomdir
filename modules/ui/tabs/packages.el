@@ -2,4 +2,8 @@
 ;;; ui/tabs/packages.el
 
 (package! tab-bar)
-(package! tab-line)
+
+(package! vimish-tab :recipe
+  (:local-repo "lisp"
+   :files ("vimish-tab.el")
+   :build (:not compile)))

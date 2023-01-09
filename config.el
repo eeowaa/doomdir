@@ -780,6 +780,22 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
                   :advice my/evil-goggles--jump-advice)
                 evil-goggles--commands)))
 
+(map! :n "gt" #'+tabs:next-window-tab
+      :n "gT" #'+tabs:prev-window-tab)
+
+(after! evil-ex
+  (evil-ex-define-cmd "tabnew"     #'+tabs:new-window-tab)
+  (evil-ex-define-cmd "tabc[lose]" #'+tabs:close-window-tab)
+  (evil-ex-define-cmd "tabn[ext]"  #'+tabs:next-window-tab)
+  (evil-ex-define-cmd "tabp[rev]"  #'+tabs:prev-window-tab))
+
+;; This does not change when the theme changes.
+;(my/doom-use-face tab-bar minibuffer-prompt)
+
+;; This works OK for all dark themes
+(custom-set-faces!
+  '(tab-bar :background "black"))
+
 (setq doom-themes-treemacs-enable-variable-pitch nil)
 
 (setq +treemacs-git-mode 'extended)

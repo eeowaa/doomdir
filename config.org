@@ -2104,10 +2104,69 @@ Accepts the same arguments as `display-buffer-in-side-window'. You must set
 `window--sides-inhibit-check' to non-nil for this work properly.
 #+end_quote
 
-** tabs [0/0] :ARCHIVE:
+** tabs [2/3]
 #+begin_quote
-This module adds an Atom-esque tab bar to the Emacs UI.
++This module adds an Atom-esque tab bar to the Emacs UI.+
+Custom implementation of =:ui tabs=.
 #+end_quote
+
+*** DONE [#A] Bind keys
+=:editor evil= binds =gt= to ~+tabs:next-or-goto~ and =gT= to
+~+tabs:previous-or-goto~. Both of those commands are defined by the standard
+=:ui tabs= module, but not by my custom implementation of =:ui tabs=.
+
+The reason why I would rather not define such commands in my custom module is
+because I have two separate abstractions for tabs: "workspace tabs" and "window
+tabs". Command names like ~+tabs:next-or-goto~ and ~+tabs:previous-or-goto~ do
+not indicate which tabs abstration is being operated on.
+
+Option 1:
+#+begin_src emacs-lisp :tangle no
+(defalias '+tabs:next-or-goto #'+tabs:next-window-tab)
+(defalias '+tabs:previous-or-goto #'+tabs:prev-window-tab)
+#+end_src
+
+Option 2:
+#+begin_src emacs-lisp :tangle yes
+(map! :n "gt" #'+tabs:next-window-tab
+      :n "gT" #'+tabs:prev-window-tab)
+#+end_src
+
+*** DONE [#A] Bind =evil-ex= commands
+Doom lazy loads =evil-ex= commands via the following code in the ~:config~
+section of the ~use-package! evil~ form in =:editor evil= configuration:
+
+#+begin_src emacs-lisp :tangle no
+(delq! 'evil-ex features)
+(add-transient-hook! 'evil-ex (provide 'evil-ex))
+(after! evil-ex (load! "+commands"))
+#+end_src
+
+Unfortunately, =+commands.el= does not contain a ~provide~ statement, and
+=:editor evil= is configured after =:ui tabs= in the ~doom!~ block, so without
+modifying =:editor evil= itself, it is hard to override Doom's default =evil-ex=
+commands in a custom =:ui tabs= module definition.
+
+However, user configuration gets loaded last, so I should be able to override
+definitions here:
+
+#+begin_src emacs-lisp :tangle yes
+(after! evil-ex
+  (evil-ex-define-cmd "tabnew"     #'+tabs:new-window-tab)
+  (evil-ex-define-cmd "tabc[lose]" #'+tabs:close-window-tab)
+  (evil-ex-define-cmd "tabn[ext]"  #'+tabs:next-window-tab)
+  (evil-ex-define-cmd "tabp[rev]"  #'+tabs:prev-window-tab))
+#+end_src
+
+*** STRT [#C] Darken the tab bar
+#+begin_src emacs-lisp :tangle yes
+;; This does not change when the theme changes.
+;(my/doom-use-face tab-bar minibuffer-prompt)
+
+;; This works OK for all dark themes
+(custom-set-faces!
+  '(tab-bar :background "black"))
+#+end_src
 
 ** treemacs [10/12]
 #+begin_quote
