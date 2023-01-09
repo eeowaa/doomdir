@@ -789,6 +789,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   (evil-ex-define-cmd "tabn[ext]"  #'+tabs:next-window-tab)
   (evil-ex-define-cmd "tabp[rev]"  #'+tabs:prev-window-tab))
 
+(setq tab-bar-separator ""
+      tab-line-separator "")
+
 ;; This does not change when the theme changes.
 ;(my/doom-use-face tab-bar minibuffer-prompt)
 

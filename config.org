@@ -2104,7 +2104,7 @@ Accepts the same arguments as `display-buffer-in-side-window'. You must set
 `window--sides-inhibit-check' to non-nil for this work properly.
 #+end_quote
 
-** tabs [2/3]
+** tabs [3/4]
 #+begin_quote
 +This module adds an Atom-esque tab bar to the Emacs UI.+
 Custom implementation of =:ui tabs=.
@@ -2156,6 +2156,12 @@ definitions here:
   (evil-ex-define-cmd "tabc[lose]" #'+tabs:close-window-tab)
   (evil-ex-define-cmd "tabn[ext]"  #'+tabs:next-window-tab)
   (evil-ex-define-cmd "tabp[rev]"  #'+tabs:prev-window-tab))
+#+end_src
+
+*** DONE [#C] Remove spaces between tabs
+#+begin_src emacs-lisp :tangle yes
+(setq tab-bar-separator ""
+      tab-line-separator "")
 #+end_src
 
 *** STRT [#C] Darken the tab bar
