@@ -187,7 +187,8 @@ grows larger."
 
 (buffer-group-side-window-setup
  (buffer-group-define repl
-   `(:names ("^\\*ielm\\*")
+   `(:names ("^\\*ielm\\*"
+             "^\\*Pp Eval Output\\*")
      :modes (inferior-emacs-lisp-mode))))
 
 (after! org

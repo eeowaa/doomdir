@@ -625,7 +625,8 @@ work OK for now.
 
 *** OKAY Side window configuration
 Treemacs uses its own system for displaying buffers in side windows. So far, I
-haven't run into much trouble with it.
+haven't run into much trouble with it. Look at ~treemacs--popup-window~ if you
+want to revisit this.
 
 ** Imenu [2/2]
 *** DONE Package configuration
@@ -659,7 +660,8 @@ haven't run into much trouble with it.
 #+begin_src emacs-lisp :tangle yes
 (buffer-group-side-window-setup
  (buffer-group-define repl
-   `(:names ("^\\*ielm\\*")
+   `(:names ("^\\*ielm\\*"
+             "^\\*Pp Eval Output\\*")
      :modes (inferior-emacs-lisp-mode))))
 #+end_src
 
