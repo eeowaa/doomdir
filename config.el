@@ -1217,14 +1217,8 @@ If the current frame has one window, restore the previous windows."
 
 (defun my/+dired-tab-jump ()
   (interactive)
-  (let ((vimish-tab-new-buffer-function
-         (lambda ()
-           (dired-noselect
-            (let ((file (buffer-file-name)))
-              (if file
-                  (file-name-directory file)
-                default-directory))))))
-    (tab-line-new-tab)))
+  (tab-line-new-tab)
+  (dired-jump))
 
 (after! evil-ex
   (evil-ex-define-cmd "Ex[plore]"  #'dired-jump)
