@@ -1215,10 +1215,22 @@ If the current frame has one window, restore the previous windows."
   (select-window (split-window-right))
   (dired-jump))
 
+(defun my/+dired-tab-jump ()
+  (interactive)
+  (let ((vimish-tab-new-buffer-function
+         (lambda ()
+           (dired-noselect
+            (let ((file (buffer-file-name)))
+              (if file
+                  (file-name-directory file)
+                default-directory))))))
+    (tab-line-new-tab)))
+
 (after! evil-ex
   (evil-ex-define-cmd "Ex[plore]"  #'dired-jump)
   (evil-ex-define-cmd "Sex[plore]" #'my/+dired-split-jump)
-  (evil-ex-define-cmd "Vex[plore]" #'my/+dired-vsplit-jump))
+  (evil-ex-define-cmd "Vex[plore]" #'my/+dired-vsplit-jump)
+  (evil-ex-define-cmd "Tex[plore]" #'my/+dired-tab-jump))
 
 ;; This should already be enabled by emacs/undo/config.el
 (global-undo-tree-mode)
