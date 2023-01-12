@@ -431,7 +431,7 @@ Aesthetic modules that affect the Emacs interface or user experience.
 ;;; :ui
 #+end_src
 
-** Miscellany [8/14]
+** Miscellany [7/13]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -521,19 +521,6 @@ Taken from tecosaur's configuration.
   :commands (info-colors-fontify-node))
 
 (add-hook 'Info-selection-hook 'info-colors-fontify-node)
-#+end_src
-
-*** KILL [#C] Create a function to set frame transparency
-:LOGBOOK:
-- Note taken on [2022-12-12 Mon 13:33] \\
-  Doom already provides a function for this: ~doom/set-frame-opacity~
-:END:
-https://www.emacswiki.org/emacs/TransparentEmacs
-#+begin_src emacs-lisp :tangle no
-(defun my/transparency (value)
-  "Sets the transparency of the frame window. 0=transparent/100=opaque"
-  (interactive "nTransparency Value 0 - 100 opaque: ")
-  (set-frame-parameter (selected-frame) 'alpha value))
 #+end_src
 
 *** TODO [#B] Configure =vdiff= :feat:
@@ -2055,7 +2042,7 @@ when changing the theme at runtime.
   '(tab-bar :background "black"))
 #+end_src
 
-** treemacs [10/12]
+** treemacs [9/11]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -2143,9 +2130,6 @@ Reference: https://github.com/hlissner/doom-emacs/issues/4555
 (after! treemacs
   (setq treemacs-collapse-dirs 0))
 #+end_src
-
-*** KILL [#B] Fix size of NPM logo
-I am no longer seeing this issue as of [2021-01-11 Mon].
 
 *** DONE [#C] Add keybindings to visit adjacent files
 I'd prefer my functions to use ~treemacs-peek~ instead of
@@ -2281,7 +2265,7 @@ Observations:
 Displays a tilde(~) in the left fringe to indicate an empty line, similar to Vi.
 #+end_quote
 
-** window-select [2/3]
+** window-select [1/2]
 #+begin_quote
 This module provides several methods for selecting windows without the use of
 the mouse or spatial navigation (e.g. =C-w {h,j,k,l}=).
@@ -2314,26 +2298,13 @@ Such frames are always considered visible, whether or not they are
 currently being displayed on the terminal.
 #+end_quote
 
-*** KILL [#C] Add an =ace-window= keybinding to close windows
-:LOGBOOK:
-- Note taken on [2022-09-16 Fri 22:15] \\
-  I forgot to mention =C-w C-c=, yet another way to close windows.
-- Note taken on [2022-07-18 Mon 11:10] \\
-  =C-w C-w x= already does exactly what I want. Not sure if this functionality was
-  added later or if I was just unaware of it.
-:END:
-Currently, I can use =C-w C-w e <window> C-w c= to close a window, but the
-cursor may switch to another window after this operation. I would rather create
-a keybinding like =C-w C-w x <window>= that closes the window that I select
-/without/ moving the cursor.
-
 *** TODO [#B] Show =ace-window= selection indicators in windows scrolled to the right
 Oftentimes, the ~*Messages*~ buffer is scrolled to the right due to long lines
 being displayed. When this is the case, I cannot easily select the window using
 ~ace-window~, because the red letter that should be in the top-left corner of
 the window is not displayed.
 
-** workspaces [3/4]
+** workspaces [2/3]
 #+begin_quote
 This module adds support for workspaces, powered by persp_mode, as well as a API
 for manipulating them.
@@ -2415,14 +2386,6 @@ Without INDEX, move to the end."
 
 (evil-ex-define-cmd "tabm[ove]" #'my/workspace-move)
 #+end_src
-
-*** KILL [#A] Uniquify buffer names using file paths
-This is done by setting the ~uniquify-buffer-name-style~ variable to ~forward~,
-which Doom does by default in =core/core-ui.el=. However, when the =workspaces=
-module is enabled, Doom makes sure that the =uniquify= package does not modify
-buffer names, as it breaks =persp-mode= (what powers the =workspaces= module).
-
-Visit the source code of ~+workspaces-init-persp-mode-h~ for more detail.
 
 *** DONE [#B] Give ~persp-keymap-prefix~ binding to =projectile=
 By default, =C-c p= is used as the prefix for ~persp-mode-map~, but I would
@@ -2554,27 +2517,10 @@ https://emacs.stackexchange.com/questions/51989/how-to-truncate-lines-by-default
 (setq-default truncate-lines t)
 #+end_src
 
-** evil [6/8]
+** evil [4/6]
 #+begin_quote
 This holy module brings the vim experience to Emacs.
 #+end_quote
-
-*** KILL [#A] Fix ~evil-visual-block~ in =org= buffers
-:LOGBOOK:
-- Note taken on [2022-09-25 Sun 20:27] \\
-  After installing gccemacs, this problem went away.
-:END:
-Oddly, this is a problem I've only encountered in =org= buffers, but when I use
-=C-v= in ~normal~ state (/not/ =C-x SPC= in ~emacs~ state) the visual block
-extends up and/or down further than what I've actually selected. This doesn't
-appear to just be a visual artifact, either, since sometimes (but not always),
-the action that I take on what I've actually selected extends to at least some
-of the visually-highlighted text that I did not select.
-
-To attempt to fix this problem, I performed a fresh install of Doom Emacs and
-all its packages. However, it looks like maybe I need to install a different
-version of Emacs (I have ~HEAD~ of Emacs 28), or just wait until =evil=, =org=
-(or =evil-org=?) gets updated.
 
 *** DONE [#A] Redefine ~:q~ and ~:wq~ semantics
 + Where applicable, integrate with ~server-edit~ (bound to =C-x #=)
@@ -2703,19 +2649,6 @@ builtin game.
     :e "K" #'solitaire-move-up
     :e "J" #'solitaire-move-down))
 #+end_src
-
-*** KILL [#C] Bind ~helpful-update~ to an Evil Normal state key
-:LOGBOOK:
-- Note taken on [2022-09-25 Sun 20:27] \\
-  This is now bound to =g r= in Evil Normal state.
-:END:
-~helpful-update~ is the function that is used to redisplay help buffers (useful
-for when a value changes). Currently, I need to switch to Emacs state via =C-z=
-and then hit =g=, finally switching back to Normal state via =C-z=.
-
-Options to look at:
-+ ~evil-collection-helpful-maps~
-+ ~helpful-mode-map~
 
 *** STRT [#B] Define modes that should always come up in Emacs state :tweak:
 For whatever reason, ~vterm~ is starting in "insert" state.
@@ -3049,7 +2982,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [11/21]
+** Miscellany [10/20]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -3192,10 +3125,6 @@ automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
       (:prefix-map ("f" . "file")
        :desc "chmod +x this file" "X" #'my/make-buffer-file-executable))
 #+end_src
-
-*** KILL [#C] Suppress warning for ~Package cl is deprecated~
-Like Henrik said, there is nothing we can do about this:
-https://github.com/hlissner/doom-emacs/issues/3372
 
 *** STRT [#B] Configure the timeclock :feat:
 Improvements:
@@ -3553,7 +3482,7 @@ Miscellaneous configuration without a corresponding module.
     (with-editor-export-editor var)))
 #+end_src
 
-** eshell [7/7]
+** eshell [5/5]
 #+begin_quote
 This module provides additional features for the built-in [[https://www.gnu.org/software/emacs/manual/html_mono/eshell.html][Emacs Shell]].
 #+end_quote
@@ -3633,30 +3562,6 @@ to =eshell=, it forcefully clears the file on disk.
 #+begin_src emacs-lisp :tangle yes
 (add-hook! eshell-mode #'my/with-editor-export)
 #+end_src
-
-*** KILL [#B] Fix ANSI escape codes
-:LOGBOOK:
-- Note taken on [2022-07-15 Fri 19:40] \\
-  This doesn't seem to be a problem for me anymore on Fedora.
-:END:
-When there is a lot of colorized output (for example, the output of ~git log -p~
-on a big repo), eventually ANSI escape codes do not get interpreted. Here is an
-example from ~doom doctor~:
-#+begin_example
-[33mThere are 4 warnings![0m
-[32m✓ Finished in 7.4969s[0m
-#+end_example
-
-*** KILL [#B] Fix terminal type
-:LOGBOOK:
-- Note taken on [2022-07-15 Fri 20:09] \\
-  This is no longer a problem now that I have removed TERM=eterm-color
-  from the git eshell alias
-:END:
-Sometimes ~git~ will spit the following:
-#+begin_example
-tput: unknown terminal "eterm-color"
-#+end_example
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
@@ -3872,7 +3777,7 @@ GUI Emacs, not terminal Emacs. Also, this is only a problem in popup buffers.*
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-** syntax [2/4]
+** syntax [1/3]
 *** DONE [#A] Disable flycheck in all Org source blocks :hack:
 References:
 + [[help:flycheck-may-enable-mode]]
@@ -3900,26 +3805,6 @@ errors should not be reported*.
     "Consider Org Src buffers as ephemeral (do not enable flycheck)."
     :after-until #'flycheck-ephemeral-buffer-p
     (string-prefix-p "*Org Src" (buffer-name))))
-#+end_src
-
-*** KILL [#B] Disable flycheck in Emacs Lisp config files
-:LOGBOOK:
-- Note taken on [2022-09-22 Thu 20:31] \\
-  The following commit removes ~+emacs-lisp-disable-flycheck-in-dirs~:
-  https://github.com/doomemacs/doomemacs/commit/afa154db27fc5ff710e8c76061c7579eee2cd918
-:END:
-#+begin_src emacs-lisp :tangle no
-(mapc (lambda (config-file-dir)
-        (pushnew! +emacs-lisp-disable-flycheck-in-dirs config-file-dir))
-      ;; Unique directory components of canonical config file paths
-      (delete-dups
-       (mapcar (lambda (config-file)
-                 (file-name-directory (file-chase-links config-file)))
-               ;; Config file paths in canonical config directories
-               (mapcan (lambda (config-dir)
-                         (directory-files config-dir t "\\.el"))
-                       (list (file-truename doom-emacs-dir)
-                             (file-truename doom-user-dir))))))
 #+end_src
 
 *** STRT [#A] Allow dynamic changing of error levels displayed :feat:
@@ -3985,7 +3870,7 @@ the left margin is currently used by =:ui vc-gutter=).
 I should probably use ~doom/sandbox~ (=SPC h d x=) to try this in vanilla Emacs
 and see if Doom is to blame.
 
-** spell [5/6]
+** spell [4/5]
 #+begin_quote
 This modules provides spellchecking powered by =aspell=, =hunspell= or =enchant=.
 #+end_quote
@@ -4113,27 +3998,6 @@ Reference:
   (after! spell-fu
     (when (fboundp '+spell--create-word-dict-a)
       (advice-remove 'spell-fu--word-add-or-remove #'+spell--create-word-dict-a))))
-#+end_src
-
-*** KILL [#B] Fix ~+spell/correct~ :bug:
-:LOGBOOK:
-- Note taken on [2021-06-25 Fri 11:13] \\
-  I am no longer seeing this error and cannot replicate it.
-:END:
-~+spell/correct~ (=z==) spits the following error on macOS:
-#+begin_quote
-Starting new Ispell process aspell with english dictionary...done
-ispell-init-process: Error: /Users/eeowaa/.config/emacs/.local/etc/ispell/english.pws: The language "english" is not known. This is probably because: the file "/usr/local/Cellar/aspell/0.60.8/lib/aspell-0.60/english.dat" can not be opened for reading.
-#+end_quote
-
-*UPDATE*: After running the following, it worked for me:
-#+begin_src sh :tangle no
-rm -rf ~/.config/emacs/.local/etc/ispell
-#+end_src
-
-I also ran the following, but I'm not sure if it made a difference:
-#+begin_src emacs-lisp :tangle no
-(setq ispell-dictionary "english")
 #+end_src
 
 *** TODO [#C] Make spelling corrections match recommendations
@@ -5889,7 +5753,7 @@ This module adds [[https://www.java.com][java]] support to Doom Emacs, including
 =groovy-mode=.
 #+end_quote
 
-** javascript [4/4]
+** javascript [3/3]
 :PROPERTIES:
 :CATEGORY: doom/ts
 :END:
@@ -5962,16 +5826,6 @@ npm install -g typescript typescript-language-server eslint trepan-ni
 #+begin_src emacs-lisp :tangle yes
 (pushnew! auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
 #+end_src
-
-*** KILL [#A] Fix broken filename-mode association for =*.js= files
-:LOGBOOK:
-- Note taken on [2022-11-11 Fri 04:49] \\
-  I no longer see this error
-:END:
-When I open a =*.js= file, I get the following error:
-: File mode specification error: (error Given parent class xref-location is not a class)
-
-I need to manually run =M-x javascript-mode RET= in order to enable JavaScript mode.
 
 ** julia [0/0] :ARCHIVE:
 #+begin_quote
@@ -7114,7 +6968,7 @@ This module adds [[https://en.wikipedia.org/wiki/Representational_state_transfer
 This module add Ruby and optional Ruby on Rails support to Emacs.
 #+end_quote
 
-** rust [2/4]
+** rust [1/3]
 #+begin_quote
 This module adds support for the Rust language and integration for its tools,
 e.g. ~cargo~.
@@ -7169,20 +7023,6 @@ rustup component add rls rust-analysis rust-src
 
 References:
 + [[https://github.com/rust-lang/rls#setup][Official installation documentation for rls]]
-
-*** KILL [#B] Favor ~rls~ over ~rust-analyzer~
-:LOGBOOK:
-- Note taken on [2022-08-09 Tue 15:59] \\
-  I am going to try debugging with ~rust-analyzer~ instead. Other sources besides
-  the =lsp-mode= documentation indicates that it is possible.
-:END:
-Although ~rls~ has been deprecated in favor of ~rust-analyzer~, =lsp-mode= only
-supports debugging for ~rls~ at the moment.
-
-#+begin_src emacs-lisp :tangle no
-(after! rustic
-  (setq rustic-lsp-server 'rls))
-#+end_src
 
 *** DONE [#C] Open =Cargo.lock= files as read-only TOML config files
 #+begin_src emacs-lisp :tangle yes
@@ -7896,7 +7736,7 @@ I would much prefer a single =circe= command to do this rather than that whole
 song and dance. See also: https://libera.chat/guides/findingchannels
 
 *** TODO [#C] Figure out how to display inline images :tweak:
-** rss [5/5]
+** rss [4/4]
 #+begin_quote
 Read RSS feeds in the comfort of DOOM (Emacs)
 #+end_quote
@@ -7916,13 +7756,6 @@ Read RSS feeds in the comfort of DOOM (Emacs)
 
 If [[https://github.com/hlissner/doom-emacs/pull/5603][this other PR]] gets merged, I may be able to remove this. *UPDATE*: The PR got
 closed without being merged.
-
-*** KILL [#A] Fix error message I get when running =M-x =rss RET=
-:LOGBOOK:
-- Note taken on [2022-12-05 Mon 14:06] \\
-  I no longer see this error message.
-:END:
-: if: Symbol’s value as variable is void: string
 
 *** DONE [#B] Allow widening of the description column :hack:
 #+begin_src emacs-lisp :tangle yes
@@ -8144,24 +7977,13 @@ References:
 (global-set-key (kbd "C-M-,") #'better-jumper-jump-forward)
 #+end_src
 
-** literate [2/4]
+** literate [1/3]
 #+begin_quote
 This module enables support for a literate config.
 #+end_quote
 
 *** DONE [#B] Tangle to =packages.el=
 I would like to make =packages.el= literate instead of "illiterate". 😉
-
-*** KILL [#A] Disable tangle upon save
-:LOGBOOK:
-- Note taken on [2022-11-23 Wed 11:41] \\
-  This is actually not too slow anymore (uses an async process).
-:END:
-It just takes too long. 🙁
-
-#+begin_src emacs-lisp :tangle no
-(remove-hook 'org-mode-hook #'+literate-enable-recompile-h)
-#+end_src
 
 *** TODO [#C] Link tangled blocks back to source :feat:
 Refer to your old config.

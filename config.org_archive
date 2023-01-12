@@ -1,0 +1,319 @@
+#    -*- mode: org -*-
+
+
+Archived entries from file /home/sam/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+
+
+
+* KILL [#C] Create a function to set frame transparency
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-11 Wed 17:37
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :ui/Miscellany
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2022-12-12 Mon 13:33] \\
+  Doom already provides a function for this: ~doom/set-frame-opacity~
+:END:
+https://www.emacswiki.org/emacs/TransparentEmacs
+#+begin_src emacs-lisp :tangle no
+(defun my/transparency (value)
+  "Sets the transparency of the frame window. 0=transparent/100=opaque"
+  (interactive "nTransparency Value 0 - 100 opaque: ")
+  (set-frame-parameter (selected-frame) 'alpha value))
+#+end_src
+
+
+* KILL [#B] Fix size of NPM logo
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-11 Wed 17:38
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :ui/treemacs
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+I am no longer seeing this issue as of [2021-01-11 Mon].
+
+
+* KILL [#C] Add an =ace-window= keybinding to close windows
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-11 Wed 17:39
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :ui/window-select
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2022-09-16 Fri 22:15] \\
+  I forgot to mention =C-w C-c=, yet another way to close windows.
+- Note taken on [2022-07-18 Mon 11:10] \\
+  =C-w C-w x= already does exactly what I want. Not sure if this functionality was
+  added later or if I was just unaware of it.
+:END:
+Currently, I can use =C-w C-w e <window> C-w c= to close a window, but the
+cursor may switch to another window after this operation. I would rather create
+a keybinding like =C-w C-w x <window>= that closes the window that I select
+/without/ moving the cursor.
+
+
+* KILL [#A] Uniquify buffer names using file paths
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-11 Wed 17:40
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :ui/workspaces
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+This is done by setting the ~uniquify-buffer-name-style~ variable to ~forward~,
+which Doom does by default in =core/core-ui.el=. However, when the =workspaces=
+module is enabled, Doom makes sure that the =uniquify= package does not modify
+buffer names, as it breaks =persp-mode= (what powers the =workspaces= module).
+
+Visit the source code of ~+workspaces-init-persp-mode-h~ for more detail.
+
+
+* KILL [#A] Fix ~evil-visual-block~ in =org= buffers
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-11 Wed 17:40
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :editor/evil
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2022-09-25 Sun 20:27] \\
+  After installing gccemacs, this problem went away.
+:END:
+Oddly, this is a problem I've only encountered in =org= buffers, but when I use
+=C-v= in ~normal~ state (/not/ =C-x SPC= in ~emacs~ state) the visual block
+extends up and/or down further than what I've actually selected. This doesn't
+appear to just be a visual artifact, either, since sometimes (but not always),
+the action that I take on what I've actually selected extends to at least some
+of the visually-highlighted text that I did not select.
+
+To attempt to fix this problem, I performed a fresh install of Doom Emacs and
+all its packages. However, it looks like maybe I need to install a different
+version of Emacs (I have ~HEAD~ of Emacs 28), or just wait until =evil=, =org=
+(or =evil-org=?) gets updated.
+
+
+* KILL [#C] Bind ~helpful-update~ to an Evil Normal state key
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-11 Wed 17:40
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :editor/evil
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2022-09-25 Sun 20:27] \\
+  This is now bound to =g r= in Evil Normal state.
+:END:
+~helpful-update~ is the function that is used to redisplay help buffers (useful
+for when a value changes). Currently, I need to switch to Emacs state via =C-z=
+and then hit =g=, finally switching back to Normal state via =C-z=.
+
+Options to look at:
++ ~evil-collection-helpful-maps~
++ ~helpful-mode-map~
+
+
+* KILL [#C] Suppress warning for ~Package cl is deprecated~
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-11 Wed 17:40
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :emacs/Miscellany
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+Like Henrik said, there is nothing we can do about this:
+https://github.com/hlissner/doom-emacs/issues/3372
+
+* KILL [#B] Fix ANSI escape codes
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-11 Wed 17:42
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :term/eshell
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2022-07-15 Fri 19:40] \\
+  This doesn't seem to be a problem for me anymore on Fedora.
+:END:
+When there is a lot of colorized output (for example, the output of ~git log -p~
+on a big repo), eventually ANSI escape codes do not get interpreted. Here is an
+example from ~doom doctor~:
+#+begin_example
+[33mThere are 4 warnings![0m
+[32m✓ Finished in 7.4969s[0m
+#+end_example
+
+
+* KILL [#B] Fix terminal type
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-11 Wed 17:42
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :term/eshell
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2022-07-15 Fri 20:09] \\
+  This is no longer a problem now that I have removed TERM=eterm-color
+  from the git eshell alias
+:END:
+Sometimes ~git~ will spit the following:
+#+begin_example
+tput: unknown terminal "eterm-color"
+#+end_example
+
+
+
+* KILL [#B] Disable flycheck in Emacs Lisp config files
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-11 Wed 17:42
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :checkers/syntax
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2022-09-22 Thu 20:31] \\
+  The following commit removes ~+emacs-lisp-disable-flycheck-in-dirs~:
+  https://github.com/doomemacs/doomemacs/commit/afa154db27fc5ff710e8c76061c7579eee2cd918
+:END:
+#+begin_src emacs-lisp :tangle no
+(mapc (lambda (config-file-dir)
+        (pushnew! +emacs-lisp-disable-flycheck-in-dirs config-file-dir))
+      ;; Unique directory components of canonical config file paths
+      (delete-dups
+       (mapcar (lambda (config-file)
+                 (file-name-directory (file-chase-links config-file)))
+               ;; Config file paths in canonical config directories
+               (mapcan (lambda (config-dir)
+                         (directory-files config-dir t "\\.el"))
+                       (list (file-truename doom-emacs-dir)
+                             (file-truename doom-user-dir))))))
+#+end_src
+
+
+* KILL [#B] Fix ~+spell/correct~ :bug:
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-11 Wed 17:43
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :checkers/spell
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2021-06-25 Fri 11:13] \\
+  I am no longer seeing this error and cannot replicate it.
+:END:
+~+spell/correct~ (=z==) spits the following error on macOS:
+#+begin_quote
+Starting new Ispell process aspell with english dictionary...done
+ispell-init-process: Error: /Users/eeowaa/.config/emacs/.local/etc/ispell/english.pws: The language "english" is not known. This is probably because: the file "/usr/local/Cellar/aspell/0.60.8/lib/aspell-0.60/english.dat" can not be opened for reading.
+#+end_quote
+
+*UPDATE*: After running the following, it worked for me:
+#+begin_src sh :tangle no
+rm -rf ~/.config/emacs/.local/etc/ispell
+#+end_src
+
+I also ran the following, but I'm not sure if it made a difference:
+#+begin_src emacs-lisp :tangle no
+(setq ispell-dictionary "english")
+#+end_src
+
+
+* KILL [#A] Fix broken filename-mode association for =*.js= files
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-11 Wed 17:43
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :lang/javascript
+:ARCHIVE_CATEGORY: doom/ts
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2022-11-11 Fri 04:49] \\
+  I no longer see this error
+:END:
+When I open a =*.js= file, I get the following error:
+: File mode specification error: (error Given parent class xref-location is not a class)
+
+I need to manually run =M-x javascript-mode RET= in order to enable JavaScript mode.
+
+
+* KILL [#B] Favor ~rls~ over ~rust-analyzer~
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-11 Wed 17:44
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :lang/rust
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2022-08-09 Tue 15:59] \\
+  I am going to try debugging with ~rust-analyzer~ instead. Other sources besides
+  the =lsp-mode= documentation indicates that it is possible.
+:END:
+Although ~rls~ has been deprecated in favor of ~rust-analyzer~, =lsp-mode= only
+supports debugging for ~rls~ at the moment.
+
+#+begin_src emacs-lisp :tangle no
+(after! rustic
+  (setq rustic-lsp-server 'rls))
+#+end_src
+
+
+* KILL [#A] Fix error message I get when running =M-x =rss RET=
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-11 Wed 17:45
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :app/rss
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2022-12-05 Mon 14:06] \\
+  I no longer see this error message.
+:END:
+: if: Symbol’s value as variable is void: string
+
+
+* KILL [#A] Disable tangle upon save
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-11 Wed 17:45
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :config/literate
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2022-11-23 Wed 11:41] \\
+  This is actually not too slow anymore (uses an async process).
+:END:
+It just takes too long. 🙁
+
+#+begin_src emacs-lisp :tangle no
+(remove-hook 'org-mode-hook #'+literate-enable-recompile-h)
+#+end_src
+
