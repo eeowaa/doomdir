@@ -67,12 +67,18 @@ to modify properties of an existing buffer group.")
 
 ;;; Buffer group membership
 
+(defvar buffer-group-case-sensitive t
+  "Case-sensitivity of buffer group names.")
+
 (defun buffer-group-name-match-p (buffer-group &optional buffer-name)
   "Return non-nil if BUFFER-NAME matches a regexp in BUFFER-GROUP.
-BUFFER-NAME defaults to the current buffer's name."
+BUFFER-NAME defaults to the current buffer's name. The regexp is
+matched case-sensitively for performance."
   (unless buffer-name
     (setq buffer-name (buffer-name)))
-  (cl-some (lambda (re) (string-match-p re buffer-name))
+  (cl-some (lambda (re)
+             (let (case-fold-search buffer-group-case-sensitive)
+               (string-match-p re buffer-name)))
            (buffer-group-plist-get buffer-group :names)))
 
 (defun buffer-group-mode-match-p (buffer-group &optional buffer-name)

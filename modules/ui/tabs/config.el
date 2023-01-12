@@ -112,7 +112,7 @@ If INDEX is not a workspace index, return nil."
      (1- (or tab-number (+tabs--workspace-name-to-index)))))
 
   ;; TODO Define advice for `tab-bar-move-tab-to' (for graphical tab repositioning)
-  (defadvice! +tabs-workspace-move-tab-to-a (to-number &optional from-number)
+  (defadvice! +tabs-workspace-move-tab-to-a (_to-number &optional _from-number)
     :override #'tab-bar-move-tab-to
     (error "Unimplemented"))
 

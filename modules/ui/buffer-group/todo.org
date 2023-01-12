@@ -15,7 +15,7 @@ a file explaining how to use the package.
 ** TODO Define display rules when =+defaults= is given
 ** TODO Add =+all= flag to set ~switch-to-buffer-obey-display-actions~
 ** TODO Add =+hacks.el= file
-* Features [0/3]
+* Features [0/4]
 ** TODO Improve syntax of ~buffer-group-define~ macro
 ** TODO Interactive functions to add and remove conditions to buffer groups
 I would like to make ~buffer-group-property-pushnew~ interactive and allow the
@@ -33,3 +33,6 @@ I would like to create a function that allows users to interactively select a
 buffer group and a corresponding ~display-buffer-alist~ action for that buffer
 group. Before that can happen, I'll need to lay some groundwork for the creation
 and management of such actions. Perhaps another alist?
+
+** TODO Prevent other buffers from appearing in side window slots
+Refer to ~+popup/quit-window~ for inspiration.

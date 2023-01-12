@@ -12,110 +12,80 @@ Examples:
                  (doom-plist-keys (face-attr-construct face)))
        :inherit ,other-face)))
 
+(setq company-idle-delay nil)
+
+(when (modulep! company +childframe)
+  (after! company
+    (add-hook! 'evil-normal-state-entry-hook
+      (defun +company-abort-h ()
+        (when company-candidates
+          (company-abort))))))
+
+(unless initial-window-system
+  (remove-hook 'company-mode 'company-box-mode))
+
+(defun my/toggle-window-dedicated ()
+  "Control whether or not Emacs is allowed to display another
+buffer in current window."
+  (interactive)
+  (message
+   (if (let (window (get-buffer-window (current-buffer)))
+         (set-window-dedicated-p window (not (window-dedicated-p window))))
+       "%s: Can't touch this!"
+     "%s is up for grabs.")
+   (current-buffer)))
+
+(define-key! evil-window-map
+  ;; replaces `+workspace/close-window-or-workspace'
+  "d" #'my/toggle-window-dedicated)
+
+;; NOTE For whatever reason, I cannot use :defer to lazy-load `imenu-list'
+;; without it breaking
+(use-package! imenu-list
+  :after imenu
+  :init
+  (define-key! doom-leader-open-map "i" #'imenu-list-minor-mode))
+
+(after! which-key
+  (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
+    (cl-pushnew `((,(format "\\`%s o i\\'" prefix-re)) nil . "Ilist")
+                which-key-replacement-alist)))
+
+(setq all-the-icons-scale-factor 1.0)
+
+(setq extended-command-suggest-shorter nil)
+
+;; Author: tecosaur
+(setq frame-title-format
+      '(""
+        (:eval
+         (if (s-contains-p org-roam-directory (or buffer-file-name ""))
+             (replace-regexp-in-string
+              ".*/[0-9]*-?" "☰ "
+              (subst-char-in-string ?_ ?  buffer-file-name))
+           "%b"))
+        (:eval
+         (let ((project-name (projectile-project-name)))
+           (unless (string= "-" project-name)
+             (format (if (buffer-modified-p)  " ◉ %s" "  ●  %s") project-name))))))
+
+(use-package! info-colors
+  :commands (info-colors-fontify-node))
+
+(add-hook 'Info-selection-hook 'info-colors-fontify-node)
+
 (setq window-sides-vertical t)
 
 (setq switch-to-buffer-obey-display-actions t)
 
 (setq window-resize-pixelwise t)
 
-(defun my/side-window-p (window)
-  "Return non-nil if WINDOW is a side window."
-  (and (window-live-p window)
-       (window-parameter window 'window-side)))
-
-(defun my/side-windows-active-p (frame)
-  "Return non-nil if FRAME contains side windows."
-  (window-with-parameter 'window-side nil frame))
-
-(defun my/side-windows (frame)
-  "Return list of side windows in FRAME."
-  (let (result)
-    (dolist (window (window-list frame) result)
-      (when (window-parameter window 'window-side)
-        (push window result)))
-    result))
-
-(defun my/window-next-siblings (window)
-  "Return list of WINDOW's next siblings."
-  (when-let ((next (window-next-sibling window)))
-    (cons next (my/window-next-siblings next))))
-
-(defun my/window-children (window)
-  "Return list of WINDOW's direct children."
-  (let ((head (window-child window)))
-    (cons head (my/window-next-siblings head))))
-
-(defun my/window-sibling-group (window)
-  "Return a list including WINDOW and all its siblings."
-  (my/window-children (window-parent window)))
-
-(defun my/side-windows-hide (frame)
-  "Hide side windows in FRAME."
-  (when (my/side-windows-active-p frame)
-    (window-toggle-side-windows frame)))
-
-(defun my/side-windows-show (frame)
-  "Show side windows in FRAME."
-  (unless (my/side-windows-active-p frame)
-    (window-toggle-side-windows frame)))
-
-;; To be used in similar places as +popup-save-a
-(defun my/side-windows-save-a (fn &rest args)
-  "Temporarily close side windows."
-  (let* ((window-or-frame (car-safe args))
-         (window (when (windowp window-or-frame)
-                   window-or-frame))
-         (frame (cond ((framep window-or-frame) window-or-frame)
-                      (window (window-frame window))
-                      (t (selected-frame)))))
-    (if (not (my/side-windows-active-p frame))
-        (apply fn args)
-      ;; NOTE: For whatever reason, `save-excursion' does not work here.
-      (let ((restorep (window-parameter (selected-window) 'window-side))
-            (buffer (current-buffer)))
-        ;; XXX: If the first element in `args' is a window, we need to ensure
-        ;; that `fn' is given an argument that refers to a window that exists
-        ;; after hiding the side windows. This window may or may not refer to
-        ;; the same window! Useful when advising `balance-windows'.
-        (if window
-            (let ((child (-first
-                          (lambda (window) (not (my/side-window-p window)))
-                          (my/window-children window))))
-              (window-toggle-side-windows frame)
-              (apply fn (cons (window-parent child) (cdr args)))
-              (window-toggle-side-windows frame))
-          (window-toggle-side-windows frame)
-          (apply fn args)
-          (window-toggle-side-windows frame))
-        (when restorep
-          (pop-to-buffer buffer '((display-buffer-reuse-window) . nil)))))))
-
-(defadvice! my/make-case-sensitive-a (fn &rest args)
-  "Make regexps in `display-buffer-alist' case-sensitive.
-
-To reduce fewer edge cases and improve performance when `display-buffer-alist'
-grows larger."
-  :around #'display-buffer-assq-regexp
-  (let (case-fold-search)
-    (apply fn args)))
-
-(defadvice! my/ignore-window-parameters-a (fn &rest args)
-  "Allow *interactive* window moving commands to traverse popups."
-  :around '(windmove-up windmove-down windmove-left windmove-right)
-  (letf! (defun windmove-find-other-window (dir &optional arg window)
-           (window-in-direction
-            (pcase dir (`up 'above) (`down 'below) (_ dir))
-            window t arg windmove-wrap-around t))
-    (apply fn args)))
-
-(advice-add 'balance-windows :around #'my/side-windows-save-a)
-
 (dolist (cmd (list #'+evil--window-swap
                    #'evil-window-move-very-bottom
                    #'evil-window-move-very-top
                    #'evil-window-move-far-left
                    #'evil-window-move-far-right))
-  (advice-add cmd :around #'my/side-windows-save-a))
+  (advice-add cmd :around #'+buffer-group-side-windows-save-a))
 
 (after! which-key
   (which-key-setup-minibuffer))
@@ -214,7 +184,7 @@ do better."
 If you switch workspaces or the src window is recreated..."
     :around #'org-edit-src-exit
     (let* ((window (selected-window))
-           (side-p (my/side-window-p window)))
+           (side-p (+buffer-group-side-window-p window)))
       (prog1 (apply fn args)
         (when (and side-p (window-live-p window))
           (delete-window window))))))
@@ -249,68 +219,6 @@ If you switch workspaces or the src window is recreated..."
    ;; "C-x p" #'+popup/other
 
 (setq display-buffer-base-action '((display-buffer-same-window) . nil))
-
-(setq company-idle-delay nil)
-
-(when (modulep! company +childframe)
-  (after! company
-    (add-hook! 'evil-normal-state-entry-hook
-      (defun +company-abort-h ()
-        (when company-candidates
-          (company-abort))))))
-
-(unless initial-window-system
-  (remove-hook 'company-mode 'company-box-mode))
-
-(defun my/toggle-window-dedicated ()
-  "Control whether or not Emacs is allowed to display another
-buffer in current window."
-  (interactive)
-  (message
-   (if (let (window (get-buffer-window (current-buffer)))
-         (set-window-dedicated-p window (not (window-dedicated-p window))))
-       "%s: Can't touch this!"
-     "%s is up for grabs.")
-   (current-buffer)))
-
-(define-key! evil-window-map
-  ;; replaces `+workspace/close-window-or-workspace'
-  "d" #'my/toggle-window-dedicated)
-
-;; NOTE For whatever reason, I cannot use :defer to lazy-load `imenu-list'
-;; without it breaking
-(use-package! imenu-list
-  :init
-  (define-key! doom-leader-open-map "i" #'imenu-list-minor-mode)
-  :after imenu)
-
-(after! which-key
-  (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
-    (cl-pushnew `((,(format "\\`%s o i\\'" prefix-re)) nil . "Ilist")
-                which-key-replacement-alist)))
-
-(setq all-the-icons-scale-factor 1.0)
-
-(setq extended-command-suggest-shorter nil)
-
-;; Author: tecosaur
-(setq frame-title-format
-      '(""
-        (:eval
-         (if (s-contains-p org-roam-directory (or buffer-file-name ""))
-             (replace-regexp-in-string
-              ".*/[0-9]*-?" "☰ "
-              (subst-char-in-string ?_ ?  buffer-file-name))
-           "%b"))
-        (:eval
-         (let ((project-name (projectile-project-name)))
-           (unless (string= "-" project-name)
-             (format (if (buffer-modified-p)  " ◉ %s" "  ●  %s") project-name))))))
-
-(use-package! info-colors
-  :commands (info-colors-fontify-node))
-
-(add-hook 'Info-selection-hook 'info-colors-fontify-node)
 
 ;; `always' is just a no-op that returns `t'
 (defadvice! my/never-hide-modeline-a (&rest _)
@@ -792,10 +700,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (setq tab-bar-separator ""
       tab-line-separator "")
 
-;; This does not change when the theme changes.
-;(my/doom-use-face tab-bar minibuffer-prompt)
+(after! tab-bar
+  (setq tab-bar-tab-face-function #'tab-bar-tab-face-default))
 
-;; This works OK for all dark themes
 (custom-set-faces!
   '(tab-bar :background "black"))
 

@@ -175,7 +175,7 @@ Creates new window parameters if they are missing or corrupted."
            (> (length (vimish-tab-list)) vimish-tab-show))))
 
 ;; TODO Completely disable the display of the tab-line instead of just showing
-;; any empty tab-line (like the following forms do):
+;; an empty tab-line (like the following forms do):
 ;;
 ;;   (advice-add 'tab-line-format-template :before-while #'vimish-tab-show-p)
 ;;   (advice-add 'tab-line-format :before-while #'vimish-tab-show-p)
@@ -225,7 +225,7 @@ Creates new window parameters if they are missing or corrupted."
     (set-window-parameter nil 'vimish-tab-index n)
     (let ((display-buffer-overriding-action '(display-buffer-same-window)))
       (pop-to-buffer buffer)
-      (vimish-tab-mode +1)))) ;; NOTE I don't know why this is necessary
+      (vimish-tab-mode +1)))) ;; REVIEW Why is this necessary?
 
 (defun vimish-tab-select (tab &optional tabs)
   "Make TAB current in the selected window.
