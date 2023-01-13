@@ -554,7 +554,7 @@ Right now, those keys are not being used.
 This is especially annoying when lines get truncated despite the text being
 scaled down, because the "$" character is full-sized.
 
-** buffer-group [21/29] :eeowaa:
+** buffer-group [23/28] :eeowaa:
 :PROPERTIES:
 :COOKIE_DATA: recursive
 :END:
@@ -851,7 +851,7 @@ want to revisit this.
      :modes (inferior-emacs-lisp-mode))))
 #+end_src
 
-*** Org [2/6]
+*** Org [3/4]
 **** DONE Suppress deletion of other windows
 #+begin_src emacs-lisp :tangle yes
 (after! org
@@ -870,6 +870,27 @@ do better."
     (letf! ((#'delete-other-windows #'ignore)
             (#'delete-window        #'ignore))
       (apply fn args))))
+#+end_src
+
+**** DONE Display TODO selection beneath selected window and shrink to fit
+#+begin_src emacs-lisp :tangle yes
+(defadvice! my/org-fix-popup-window-shrinking-a (fn &rest args)
+    "`+popup--org-fix-popup-window-shrinking-a'
+Hides the mode-line in *Org tags* buffer so you can actually see its
+content and displays it in a side window without deleting all other windows.
+Ugh, such an ugly hack."
+    :around #'org-fast-tag-selection
+    :around #'org-fast-todo-selection
+    (letf! ((defun read-char-exclusive (&rest args)
+              (message nil)
+              (apply read-char-exclusive args))
+            (defun split-window-vertically (&optional _size)
+              (funcall split-window-vertically (- 0 window-min-height 1)))
+            (defun org-fit-window-to-buffer (&optional window max-height min-height shrink-only)
+              (when (> (window-buffer-height window)
+                       (window-height window))
+                (fit-window-to-buffer window (window-buffer-height window)))))
+      (apply fn args)))
 #+end_src
 
 **** DONE Save org source edit buffers when switching workspaces
@@ -892,13 +913,10 @@ For more buffer names, search for ~get-buffer-create~ in the Org package.
 #+begin_src emacs-lisp :tangle yes
 (buffer-group-side-window-setup
  (buffer-group-define org-prompt
-   `(:names ("^ \\*Org todo\\*$")))
+   `(:names ("^\\*Org Note\\*")))
  '((slot . 1)))
 #+end_src
 
-**** TODO Advise ~org-goto-location~
-**** TODO Advise ~org-fast-tag-selection~
-**** TODO Advise ~org-fast-todo-selection~
 *** Magit [2/3]
 **** LOOP Buffer group definition
 For now, I am mostly just using Doom's configuration. It could maybe use a bit
@@ -949,6 +967,16 @@ arrangements, but this is all that matters to me right now.
 **** TODO Configure Transient windows
 Currently, Transient buffers open in the window below the selected window. IIRC,
 Doom sets this option in the Magit configuration. I don't know if I like that.
+
+*** Flycheck [1/1]
+**** DONE Buffer group definition
+#+begin_src emacs-lisp :tangle yes
+(buffer-group-property-pushnew
+ 'diagnostics :names "^\\*Flycheck errors\\*")
+
+(buffer-group-property-pushnew
+ 'diagnostics :modes 'flycheck-error-list-mode)
+#+end_src
 
 *** Keybinds [0/1]
 **** STRT Replacements for =:ui popup= bindings

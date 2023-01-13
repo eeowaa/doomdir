@@ -178,6 +178,24 @@ do better."
             (#'delete-window        #'ignore))
       (apply fn args))))
 
+(defadvice! my/org-fix-popup-window-shrinking-a (fn &rest args)
+    "`+popup--org-fix-popup-window-shrinking-a'
+Hides the mode-line in *Org tags* buffer so you can actually see its
+content and displays it in a side window without deleting all other windows.
+Ugh, such an ugly hack."
+    :around #'org-fast-tag-selection
+    :around #'org-fast-todo-selection
+    (letf! ((defun read-char-exclusive (&rest args)
+              (message nil)
+              (apply read-char-exclusive args))
+            (defun split-window-vertically (&optional _size)
+              (funcall split-window-vertically (- 0 window-min-height 1)))
+            (defun org-fit-window-to-buffer (&optional window max-height min-height shrink-only)
+              (when (> (window-buffer-height window)
+                       (window-height window))
+                (fit-window-to-buffer window (window-buffer-height window)))))
+      (apply fn args)))
+
 (after! org
   (defadvice! my/org-edit-src-exit-a (fn &rest args)
     "`+popup--org-edit-src-exit-a'
@@ -191,7 +209,7 @@ If you switch workspaces or the src window is recreated..."
 
 (buffer-group-side-window-setup
  (buffer-group-define org-prompt
-   `(:names ("^ \\*Org todo\\*$")))
+   `(:names ("^\\*Org Note\\*")))
  '((slot . 1)))
 
 (buffer-group-side-window-setup
@@ -213,6 +231,12 @@ If you switch workspaces or the src window is recreated..."
 
 (buffer-group-property-pushnew
  'diagnostics :names "^\\* docker container logs ")
+
+(buffer-group-property-pushnew
+ 'diagnostics :names "^\\*Flycheck errors\\*")
+
+(buffer-group-property-pushnew
+ 'diagnostics :modes 'flycheck-error-list-mode)
 
 (map! "C-`"   #'window-toggle-side-windows)
    ;; "C-~"   #'+popup/raise
