@@ -1,5 +1,5 @@
 ;; -*- no-byte-compile: t; -*-
-;;; lang/kubernetes/packages.el
+;;; tools/kubernetes/packages.el
 
 (package! kubedoc)
 

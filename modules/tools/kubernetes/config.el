@@ -1,4 +1,4 @@
-;;; lang/kubernetes/config.el -*- lexical-binding: t; -*-
+;;; tools/kubernetes/config.el -*- lexical-binding: t; -*-
 
 
 ;;; Kubedoc

@@ -1,4 +1,4 @@
-;;; lang/kubernetes/doctor.el -*- lexical-binding: t; -*-
+;;; tools/kubernetes/doctor.el -*- lexical-binding: t; -*-
 
 (if (modulep! +tree-sitter)
     (assert! (modulep! :tools tree-sitter)
