@@ -79,11 +79,11 @@ When NOERROR is provided, do not signal an error."
 
 ;;; Tab alists
 
-(defun vimish-tab--make-tab (buffer index)
+(defun vimish-tab--make-tab (buffer index &optional select)
   (unless (bufferp buffer)
     (error "BUFFER argument is not a buffer object"))
   (list (cons 'index index)
-        (cons 'selected nil)
+        (cons 'selected select)
         (cons 'name (buffer-name buffer))
         (cons 'buffer buffer)
         (cons 'select #'vimish-tab-select)))
@@ -112,7 +112,7 @@ Creates new window parameters if they are missing or corrupted."
           (set-window-parameter nil 'vimish-tab-list tabs))
       (set-window-parameter nil 'vimish-tab-index 0)
       (set-window-parameter nil 'vimish-tab-list
-       (list (vimish-tab--make-tab (current-buffer) 0))))))
+       (list (vimish-tab--make-tab (current-buffer) 0 t))))))
 
 ;; Ensure that the tab list gets updated appropriately
 ;; TODO Make this work across perspectives
