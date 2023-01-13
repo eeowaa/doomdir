@@ -102,6 +102,7 @@
        (docker +lsp)
        editorconfig      ; let someone else argue about tabs vs spaces
        ein               ; tame Jupyter notebooks with emacs
+       elasticsearch       ; XXX user module
        (eval +overlay)     ; run code, run (also, repls)
        ;;gist              ; interacting with github gists
        (kubernetes +lsp +tree-sitter) ; XXX user module
