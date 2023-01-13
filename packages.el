@@ -50,6 +50,8 @@
 ;; If this causes issues, try `(unpin! (:tools lsp))' instead
 (unpin! lsp-mode)
 
+(unpin! tree-sitter-langs)
+
 ;;; :os
 
 ;;; :lang

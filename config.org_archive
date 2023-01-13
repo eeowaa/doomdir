@@ -138,6 +138,7 @@ Options to look at:
 Like Henrik said, there is nothing we can do about this:
 https://github.com/hlissner/doom-emacs/issues/3372
 
+
 * KILL [#B] Fix ANSI escape codes
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-01-11 Wed 17:42

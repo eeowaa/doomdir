@@ -1,0 +1,126 @@
+#+title:    :tools cloudformation
+#+subtitle: IDE functionality for AWS CloudFormation templates
+
+* TODO Description :unfold:
+This *currently unimplemented* module will provide linting, completion, and/or
+symbol lookup for CloudFormation buffers (YAML and potentially JSON).
+
+The [[*Implementation][implementation]] section describes three implementation options, ordered from
+most preferred to least preferred. In any case, it might be good to reference
+~+ansible-yaml-mode~, which uses ~def-project-mode!~ to define Ansible-specific
+functionality at a project level and override default =yaml-mode= behavior.
+
+* TODO Implementation
+** Option 1: =lsp-cfn= with ~cfn-lsp-extra~
+References:
+- https://github.com/LaurenceWarne/lsp-cfn.el
+- https://github.com/LaurenceWarne/cfn-lsp-extra
+
+#+begin_src emacs-lisp :tangle no
+;; package.el
+(package! cfn-lsp-extra)
+(package! lsp-cfn)
+
+;; config.el
+(use-package! lsp-cfn
+  :magic (("\\({\n *\\)? *[\"']AWSTemplateFormatVersion" . lsp-cfn-json-mode)
+          ;; SAM templates are also supported
+          ("\\({\n *\\)? *[\"']Transform[\"']: [\"']AWS::Serverless-2016-10-31" . lsp-cfn-json-mode)
+          ("\\(---\n\\)?AWSTemplateFormatVersion:" . lsp-cfn-yaml-mode)
+          ("\\(---\n\\)?Transform: AWS::Serverless-2016-10-31" . lsp-cfn-yaml-mode))
+  :config
+  (add-hook! '(lsp-cfn-yaml-mode-local-vars-hook lsp-cfn-json-mode-local-vars-hook)
+    :append #'lsp!)
+
+  (setq-hook! '(lsp-cfn-yaml-mode-hook lsp-cfn-json-mode-hook)
+    completion-ignore-case t))
+#+end_src
+
+** Option 2: =cfn-mode= with ~yamlls~
+References:
+- https://gitlab.com/worr/cfn-mode
+- https://github.com/LaurenceWarne/cfn-lsp-extra#yamlls
+
+#+begin_src emacs-lisp :tangle no
+;; package.el
+(package! cfn-mode)
+
+;; config.el
+(defun my/yamlls-cloudformation-setup-h ()
+  (lsp-yaml-set-buffer-schema "https://raw.githubusercontent.com/awslabs/goformation/master/schema/cloudformation.schema.json")
+  (setq-local lsp-yaml-custom-tags
+              ["!And"
+               "!Base64"
+               "!Cidr"
+               "!Equals"
+               "!FindInMap sequence"
+               "!GetAZs"
+               "!GetAtt"
+               "!If"
+               "!ImportValue"
+               "!Join sequence"
+               "!Not"
+               "!Or"
+               "!Ref Scalar"
+               "!Ref"
+               "!Select"
+               "!Split"
+               "!Sub"
+               "!fn"]))
+
+(add-hook 'cfn-mode-local-vars-hook #'my/yamlls-cloudformation-setup-h)
+(add-hook 'cfn-mode-local-vars-hook #'lsp!)
+#+end_src
+
+** Option 3: Custom implementation
+The following associates the CloudFormation schema with all YAML buffers.
+Ultimately, this should only happen for CloudFormation buffers.
+
+#+begin_src emacs-lisp :tangle no
+(setq lsp-yaml-schemas
+      '((https://raw\.githubusercontent\.com/awslabs/goformation/master/schema/cloudformation\.schema\.json
+         . ["*.yaml" "*.yml"])))
+#+end_src
+
+The following will activate ~cfn-lint~ for all YAML buffers. Ultimately, it
+should only activate for CloudFormation buffers.
+
+#+begin_src emacs-lisp :tangle no
+;; https://awk.space/blog/cfn-lint/
+(after! flycheck
+  (flycheck-define-checker cfn-lint
+    "A CloudFormation linter using cfn-lint."
+    :command ("cfn-lint" "-f" "parseable" source)
+    :error-patterns ((warning line-start (file-name) ":" line ":" column
+                              ":" (one-or-more digit) ":" (one-or-more digit) ":"
+                              (id "W" (one-or-more digit)) ":" (message) line-end)
+                     (error line-start (file-name) ":" line ":" column
+                            ":" (one-or-more digit) ":" (one-or-more digit) ":"
+                            (id "E" (one-or-more digit)) ":" (message) line-end))
+    :modes (yaml-mode))
+    (pushnew! flycheck-checkers 'cfn-lint))
+#+end_src
+
+The following will disable LSP syntax checking (thus relying on ~cfn-lint~) in
+all YAML buffers. Ultimately, this should only activate for CloudFormation
+buffers.
+
+#+begin_src emacs-lisp :tangle no
+(setq-hook! 'yaml-mode-hook lsp-diagnostics-provider :none)
+#+end_src
+
+The following will add CloudFormation-specific YAML syntax to all =lsp-yaml=
+buffers. Ultimately, this should only apply to CloudFormation buffers.
+
+#+begin_src emacs-lisp :tangle no
+(setq lsp-yaml-custom-tags
+      ["!Equals sequence"
+       "!FindInMap sequence"
+       "!GetAtt"
+       "!GetAZs"
+       "!ImportValue"
+       "!Join sequence"
+       "!Ref"
+       "!Select sequence"
+       "!Split sequence"])
+#+end_src

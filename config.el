@@ -2111,6 +2111,8 @@ Optional argument INFO is a plist of options."
       (mkdir (file-name-directory f) t)
       (lsp-yaml-download-schema-store-db))))
 
+(add-hook 'yaml-mode-local-vars-hook #'tree-sitter! 'append)
+
 (put 'lsp-yaml-schemas 'safe-local-variable #'always)
 
 ;; REVIEW Compare `kubel' with `kubernetes-el'

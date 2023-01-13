@@ -5069,7 +5069,19 @@ sudo dnf -y install terraform terraform-ls
 #+end_src
 
 ** tmux [0/0] :ARCHIVE:
-** tree-sitter [3/4]
+** tree-sitter [4/5]
+*** DONE [#A] Unpin =tree-sitter-langs=
+Unfortunately, the font-locking provided by =yaml-mode= does not properly
+fontify multiline quoted strings within string literals. My hope is that
+=tree-sitter= will provided more accurante syntax highlighting for YAML.
+
+Doom currently uses an old version of =tree-sitter-langs= without support for
+YAML, so I am going to unpin that package for now.
+
+#+begin_src emacs-lisp :tangle packages.el
+(unpin! tree-sitter-langs)
+#+end_src
+
 *** DONE [#A] Add tree-sitter syntax highlighting to terraform
 Although there is no ~+tree-sitter~ flag for =:tools treesitter=, there is
 support for HCL syntax [[https://github.com/emacs-tree-sitter/tree-sitter-langs/tree/master/repos][parsing]] and [[https://github.com/emacs-tree-sitter/tree-sitter-langs/tree/master/queries][highlighting]], so Terraform should use this.
@@ -7197,7 +7209,7 @@ npm install -g js-beautify stylelint
 npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 #+end_src
 
-** yaml [4/8]
+** yaml [4/4]
 :PROPERTIES:
 :CATEGORY: doom/yaml
 :END:
@@ -7218,15 +7230,6 @@ npm install -g yaml-language-server
 npm install -g yaml-language-server
 #+end_src
 
-*** DONE [#A] Set the YAML LSP server to RedHat's implementation
-+ https://developers.redhat.com/blog/2017/10/18/yaml-language-server-extension-vs-code/
-
-Every time I try to use LSP with ~yamlls~, this is what I get:
-: Server yamlls:4133 status:starting exited with status exit. Do you want to restart it? (y or n)
-
-Got it working. See the ~PREREQ~ lines for the =yaml= module in
-=DOOMDIR/init.el=. Could use some cleanup.
-
 *** DONE [#A] Download the schema definitions if we don't have them already
 I /think/ this is working. However, I have a note from my "illiterate" config
 saying that the implementation of ~lsp-yaml-download-schema-store-db~ is buggy.
@@ -7239,145 +7242,17 @@ saying that the implementation of ~lsp-yaml-download-schema-store-db~ is buggy.
       (lsp-yaml-download-schema-store-db))))
 #+end_src
 
+*** DONE [#A] Use tree-sitter with YAML :feat:hack:
+This currently requires [[*Unpin =tree-sitter-langs=][unpinning tree-sitter-langs]].
+
+#+begin_src emacs-lisp :tangle yes
+(add-hook 'yaml-mode-local-vars-hook #'tree-sitter! 'append)
+#+end_src
+
 *** DONE [#B] Allow YAML schemas to be decided in .dir-locals.el
 #+begin_src emacs-lisp :tangle yes
 (put 'lsp-yaml-schemas 'safe-local-variable #'always)
 #+end_src
-
-*** STRT [#A] Integrate ~cfn-lint~ with Flycheck :feat:
-:LOGBOOK:
-- Note taken on [2021-11-17 Wed 15:06] \\
-  I can no longer assume that YAML will almost always be CloudFormation, so I have
-  disabled tangling of the source block, at least for now.
-:END:
-Again, since I'm only really using YAML for CloudFormation (at the moment), I
-feel OK about automatically integrating ~cfn-lint~ into Flycheck for all YAML
-files. This fills in the diagnostics gap left by RedHat's YAML language
-server implementation and corresponding Emacs mode.
-
-#+begin_src emacs-lisp :tangle no
-(after! flycheck
-  (flycheck-define-checker cfn-lint
-    "A CloudFormation linter using cfn-lint."
-    :command ("cfn-lint" "-f" "parseable" source)
-    :error-patterns ((warning line-start (file-name) ":" line ":" column
-                              ":" (one-or-more digit) ":" (one-or-more digit) ":"
-                              (id "W" (one-or-more digit)) ":" (message) line-end)
-                     (error line-start (file-name) ":" line ":" column
-                            ":" (one-or-more digit) ":" (one-or-more digit) ":"
-                            (id "E" (one-or-more digit)) ":" (message) line-end))
-    :modes (yaml-mode))
-    (pushnew! flycheck-checkers 'cfn-lint))
-#+end_src
-
-A better way to do this would probably be through a project mode. (Refer to
-~+ansible-yaml-mode~ and ~def-project-mode!~ for more info.) However, when I
-tried doing this, I had some errors so decided to back out for now.
-
-Reference:
-+ https://awk.space/blog/cfn-lint/
-
-*** STRT [#B] Use CloudFormation YAML schema :feat:
-:LOGBOOK:
-- Note taken on [2021-11-17 Wed 15:06] \\
-  I can no longer assume that YAML will almost always be CloudFormation, so I have
-  disabled tangling of the source block, at least for now.
-:END:
-I use YAML almost entirely for CloudFormation, so I like to use CloudFormation
-YAML schema by default. This involves setting ~lsp-yaml-schemas~ appropriately,
-but unfortunately the documentation in that regard is quite lacking. I managed
-to get it right mostly by running =M-x lsp-yaml-select-buffer-schema= and then
-selecting the correct schema ("AWS CloudFormation") through interactive
-completion.
-
-#+begin_src emacs-lisp :tangle no
-(setq lsp-yaml-schemas
-      '((https://raw\.githubusercontent\.com/awslabs/goformation/v4\.15\.0/schema/cloudformation\.schema\.json
-         . ["*.yaml" "*.yml"])))
-#+end_src
-
-Other references:
-+ https://github.com/redhat-developer/yaml-language-server#using-yamlschemas-settings
-+ Help for ~lsp-yaml-schemas~
-+ File referenced by ~lsp-yaml-schema-store-local-db~
-
-*** STRT [#B] Disable LSP syntax checking :tweak:
-:LOGBOOK:
-- Note taken on [2021-11-17 Wed 15:06] \\
-  I can no longer assume that YAML will almost always be CloudFormation, so I have
-  disabled tangling of the source block, at least for now.
-:END:
-Honestly, I don't really need syntax checking from RedHat's YAML language server
-when ~cfn-lint~ does a better job. In fact, it appears as though there are false
-alarms when using LSP syntax checking (and that's not even counting custom
-tags).
-
-#+begin_src emacs-lisp :tangle no
-(setq-hook! 'yaml-mode-hook lsp-diagnostics-provider :none)
-#+end_src
-
-References:
-+ https://github.com/emacs-lsp/lsp-mode/issues/1810
-+ [[file:~/.config/emacs/modules/lang/yaml/config.el]]
-
-*** HOLD [#C] Add custom CloudFormation tags :feat:
-This is the sort of thing that should probably be set per schema, but again,
-since I pretty much only use YAML for CloudFormation, defining custom tags
-globally should be OK. Unfortunately, I can't figure out how to get this to
-work. The following subtrees explain what I tried doing. Make sure to view the
-*Notes* subtree!
-
-**** List of strings
-#+begin_src emacs-lisp :tangle no
-(setq lsp-yaml-custom-tags
-      '("!Equals sequence"
-        "!FindInMap sequence"
-        "!GetAtt"
-        "!GetAZs"
-        "!ImportValue"
-        "!Join sequence"
-        "!Ref"
-        "!Select sequence"
-        "!Split sequence"
-        "!Sub"))
-#+end_src
-This causes the following error after opening a YAML file:
-: Error processing message (wrong-type-argument symbolp "!Equals sequence").
-
-**** Serialized JSON string
-#+begin_src emacs-lisp :tangle no
-(setq lsp-yaml-custom-tags
-      (json-serialize
-       ["!Equals sequence"
-        "!FindInMap sequence"
-        "!GetAtt"
-        "!GetAZs"
-        "!ImportValue"
-        "!Join sequence"
-        "!Ref"
-        "!Select sequence"
-        "!Split sequence"
-        "!Sub"]))
-#+end_src
-Unfortunately, invalid tags do not appear as Flycheck errors, and the following
-error occurs when attempting to complete anything in the YAML buffer with
-=C-SPC= (~+company/complete~) in Evil insert state:
-
-: Company: An error occurred in auto-begin
-: Company: backend company-capf error "Request textDocument/completion failed with message: customTags.filter is not a function" with args (candidates )
-
-**** Notes
-Looks like this is a problem stemming from RedHat's YAML LSP server
-implementation, and I might be able to get around it by using a
-CloudFormation-specific YAML LSP server (at least until I get around to using
-Ansible more). Unfortunately, it looks like there is no such integration with
-Emacs, but I've gathered some links on how I might be able to perform the
-integration myself.
-
-Reference:
-+ https://stackoverflow.com/questions/53470329/aws-sam-yaml-template-unknown-tag-ref
-+ https://emacs-lsp.github.io/lsp-mode/page/adding-new-language/
-+ https://github.com/aws-cloudformation/aws-cfn-lint-visual-studio-code/blob/master/package.json
 
 ** zig [0/0] :ARCHIVE:
 #+begin_quote
