@@ -286,10 +286,6 @@ sudo dnf -y install terraform terraform-ls
 # Install prerequisites for `lang/Miscellany` module
 pipx install nginx-language-server
 
-# Install prerequisites for `lang/Kubernetes` module
-curl -L https://github.com/mrjosh/helm-ls/releases/download/master/helm_ls_linux_amd64 \
-    --output ~/.local/bin/helm_ls
-
 # Install prerequisites for `lang/cc` module
 
 ## GCC
