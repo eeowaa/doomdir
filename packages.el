@@ -65,9 +65,6 @@
 
 ;; Config
 (package! systemd)
-(package! nginx-mode)
-(when (modulep! :completion company)
-  (package! company-nginx))
 
 ;; Builds
 (package! jenkinsfile-mode)

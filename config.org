@@ -5248,7 +5248,7 @@ Modules that bring support for a language or group of languages to Emacs.
 ;;; :lang
 #+end_src
 
-** Miscellany [2/4]
+** Miscellany [2/3]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -5277,9 +5277,6 @@ pipx install nginx-language-server
 
 ;; Config
 (package! systemd)
-(package! nginx-mode)
-(when (modulep! :completion company)
-  (package! company-nginx))
 
 ;; Builds
 (package! jenkinsfile-mode)
@@ -5302,27 +5299,6 @@ pipx install nginx-language-server
 
 Note that MongoDB queries use Javascript syntax, so there is no Mongo-specific
 mode derived from ~prog-mode~ (just use ~js-mode~).
-
-*** STRT [#A] Configure =nginx-mode= :feat:
-Things that work sometimes, but that I cannot replicate:
-
-- ~+lookup/documentation~ (provided by LSP)
-- ~company-complete-common~ (provided by company or LSP)
-
-#+begin_src emacs-lisp :tangle yes
-(use-package! nginx-mode
-  :mode "nginx.*\\.conf"
-  :config
-  (when (modulep! :tools lsp)
-    (add-hook 'nginx-mode-local-vars-hook #'lsp! 'append))
-  (set-docsets! 'nginx-mode "Nginx"))
-
-(use-package! company-nginx
-  :when (modulep! :completion company)
-  :after nginx-mode
-  :config
-  (set-company-backend! 'nginx-mode 'company-nginx))
-#+end_src
 
 *** TODO [#A] Configure Perl modes :feat:
 Doom Emacs does not have a module for Perl 5. That said, Emacs has a lot of
