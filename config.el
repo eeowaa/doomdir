@@ -920,6 +920,9 @@ current buffer first unless the `force' argument is given."
 
 (setq evil-auto-balance-windows nil)
 
+(setq evil-split-window-below t
+      evil-vsplit-window-right t)
+
 (after! 5x5
   (map! :mode 5x5-mode
     :e "k" #'5x5-up

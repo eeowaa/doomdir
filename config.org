@@ -555,7 +555,7 @@ Right now, those keys are not being used.
 This is especially annoying when lines get truncated despite the text being
 scaled down, because the "$" character is full-sized.
 
-** buffer-group [25/30] :eeowaa:
+** buffer-group [25/29] :eeowaa:
 :PROPERTIES:
 :COOKIE_DATA: recursive
 :END:
@@ -670,7 +670,7 @@ string    = ?elisp string? .
 bufferobj = ?elisp buffer object? .
 #+end_src
 
-*** Emacs [3/4]
+*** Emacs [3/3]
 **** DONE Use full frame height for left and right side windows
 #+begin_src emacs-lisp :tangle yes
 (setq window-sides-vertical t)
@@ -693,7 +693,6 @@ it doesn't cause any crashes for us.
 (setq window-resize-pixelwise t)
 #+end_src
 
-**** TODO Focus on a new window after splitting
 *** Evil [1/1]
 **** DONE Prevent windows from moving into side windows
 #+begin_src emacs-lisp :tangle yes
@@ -2571,7 +2570,7 @@ https://emacs.stackexchange.com/questions/51989/how-to-truncate-lines-by-default
 (setq-default truncate-lines t)
 #+end_src
 
-** evil [4/6]
+** evil [5/7]
 #+begin_quote
 This holy module brings the vim experience to Emacs.
 #+end_quote
@@ -2646,6 +2645,12 @@ form). Using ~:override~ advice in this case seems brittle, but works for now.
 *** DONE [#B] Do not automatically balance windows
 #+begin_src emacs-lisp :tangle yes
 (setq evil-auto-balance-windows nil)
+#+end_src
+
+*** DONE [#B] Always select newly-split window
+#+begin_src emacs-lisp :tangle yes
+(setq evil-split-window-below t
+      evil-vsplit-window-right t)
 #+end_src
 
 *** DONE [#C] Define Vim bindings for games
