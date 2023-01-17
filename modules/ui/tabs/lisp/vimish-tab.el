@@ -97,9 +97,38 @@ When NOERROR is provided, do not signal an error."
 (defun vimish-tab-default-buffer ()
   (get-buffer-create "*scratch*"))
 
+(defun vimish-tab-select-buffer ()
+  (condition-case nil
+      (get-buffer (read-buffer-to-switch "Open in new tab: "))
+    (quit (vimish-tab-default-buffer))))
+
+(defun vimish-tab--persp-complete-buffer ()
+  (apply-partially #'completion-table-with-predicate
+                   #'internal-complete-buffer
+                   (lambda (name)
+                     (member (if (consp name) (car name) name)
+                             (mapcar #'buffer-name (persp-buffer-list))))
+                   nil))
+
+(defun vimish-tab-persp-buffer ()
+  (condition-case nil
+      (let ((completion-table (vimish-tab--persp-complete-buffer)))
+        (minibuffer-with-setup-hook
+            (lambda ()
+              (setq minibuffer-completion-table completion-table)
+              (if (and (boundp 'icomplete-with-completion-tables)
+                       (listp icomplete-with-completion-tables))
+                  (setq-local icomplete-with-completion-tables
+                              (cons completion-table
+                                    icomplete-with-completion-tables))))
+          (get-buffer (read-buffer "Open in new tab: "
+                                   (other-buffer (current-buffer))
+                                   (confirm-nonexistent-file-or-buffer)))))
+    (quit (vimish-tab-default-buffer))))
+
 (defun vimish-tab--update ()
   "Update the selected tab with current buffer info.
-Creates new window parameters if they are missing or corrupted."
+Creates new window parameters if they are missing and fixes corruption."
   (when vimish-tab-mode
     (if-let
         ((index (vimish-tab-index t))
@@ -109,6 +138,7 @@ Creates new window parameters if they are missing or corrupted."
         (progn
           (setf (alist-get 'buffer selected-tab) buffer)
           (setf (alist-get 'name selected-tab) (buffer-name buffer))
+          (setf (alist-get 'selected selected-tab) t) ;; HACK Fix corner cases
           (set-window-parameter nil 'vimish-tab-list tabs))
       (set-window-parameter nil 'vimish-tab-index 0)
       (set-window-parameter nil 'vimish-tab-list
@@ -252,10 +282,11 @@ This function is assigned to the `select' alist entry of each tab."
 
 (defvaralias 'vimish-tab-new-button-show 'tab-line-new-button-show)
 
-(defun vimish-tab-new ()
+;; TODO Handle argument
+(defun vimish-tab-new (&optional _n)
   "Function to call when adding a new window tab.
-Currently only supports adding to the end of the list."
-  (interactive)
+The new tab is inserted after the Nth tab (default current)."
+  (interactive "<N>")
   (let* ((tabs (vimish-tab-list))
          (buffer (funcall vimish-tab-new-buffer-function))
          (index (length tabs))
@@ -303,6 +334,18 @@ In order for this function to be called with an appropriate TAB argument in
   (interactive)
   (vimish-tab-close-nth (vimish-tab-index)))
 
+(cl-defun vimish-tab-close-other-tabs
+    (&optional (n (vimish-tab-index)) (tabs (vimish-tab-list)))
+  "Close all but the Nth tab in TABS.
+N defaults to the index of the selected tab."
+  (interactive)
+  (unless (< -1 n (length tabs))
+    (error "Out of bounds tab closing index"))
+  (let ((tab (vimish-tab-current)))
+    (setf (alist-get 'index tab) 0)
+    (set-window-parameter nil 'vimish-tab-list (list tab))
+    (set-window-parameter nil 'vimish-tab-index 0)))
+
 (vimish-tab--set 'tab-line-close-tab-function #'vimish-tab-close)
 
 
@@ -347,6 +390,38 @@ This function is influenced by `vimish-tab-switch-cycling'."
       (message "Unable to select previous tab"))))
 
 (advice-add 'tab-line-switch-to-prev-tab :override #'vimish-tab-prev)
+
+
+;;; Moving tabs
+
+(defun vimish-tab-move (&optional n)
+  "Move the current window tab to the Nth position.
+If N is omitted, default to the last position."
+  (interactive)
+  (let* ((tabs (vimish-tab-list))
+         (index (vimish-tab-index))
+         (n (or n (1- (length tabs))))
+         (ascendingp (< index n)))
+    (unless (< -1 n (length tabs))
+      (error "Out of bounds tab moving index"))
+    (unless (= index n)
+      (let ((left (seq-take tabs (if ascendingp index n)))
+            (right (nthcdr (1+ (if ascendingp n index)) tabs))
+            (middle (mapc (lambda (tab)
+                            (if ascendingp
+                                (cl-decf (alist-get 'index tab))
+                              (cl-incf (alist-get 'index tab))))
+                          (seq-take (nthcdr (if ascendingp (1+ index) n) tabs)
+                                    (if ascendingp (- n index) (- index n)))))
+            (tab (nth index tabs)))
+        (setf (alist-get 'index tab) n)
+        (setq tabs (append left
+                           (if ascendingp
+                               (append middle (list tab))
+                             (push tab middle))
+                           right))
+        (set-window-parameter nil 'vimish-tab-list tabs)
+        (set-window-parameter nil 'vimish-tab-index n)))))
 
 
 ;;; Minor modes

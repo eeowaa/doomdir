@@ -716,10 +716,18 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
       :n "gT" #'+tabs:prev-window-tab)
 
 (after! evil-ex
-  (evil-ex-define-cmd "tabnew"     #'+tabs:new-window-tab)
-  (evil-ex-define-cmd "tabc[lose]" #'+tabs:close-window-tab)
-  (evil-ex-define-cmd "tabn[ext]"  #'+tabs:next-window-tab)
-  (evil-ex-define-cmd "tabp[rev]"  #'+tabs:prev-window-tab))
+  (evil-ex-define-cmd "tabe[dit]"   #'+tabs:new-window-tab)
+  (evil-ex-define-cmd "tabnew"      #'+tabs:new-window-tab)
+  (evil-ex-define-cmd "tabc[lose]"  #'+tabs:close-window-tab)
+  (evil-ex-define-cmd "tabo[nly]"   #'+tabs:close-other-window-tabs)
+  (evil-ex-define-cmd "tabn[ext]"   #'+tabs:next-window-tab)
+  (evil-ex-define-cmd "tabN[ext]"   #'+tabs:prev-window-tab)
+  (evil-ex-define-cmd "tabp[rev]"   #'+tabs:prev-window-tab)
+  (evil-ex-define-cmd "tabr[ewind]" #'+tabs:first-window-tab)
+  (evil-ex-define-cmd "tabfir[st]"  #'+tabs:first-window-tab)
+  (evil-ex-define-cmd "tabl[ast]"   #'+tabs:last-window-tab)
+  (evil-ex-define-cmd "tabl[ast]"   #'+tabs:last-window-tab)
+  (evil-ex-define-cmd "tabm[ove]"   #'+tabs:move-window-tab))
 
 (setq tab-bar-separator ""
       tab-line-separator "")
@@ -1148,8 +1156,9 @@ If the current frame has one window, restore the previous windows."
 
 (defun my/+dired-tab-jump ()
   (interactive)
-  (tab-line-new-tab)
-  (dired-jump))
+  (let ((vimish-tab-new-buffer-function #'current-buffer))
+    (vimish-tab-new)
+    (dired-jump)))
 
 (after! evil-ex
   (evil-ex-define-cmd "Ex[plore]"  #'dired-jump)

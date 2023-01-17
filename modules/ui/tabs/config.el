@@ -4,6 +4,7 @@
 ;;; tab-bar
 
 (use-package! tab-bar
+  :unless noninteractive
   :when (modulep! :ui workspaces)
   :hook (persp-mode . tab-bar-mode)
   :preface
@@ -145,8 +146,12 @@ If INDEX is not a workspace index, return nil."
 
 ;; TODO Implement desired functionality
 (use-package! vimish-tab
-  :hook (persp-mode . global-vimish-tab-mode)
+  :unless noninteractive
+  :hook (doom-init-ui . global-vimish-tab-mode)
   :config
   (setq vimish-tab-new-button-show nil
         vimish-tab-close-button-show nil
-        vimish-tab-switch-cycling t))
+        vimish-tab-switch-cycling t
+        vimish-tab-new-buffer-function (if (modulep! :ui workspaces)
+                                           #'vimish-tab-persp-buffer
+                                         #'vimish-tab-select-buffer)))
