@@ -5032,7 +5032,7 @@ Until I get things figured out, I am going to continue to use hash tables.
 (setq lsp-use-plists t)
 #+end_src
 
-** magit [1/2]
+** magit [1/3]
 *** STRT [#A] Install prerequisites :feat:
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -5050,6 +5050,14 @@ sudo dnf -y install perl
 # TODO: Find equivalent to git-absorb
 # TODO: Fix cpan install command
 cpan install App::Git::Autofixup
+#+end_src
+
+*** STRT [#B] Remove gitflow configuration
+Configuration for =magit-gitflow= shadows configuration for worktrees. I do not
+use Git Flow, but I do use worktrees, so this behavior is backwards for me.
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! magit-gitflow :disable t)
 #+end_src
 
 *** DONE [#C] Configure list of repositories

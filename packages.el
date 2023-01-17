@@ -50,6 +50,8 @@
 ;; If this causes issues, try `(unpin! (:tools lsp))' instead
 (unpin! lsp-mode)
 
+(package! magit-gitflow :disable t)
+
 (unpin! tree-sitter-langs)
 
 ;;; :os
