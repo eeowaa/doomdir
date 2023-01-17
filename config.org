@@ -274,11 +274,24 @@ completion.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-** company [2/4]
+** company [3/5]
 #+begin_quote
 This module provides code completion, powered by [[https://github.com/company-mode/company-mode][company-mode]]. It is required
 for code completion in many of Doom's :lang modules.
 #+end_quote
+
+*** DONE [#A] Do not use childframes for =company= in TTY Emacs
+Tangle to =early-init.el=:
+#+begin_src emacs-lisp :tangle early-init.el
+(unless initial-window-system
+  (use-package-hook! company-box :pre-config nil))
+#+end_src
+
+Tangle to =config.el=:
+#+begin_src emacs-lisp :tangle yes
+(unless initial-window-system
+  (remove-hook 'company-mode 'company-box-mode))
+#+end_src
 
 *** DONE [#B] Never start completion automatically (require =C-SPC=)
 #+begin_src emacs-lisp :tangle yes
@@ -347,20 +360,8 @@ the package for now to get the following updates:
 *There is still one more issue*. Documentation frames always appear below point,
 even when point is at the bottom of the frame.
 
-*** STRT [#A] Do not use childframes for =company= in TTY Emacs :bug:
-Tangle to =early-init.el=:
-#+begin_src emacs-lisp :tangle early-init.el
-(unless initial-window-system
-  (use-package-hook! company-box :pre-config nil))
-#+end_src
-
-Tangle to =config.el=:
-#+begin_src emacs-lisp :tangle yes
-(unless initial-window-system
-  (remove-hook 'company-mode 'company-box-mode))
-#+end_src
-
-Still not working...
+*** TODO [#A] Ensure that =tab-bar-mode= is disabled in =company-box= frames
+Fixed in [[https://github.com/sebastiencs/company-box/commit/79abd77f3357279c2726b74f8b20df27b71aa867][this commit]] of company-box, which I apparently have. What gives?
 
 ** helm [0/0] :ARCHIVE:
 #+begin_quote

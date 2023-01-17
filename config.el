@@ -12,6 +12,9 @@ Examples:
                  (doom-plist-keys (face-attr-construct face)))
        :inherit ,other-face)))
 
+(unless initial-window-system
+  (remove-hook 'company-mode 'company-box-mode))
+
 (setq company-idle-delay nil)
 
 (when (modulep! company +childframe)
@@ -20,9 +23,6 @@ Examples:
       (defun +company-abort-h ()
         (when company-candidates
           (company-abort))))))
-
-(unless initial-window-system
-  (remove-hook 'company-mode 'company-box-mode))
 
 (defun my/toggle-window-dedicated ()
   "Control whether or not Emacs is allowed to display another
