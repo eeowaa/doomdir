@@ -554,7 +554,7 @@ Right now, those keys are not being used.
 This is especially annoying when lines get truncated despite the text being
 scaled down, because the "$" character is full-sized.
 
-** buffer-group [23/28] :eeowaa:
+** buffer-group [25/30] :eeowaa:
 :PROPERTIES:
 :COOKIE_DATA: recursive
 :END:
@@ -801,6 +801,15 @@ work OK for now.
              kubedoc-mode))))
 #+end_src
 
+*** PDFView [1/1]
+**** DONE Buffer group definition
+#+begin_src emacs-lisp :tangle yes
+(buffer-group-reuse-window-setup
+ (buffer-group-define pdf
+   `(:names ("*\\.pdf$")
+     :modes (pdf-view-mode))))
+#+end_src
+
 *** Treemacs [2/2]
 **** DONE Builtin configuration
 #+begin_src emacs-lisp :tangle yes
@@ -833,12 +842,13 @@ want to revisit this.
      (window-width . ,imenu-list-size))))
 #+end_src
 
-*** Terminals [1/1]
+*** Evaluation [1/1]
 **** DONE Buffer group definition
 #+begin_src emacs-lisp :tangle yes
 (buffer-group-side-window-setup
- (buffer-group-define popup-term
-   `(:names ("^\\*doom:\\(?:v?term\\|e?shell\\)-popup"))))
+ (buffer-group-define output
+   `(:names ("^\\*Shell Command Output\\*"
+             "^\\*Pp Eval Output\\*"))))
 #+end_src
 
 *** REPLs [1/1]
@@ -846,9 +856,16 @@ want to revisit this.
 #+begin_src emacs-lisp :tangle yes
 (buffer-group-side-window-setup
  (buffer-group-define repl
-   `(:names ("^\\*ielm\\*"
-             "^\\*Pp Eval Output\\*")
+   `(:names ("^\\*ielm\\*")
      :modes (inferior-emacs-lisp-mode))))
+#+end_src
+
+*** Terminals [1/1]
+**** DONE Buffer group definition
+#+begin_src emacs-lisp :tangle yes
+(buffer-group-side-window-setup
+ (buffer-group-define popup-term
+   `(:names ("^\\*doom:\\(?:v?term\\|e?shell\\)-popup"))))
 #+end_src
 
 *** Org [3/4]

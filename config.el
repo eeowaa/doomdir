@@ -135,6 +135,11 @@ buffer in current window."
              Man-mode woman-mode
              kubedoc-mode))))
 
+(buffer-group-reuse-window-setup
+ (buffer-group-define pdf
+   `(:names ("*\\.pdf$")
+     :modes (pdf-view-mode))))
+
 ;; This is the default, but it's good to specify it
 (setq treemacs-display-in-side-window t
       treemacs-position 'left)
@@ -152,14 +157,18 @@ buffer in current window."
      (window-width . ,imenu-list-size))))
 
 (buffer-group-side-window-setup
- (buffer-group-define popup-term
-   `(:names ("^\\*doom:\\(?:v?term\\|e?shell\\)-popup"))))
+ (buffer-group-define output
+   `(:names ("^\\*Shell Command Output\\*"
+             "^\\*Pp Eval Output\\*"))))
 
 (buffer-group-side-window-setup
  (buffer-group-define repl
-   `(:names ("^\\*ielm\\*"
-             "^\\*Pp Eval Output\\*")
+   `(:names ("^\\*ielm\\*")
      :modes (inferior-emacs-lisp-mode))))
+
+(buffer-group-side-window-setup
+ (buffer-group-define popup-term
+   `(:names ("^\\*doom:\\(?:v?term\\|e?shell\\)-popup"))))
 
 (after! org
   (defadvice! my/suppress-delete-other-windows-a (fn &rest args)
