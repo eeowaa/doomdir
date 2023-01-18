@@ -154,4 +154,8 @@ If INDEX is not a workspace index, return nil."
         vimish-tab-switch-cycling t
         vimish-tab-new-buffer-function (if (modulep! :ui workspaces)
                                            #'vimish-tab-persp-buffer
-                                         #'vimish-tab-select-buffer)))
+                                         #'vimish-tab-select-buffer))
+  (when (modulep! :tools magit)
+    (map! (:map magit-status-mode-map
+           :nv "gt" #'+tabs:next-window-tab
+           :nv "gT" #'+tabs:prev-window-tab))))
