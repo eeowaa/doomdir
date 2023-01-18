@@ -4549,7 +4549,7 @@ EOF
 )
 #+end_src
 
-** lookup [2/5]
+** lookup [3/6]
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -4567,6 +4567,16 @@ sudo dnf -y install ripgrep sqlite-3
 #+begin_src emacs-lisp :tangle yes
 (setq eldoc-echo-area-use-multiline-p nil
       eldoc-echo-area-display-truncation-message nil)
+#+end_src
+
+*** DONE [#B] Do not automatically select documentation windows
+#+begin_src emacs-lisp :tangle yes
+(defadvice! my/display-doc-buffer-a (fn &rest args)
+  "Display the documentation buffer without selecting it."
+  :around #'+lookup/documentation
+  (letf! ((#'pop-to-buffer #'display-buffer))
+    (let (help-window-select)
+      (apply fn args))))
 #+end_src
 
 *** STRT [#A] Automatically install missing docsets :feat:

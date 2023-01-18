@@ -1364,6 +1364,13 @@ which causes problems even if there is no existing buffer."
 (setq eldoc-echo-area-use-multiline-p nil
       eldoc-echo-area-display-truncation-message nil)
 
+(defadvice! my/display-doc-buffer-a (fn &rest args)
+  "Display the documentation buffer without selecting it."
+  :around #'+lookup/documentation
+  (letf! ((#'pop-to-buffer #'display-buffer))
+    (let (help-window-select)
+      (apply fn args))))
+
 (when (modulep! :tools lookup +docsets)
   (defun my/ensure-docsets ()
     (dolist (docset dash-docs-docsets)
