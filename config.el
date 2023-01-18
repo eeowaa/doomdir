@@ -550,8 +550,8 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
       :n "gT" #'+tabs:prev-window-tab)
 
 (after! evil-ex
+  (evil-ex-define-cmd "tabnew"      #'+tabs:new-blank-window-tab)
   (evil-ex-define-cmd "tabe[dit]"   #'+tabs:new-window-tab)
-  (evil-ex-define-cmd "tabnew"      #'+tabs:new-window-tab)
   (evil-ex-define-cmd "tabc[lose]"  #'+tabs:close-window-tab)
   (evil-ex-define-cmd "tabo[nly]"   #'+tabs:close-other-window-tabs)
   (evil-ex-define-cmd "tabn[ext]"   #'+tabs:next-window-tab)

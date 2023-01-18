@@ -7,6 +7,14 @@
   (interactive)
   (funcall #'tab-line-new-tab))
 
+;;;###autoload (autoload '+tabs:new-blank-window-tab "ui/tabs/autoload/evil" nil t)
+(evil-define-command +tabs:new-blank-window-tab ()
+  "Ex wrapper to open a new blank window tab."
+  (interactive)
+  (let ((vimish-tab-default-buffer-name "*scratch*")
+        (vimish-tab-new-buffer-function #'vimish-tab-default-buffer))
+    (funcall #'vimish-tab-new)))
+
 
 ;;;###autoload (autoload '+tabs:close-window-tab "ui/tabs/autoload/evil" nil t)
 (evil-define-command +tabs:close-window-tab (&optional count)

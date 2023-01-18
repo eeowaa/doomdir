@@ -94,8 +94,11 @@ When NOERROR is provided, do not signal an error."
 (defvar vimish-tab-new-buffer-function #'vimish-tab-default-buffer
   "Function to return a buffer in a newly-created tab.")
 
+(defvar vimish-tab-default-buffer-name "*scratch*"
+  "Name of default buffer opened by `vimish-tab-default-buffer'.")
+
 (defun vimish-tab-default-buffer ()
-  (get-buffer-create "*scratch*"))
+  (get-buffer-create vimish-tab-default-buffer-name))
 
 (defun vimish-tab-select-buffer ()
   (condition-case nil
