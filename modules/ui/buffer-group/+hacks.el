@@ -10,6 +10,88 @@
 ;;
 ;;; External functions
 
+;;;###package evil
+;; Prevent windows from moving into side windows
+(dolist (cmd (list #'+evil--window-swap
+                   #'evil-window-move-very-bottom
+                   #'evil-window-move-very-top
+                   #'evil-window-move-far-left
+                   #'evil-window-move-far-right))
+  (advice-add cmd :around #'+buffer-group-side-windows-save-a))
+
+;;;###package man
+;; Use `switch-to-buffer' to open new Man buffers
+(setq Man-notify-method 'pushy)
+
+;;;###package org
+(after! org
+  ;; Suppress deletion of other windows
+  (defadvice! my/suppress-delete-other-windows-a (fn &rest args)
+    "See `+popup--suppress-delete-other-windows-a'.
+Org has a scorched-earth window management policy I'm not fond of. i.e. it
+kills all other windows just so it can monopolize the frame. No thanks. We can
+do better."
+    :around #'org-add-log-note
+    :around #'org-capture-place-template
+    :around #'org-export--dispatch-ui
+    :around #'org-agenda-get-restriction-and-command
+    :around #'org-goto-location
+    :around #'org-fast-tag-selection
+    :around #'org-fast-todo-selection
+    (letf! ((#'delete-other-windows #'ignore)
+            (#'delete-window        #'ignore))
+      (apply fn args)))
+ ;; Display TODO selection beneath selected window and shrink to fit
+ (defadvice! my/org-fix-popup-window-shrinking-a (fn &rest args)
+     "See `+popup--org-fix-popup-window-shrinking-a'.
+Hides the mode-line in *Org tags* buffer so you can actually see its
+content and displays it in a side window without deleting all other windows.
+Ugh, such an ugly hack."
+      :around #'org-fast-tag-selection
+      :around #'org-fast-todo-selection
+      (letf! ((defun read-char-exclusive (&rest args)
+                (message nil)
+                (apply read-char-exclusive args))
+              (defun split-window-vertically (&optional _size)
+                (funcall split-window-vertically (- 0 window-min-height 1)))
+              (defun org-fit-window-to-buffer (&optional window max-height min-height shrink-only)
+                (when (> (window-buffer-height window)
+                         (window-height window))
+                  (fit-window-to-buffer window (window-buffer-height window)))))
+        (apply fn args)))
+  ;; Save org source edit buffers when switching workspaces
+  (defadvice! my/org-edit-src-exit-a (fn &rest args)
+    "See `+popup--org-edit-src-exit-a'.
+If you switch workspaces or the src window is recreated..."
+    :around #'org-edit-src-exit
+    (let* ((window (selected-window))
+           (side-p (+buffer-group-side-window-p window)))
+      (prog1 (apply fn args)
+        (when (and side-p (window-live-p window))
+          (delete-window window))))))
+
+;;;###package treemacs
+(progn
+  ;; TODO Advise `treemacs--popup-window'
+  ;; This is the default, but it's good to specify it
+  (setq treemacs-display-in-side-window t
+        treemacs-position 'left))
+
+;;;###package undo-tree
+;; Use `display-buffer' to show diffs instead of splitting a window.
+(defadvice! +buffer-group--undo-tree-diff-display-buffer-a (&optional node)
+  "Display an undo-tree diff buffer using `display-buffer'."
+  :override '(undo-tree-visualizer-show-diff undo-tree-visualizer-update-diff)
+  (setq undo-tree-visualizer-diff t)
+  (let ((buff (with-current-buffer undo-tree-visualizer-parent-buffer
+                (undo-tree-diff node))))
+    (display-buffer buff)))
+
+;;;###package which-key
+;; Use the minibuffer instead of a side window to get full horizontal width.
+(after! which-key
+  (which-key-setup-minibuffer))
+
 ;;;###package windmove
 ;; Users should be able to hop into side windows easily, but Elisp shouldn't.
 (defadvice! +buffer-group/ignore-window-parameters-a (fn &rest args)

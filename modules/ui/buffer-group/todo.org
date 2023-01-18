@@ -2,6 +2,12 @@
 
 * Documentation [0/5]
 ** TODO Buffer name regexps vs. major modes
+Sometimes buffers are displayed before the major mode is set. In these cases,
+major modes in buffer group definitions will not be checked in order to
+determine where to display the buffer. Therefore, it is good to define buffer
+groups based on buffer name regexps as well as major modes. I have not found
+another workaround.
+
 ** TODO Incompatibility with =:ui popup=
 ** TODO Order is important in ~display-buffer-alist~
 ** TODO Use of the ~window-sides-vertical~ option

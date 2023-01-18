@@ -20,7 +20,6 @@
 
 (package! col-highlight)
 (package! page-break-lines)
-(package! imenu-list)
 
 ;; Collection of themes by prot
 (package! ef-themes)

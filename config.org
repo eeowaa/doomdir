@@ -432,7 +432,7 @@ Aesthetic modules that affect the Emacs interface or user experience.
 ;;; :ui
 #+end_src
 
-** Miscellany [7/13]
+** Miscellany [6/7]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -441,7 +441,6 @@ Miscellaneous configuration without a corresponding module.
 #+begin_src emacs-lisp :tangle packages.el
 (package! col-highlight)
 (package! page-break-lines)
-(package! imenu-list)
 
 ;; Collection of themes by prot
 (package! ef-themes)
@@ -470,21 +469,6 @@ buffer in current window."
 (define-key! evil-window-map
   ;; replaces `+workspace/close-window-or-workspace'
   "d" #'my/toggle-window-dedicated)
-#+end_src
-
-*** DONE [#B] Add key binding for Ilist
-#+begin_src emacs-lisp :tangle yes
-;; NOTE For whatever reason, I cannot use :defer to lazy-load `imenu-list'
-;; without it breaking
-(use-package! imenu-list
-  :after imenu
-  :init
-  (define-key! doom-leader-open-map "i" #'imenu-list-minor-mode))
-
-(after! which-key
-  (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
-    (cl-pushnew `((,(format "\\`%s o i\\'" prefix-re)) nil . "Ilist")
-                which-key-replacement-alist)))
 #+end_src
 
 *** DONE [#C] Keep icons small by default
@@ -527,38 +511,7 @@ Taken from tecosaur's configuration.
 *** TODO [#B] Configure =vdiff= :feat:
 See also: [[file:~/.config/emacs/.local/straight/repos/evil-collection/modes/vdiff/evil-collection-vdiff.el][evil-collection-vdiff]]
 
-*** TODO [#C] Always display Imenu for current buffer in Ilist :tweak:
-If the current buffer does not have Imenu entries, I do not want old ones to
-persist in the Ilist, because I find that confusing. Actually, maybe I just want
-Ilist to display entries for the list selected buffer (in the current workspace)
-that is derived from ~prog-mode~.
-
-In any case, the following does *not* work, because it causes Ilist to update
-(and display nothing) when I am just doing stuff in the minibuffer (or within
-Ilist itself!), and I'd like to keep it displaying what it had before in those
-obvious cases:
-
-#+begin_src emacs-lisp :tangle no
-(setq imenu-list-persist-when-imenu-index-unavailable nil)
-#+end_src
-
-*** TODO [#C] Keep Ilist the same same size as before when opening and closing it :tweak:
-Could hook into ~imenu-list-quit-window~ and save a variable such as
-~my/imenu-list--popup-size~, and then default to that when opening back up.
-Look at how Treemacs accomplishes this.
-
-*** TODO [#C] Disable the cursor in Ilist buffers (like Treemacs) :tweak:
-*** TODO [#C] Remap "<" and ">" to window resize functions in Ilist :feat:
-Right now, those keys are not being used.
-
-*** TODO [#C] Use a different line truncate character than "$" in Ilist :tweak:
-This is especially annoying when lines get truncated despite the text being
-scaled down, because the "$" character is full-sized.
-
-** buffer-group [25/29] :eeowaa:
-:PROPERTIES:
-:COOKIE_DATA: recursive
-:END:
+** buffer-group [4/5] :eeowaa:
 #+begin_quote
 Doom's way of handling windows (through =:ui popup=) is too magical for my
 liking and forces a specific way of doing things. I've never been able to get
@@ -670,20 +623,19 @@ string    = ?elisp string? .
 bufferobj = ?elisp buffer object? .
 #+end_src
 
-*** Emacs [3/3]
-**** DONE Use full frame height for left and right side windows
+*** DONE Use full frame height for left and right side windows
 #+begin_src emacs-lisp :tangle yes
 (setq window-sides-vertical t)
 #+end_src
 
-**** DONE Make ~switch-to-buffer~ respect ~display-buffer-alist~
+*** DONE Make ~switch-to-buffer~ respect ~display-buffer-alist~
 https://www.masteringemacs.org/article/demystifying-emacs-window-manager
 
 #+begin_src emacs-lisp :tangle yes
 (setq switch-to-buffer-obey-display-actions t)
 #+end_src
 
-**** DONE Keep window dividers aligned
+*** DONE Keep window dividers aligned
 Sometimes, spliting a window will result in jagged window placement, just a few
 pixels off. This can cause issues with selecting windows when point is near a
 jagged border. Doom disabled this feature to prevent crashes... let's hope that
@@ -693,318 +645,7 @@ it doesn't cause any crashes for us.
 (setq window-resize-pixelwise t)
 #+end_src
 
-*** Evil [1/1]
-**** DONE Prevent windows from moving into side windows
-#+begin_src emacs-lisp :tangle yes
-(dolist (cmd (list #'+evil--window-swap
-                   #'evil-window-move-very-bottom
-                   #'evil-window-move-very-top
-                   #'evil-window-move-far-left
-                   #'evil-window-move-far-right))
-  (advice-add cmd :around #'+buffer-group-side-windows-save-a))
-#+end_src
-
-*** Which Key [1/1]
-**** DONE Use full frame width
-Use the minibuffer instead of a side window to get full horizontal width.
-
-#+begin_src emacs-lisp :tangle yes
-(after! which-key
-  (which-key-setup-minibuffer))
-#+end_src
-
-*** Undo Tree [2/2]
-**** DONE Buffer group definitions
-I would prefer undo-tree to replace Treemacs when it is showing, but when that
-happens, quitting undo-tree will close the side window instead of redisplaying
-Treemacs.
-
-#+begin_src emacs-lisp :tangle yes
-(after! undo-tree
-  (buffer-group-side-window-setup
-   (buffer-group-define undo-tree
-     `(:names (,(concat "^" (regexp-quote undo-tree-visualizer-buffer-name)))))
-   '((side . left) (slot . 1)))
-
-  (buffer-group-side-window-setup
-   (buffer-group-define undo-tree-diff
-     `(:names (,(concat "^" (regexp-quote undo-tree-diff-buffer-name)))))))
-#+end_src
-
-**** DONE Show undo tree visualizer
-Unfortunately, ~undo-tree-visualizer-show-diff~ attempts to split a window in
-order to show a diff. It should really be using ~display-buffer~ instead.
-
-#+begin_src emacs-lisp :tangle yes
-(defadvice! my/undo-tree-diff-display-buffer-a (&optional node)
-  "Display an undo-tree diff buffer using `display-buffer'."
-  :override '(undo-tree-visualizer-show-diff undo-tree-visualizer-update-diff)
-  (setq undo-tree-visualizer-diff t)
-  (let ((buff (with-current-buffer undo-tree-visualizer-parent-buffer
-                (undo-tree-diff node))))
-    (display-buffer buff)))
-#+end_src
-
-*** Help [2/2]
-**** DONE Builtin configuration
-The builtin configuration is only respected if
-~display-buffer-overriding-action~ is unset and ~display-buffer-alist~ does not
-containing a matching entry for corresponding help buffers.
-
-#+begin_src emacs-lisp :tangle yes
-(setq help-window-select t
-      helpful-switch-buffer-function
-      (lambda (buffer-or-name)
-        (interactive)
-        (pop-to-buffer buffer-or-name #'display-buffer-reuse-mode-window)))
-#+end_src
-
-Setting ~Man-noficy-method~ to ~pushy~ is supposed to just use
-~switch-to-buffer~ to open new Man buffers. However, it doesn't quite obey
-~display-buffer-alist~ when invoking ~man~ from ~vterm~. In some ways, this is
-sort of nice behavior, but I wish it was more predictable (running ~man~ from
-~vterm~ to open an existing Man buffer *will* obey ~display-buffer-alist~). See
-the definition of function ~Man-notify-when-ready~ for more info.
-
-*UPDATE*: When adding buffer name regexps back into the buffer group definition,
-man pages started opening as I intended. The reason could potentially be that
-~Man-mode~ buffers get displayed before the major mode is set.
-
-#+begin_src emacs-lisp :tangle yes
-(setq Man-notify-method 'pushy)
-#+end_src
-
-**** DONE Buffer group definition
-I think I'd rather have a bit more flexibility in window placement (for example,
-reusing an existing window displaying a buffer with one of the major modes
-corresponding to the regular expressions for the buffer group), but this will
-work OK for now.
-
-#+begin_src emacs-lisp :tangle yes
-(buffer-group-side-window-setup
- (buffer-group-define help
-   `(:names ("^\\*\\(?:[Hh]elp*\\|Apropos\\)"
-             "^\\*lsp-help"
-             "^\\*Shortdoc ")
-     :modes (helpful-mode help-mode apropos-mode
-             lsp-help-mode
-             shortdoc-mode)))
- '((slot . 1)))
-
-(buffer-group-reuse-window-setup
- (buffer-group-define reference
-   `(:names ("^\\*info\\*"
-             "^\\*\\(?:Wo\\)?Man "
-             "^\\*Kubernetes Docs ")
-     :modes (Info-mode
-             Man-mode woman-mode
-             kubedoc-mode))))
-#+end_src
-
-*** PDFView [1/1]
-**** DONE Buffer group definition
-#+begin_src emacs-lisp :tangle yes
-(buffer-group-reuse-window-setup
- (buffer-group-define pdf
-   `(:names ("*\\.pdf$")
-     :modes (pdf-view-mode))))
-#+end_src
-
-*** Treemacs [2/2]
-**** DONE Builtin configuration
-#+begin_src emacs-lisp :tangle yes
-;; This is the default, but it's good to specify it
-(setq treemacs-display-in-side-window t
-      treemacs-position 'left)
-#+end_src
-
-**** OKAY Side window configuration
-Treemacs uses its own system for displaying buffers in side windows. So far, I
-haven't run into much trouble with it. Look at ~treemacs--popup-window~ if you
-want to revisit this.
-
-*** Imenu [2/2]
-**** DONE Package configuration
-#+begin_src emacs-lisp :tangle yes
-(setq imenu-list-mode-line-format "  Ilist"
-      imenu-list-position 'right
-      imenu-list-size 35) ;; same as treemacs
-#+end_src
-
-**** DONE Buffer group definition
-#+begin_src emacs-lisp :tangle yes
-(after! imenu-list
-  (buffer-group-side-window-setup
-   (buffer-group-define imenu
-     `(:names (,(concat "^" (regexp-quote imenu-list-buffer-name) "$"))
-       :modes (imenu-list-major-mode)))
-   `((side . ,imenu-list-position)
-     (window-width . ,imenu-list-size))))
-#+end_src
-
-*** Evaluation [1/1]
-**** DONE Buffer group definition
-#+begin_src emacs-lisp :tangle yes
-(buffer-group-side-window-setup
- (buffer-group-define output
-   `(:names ("^\\*Shell Command Output\\*"
-             "^\\*Pp Eval Output\\*"))))
-#+end_src
-
-*** REPLs [1/1]
-**** DONE Buffer group definition
-#+begin_src emacs-lisp :tangle yes
-(buffer-group-side-window-setup
- (buffer-group-define repl
-   `(:names ("^\\*ielm\\*")
-     :modes (inferior-emacs-lisp-mode))))
-#+end_src
-
-*** Terminals [1/1]
-**** DONE Buffer group definition
-#+begin_src emacs-lisp :tangle yes
-(buffer-group-side-window-setup
- (buffer-group-define popup-term
-   `(:names ("^\\*doom:\\(?:v?term\\|e?shell\\)-popup"))))
-#+end_src
-
-*** Org [3/4]
-**** DONE Suppress deletion of other windows
-#+begin_src emacs-lisp :tangle yes
-(after! org
-  (defadvice! my/suppress-delete-other-windows-a (fn &rest args)
-    "`+popup--suppress-delete-other-windows-a'
-Org has a scorched-earth window management policy I'm not fond of. i.e. it
-kills all other windows just so it can monopolize the frame. No thanks. We can
-do better."
-    :around #'org-add-log-note
-    :around #'org-capture-place-template
-    :around #'org-export--dispatch-ui
-    :around #'org-agenda-get-restriction-and-command
-    :around #'org-goto-location
-    :around #'org-fast-tag-selection
-    :around #'org-fast-todo-selection
-    (letf! ((#'delete-other-windows #'ignore)
-            (#'delete-window        #'ignore))
-      (apply fn args))))
-#+end_src
-
-**** DONE Display TODO selection beneath selected window and shrink to fit
-#+begin_src emacs-lisp :tangle yes
-(defadvice! my/org-fix-popup-window-shrinking-a (fn &rest args)
-    "`+popup--org-fix-popup-window-shrinking-a'
-Hides the mode-line in *Org tags* buffer so you can actually see its
-content and displays it in a side window without deleting all other windows.
-Ugh, such an ugly hack."
-    :around #'org-fast-tag-selection
-    :around #'org-fast-todo-selection
-    (letf! ((defun read-char-exclusive (&rest args)
-              (message nil)
-              (apply read-char-exclusive args))
-            (defun split-window-vertically (&optional _size)
-              (funcall split-window-vertically (- 0 window-min-height 1)))
-            (defun org-fit-window-to-buffer (&optional window max-height min-height shrink-only)
-              (when (> (window-buffer-height window)
-                       (window-height window))
-                (fit-window-to-buffer window (window-buffer-height window)))))
-      (apply fn args)))
-#+end_src
-
-**** DONE Save org source edit buffers when switching workspaces
-#+begin_src emacs-lisp :tangle yes
-(after! org
-  (defadvice! my/org-edit-src-exit-a (fn &rest args)
-    "`+popup--org-edit-src-exit-a'
-If you switch workspaces or the src window is recreated..."
-    :around #'org-edit-src-exit
-    (let* ((window (selected-window))
-           (side-p (+buffer-group-side-window-p window)))
-      (prog1 (apply fn args)
-        (when (and side-p (window-live-p window))
-          (delete-window window))))))
-#+end_src
-
-**** STRT Buffer group definition
-For more buffer names, search for ~get-buffer-create~ in the Org package.
-
-#+begin_src emacs-lisp :tangle yes
-(buffer-group-side-window-setup
- (buffer-group-define org-prompt
-   `(:names ("^\\*Org Note\\*")))
- '((slot . 1)))
-#+end_src
-
-*** Magit [2/3]
-**** LOOP Buffer group definition
-For now, I am mostly just using Doom's configuration. It could maybe use a bit
-of improvement, but I'm used to it and generally like it.
-
-#+begin_src emacs-lisp :tangle no
-(buffer-group-side-window-setup
- (buffer-group-define magit-edit
-   `(:names ("^COMMIT_EDITMSG")))
- '((side . bottom) (slot . 1)))
-#+end_src
-
-**** DONE Show log selection windows in a side window
-One use case is with "instant fixup" windows.
-
-#+begin_src emacs-lisp :tangle yes
-(buffer-group-side-window-setup
- (buffer-group-define magit-select
-   `(:modes (magit-log-select-mode))))
-#+end_src
-
-**** DONE Show hunk revert windows in a side window
-There are more use cases for =diff-hl= that may require different window
-arrangements, but this is all that matters to me right now.
-
-#+begin_src emacs-lisp :tangle yes
-(buffer-group-side-window-setup
- (buffer-group-define diff-hl
-   `(:names ("^\\*diff-hl\\*$"))))
-#+end_src
-
-*** Docker [1/2]
-**** DONE Buffer group definition
-#+begin_src emacs-lisp :tangle yes
-(buffer-group-side-window-setup
- (buffer-group-define docker
-   `(:names ("^\\*docker-\\(?:containers\\|images\\|networks\\|volumes\\)")
-     :modes (docker-container-mode
-             docker-image-mode
-             docker-volume-mode
-             docker-network-mode)))
- '((side . top)))
-
-(buffer-group-property-pushnew
- 'diagnostics :names "^\\* docker container logs ")
-#+end_src
-
-**** TODO Configure Transient windows
-Currently, Transient buffers open in the window below the selected window. IIRC,
-Doom sets this option in the Magit configuration. I don't know if I like that.
-
-*** Flycheck [1/1]
-**** DONE Buffer group definition
-#+begin_src emacs-lisp :tangle yes
-(buffer-group-property-pushnew
- 'diagnostics :names "^\\*Flycheck errors\\*")
-
-(buffer-group-property-pushnew
- 'diagnostics :modes 'flycheck-error-list-mode)
-#+end_src
-
-*** Keybinds [0/1]
-**** STRT Replacements for =:ui popup= bindings
-#+begin_src emacs-lisp :tangle yes
-(map! "C-`"   #'window-toggle-side-windows)
-   ;; "C-~"   #'+popup/raise
-   ;; "C-x p" #'+popup/other
-#+end_src
-
-*** Fallbacks [1/1]
-**** DONE Open buffers in the current window by default
+*** DONE Open buffers in the current window by default
 This is cool, but it screws up some nice things that Doom does for Magit
 (although eventually, I'd like to fine-tune Magit, as well):
 
@@ -1017,6 +658,13 @@ Instead of that, let's try something a bit milder and see how it goes:
 
 #+begin_src emacs-lisp :tangle yes
 (setq display-buffer-base-action '((display-buffer-same-window) . nil))
+#+end_src
+
+*** STRT Replace key bindings for =:ui popup=
+#+begin_src emacs-lisp :tangle yes
+(map! "C-`"   #'window-toggle-side-windows)
+   ;; "C-~"   #'+popup/raise
+   ;; "C-x p" #'+popup/other
 #+end_src
 
 ** deft [0/0] :ARCHIVE:
@@ -1789,6 +1437,14 @@ I just need to test this functionality.
   ("l" (table-generate-source 'latex) "LaTeX")
   ("c" (table-generate-source 'cals) "CALS")
   ("SPC" hydra-table/body "Menu" :exit 1))
+#+end_src
+
+** ilist [1/1] :eeowaa:
+**** DONE Window configuration
+#+begin_src emacs-lisp :tangle yes
+(setq imenu-list-mode-line-format "  Ilist"
+      imenu-list-position 'right
+      imenu-list-size 35) ;; same as treemacs
 #+end_src
 
 ** indent-guides [0/0] :ARCHIVE:
@@ -4152,6 +3808,7 @@ pipx install ansible-core
 ansible-galaxy collection install community.general
 #+end_src
 
+** cloudformation [0/0] :eeowaa:ARCHIVE:
 ** debugger [1/9]
 References:
 + https://www.youtube.com/watch?v=0bilcQVSlbM
@@ -4792,6 +4449,7 @@ echo "Hi, ${name}!"
 
 A workaround is to simply *not export* the results.
 
+** elasticsearch [0/0] :eeowaa:
 ** eval [0/0]
 ** gist [0/0] :ARCHIVE:
 ** kubernetes [1/1] :eeowaa:
@@ -5073,6 +4731,7 @@ use Git Flow, but I do use worktrees, so this behavior is backwards for me.
 #+end_src
 
 ** make [0/0]
+** nginx [0/0] :eeowaa:
 ** pass [0/0] :ARCHIVE:
 ** pdf [1/1]
 *** COMMENT Documentation

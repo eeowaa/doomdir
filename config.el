@@ -39,18 +39,6 @@ buffer in current window."
   ;; replaces `+workspace/close-window-or-workspace'
   "d" #'my/toggle-window-dedicated)
 
-;; NOTE For whatever reason, I cannot use :defer to lazy-load `imenu-list'
-;; without it breaking
-(use-package! imenu-list
-  :after imenu
-  :init
-  (define-key! doom-leader-open-map "i" #'imenu-list-minor-mode))
-
-(after! which-key
-  (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
-    (cl-pushnew `((,(format "\\`%s o i\\'" prefix-re)) nil . "Ilist")
-                which-key-replacement-alist)))
-
 (setq all-the-icons-scale-factor 1.0)
 
 (setq extended-command-suggest-shorter nil)
@@ -80,178 +68,11 @@ buffer in current window."
 
 (setq window-resize-pixelwise t)
 
-(dolist (cmd (list #'+evil--window-swap
-                   #'evil-window-move-very-bottom
-                   #'evil-window-move-very-top
-                   #'evil-window-move-far-left
-                   #'evil-window-move-far-right))
-  (advice-add cmd :around #'+buffer-group-side-windows-save-a))
-
-(after! which-key
-  (which-key-setup-minibuffer))
-
-(after! undo-tree
-  (buffer-group-side-window-setup
-   (buffer-group-define undo-tree
-     `(:names (,(concat "^" (regexp-quote undo-tree-visualizer-buffer-name)))))
-   '((side . left) (slot . 1)))
-
-  (buffer-group-side-window-setup
-   (buffer-group-define undo-tree-diff
-     `(:names (,(concat "^" (regexp-quote undo-tree-diff-buffer-name)))))))
-
-(defadvice! my/undo-tree-diff-display-buffer-a (&optional node)
-  "Display an undo-tree diff buffer using `display-buffer'."
-  :override '(undo-tree-visualizer-show-diff undo-tree-visualizer-update-diff)
-  (setq undo-tree-visualizer-diff t)
-  (let ((buff (with-current-buffer undo-tree-visualizer-parent-buffer
-                (undo-tree-diff node))))
-    (display-buffer buff)))
-
-(setq help-window-select t
-      helpful-switch-buffer-function
-      (lambda (buffer-or-name)
-        (interactive)
-        (pop-to-buffer buffer-or-name #'display-buffer-reuse-mode-window)))
-
-(setq Man-notify-method 'pushy)
-
-(buffer-group-side-window-setup
- (buffer-group-define help
-   `(:names ("^\\*\\(?:[Hh]elp*\\|Apropos\\)"
-             "^\\*lsp-help"
-             "^\\*Shortdoc ")
-     :modes (helpful-mode help-mode apropos-mode
-             lsp-help-mode
-             shortdoc-mode)))
- '((slot . 1)))
-
-(buffer-group-reuse-window-setup
- (buffer-group-define reference
-   `(:names ("^\\*info\\*"
-             "^\\*\\(?:Wo\\)?Man "
-             "^\\*Kubernetes Docs ")
-     :modes (Info-mode
-             Man-mode woman-mode
-             kubedoc-mode))))
-
-(buffer-group-reuse-window-setup
- (buffer-group-define pdf
-   `(:names ("*\\.pdf$")
-     :modes (pdf-view-mode))))
-
-;; This is the default, but it's good to specify it
-(setq treemacs-display-in-side-window t
-      treemacs-position 'left)
-
-(setq imenu-list-mode-line-format "  Ilist"
-      imenu-list-position 'right
-      imenu-list-size 35) ;; same as treemacs
-
-(after! imenu-list
-  (buffer-group-side-window-setup
-   (buffer-group-define imenu
-     `(:names (,(concat "^" (regexp-quote imenu-list-buffer-name) "$"))
-       :modes (imenu-list-major-mode)))
-   `((side . ,imenu-list-position)
-     (window-width . ,imenu-list-size))))
-
-(buffer-group-side-window-setup
- (buffer-group-define output
-   `(:names ("^\\*Shell Command Output\\*"
-             "^\\*Pp Eval Output\\*"))))
-
-(buffer-group-side-window-setup
- (buffer-group-define repl
-   `(:names ("^\\*ielm\\*")
-     :modes (inferior-emacs-lisp-mode))))
-
-(buffer-group-side-window-setup
- (buffer-group-define popup-term
-   `(:names ("^\\*doom:\\(?:v?term\\|e?shell\\)-popup"))))
-
-(after! org
-  (defadvice! my/suppress-delete-other-windows-a (fn &rest args)
-    "`+popup--suppress-delete-other-windows-a'
-Org has a scorched-earth window management policy I'm not fond of. i.e. it
-kills all other windows just so it can monopolize the frame. No thanks. We can
-do better."
-    :around #'org-add-log-note
-    :around #'org-capture-place-template
-    :around #'org-export--dispatch-ui
-    :around #'org-agenda-get-restriction-and-command
-    :around #'org-goto-location
-    :around #'org-fast-tag-selection
-    :around #'org-fast-todo-selection
-    (letf! ((#'delete-other-windows #'ignore)
-            (#'delete-window        #'ignore))
-      (apply fn args))))
-
-(defadvice! my/org-fix-popup-window-shrinking-a (fn &rest args)
-    "`+popup--org-fix-popup-window-shrinking-a'
-Hides the mode-line in *Org tags* buffer so you can actually see its
-content and displays it in a side window without deleting all other windows.
-Ugh, such an ugly hack."
-    :around #'org-fast-tag-selection
-    :around #'org-fast-todo-selection
-    (letf! ((defun read-char-exclusive (&rest args)
-              (message nil)
-              (apply read-char-exclusive args))
-            (defun split-window-vertically (&optional _size)
-              (funcall split-window-vertically (- 0 window-min-height 1)))
-            (defun org-fit-window-to-buffer (&optional window max-height min-height shrink-only)
-              (when (> (window-buffer-height window)
-                       (window-height window))
-                (fit-window-to-buffer window (window-buffer-height window)))))
-      (apply fn args)))
-
-(after! org
-  (defadvice! my/org-edit-src-exit-a (fn &rest args)
-    "`+popup--org-edit-src-exit-a'
-If you switch workspaces or the src window is recreated..."
-    :around #'org-edit-src-exit
-    (let* ((window (selected-window))
-           (side-p (+buffer-group-side-window-p window)))
-      (prog1 (apply fn args)
-        (when (and side-p (window-live-p window))
-          (delete-window window))))))
-
-(buffer-group-side-window-setup
- (buffer-group-define org-prompt
-   `(:names ("^\\*Org Note\\*")))
- '((slot . 1)))
-
-(buffer-group-side-window-setup
- (buffer-group-define magit-select
-   `(:modes (magit-log-select-mode))))
-
-(buffer-group-side-window-setup
- (buffer-group-define diff-hl
-   `(:names ("^\\*diff-hl\\*$"))))
-
-(buffer-group-side-window-setup
- (buffer-group-define docker
-   `(:names ("^\\*docker-\\(?:containers\\|images\\|networks\\|volumes\\)")
-     :modes (docker-container-mode
-             docker-image-mode
-             docker-volume-mode
-             docker-network-mode)))
- '((side . top)))
-
-(buffer-group-property-pushnew
- 'diagnostics :names "^\\* docker container logs ")
-
-(buffer-group-property-pushnew
- 'diagnostics :names "^\\*Flycheck errors\\*")
-
-(buffer-group-property-pushnew
- 'diagnostics :modes 'flycheck-error-list-mode)
+(setq display-buffer-base-action '((display-buffer-same-window) . nil))
 
 (map! "C-`"   #'window-toggle-side-windows)
    ;; "C-~"   #'+popup/raise
    ;; "C-x p" #'+popup/other
-
-(setq display-buffer-base-action '((display-buffer-same-window) . nil))
 
 ;; `always' is just a no-op that returns `t'
 (defadvice! my/never-hide-modeline-a (&rest _)
@@ -681,6 +502,10 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   ("l" (table-generate-source 'latex) "LaTeX")
   ("c" (table-generate-source 'cals) "CALS")
   ("SPC" hydra-table/body "Menu" :exit 1))
+
+(setq imenu-list-mode-line-format "  Ilist"
+      imenu-list-position 'right
+      imenu-list-size 35) ;; same as treemacs
 
 (setq +ligatures-in-modes '(org-mode)
       +ligatures-extras-in-modes '(org-mode))

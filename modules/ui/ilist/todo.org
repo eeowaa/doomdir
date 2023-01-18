@@ -1,0 +1,28 @@
+* TODO [#C] Remap "<" and ">" to window resize functions in Ilist :feat:
+Right now, those keys are not being used.
+
+* TODO [#C] Always display Imenu for current buffer in Ilist :tweak:
+If the current buffer does not have Imenu entries, I do not want old ones to
+persist in the Ilist, because I find that confusing. Actually, maybe I just want
+Ilist to display entries for the list selected buffer (in the current workspace)
+that is derived from ~prog-mode~.
+
+In any case, the following does *not* work, because it causes Ilist to update
+(and display nothing) when I am just doing stuff in the minibuffer (or within
+Ilist itself!), and I'd like to keep it displaying what it had before in those
+obvious cases:
+
+#+begin_src emacs-lisp :tangle no
+(setq imenu-list-persist-when-imenu-index-unavailable nil)
+#+end_src
+
+* TODO [#C] Keep Ilist the same same size as before when opening and closing it :tweak:
+Could hook into ~imenu-list-quit-window~ and save a variable such as
+~+ilist--popup-size~, and then default to that when opening back up.
+Look at how Treemacs accomplishes this.
+
+* TODO [#C] Disable the cursor in Ilist buffers (like Treemacs) :tweak:
+* TODO [#C] Use a different line truncate character than "$" in Ilist :tweak:
+This is especially annoying when lines get truncated despite the text being
+scaled down, because the "$" character is full-sized. Treemacs has the same
+problem.
