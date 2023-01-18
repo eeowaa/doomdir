@@ -4594,13 +4594,26 @@ is currently only a problem on Emacs 28.
 *** TODO [#C] Add definitions to word completions
 Seems like an offline dictionary will be required for this.
 
-** lsp [5/7]
+** lsp [6/8]
 *** COMMENT Documentation
 + [[doom-modules:tools/lsp/README.org][tools/lsp module documentation]]
 + [[doom:.local/straight/repos/lsp-mode/README.md][lsp-mode package README]]
 + [[doom:.local/straight/repos/lsp-mode/docs/page][lsp-mode package documentation]]
   - [[doom:.local/straight/repos/lsp-mode/docs/page/performance.md][performance.md]]
   - [[doom:.local/straight/repos/lsp-mode/docs/page/troubleshooting.md][troubleshooting.md]]
+
+*** DONE [#A] Unpin package :hack:
+Today (12/23/2022), there are three reasons why I want to unpin =lsp-mode=:
+
+1. Updated =eldoc= support (for [[*Truncate eldoc messages to fit in a single minibuffer line][this item]])
+2. Native =jsonrpc= support (for performance improvements)
+
+This is a fairly risky operation, but let's see how it goes.
+
+#+begin_src emacs-lisp :tangle packages.el
+;; If this causes issues, try `(unpin! (:tools lsp))' instead
+(unpin! lsp-mode)
+#+end_src
 
 *** OKAY [#A] Fix the size of the popup buffer invoked by =M-x lsp=
 :LOGBOOK:
@@ -4644,17 +4657,16 @@ The help window is invoked with =K= (~+lookup/documentation~).
       :quit t)))
 #+end_src
 
-*** DONE [#A] Unpin package :hack:
-Today (12/23/2022), there are three reasons why I want to unpin =lsp-mode=:
+*** DONE [#C] Do not display code actions in the modeline
+The main reason why I want to disable this feature is because with
+~tab-bar-mode~ enabled, the code actions are displayed in the tab bar, which I
+do not like. Also, the right-aligned contents of the tab bar can sometimes wrap
+to a new line when LSP code actions are displayed there, too. I could probably
+fix these things, but I do not see much benefit in doing so. Reference:
+https://emacs-lsp.github.io/lsp-mode/page/main-features/#code-actions-on-modeline
 
-1. Updated =eldoc= support (for [[*Truncate eldoc messages to fit in a single minibuffer line][this item]])
-2. Native =jsonrpc= support (for performance improvements)
-
-This is a fairly risky operation, but let's see how it goes.
-
-#+begin_src emacs-lisp :tangle packages.el
-;; If this causes issues, try `(unpin! (:tools lsp))' instead
-(unpin! lsp-mode)
+#+begin_src emacs-lisp :tangle yes
+(setq lsp-modeline-code-actions-segments nil)
 #+end_src
 
 *** LOOP [#B] Provide better integration with lsp-ui-imenu :feat:

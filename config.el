@@ -1388,6 +1388,8 @@ which causes problems even if there is no existing buffer."
       :select nil ;; NOTE I changed this from Doom's default of `t'
       :quit t)))
 
+(setq lsp-modeline-code-actions-segments nil)
+
 (define-key! doom-leader-toggle-map
   "i" #'lsp-ui-imenu)
 
