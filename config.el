@@ -1378,9 +1378,6 @@ which causes problems even if there is no existing buffer."
   ;; REVIEW Ensure that `set-docsets!' is only called for modes derived from `prog-mode'
   (add-hook! prog-mode #'my/ensure-docsets))
 
-(after! lsp-mode
-  (setq lsp-restart 'auto-restart))
-
 (after! lsp-ui
   (setq lsp-ui-doc-show-with-mouse t
         lsp-ui-doc-delay 0.5))

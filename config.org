@@ -4604,7 +4604,7 @@ is currently only a problem on Emacs 28.
 *** TODO [#C] Add definitions to word completions
 Seems like an offline dictionary will be required for this.
 
-** lsp [6/8]
+** lsp [5/8]
 *** COMMENT Documentation
 + [[doom-modules:tools/lsp/README.org][tools/lsp module documentation]]
 + [[doom:.local/straight/repos/lsp-mode/README.md][lsp-mode package README]]
@@ -4636,12 +4636,6 @@ When the frame is too small (e.g. its default size), the first few menu items in
 the popup window are cut off, and all you see are options to exclude the file
 from the LSP workspace. Unless you know about the other available options, LSP
 won't work for you. Unfortunately, resizing the frame does not help.
-
-*** DONE [#B] Automatically restart the LSP server when it crashes
-#+begin_src emacs-lisp :tangle yes
-(after! lsp-mode
-  (setq lsp-restart 'auto-restart))
-#+end_src
 
 *** DONE [#B] Enable documentation popups upon mouseover
 This is also possible via =SPC c l h g= (~lsp-ui-doc-glance~).
@@ -4677,6 +4671,13 @@ https://emacs-lsp.github.io/lsp-mode/page/main-features/#code-actions-on-modelin
 
 #+begin_src emacs-lisp :tangle yes
 (setq lsp-modeline-code-actions-segments nil)
+#+end_src
+
+*** LOOP [#B] Automatically restart the LSP server when it crashes
+This can result in infinite loops, so I've disabled it for now:
+#+begin_src emacs-lisp :tangle no
+(after! lsp-mode
+  (setq lsp-restart 'auto-restart))
 #+end_src
 
 *** LOOP [#B] Provide better integration with lsp-ui-imenu :feat:
@@ -4769,7 +4770,20 @@ use Git Flow, but I do use worktrees, so this behavior is backwards for me.
 #+end_src
 
 ** make [0/0]
-** nginx [0/0] :eeowaa:
+** nginx [1/1] :eeowaa:
+*** DONE [#A] Install prerequisites
+**** DONE macOS
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `tools/nginx` module
+pipx install nginx-language-server
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `tools/nginx` module
+pipx install nginx-language-server
+#+end_src
+
 ** pass [0/0] :ARCHIVE:
 ** pdf [1/1]
 *** COMMENT Documentation
@@ -4985,23 +4999,10 @@ Modules that bring support for a language or group of languages to Emacs.
 ;;; :lang
 #+end_src
 
-** Miscellany [2/3]
+** Miscellany [1/2]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
-
-*** DONE [#A] Install prerequisites
-**** DONE macOS
-#+begin_src sh :tangle install/macos.sh
-# Install prerequisites for `lang/Miscellany` module
-pipx install nginx-language-server
-#+end_src
-
-**** DONE Fedora
-#+begin_src sh :tangle install/fedora.sh
-# Install prerequisites for `lang/Miscellany` module
-pipx install nginx-language-server
-#+end_src
 
 *** DONE [#A] Install packages
 #+begin_src emacs-lisp :tangle packages.el
