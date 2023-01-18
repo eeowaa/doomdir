@@ -606,6 +606,8 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   (when initial-window-system
     (setq aw-scope 'visible)))
 
+(setq aw-background nil)
+
 (map! :leader
       (:when (modulep! :ui workspaces)
        (:prefix-map ("TAB" . "workspace")

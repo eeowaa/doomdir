@@ -1974,7 +1974,7 @@ Observations:
 Displays a tilde(~) in the left fringe to indicate an empty line, similar to Vi.
 #+end_quote
 
-** window-select [1/2]
+** window-select [2/4]
 #+begin_quote
 This module provides several methods for selecting windows without the use of
 the mouse or spatial navigation (e.g. =C-w {h,j,k,l}=).
@@ -2007,11 +2007,27 @@ Such frames are always considered visible, whether or not they are
 currently being displayed on the terminal.
 #+end_quote
 
-*** TODO [#B] Show =ace-window= selection indicators in windows scrolled to the right
-Oftentimes, the ~*Messages*~ buffer is scrolled to the right due to long lines
-being displayed. When this is the case, I cannot easily select the window using
-~ace-window~, because the red letter that should be in the top-left corner of
-the window is not displayed.
+*** DONE [#B] Do not dim the buffer content during selection
+#+begin_src emacs-lisp :tangle yes
+(setq aw-background nil)
+#+end_src
+
+*** LOOP [#B] Show =ace-window= selection indicators in ~*info*~ buffers
+Displaying the indicator in the bottom-left instead of the top-left means that
+the overlay displayed by ~*info*~ buffers does not hide the =ace-window=
+indicator.
+
+#+begin_src emacs-lisp :tangle no
+(setq aw-char-position 'left)
+#+end_src
+
+*** LOOP [#B] Make the selection character more visible
+#+begin_src emacs-lisp :tangle no
+(custom-set-faces!
+  '(aw-leading-char-face
+    :foreground "white" :background "red"
+    :weight bold :height 2.5 :box (:line-width 10 :color "red")))
+#+end_src
 
 ** workspaces [2/3]
 #+begin_quote
