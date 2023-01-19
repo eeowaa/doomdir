@@ -1748,7 +1748,7 @@ Exclude ~tab-line-mode~ from major modes corresponding to buffer groups that are
 configured to display their buffers in side windows:
 
 #+begin_src emacs-lisp :tangle yes
-(after! tab-line
+(after! vimish-tab
   (dolist (entry display-buffer-alist)
     (when-let ((condition (car entry))
                (fn-name (and (symbolp condition) (symbol-name condition)))
@@ -1757,13 +1757,15 @@ configured to display their buffers in side windows:
                (action (and (listp (cdr entry)) (cdr entry)))
                (alist (cdr action)))
       (when (memq 'side (mapcar #'car alist))
-        (mapc (lambda (mode) (cl-pushnew mode tab-line-exclude-modes))
+        (mapc (lambda (mode) (cl-pushnew mode vimish-tab-exclude-names))
+              (buffer-group-plist-get group :names))
+        (mapc (lambda (mode) (cl-pushnew mode vimish-tab-exclude-modes))
               (buffer-group-plist-get group :modes))))))
 #+end_src
 
 Exclude ~tab-line-mode~ from term popups.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (defun my/disable-tab-line-a (fn &rest args)
   "Disable `tab-line-mode' in the current buffer.
 Use this as :around advice for functions that display buffers."

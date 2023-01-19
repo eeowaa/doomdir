@@ -569,7 +569,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (after! tab-bar
   (setq tab-bar-tab-face-function #'tab-bar-tab-face-default))
 
-(after! tab-line
+(after! vimish-tab
   (dolist (entry display-buffer-alist)
     (when-let ((condition (car entry))
                (fn-name (and (symbolp condition) (symbol-name condition)))
@@ -578,25 +578,10 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
                (action (and (listp (cdr entry)) (cdr entry)))
                (alist (cdr action)))
       (when (memq 'side (mapcar #'car alist))
-        (mapc (lambda (mode) (cl-pushnew mode tab-line-exclude-modes))
+        (mapc (lambda (mode) (cl-pushnew mode vimish-tab-exclude-names))
+              (buffer-group-plist-get group :names))
+        (mapc (lambda (mode) (cl-pushnew mode vimish-tab-exclude-modes))
               (buffer-group-plist-get group :modes))))))
-
-(defun my/disable-tab-line-a (fn &rest args)
-  "Disable `tab-line-mode' in the current buffer.
-Use this as :around advice for functions that display buffers."
-  (letf! ((defadvice disable-tabs-a (buffer-or-name &rest _)
-            :before #'display-buffer
-            (with-current-buffer buffer-or-name
-              (setq-local tab-line-exclude t)
-              ;; HACK This would probably not be necessary if I added an option
-              ;; to `vimish-tab' to ignore names as well as modes.
-              (when vimish-tab-mode
-                (vimish-tab-mode -1)))))
-    (apply fn args)))
-
-(dolist (package '(term vterm shell eshell))
-  (let ((fn (intern (format "+%s/toggle" package))))
-    (advice-add fn :around #'my/disable-tab-line-a)))
 
 (custom-set-faces!
   '(tab-bar :foreground "white" :background "black"))

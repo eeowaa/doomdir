@@ -5,6 +5,11 @@
 (require 'cl-lib)
 (require 'tab-line)
 
+(defgroup vimish-tab nil
+  "Wrapper around `tab-line' using Vim idioms."
+  :group 'convenience
+  :version "27.1")
+
 
 ;;; Unused helper functions
 
@@ -91,11 +96,15 @@ When NOERROR is provided, do not signal an error."
 
 ;;; Tab buffers
 
-(defvar vimish-tab-new-buffer-function #'vimish-tab-default-buffer
-  "Function to return a buffer in a newly-created tab.")
+(defcustom vimish-tab-new-buffer-function #'vimish-tab-default-buffer
+  "Function to return a buffer in a newly-created tab."
+  :type 'function
+  :group 'vimish-tab)
 
-(defvar vimish-tab-default-buffer-name "*scratch*"
-  "Name of default buffer opened by `vimish-tab-default-buffer'.")
+(defcustom vimish-tab-default-buffer-name "*scratch*"
+  "Name of default buffer opened by `vimish-tab-default-buffer'."
+  :type 'string
+  :group 'vimish-tab)
 
 (defun vimish-tab-default-buffer ()
   (get-buffer-create vimish-tab-default-buffer-name))
@@ -198,8 +207,12 @@ Creates new window parameters if they are missing and fixes corruption."
 
 (vimish-tab--set 'tab-line-tab-name-format-function #'vimish-tab-name-format)
 
-(defvar vimish-tab-show 1
-  "Analogous to `tab-bar-show', except for the tab-line.")
+(defcustom vimish-tab-show 1
+  "Analogous to `tab-bar-show', except for the tab-line."
+  :type '(choice (const :tag "Always" t)
+                 (const :tag "When more than one tab" 1)
+                 (const :tag "Never" nil))
+  :group 'vimish-tab)
 
 (defun vimish-tab-show-p (&rest _)
   "Whether or not to display tabs for the current window."
@@ -429,6 +442,16 @@ If N is omitted, default to the last position."
 
 ;;; Minor modes
 
+(defvaralias 'vimish-tab-exclude 'tab-line-exclude)
+(defvaralias 'vimish-tab-exclude-modes 'tab-line-exclude-modes)
+
+(defcustom vimish-tab-exclude-names nil
+  "List of buffer names regexps for which `vimish-tab' is not enabled.
+Buffers under any of these major modes will not show the tab line in
+their windows, even if `global-vimish-tab-mode' is enabled."
+  :type 'list
+  :group 'vimish-tab)
+
 ;;;###autoload
 (define-minor-mode vimish-tab-mode
   "Toggle Vim-like tabs for the current buffer.
@@ -440,12 +463,15 @@ You probably want to use `global-vimish-tab-mode' instead."
     (tab-line-mode -1)))
 
 (defun vimish-tab-mode--turn-on ()
-  "The same as `tab-line-mode--turn-on', except enable 'vimish-tab-mode'."
+  "Similar to `tab-line-mode--turn-on', except enable 'vimish-tab-mode'.
+Also respects the `vimish-tab-exclude-names' variable."
   (unless (or (minibufferp)
-              (string-match-p "\\` " (buffer-name))
-              (memq major-mode tab-line-exclude-modes)
-              (get major-mode 'tab-line-exclude)
-              (buffer-local-value 'tab-line-exclude (current-buffer)))
+              (let ((buffer-name (buffer-name)))
+                (cl-some (lambda (re) (string-match-p re buffer-name))
+                         (cons "\\` " vimish-tab-exclude-names)))
+              (memq major-mode vimish-tab-exclude-modes)
+              (get major-mode 'vimish-tab-exclude)
+              (buffer-local-value 'vimish-tab-exclude (current-buffer)))
     (vimish-tab-mode +1)))
 
 ;;;###autoload
