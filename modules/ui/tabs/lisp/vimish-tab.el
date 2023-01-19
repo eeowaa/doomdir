@@ -298,17 +298,22 @@ This function is assigned to the `select' alist entry of each tab."
 
 (defvaralias 'vimish-tab-new-button-show 'tab-line-new-button-show)
 
-;; TODO Handle argument
-(defun vimish-tab-new (&optional _n)
+(defun vimish-tab-new (&optional n)
   "Function to call when adding a new window tab.
-The new tab is inserted after the Nth tab (default current)."
-  (interactive "<N>")
+The new tab is inserted after the Nth tab (default current) and
+is selected after insertion."
+  (interactive "P")
   (let* ((tabs (vimish-tab-list))
+         (index (if (integerp n) n
+                  (1+ (vimish-tab-index))))
          (buffer (funcall vimish-tab-new-buffer-function))
-         (index (length tabs))
-         (tab (vimish-tab--make-tab buffer index)))
-    (vimish-tab-select-nth index
-                           (append tabs (list tab)))))
+         (tab (vimish-tab--make-tab buffer index))
+         (left (seq-take tabs index))
+         (right (mapc (lambda (tab)
+                        (cl-incf (alist-get 'index tab)))
+                      (nthcdr index tabs)))
+         (new-tabs (append left (list tab) right)))
+    (vimish-tab-select-nth index new-tabs)))
 
 (vimish-tab--set 'tab-line-new-tab-choice #'vimish-tab-new)
 

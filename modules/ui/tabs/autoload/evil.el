@@ -2,18 +2,18 @@
 ;;;###if (modulep! :editor evil)
 
 ;;;###autoload (autoload '+tabs:new-window-tab "ui/tabs/autoload/evil" nil t)
-(evil-define-command +tabs:new-window-tab ()
+(evil-define-command +tabs:new-window-tab (&optional count)
   "Ex wrapper around `tab-line-new-tab'."
-  (interactive)
-  (funcall #'tab-line-new-tab))
+  (interactive "<c>")
+  (funcall #'tab-line-new-tab count))
 
 ;;;###autoload (autoload '+tabs:new-blank-window-tab "ui/tabs/autoload/evil" nil t)
-(evil-define-command +tabs:new-blank-window-tab ()
+(evil-define-command +tabs:new-blank-window-tab (&optional count)
   "Ex wrapper to open a new blank window tab."
-  (interactive)
+  (interactive "<c>")
   (let ((vimish-tab-default-buffer-name "*scratch*")
         (vimish-tab-new-buffer-function #'vimish-tab-default-buffer))
-    (funcall #'vimish-tab-new)))
+    (funcall #'vimish-tab-new count)))
 
 
 ;;;###autoload (autoload '+tabs:close-window-tab "ui/tabs/autoload/evil" nil t)
