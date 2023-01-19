@@ -1339,6 +1339,28 @@ which causes problems even if there is no existing buffer."
 ;; Remove hook installed by Doom
 (remove-hook 'dap-ui-mode-hook 'dap-ui-controls-mode)
 
+(setq! docker-image-columns
+       '((:name "Repository" :width 49 :template "{{ json .Repository }}" :sort nil :format nil)
+         (:name "Tag" :width 9 :template "{{ json .Tag }}" :sort nil :format nil)
+         (:name "Id" :width 13 :template "{{ json .ID }}" :sort nil :format nil)
+         (:name "Created" :width 20 :template "{{ json .CreatedAt }}" :sort nil :format (lambda (x) (format-time-string "%F %T" (date-to-time x))))
+         (:name "Size" :width 10 :template "{{ json .Size }}" :sort docker-utils-human-size-predicate :format nil))
+
+       docker-container-columns
+       '((:name "Id" :width 13 :template "{{ json .ID }}" :sort nil :format nil)
+         (:name "Names" :width 35 :template "{{ json .Names }}" :sort nil :format nil)
+         (:name "Image" :width 41 :template "{{ json .Image }}" :sort nil :format nil)
+         (:name "Command" :width 58 :template "{{ json .Command }}" :sort nil :format nil)
+         (:name "Ports" :width 10 :template "{{ json .Ports }}" :sort nil :format nil)
+         (:name "Status" :width 26 :template "{{ json .Status }}" :sort nil :format nil)
+         (:name "Created" :width 20 :template "{{ json .CreatedAt }}" :sort nil :format (lambda (x) (format-time-string "%F %T" (date-to-time x)))))
+
+       docker-network-columns
+       '((:name "Network ID" :width 13 :template "{{ json .ID }}" :sort nil :format nil)
+         (:name "Scope" :width 6 :template "{{ json .Scope }}" :sort nil :format nil)
+         (:name "Driver" :width 7 :template "{{ json .Driver }}" :sort nil :format nil)
+         (:name "Name" :width 50 :template "{{ json .Name }}" :sort nil :format nil)))
+
 ;; Replace default association with a more generic one
 (delq! "/Dockerfile\\(?:\\.[^/\\]*\\)?\\'" auto-mode-alist #'assoc-string)
 (pushnew! auto-mode-alist
