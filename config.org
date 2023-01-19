@@ -1681,12 +1681,27 @@ Option 1:
 #+begin_src emacs-lisp :tangle no
 (defalias '+tabs:next-or-goto #'+tabs:next-window-tab)
 (defalias '+tabs:previous-or-goto #'+tabs:prev-window-tab)
+;; ...
 #+end_src
 
 Option 2:
 #+begin_src emacs-lisp :tangle yes
-(map! :n "gt" #'+tabs:next-window-tab
-      :n "gT" #'+tabs:prev-window-tab)
+(map! :nv "gt" #'+tabs:next-window-tab
+      :nv "gT" #'+tabs:prev-window-tab
+      (:after evil-collection-magit
+       :map magit-status-mode-map
+       :nv "gt" #'+tabs:next-window-tab
+       :nv "gT" #'+tabs:prev-window-tab))
+
+;; NOTE Bindings for `info-mode' are set by `evil-collection-info-setup', which
+;; is not called directly in `evil-collection-info'. Apparently this sort of
+;; configuration is special, as evidenced by the `info' entry in the
+;; `evil-collection-config' custom option. Advice provides an easy workaround:
+(defadvice! my/window-tab-info-bindings-a (&rest _)
+  :after #'evil-collection-info-setup
+  (evil-collection-define-key 'normal 'Info-mode-map
+    "gt" #'+tabs:next-window-tab
+    "gT" #'+tabs:prev-window-tab))
 #+end_src
 
 *** DONE [#A] Bind =evil-ex= commands

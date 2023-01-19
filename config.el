@@ -546,8 +546,22 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
                   :advice my/evil-goggles--jump-advice)
                 evil-goggles--commands)))
 
-(map! :n "gt" #'+tabs:next-window-tab
-      :n "gT" #'+tabs:prev-window-tab)
+(map! :nv "gt" #'+tabs:next-window-tab
+      :nv "gT" #'+tabs:prev-window-tab
+      (:after evil-collection-magit
+       :map magit-status-mode-map
+       :nv "gt" #'+tabs:next-window-tab
+       :nv "gT" #'+tabs:prev-window-tab))
+
+;; NOTE Bindings for `info-mode' are set by `evil-collection-info-setup', which
+;; is not called directly in `evil-collection-info'. Apparently this sort of
+;; configuration is special, as evidenced by the `info' entry in the
+;; `evil-collection-config' custom option. Advice provides an easy workaround:
+(defadvice! my/window-tab-info-bindings-a (&rest _)
+  :after #'evil-collection-info-setup
+  (evil-collection-define-key 'normal 'Info-mode-map
+    "gt" #'+tabs:next-window-tab
+    "gT" #'+tabs:prev-window-tab))
 
 (after! evil-ex
   (evil-ex-define-cmd "tabnew"      #'+tabs:new-blank-window-tab)
