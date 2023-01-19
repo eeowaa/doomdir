@@ -138,6 +138,12 @@ When NOERROR is provided, do not signal an error."
                                    (confirm-nonexistent-file-or-buffer)))))
     (quit (vimish-tab-default-buffer))))
 
+;; NOTE Without this, `find-file-noselect' will display the buffer in the
+;; selected tab in addition to displaying the buffer in the new tab.
+(defun vimish-tab-file-buffer (file)
+  (save-window-excursion
+    (find-file-noselect file)))
+
 (defun vimish-tab--update ()
   "Update the selected tab with current buffer info.
 Creates new window parameters if they are missing and fixes corruption."

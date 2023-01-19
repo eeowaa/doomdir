@@ -2,10 +2,14 @@
 ;;;###if (modulep! :editor evil)
 
 ;;;###autoload (autoload '+tabs:new-window-tab "ui/tabs/autoload/evil" nil t)
-(evil-define-command +tabs:new-window-tab (&optional count)
+(evil-define-command +tabs:new-window-tab (&optional count file)
   "Ex wrapper around `tab-line-new-tab'."
-  (interactive "<c>")
-  (funcall #'tab-line-new-tab count))
+  (interactive "<c><f>")
+  (if file
+      (let ((vimish-tab-new-buffer-function
+             (lambda () (vimish-tab-file-buffer file))))
+        (funcall #'vimish-tab-new count))
+    (funcall #'vimish-tab-new count)))
 
 ;;;###autoload (autoload '+tabs:new-blank-window-tab "ui/tabs/autoload/evil" nil t)
 (evil-define-command +tabs:new-blank-window-tab (&optional count)
