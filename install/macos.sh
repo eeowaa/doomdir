@@ -135,7 +135,7 @@ brew install perl git-absorb
 cpan install App::Git::Autofixup
 
 # Install prerequisites for `tools/nginx` module
-pipx install nginx-language-server
+pipx install --python `which python3.10` nginx-language-server
 
 # Install prerequisites for `tools/pdf` module
 brew install pkg-config poppler automake

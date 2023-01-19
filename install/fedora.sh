@@ -281,7 +281,7 @@ sudo dnf -y install perl
 cpan install App::Git::Autofixup
 
 # Install prerequisites for `tools/nginx` module
-pipx install nginx-language-server
+pipx install --python `which python3.10` nginx-language-server
 
 # Install prerequisites for `tools/terraform` module
 sudo dnf -y install terraform terraform-ls

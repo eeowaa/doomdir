@@ -4775,13 +4775,13 @@ use Git Flow, but I do use worktrees, so this behavior is backwards for me.
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/nginx` module
-pipx install nginx-language-server
+pipx install --python `which python3.10` nginx-language-server
 #+end_src
 
 **** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `tools/nginx` module
-pipx install nginx-language-server
+pipx install --python `which python3.10` nginx-language-server
 #+end_src
 
 ** pass [0/0] :ARCHIVE:
@@ -6552,7 +6552,7 @@ This module adds support for PHP 5.3+ (including PHP7).
 
 ** plantuml [0/0] :ARCHIVE:
 ** purescript [0/0] :ARCHIVE:
-** python [5/7]
+** python [6/8]
 :PROPERTIES:
 :CATEGORY: doom/python
 :END:
@@ -6602,19 +6602,6 @@ More than a simple "Hello World":
 + [[file:~/Documents/src/life/secret-santa/][Secret Santa project]]
 + [[file:~/org/life/notes.org::*Developing with interpreted languages][Notes for developing with interpreted languages]]
 
-*** DONE [#B] Set up fill column for PEP 8 compliance
-#+begin_src emacs-lisp :tangle yes
-(add-hook! python-mode
-  (setq fill-column 79)
-  (display-fill-column-indicator-mode))
-#+end_src
-
-*** DONE [#C] Filename-mode associations
-#+begin_src emacs-lisp :tangle yes
-(pushnew! auto-mode-alist '("pylint" . conf-mode)
-                          '("/activate\\'" . shell-script-mode))
-#+end_src
-
 *** DONE [#A] Fix quirks with keymaps
 #+begin_src emacs-lisp :tangle yes
 ;; Add "pipenv" label to "e" prefix key
@@ -6622,6 +6609,27 @@ More than a simple "Hello World":
   (map! :map python-mode-map
         :localleader
         :prefix ("e" . "pipenv")))
+#+end_src
+
+*** DONE [#B] Set up fill column for PEP 8 compliance
+#+begin_src emacs-lisp :tangle yes
+(add-hook! python-mode
+  (setq fill-column 79)
+  (display-fill-column-indicator-mode))
+#+end_src
+
+*** DONE [#B] Discover ~pipx~ virtualenvs with projectile
+#+begin_src emacs-lisp :tangle yes
+(after! projectile
+  (add-to-list 'projectile-project-root-files "pyvenv.cfg")
+  (add-to-list 'projectile-project-search-path
+               `(,(concat (file-name-as-directory (getenv "HOME")) ".local/pipx/venvs") . 1)))
+#+end_src
+
+*** DONE [#C] Filename-mode associations
+#+begin_src emacs-lisp :tangle yes
+(pushnew! auto-mode-alist '("pylint" . conf-mode)
+                          '("/activate\\'" . shell-script-mode))
 #+end_src
 
 *** STRT [#B] Integrate Pipenv with projectile :bug:
@@ -7503,10 +7511,7 @@ Some ideas for more project directories:
 
        ;; Personal source directories
        (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/work") 2)
-       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/life") 2)
-
-       ;; Helm charts
-       (cons (concat (file-name-as-directory (xdg-cache-home)) "helm/repository") 1)))
+       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/life") 2)))
 #+end_src
 
 *** DONE [#B] Remove =straight= package repos from =projectile=

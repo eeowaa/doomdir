@@ -1929,18 +1929,23 @@ Optional argument INFO is a plist of options."
           org-pomodoro-short-break-sound-args args
           org-pomodoro-long-break-sound-args args)))
 
-(add-hook! python-mode
-  (setq fill-column 79)
-  (display-fill-column-indicator-mode))
-
-(pushnew! auto-mode-alist '("pylint" . conf-mode)
-                          '("/activate\\'" . shell-script-mode))
-
 ;; Add "pipenv" label to "e" prefix key
 (after! pipenv
   (map! :map python-mode-map
         :localleader
         :prefix ("e" . "pipenv")))
+
+(add-hook! python-mode
+  (setq fill-column 79)
+  (display-fill-column-indicator-mode))
+
+(after! projectile
+  (add-to-list 'projectile-project-root-files "pyvenv.cfg")
+  (add-to-list 'projectile-project-search-path
+               `(,(concat (file-name-as-directory (getenv "HOME")) ".local/pipx/venvs") . 1)))
+
+(pushnew! auto-mode-alist '("pylint" . conf-mode)
+                          '("/activate\\'" . shell-script-mode))
 
 (after! dap-mode
   (setq dap-python-debugger 'debugpy))
@@ -2062,10 +2067,7 @@ ALIGN should be a keyword :left or :right."
 
        ;; Personal source directories
        (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/work") 2)
-       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/life") 2)
-
-       ;; Helm charts
-       (cons (concat (file-name-as-directory (xdg-cache-home)) "helm/repository") 1)))
+       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/life") 2)))
 
 ;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
 (after! projectile

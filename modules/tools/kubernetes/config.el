@@ -164,7 +164,9 @@ lines of the buffer are checked against this regexp. If there is a match,
         (add-to-list 'lsp-yaml-schemas `(,uri . ["/Chart.lock"])))))
 
   (after! projectile
-    (add-to-list 'projectile-project-root-files "Chart.yaml"))
+    (add-to-list 'projectile-project-root-files "Chart.yaml")
+    (add-to-list 'projectile-project-search-path
+                 `(,(concat (file-name-as-directory (xdg-cache-home)) "helm/repository") . 1)))
 
   :config
   (when (modulep! +lsp)
