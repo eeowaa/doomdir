@@ -789,12 +789,15 @@ problem that [[https://www.reddit.com/r/DoomEmacs/comments/pfp39u/customizing_do
 selected. To fix the problem, I customized the theme to use the same background
 color as the face used for the current selection in the completion framework.
 Note that this fix also modifies the background color of highlighted lines in
-other windows that use =solaire-mode=.
+other windows that use =solaire-mode=. *UPDATE*: The =ef-themes= packages
+provides very nice-looking themes in a graphical environment, and are better
+than most Doom themes for displaying the =tab-line= and =tab-bar=; I have
+migrated to ~ef-bio~ for now.
 
 #+begin_src emacs-lisp :tangle yes
 (setq doom-theme
       (if initial-window-system
-          'doom-outrun-electric
+          'ef-bio
         'ef-tritanopia-dark))
 
 (after! (:and solaire-mode (:or vertico ivy))

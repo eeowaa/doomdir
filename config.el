@@ -90,7 +90,7 @@ buffer in current window."
 
 (setq doom-theme
       (if initial-window-system
-          'doom-outrun-electric
+          'ef-bio
         'ef-tritanopia-dark))
 
 (after! (:and solaire-mode (:or vertico ivy))
