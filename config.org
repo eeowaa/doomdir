@@ -1765,8 +1765,8 @@ module, but for now I will just make a private customization.
 Side windows, especially those displayed on the top and bottom, are working with
 limited screen real estate. To save space, I'd like to hide the tab line.
 
-Exclude ~tab-line-mode~ from major modes corresponding to buffer groups that are
-configured to display their buffers in side windows:
+The following code excludes ~tab-line-mode~ from buffer groups configured to
+display in side windows:
 
 #+begin_src emacs-lisp :tangle yes
 (after! vimish-tab
@@ -1783,35 +1783,6 @@ configured to display their buffers in side windows:
         (mapc (lambda (mode) (cl-pushnew mode vimish-tab-exclude-modes))
               (buffer-group-plist-get group :modes))))))
 #+end_src
-
-Exclude ~tab-line-mode~ from term popups.
-
-#+begin_src emacs-lisp :tangle no
-(defun my/disable-tab-line-a (fn &rest args)
-  "Disable `tab-line-mode' in the current buffer.
-Use this as :around advice for functions that display buffers."
-  (letf! ((defadvice disable-tabs-a (buffer-or-name &rest _)
-            :before #'display-buffer
-            (with-current-buffer buffer-or-name
-              (setq-local tab-line-exclude t)
-              ;; HACK This would probably not be necessary if I added an option
-              ;; to `vimish-tab' to ignore names as well as modes.
-              (when vimish-tab-mode
-                (vimish-tab-mode -1)))))
-    (apply fn args)))
-
-(dolist (package '(term vterm shell eshell))
-  (let ((fn (intern (format "+%s/toggle" package))))
-    (advice-add fn :around #'my/disable-tab-line-a)))
-#+end_src
-
-Names of other buffers that should exclude ~tab-line-mode~:
-
-: "COMMIT_EDITMSG"
-: "*Org Note*"
-: "*Pp Eval Output*"
-: *diff-hl*
-: <undo-tree-diff-buffer-name>
 
 *** STRT [#C] Darken the tab bar
 The following solution works OK for dark themes, but is jarring with light
