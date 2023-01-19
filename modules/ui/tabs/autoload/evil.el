@@ -3,12 +3,19 @@
 
 ;;;###autoload (autoload '+tabs:new-window-tab "ui/tabs/autoload/evil" nil t)
 (evil-define-command +tabs:new-window-tab (&optional count file)
-  "Ex wrapper around `tab-line-new-tab'."
+  "Ex wrapper around `vimish-tab-new'."
   (interactive "<c><f>")
   (if file
       (let ((vimish-tab-new-buffer-function
              (lambda () (vimish-tab-file-buffer file))))
         (funcall #'vimish-tab-new count))
+    (funcall #'vimish-tab-new count)))
+
+;;;###autoload (autoload '+tabs:new-project-window-tab "ui/tabs/autoload/evil" nil t)
+(evil-define-command +tabs:new-project-window-tab (&optional count)
+  "Ex wrapper to open a new tab containing a `projectile' project file."
+  (interactive "<c>")
+  (let ((vimish-tab-new-buffer-function #'vimish-tab-projectile-file-buffer))
     (funcall #'vimish-tab-new count)))
 
 ;;;###autoload (autoload '+tabs:new-blank-window-tab "ui/tabs/autoload/evil" nil t)

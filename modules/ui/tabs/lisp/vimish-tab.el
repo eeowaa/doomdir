@@ -144,6 +144,17 @@ When NOERROR is provided, do not signal an error."
   (save-window-excursion
     (find-file-noselect file)))
 
+(defun vimish-tab-projectile-file-buffer ()
+  (condition-case nil
+      (let* ((project-root (projectile-acquire-root))
+             (file (projectile-completing-read "Find file: "
+                                               (projectile-project-files project-root))))
+        (if (not file)
+            (vimish-tab-default-buffer)
+          ;; TODO Temporarily instrument `projectile-find-file-hook'
+          (vimish-tab-file-buffer (expand-file-name file project-root))))
+    (quit (vimish-tab-default-buffer))))
+
 (defun vimish-tab--update ()
   "Update the selected tab with current buffer info.
 Creates new window parameters if they are missing and fixes corruption."

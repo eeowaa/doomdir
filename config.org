@@ -1726,6 +1726,7 @@ definitions here:
 (after! evil-ex
   (evil-ex-define-cmd "tabnew"      #'+tabs:new-blank-window-tab)
   (evil-ex-define-cmd "tabe[dit]"   #'+tabs:new-window-tab)
+  (evil-ex-define-cmd "tabf[ind]"   #'+tabs:new-project-window-tab)
   (evil-ex-define-cmd "tabc[lose]"  #'+tabs:close-window-tab)
   (evil-ex-define-cmd "tabo[nly]"   #'+tabs:close-other-window-tabs)
   (evil-ex-define-cmd "tabn[ext]"   #'+tabs:next-window-tab)
