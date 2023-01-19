@@ -1,9 +1,9 @@
 #!/bin/sh
 
-# Install Homebrew to install packages
+# Install Homebrew to install system packages
 curl -Lo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
 
-# Install NVM to install packages
+# Install NVM to install Node.js packages
 curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
     | env PROFILE=/dev/null bash
 

@@ -45,11 +45,14 @@
     ln -sf "$srcdir" .
 )
 
-# Install NVM to install packages
+# Install openssh-askpass to install Elisp packages
+sudo dnf -y install openssh-askpass
+
+# Install NVM to install Node.js packages
 curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
     | env PROFILE=/dev/null bash
 
-# Install pipx to install packages
+# Install pipx to install Python packages
 sudo dnf -y install pipx
 
 # Function to install a binary asset from the latest release of a GitHub repo

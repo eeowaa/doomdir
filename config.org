@@ -127,10 +127,10 @@ $func: (recursively) delete? [y/N]: "
 #+begin_src sh :tangle install/macos.sh
 #!/bin/sh
 
-# Install Homebrew to install packages
+# Install Homebrew to install system packages
 curl -Lo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
 
-# Install NVM to install packages
+# Install NVM to install Node.js packages
 curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
     | env PROFILE=/dev/null bash
 
@@ -188,11 +188,14 @@ brew install jq
     ln -sf "$srcdir" .
 )
 
-# Install NVM to install packages
+# Install openssh-askpass to install Elisp packages
+sudo dnf -y install openssh-askpass
+
+# Install NVM to install Node.js packages
 curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
     | env PROFILE=/dev/null bash
 
-# Install pipx to install packages
+# Install pipx to install Python packages
 sudo dnf -y install pipx
 
 # Function to install a binary asset from the latest release of a GitHub repo
