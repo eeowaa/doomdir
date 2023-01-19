@@ -570,7 +570,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   (setq tab-bar-tab-face-function #'tab-bar-tab-face-default))
 
 (custom-set-faces!
-  '(tab-bar :background "black"))
+  '(tab-bar :foreground "white" :background "black"))
 
 (setq doom-themes-treemacs-enable-variable-pitch nil)
 

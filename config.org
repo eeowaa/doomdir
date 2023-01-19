@@ -1748,7 +1748,7 @@ when changing the theme at runtime.
 
 #+begin_src emacs-lisp :tangle yes
 (custom-set-faces!
-  '(tab-bar :background "black"))
+  '(tab-bar :foreground "white" :background "black"))
 #+end_src
 
 ** treemacs [9/11]
