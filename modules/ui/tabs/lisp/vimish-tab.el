@@ -171,7 +171,9 @@ Creates new window parameters if they are missing and fixes corruption."
           (set-window-parameter nil 'vimish-tab-list tabs))
       (set-window-parameter nil 'vimish-tab-index 0)
       (set-window-parameter nil 'vimish-tab-list
-       (list (vimish-tab--make-tab (current-buffer) 0 t))))))
+       (list (vimish-tab--make-tab (current-buffer) 0 t))))
+    (set-window-parameter nil 'tab-line-format
+                          (unless (vimish-tab-show-p) 'none))))
 
 ;; Ensure that the tab list gets updated appropriately
 ;; TODO Make this work across perspectives
@@ -231,38 +233,19 @@ Creates new window parameters if they are missing and fixes corruption."
                  (const :tag "Never" nil))
   :group 'vimish-tab)
 
-(defun vimish-tab-show-p (&rest _)
+(defun vimish-tab-show-p ()
   "Whether or not to display tabs for the current window."
   (or (eq vimish-tab-show t)
       (and (integerp vimish-tab-show)
            (> (length (vimish-tab-list)) vimish-tab-show))))
 
-;; TODO Completely disable the display of the tab-line instead of just showing
-;; an empty tab-line (like the following forms do):
-;;
-;;   (advice-add 'tab-line-format-template :before-while #'vimish-tab-show-p)
-;;   (advice-add 'tab-line-format :before-while #'vimish-tab-show-p)
-;;
-;; Unfortunately, unlike the tab-bar, which can be hidden by setting the
-;; tab-bar-lines frame parameter to 0, tab-line does not have such a construct.
-;; Instead, the `tab-line-format' variable is consulted instead; see
-;; `mode-line-format' for how it is evaluated.
-;;
-;; After some trail and error, it seems that setting `tab-line-format' to nil is
-;; the only way to hide the tab line; setting `tab-line-format' to (:eval
-;; (tab-line-format)) and making that function return nil will just display an
-;; empty tab line.
-;;
-;; Unfortunately, let-binding `tab-line-format' to nil and performing
-;; `force-mode-line-update' is not a valid workaround; neither is temporarily
-;; setting the buffer-local `tab-line-format' in a similar fashion.
-;;
-;;   (let ((tab-line-format
-;;          (when (vimish-tab-show-p) '(:eval tab-line-format))))
-;;     (force-mode-line-update))
-;;
-;; This seems like a problem for #emacs or the mailing list. I don't think I can
-;; resolve it myself.
+;; NOTE The `tab-line-format' window parameter overrides the buffer-local
+;; variable `tab-line-format'. Because a buffer can be displayed in multiple
+;; windows with differing values of `vimish-tab-show-p', the window parameter
+;; should be used to hide the tab bar instead of the buffer-local variable.
+;; Currently, this window parameter is updated by `vimish-tab--update' and
+;; `vimish-tab-close-other-tabs'.
+(cl-pushnew '(tab-line-format . writable) window-persistent-parameters)
 
 
 ;;; Selecting tabs
@@ -382,7 +365,9 @@ N defaults to the index of the selected tab."
   (let ((tab (vimish-tab-current)))
     (setf (alist-get 'index tab) 0)
     (set-window-parameter nil 'vimish-tab-list (list tab))
-    (set-window-parameter nil 'vimish-tab-index 0)))
+    (set-window-parameter nil 'vimish-tab-index 0)
+    (set-window-parameter nil 'tab-line-format
+                              (unless (vimish-tab-show-p) 'none))))
 
 (vimish-tab--set 'tab-line-close-tab-function #'vimish-tab-close)
 
@@ -480,7 +465,9 @@ their windows, even if `global-vimish-tab-mode' is enabled."
 You probably want to use `global-vimish-tab-mode' instead."
   :lighter nil
   (if vimish-tab-mode
-      (when (vimish-tab--update)
+      (progn
+        (vimish-tab--update)
+        (setq-local tab-line-format '(:eval (tab-line-format)))
         (tab-line-mode +1))
     (tab-line-mode -1)))
 
