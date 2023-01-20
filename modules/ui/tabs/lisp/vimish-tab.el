@@ -175,8 +175,15 @@ Creates new window parameters if they are missing and fixes corruption."
     (set-window-parameter nil 'tab-line-format
                           (unless (vimish-tab-show-p) 'none))))
 
-;; Ensure that the tab list gets updated appropriately
-;; TODO Make this work across perspectives
+;; REVIEW Ensure that the tab list gets updated appropriately
+;;
+;; `window-buffer-change-functions'
+;;     Functions called during redisplay when window buffers have changed.
+;; `window-selection-change-functions'
+;;     Functions called during redisplay when the selected window has changed.
+;; `buffer-list-update-hook'
+;;     Hook run when the buffer list changes.
+;;
 (add-hook 'buffer-list-update-hook #'vimish-tab--update)
 
 
@@ -185,9 +192,12 @@ Creates new window parameters if they are missing and fixes corruption."
 ;; Used by `tab-line-format', `tab-line-format-template', and `tab-line-hscroll'.
 (vimish-tab--set 'tab-line-tabs-function #'vimish-tab-list)
 
-(defun vimish-tab-current ()
-  "Return the current tab of the selected window."
-  (nth (vimish-tab-index) (vimish-tab-list)))
+(defun vimish-tab-current (&optional noerror)
+  "Return the current tab of the selected window.
+When NOERROR is provided, do not signal an error."
+  (when-let* ((index (vimish-tab-index noerror))
+              (tabs (vimish-tab-list noerror)))
+    (nth (vimish-tab-index) (vimish-tab-list))))
 
 (defun vimish-tab--property-hack (prop string)
   (when (and (eq prop 'tab) (null string))
@@ -195,8 +205,21 @@ Creates new window parameters if they are missing and fixes corruption."
 
 (advice-add 'tab-line--get-tab-property :before-until #'vimish-tab--property-hack)
 
-
-;;; Displaying tabs
+(defun vimish-tab-force-tab-line-update ()
+  "Force-update the tab line of the current buffer.
+Use in place of `force-mode-line-update' to update the tab line
+when switching between tabs containing the same buffer."
+  (let ((mode-line-format (format-mode-line mode-line-format)))
+    (if buffer-file-name
+        (let ((flag (buffer-modified-p)))
+          (set-buffer-modified-p (not flag))
+          (force-mode-line-update)
+          (redisplay)
+          (set-buffer-modified-p flag))
+      (setq buffer-file-name "/tmp/.vimish-tab")
+      (force-mode-line-update)
+      (redisplay)
+      (setq buffer-file-name nil))))
 
 (defun vimish-tab-name-format (tab tabs)
   (let* ((selected-p (alist-get 'selected tab))
@@ -256,7 +279,8 @@ Creates new window parameters if they are missing and fixes corruption."
     (setq tabs (vimish-tab-list)))
   (unless (< -1 n (length tabs))
     (error "Out of bounds tab selection index"))
-  (let (buffer result)
+  (let ((old-buffer (alist-get 'buffer (vimish-tab-current t)))
+        buffer result)
     (dolist (tab tabs)
       (if (eq (alist-get 'index tab) n)
           (let ((buf (alist-get 'buffer tab)))
@@ -269,9 +293,11 @@ Creates new window parameters if they are missing and fixes corruption."
       (push tab result))
     (set-window-parameter nil 'vimish-tab-list (reverse result))
     (set-window-parameter nil 'vimish-tab-index n)
-    (let ((display-buffer-overriding-action '(display-buffer-same-window)))
-      (pop-to-buffer buffer)
-      (vimish-tab-mode +1)))) ;; REVIEW Why is this necessary?
+    (if (eq buffer old-buffer)
+        (vimish-tab-force-tab-line-update)
+      (let ((display-buffer-overriding-action '(display-buffer-same-window)))
+        (pop-to-buffer buffer)
+        (vimish-tab-mode +1))))) ;; REVIEW Why is this necessary?
 
 (defun vimish-tab-select (tab &optional tabs)
   "Make TAB current in the selected window.
