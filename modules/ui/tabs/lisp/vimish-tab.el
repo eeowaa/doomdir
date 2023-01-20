@@ -226,7 +226,7 @@ Creates new window parameters if they are missing and fixes corruption."
 
 (vimish-tab--set 'tab-line-tab-name-format-function #'vimish-tab-name-format)
 
-(defcustom vimish-tab-show 1
+(defcustom vimish-tab-show t
   "Analogous to `tab-bar-show', except for the tab-line."
   :type '(choice (const :tag "Always" t)
                  (const :tag "When more than one tab" 1)
