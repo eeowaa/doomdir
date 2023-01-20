@@ -66,7 +66,7 @@ the command buffer. Also use `quit-window' instead of `delete-window'."
 ;;;###package org
 (after! org
   ;; Suppress deletion of other windows
-  (defadvice! my/suppress-delete-other-windows-a (fn &rest args)
+  (defadvice! +buffer-group--suppress-delete-other-windows-a (fn &rest args)
     "See `+popup--suppress-delete-other-windows-a'.
 Org has a scorched-earth window management policy I'm not fond of. i.e. it
 kills all other windows just so it can monopolize the frame. No thanks. We can
@@ -81,8 +81,8 @@ do better."
     (letf! ((#'delete-other-windows #'ignore)
             (#'delete-window        #'ignore))
       (apply fn args)))
- ;; Display TODO selection beneath selected window and shrink to fit
- (defadvice! my/org-fix-popup-window-shrinking-a (fn &rest args)
+ ;; Display tag/todo selection beneath selected window and shrink to fit
+ (defadvice! +buffer-group--org-fix-popup-window-shrinking-a (fn &rest args)
      "See `+popup--org-fix-popup-window-shrinking-a'.
 Hides the mode-line in *Org tags* buffer so you can actually see its
 content and displays it in a side window without deleting all other windows.
@@ -100,7 +100,7 @@ Ugh, such an ugly hack."
                   (fit-window-to-buffer window (window-buffer-height window)))))
         (apply fn args)))
   ;; Save org source edit buffers when switching workspaces
-  (defadvice! my/org-edit-src-exit-a (fn &rest args)
+  (defadvice! +buffer-group--org-edit-src-exit-a (fn &rest args)
     "See `+popup--org-edit-src-exit-a'.
 If you switch workspaces or the src window is recreated..."
     :around #'org-edit-src-exit
@@ -134,7 +134,7 @@ If you switch workspaces or the src window is recreated..."
 
 ;;;###package windmove
 ;; Users should be able to hop into side windows easily, but Elisp shouldn't.
-(defadvice! +buffer-group/ignore-window-parameters-a (fn &rest args)
+(defadvice! +buffer-group--ignore-window-parameters-a (fn &rest args)
   "Allow *interactive* window moving commands to traverse side windows."
   :around '(windmove-up windmove-down windmove-left windmove-right)
   (letf! (defun windmove-find-other-window (dir &optional arg window)
