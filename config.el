@@ -717,7 +717,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   (defun my/redraw ()
     (interactive)
     (redraw-display)
-    (set-window-buffer nil (current-buffer)))
+    (set-window-buffer nil (current-buffer))
+    (when (fboundp 'vimish-tab-force-tab-line-update)
+      (vimish-tab-force-tab-line-update)))
   (global-set-key (kbd "C-l") #'my/redraw))
 
 ;; Perform a line feed after jumping to a ^L character

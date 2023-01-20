@@ -436,7 +436,7 @@ Aesthetic modules that affect the Emacs interface or user experience.
 ;;; :ui
 #+end_src
 
-** Miscellany [6/7]
+** Miscellany [7/8]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -2275,7 +2275,9 @@ Miscellaneous configuration without a corresponding module.
   (defun my/redraw ()
     (interactive)
     (redraw-display)
-    (set-window-buffer nil (current-buffer)))
+    (set-window-buffer nil (current-buffer))
+    (when (fboundp 'vimish-tab-force-tab-line-update)
+      (vimish-tab-force-tab-line-update)))
   (global-set-key (kbd "C-l") #'my/redraw))
 
 ;; Perform a line feed after jumping to a ^L character
