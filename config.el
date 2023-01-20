@@ -57,6 +57,8 @@ buffer in current window."
            (unless (string= "-" project-name)
              (format (if (buffer-modified-p)  " ◉ %s" "  ●  %s") project-name))))))
 
+(setf (alist-get 'fullscreen initial-frame-alist) 'maximized)
+
 (use-package! info-colors
   :commands (info-colors-fontify-node))
 
