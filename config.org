@@ -1782,7 +1782,9 @@ display in side windows:
         (mapc (lambda (mode) (cl-pushnew mode vimish-tab-exclude-names))
               (buffer-group-plist-get group :names))
         (mapc (lambda (mode) (cl-pushnew mode vimish-tab-exclude-modes))
-              (buffer-group-plist-get group :modes))))))
+              (buffer-group-plist-get group :modes)))))
+  ;; Treemacs buffers are treated specially
+  (cl-pushnew 'treemacs-mode vimish-tab-exclude-modes))
 #+end_src
 
 *** STRT [#C] Darken the tab bar

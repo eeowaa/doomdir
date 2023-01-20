@@ -596,7 +596,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
         (mapc (lambda (mode) (cl-pushnew mode vimish-tab-exclude-names))
               (buffer-group-plist-get group :names))
         (mapc (lambda (mode) (cl-pushnew mode vimish-tab-exclude-modes))
-              (buffer-group-plist-get group :modes))))))
+              (buffer-group-plist-get group :modes)))))
+  ;; Treemacs buffers are treated specially
+  (cl-pushnew 'treemacs-mode vimish-tab-exclude-modes))
 
 (custom-set-faces!
   '(tab-bar :foreground "white" :background "black"))
