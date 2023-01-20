@@ -11,13 +11,53 @@
 ;;; External functions
 
 ;;;###package evil
-;; Prevent windows from moving into side windows
-(dolist (cmd (list #'+evil--window-swap
-                   #'evil-window-move-very-bottom
-                   #'evil-window-move-very-top
-                   #'evil-window-move-far-left
-                   #'evil-window-move-far-right))
-  (advice-add cmd :around #'+buffer-group-side-windows-save-a))
+(progn
+  ;; Open the evil command window according to buffer display rules
+  (defadvice! +buffer-group--evil-command-window-a (hist cmd-key execute-fn)
+    "See `+popup--evil-command-window-a'.
+Monkey patch the evil command window to use `pop-to-buffer' and to not
+split the selected window."
+    :override #'evil-command-window
+    (when (eq major-mode 'evil-command-window-mode)
+      (user-error "Cannot recursively open command line window"))
+    (dolist (win (window-list))
+      (when (equal (buffer-name (window-buffer win))
+                   "*Command Line*")
+        (kill-buffer (window-buffer win))
+        (delete-window win)))
+    (setq evil-command-window-current-buffer (current-buffer))
+    (ignore-errors (kill-buffer "*Command Line*"))
+    (with-current-buffer (pop-to-buffer "*Command Line*")
+      (setq-local evil-command-window-execute-fn execute-fn)
+      (setq-local evil-command-window-cmd-key cmd-key)
+      (evil-command-window-mode)
+      (evil-command-window-insert-commands hist)))
+
+  (defadvice! +buffer-group--evil-command-window-execute-a ()
+    "See `+popup--evil-command-window-execute-a'.
+Execute the command under the cursor in the appropriate buffer, rather than
+the command buffer. Also use `quit-window' instead of `delete-window'."
+    :override #'evil-command-window-execute
+    (interactive)
+    (let ((result (buffer-substring (line-beginning-position)
+                                    (line-end-position)))
+          (execute-fn evil-command-window-execute-fn)
+          (execute-window (get-buffer-window evil-command-window-current-buffer))
+          (command-window (selected-window)))
+      (if execute-window
+          (select-window execute-window)
+        (user-error "Originating buffer is no longer active"))
+      (quit-window t command-window)
+      (funcall execute-fn result)
+      (setq evil-command-window-current-buffer nil)))
+
+  ;; Prevent windows from moving into side windows
+  (dolist (cmd (list #'+evil--window-swap
+                     #'evil-window-move-very-bottom
+                     #'evil-window-move-very-top
+                     #'evil-window-move-far-left
+                     #'evil-window-move-far-right))
+    (advice-add cmd :around #'+buffer-group-side-windows-save-a)))
 
 ;;;###package man
 ;; Use `switch-to-buffer' to open new Man buffers

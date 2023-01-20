@@ -65,6 +65,14 @@
      '((slot . 1))))
 
   (buffer-group-side-window-setup
+   (buffer-group-define command-history
+     `(:names ("^ \\*Input History\\*"
+               "^\\*Command Line\\*")
+       :modes (completion-list-mode
+               evil-command-window-mode)))
+   '((slot . 1)))
+
+  (buffer-group-side-window-setup
    (buffer-group-define output
      `(:names ("^\\*\\(?:Shell Command\\|Pp Eval\\) Output\\*"))))
 
