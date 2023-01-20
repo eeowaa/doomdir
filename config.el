@@ -549,9 +549,12 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (map! :nv "gt" #'+tabs:next-window-tab
       :nv "gT" #'+tabs:prev-window-tab
       (:after evil-collection-magit
-       :map magit-status-mode-map
-       :nv "gt" #'+tabs:next-window-tab
-       :nv "gT" #'+tabs:prev-window-tab))
+       (:map magit-status-mode-map
+        :nv "gt" #'+tabs:next-window-tab
+        :nv "gT" #'+tabs:prev-window-tab)
+       (:map magit-log-mode-map
+        :nv "gt" #'+tabs:next-window-tab
+        :nv "gT" #'+tabs:prev-window-tab)))
 
 ;; NOTE Bindings for `info-mode' are set by `evil-collection-info-setup', which
 ;; is not called directly in `evil-collection-info'. Apparently this sort of
