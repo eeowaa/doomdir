@@ -90,6 +90,15 @@ buffer in current window."
 
 (remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
 
+(defadvice! my/tab-bar-theme-a (theme &rest _)
+  "Tweak the style of the tab bar."
+  :after '(load-theme consult-theme)
+  (if (string-match-p "\\`ef-" (symbol-name theme))
+      (ef-themes-with-colors
+        (custom-set-faces
+         `(tab-bar ((,c :background ,bg-inactive :foreground ,fg-intense)))))
+    (my/doom-use-face tab-bar mode-line-inactive)))
+
 (setq doom-theme
       (if initial-window-system
           'ef-bio
@@ -603,9 +612,6 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
               (buffer-group-plist-get group :modes)))))
   ;; Treemacs buffers are treated specially
   (cl-pushnew 'treemacs-mode vimish-tab-exclude-modes))
-
-(custom-set-faces!
-  '(tab-bar :foreground "white" :background "black"))
 
 (setq doom-themes-treemacs-enable-variable-pitch nil)
 

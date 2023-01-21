@@ -682,7 +682,7 @@ Instead of that, let's try something a bit milder and see how it goes:
 formats, such as org-mode, markdown, and LaTeX.
 #+end_quote
 
-** doom [4/4]
+** doom [5/5]
 #+begin_quote
 This module gives Doom its signature look: powered by the =doom-one= theme
 (inspired by Atom's One Dark theme) and =solaire-mode=.
@@ -767,6 +767,21 @@ exchange of screen real estate.
                 vterm-mode-hook
                 eshell-mode-hook)
               #'hide-mode-line-mode)
+#+end_src
+
+*** DONE [#C] Tweak the style of the tab bar
+The following advice needs to be defined before we set the initial theme in
+order for it to take effect.
+
+#+begin_src emacs-lisp :tangle yes
+(defadvice! my/tab-bar-theme-a (theme &rest _)
+  "Tweak the style of the tab bar."
+  :after '(load-theme consult-theme)
+  (if (string-match-p "\\`ef-" (symbol-name theme))
+      (ef-themes-with-colors
+        (custom-set-faces
+         `(tab-bar ((,c :background ,bg-inactive :foreground ,fg-intense)))))
+    (my/doom-use-face tab-bar mode-line-inactive)))
 #+end_src
 
 *** DONE [#C] Set the theme
@@ -1667,7 +1682,7 @@ Accepts the same arguments as `display-buffer-in-side-window'. You must set
 `window--sides-inhibit-check' to non-nil for this work properly.
 #+end_quote
 
-** tabs [4/6] :eeowaa:
+** tabs [4/5] :eeowaa:
 #+begin_quote
 +This module adds an Atom-esque tab bar to the Emacs UI.+
 Custom implementation of =:ui tabs=.
@@ -1785,17 +1800,6 @@ display in side windows:
               (buffer-group-plist-get group :modes)))))
   ;; Treemacs buffers are treated specially
   (cl-pushnew 'treemacs-mode vimish-tab-exclude-modes))
-#+end_src
-
-*** STRT [#C] Darken the tab bar
-The following solution works OK for dark themes, but is jarring with light
-themes. Ideally, I would just use the same face as the minibuffer prompt, but a
-solution like ~(my/doom-use-face tab-bar minibuffer-prompt)~ does not update
-when changing the theme at runtime.
-
-#+begin_src emacs-lisp :tangle yes
-(custom-set-faces!
-  '(tab-bar :foreground "white" :background "black"))
 #+end_src
 
 ** treemacs [9/11]
