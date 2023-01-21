@@ -28,7 +28,7 @@
     # Configure sources to match the installed Emacs package
     version=`rpm -q --qf '%{version}' emacs`
     srcdir=`rpm --eval '%{_builddir}'`/emacs-$version
-    flags=`emacs -Q --batch --eval "\
+    flags=`command emacs -Q --batch --eval "\
     (let ((text-quoting-style 'straight))
       (message system-configuration-options))" 2>&1`
     cd "$srcdir"
