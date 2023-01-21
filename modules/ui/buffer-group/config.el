@@ -11,6 +11,16 @@
           (interactive)
           (pop-to-buffer buffer-or-name #'display-buffer-reuse-mode-window)))
 
+  (buffer-group-side-window-setup
+   (buffer-group-define calendar
+     `(:names ("^\\*Calendar\\*")
+       :modes (calendar-mode))))
+
+  (buffer-group-side-window-setup
+   (buffer-group-define calendar-aux
+     `(:names ("^\\*Holidays\\*")))
+   '((slot . 1)))
+
   (when (modulep! :tools docker)
     ;; TODO Configure Transient windows
     ;; Currently, Transient buffers open in the window below the selected window. IIRC,
