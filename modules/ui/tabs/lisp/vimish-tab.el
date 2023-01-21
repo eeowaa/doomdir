@@ -381,6 +381,19 @@ In order for this function to be called with an appropriate TAB argument in
   (interactive)
   (vimish-tab-close-nth (vimish-tab-index)))
 
+(defcustom vimish-tab-close-window-function #'delete-window
+  "Function to close a window when no tabs remain.
+Used by `vimish-tab-close-tab-or-window'."
+  :type 'function
+  :group 'vimish-tab)
+
+(defun vimish-tab-close-tab-or-window ()
+  "Close the current tab or window (if only one tab left)."
+  (interactive)
+  (if (and vimish-tab-mode (> (length (vimish-tab-list)) 1))
+      (vimish-tab-close-current)
+    (funcall vimish-tab-close-window-function)))
+
 (cl-defun vimish-tab-close-other-tabs
     (&optional (n (vimish-tab-index)) (tabs (vimish-tab-list)))
   "Close all but the Nth tab in TABS.

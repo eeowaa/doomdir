@@ -151,7 +151,14 @@ If INDEX is not a workspace index, return nil."
   :config
   (setq vimish-tab-new-button-show nil
         vimish-tab-close-button-show nil
-        vimish-tab-switch-cycling t
-        vimish-tab-new-buffer-function (if (modulep! :ui workspaces)
-                                           #'vimish-tab-persp-buffer
-                                         #'vimish-tab-select-buffer)))
+        vimish-tab-switch-cycling t)
+
+  (if (not (modulep! :ui workspaces))
+      (setq vimish-tab-new-buffer-function #'vimish-tab-select-buffer
+            vimish-tab-close-window-function #'delete-window)
+    (setq vimish-tab-new-buffer-function #'vimish-tab-persp-buffer
+          vimish-tab-close-window-function #'+workspace/close-window-or-workspace)
+    (after! persp-mode
+      (define-key! persp-mode-map
+        [remap delete-window] #'vimish-tab-close-tab-or-window
+        [remap evil-window-delete] #'vimish-tab-close-tab-or-window))))

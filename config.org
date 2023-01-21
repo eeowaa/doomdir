@@ -1683,14 +1683,6 @@ because I have two separate abstractions for tabs: "workspace tabs" and "window
 tabs". Command names like ~+tabs:next-or-goto~ and ~+tabs:previous-or-goto~ do
 not indicate which tabs abstration is being operated on.
 
-Option 1:
-#+begin_src emacs-lisp :tangle no
-(defalias '+tabs:next-or-goto #'+tabs:next-window-tab)
-(defalias '+tabs:previous-or-goto #'+tabs:prev-window-tab)
-;; ...
-#+end_src
-
-Option 2:
 #+begin_src emacs-lisp :tangle yes
 (map! :nv "gt" #'+tabs:next-window-tab
       :nv "gT" #'+tabs:prev-window-tab
