@@ -580,7 +580,6 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   (evil-ex-define-cmd "tabr[ewind]" #'+tabs:first-window-tab)
   (evil-ex-define-cmd "tabfir[st]"  #'+tabs:first-window-tab)
   (evil-ex-define-cmd "tabl[ast]"   #'+tabs:last-window-tab)
-  (evil-ex-define-cmd "tabl[ast]"   #'+tabs:last-window-tab)
   (evil-ex-define-cmd "tabm[ove]"   #'+tabs:move-window-tab))
 
 (setq tab-bar-separator ""
