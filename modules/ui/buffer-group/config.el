@@ -93,6 +93,10 @@
          :modes (pdf-view-mode)))))
 
   (buffer-group-side-window-setup
+   (buffer-group-define popup-scratch
+     `(:names ("^\\*doom:scratch\\*"))))
+
+  (buffer-group-side-window-setup
    (buffer-group-define popup-term
      `(:names ("^\\*doom:\\(?:v?term\\|e?shell\\)-popup"))))
 
