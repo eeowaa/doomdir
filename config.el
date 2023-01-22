@@ -2186,6 +2186,9 @@ on them."
 
 (remove-hook 'text-mode-hook #'display-line-numbers-mode)
 
+(setq-hook! 'lisp-interaction-mode-hook
+  display-line-numbers nil)
+
 (defun my/toggle-line-numbers ()
   "Toggle line numbers.
 

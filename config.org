@@ -7683,7 +7683,7 @@ This can be done with ~#+INCLUDE~ directives. Doing so might make tangling
 faster, but currently I don't have any problems with performance. If and when I
 start to notice a problem, I'll revisit this item.
 
-** default [8/10]
+** default [9/11]
 #+begin_quote
 This module provides a set of reasonable defaults.
 #+end_quote
@@ -7741,6 +7741,12 @@ on them."
 *** DONE [#B] Do not display line numbers in text mode
 #+begin_src emacs-lisp :tangle yes
 (remove-hook 'text-mode-hook #'display-line-numbers-mode)
+#+end_src
+
+*** DONE [#B] Do not display line numbers in lisp interaction mode
+#+begin_src emacs-lisp :tangle yes
+(setq-hook! 'lisp-interaction-mode-hook
+  display-line-numbers nil)
 #+end_src
 
 *** DONE [#B] Normalize the behavior of toggling line numbers
