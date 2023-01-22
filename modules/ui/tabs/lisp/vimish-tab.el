@@ -205,10 +205,15 @@ When NOERROR is provided, do not signal an error."
 
 (advice-add 'tab-line--get-tab-property :before-until #'vimish-tab--property-hack)
 
+;; TODO Get this working for magit buffers
 (defun vimish-tab-force-tab-line-update ()
   "Force-update the tab line of the current buffer.
 Use in place of `force-mode-line-update' to update the tab line
-when switching between tabs containing the same buffer."
+when switching between tabs containing the same buffer.
+
+This works by temporarily toggling the buffer-modified flag. For
+buffers not visiting a file, the variable `buffer-file-name' is
+temporarily set to a dummy file path."
   (let ((mode-line-format (format-mode-line mode-line-format)))
     (if buffer-file-name
         (let ((flag (buffer-modified-p)))
