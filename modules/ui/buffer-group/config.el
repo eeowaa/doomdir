@@ -85,6 +85,11 @@
   (buffer-group-side-window-setup
    (buffer-group-define output
      `(:names ("^\\*\\(?:Shell Command\\|Pp Eval\\) Output\\*"))))
+  (when (modulep! :tools magit)
+    (buffer-group-property-pushnew
+     'output :names "^magit-process: ")
+    (buffer-group-property-pushnew
+     'output :modes 'magit-process-mode))
 
   (when (modulep! :tools pdf)
     (buffer-group-reuse-window-setup
