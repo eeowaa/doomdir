@@ -57,7 +57,7 @@ to modify properties of an existing buffer group.")
   (let* ((plist (alist-get buffer-group buffer-group-alist))
          (value-list (plist-get plist property)))
     (dolist (value values)
-      (cl-pushnew value value-list))
+      (cl-pushnew value value-list :test #'equal))
     (setf plist (plist-put plist property value-list))))
 
 (defalias 'buffer-group-properties #'buffer-group-plist)
