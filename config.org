@@ -2313,7 +2313,7 @@ https://emacs.stackexchange.com/questions/51989/how-to-truncate-lines-by-default
 (setq-default truncate-lines t)
 #+end_src
 
-** evil [5/7]
+** evil [6/8]
 #+begin_quote
 This holy module brings the vim experience to Emacs.
 #+end_quote
@@ -2450,6 +2450,16 @@ builtin game.
     :e "H" #'solitaire-move-left
     :e "K" #'solitaire-move-up
     :e "J" #'solitaire-move-down))
+#+end_src
+
+*** DONE [#C] Make =C-i= behave as =TAB= in info mode
+#+begin_src emacs-lisp :tangle yes
+(defadvice! my/ergonomic-info-bindings-a (&rest _)
+  :after #'evil-collection-info-setup
+  (evil-collection-define-key 'normal 'Info-mode-map
+    (kbd "C-i") 'Info-next-reference
+    (kbd "M-,") 'Info-history-back
+    (kbd "C-M-,") 'Info-history-forward))
 #+end_src
 
 *** STRT [#B] Define modes that should always come up in Emacs state :tweak:

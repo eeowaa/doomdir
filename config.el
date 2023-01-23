@@ -843,6 +843,13 @@ current buffer first unless the `force' argument is given."
     :e "K" #'solitaire-move-up
     :e "J" #'solitaire-move-down))
 
+(defadvice! my/ergonomic-info-bindings-a (&rest _)
+  :after #'evil-collection-info-setup
+  (evil-collection-define-key 'normal 'Info-mode-map
+    (kbd "C-i") 'Info-next-reference
+    (kbd "M-,") 'Info-history-back
+    (kbd "C-M-,") 'Info-history-forward))
+
 (pushnew! evil-emacs-state-modes 'noaa-mode 'vterm-mode)
 
 (setq hs-allow-nesting t)
