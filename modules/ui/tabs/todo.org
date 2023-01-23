@@ -9,13 +9,18 @@ Migrate evil bindings from Doom module config. Refer to =treemacs-evil=,
 =kubernetes-evil=, and =kubel-evil= for how to do this.
 
 ** TODO Add a keymap for non-=evil= users
-* Bugs [0/4]
+* Bugs [0/5]
 ** HOLD Integrate =vimish-tab= with =winner=
 I do not have steps to replicate this at the moment.
 
 ** TODO Integrate =vimish-tab= with =persp=
 Should ensure a package-agnostic mechanism so that =tab-bar= users not using
 =persp= can still benefit.
+
+** TODO Integrate =vimish-tab= with =better-jumper=
+Currently, the jump history is recorded per window, which can cause some
+unexpected behavior when using multiple tabs in the same window. Consider adding
+another parameter to each tab to track the jump list.
 
 ** TODO Preserve buffer position in window tabs
 - _Steps to replicate:_
@@ -29,6 +34,10 @@ Should ensure a package-agnostic mechanism so that =tab-bar= users not using
 
 - _Actual behavior:_ \\
   The point and buffer position were updated to match the new tab
+
+Note that this is not a problem when a buffer is displayed in multiple live
+windows (point and buffer position are independent between windows). Are window
+parameters used to achieve this?
 
 ** TODO Fix bugs in tab caching
 The ~tab-line-format~ function manages a ~tab-line-cache~ window parameter that

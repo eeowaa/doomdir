@@ -93,6 +93,28 @@ When NOERROR is provided, do not signal an error."
         (cons 'buffer buffer)
         (cons 'select #'vimish-tab-select)))
 
+;; REVIEW Consider refactoring parts of this library to set tab parameters
+;; directly using `set-vimish-tab-parameter' instead of constructing new tab
+;; lists and passing them to `set-window-parameter'.
+
+(defun vimish-tab-parameters (&optional tab)
+  "Return the parameters of TAB and their values.
+TAB defaults to the selected tab."
+  (or tab (vimish-tab-current)))
+
+(defmacro vimish-tab-parameter (tab parameter)
+  "Return TAB's value for PARAMETER.
+TAB can be any tab and defaults to the selected one."
+  `(alist-get ,parameter
+              ,(or tab `(nth (window-parameter nil 'vimish-tab-index)
+                             (window-parameter nil 'vimish-tab-list)))))
+
+(defmacro set-vimish-tab-parameter (tab parameter value)
+  "Set TAB's value of PARAMETER to VALUE.
+TAB can be any window and defaults to the selected one.
+Return VALUE."
+  `(setf (vimish-tab-parameter ,tab ,parameter) ,value))
+
 
 ;;; Tab buffers
 
@@ -197,7 +219,7 @@ Creates new window parameters if they are missing and fixes corruption."
 When NOERROR is provided, do not signal an error."
   (when-let* ((index (vimish-tab-index noerror))
               (tabs (vimish-tab-list noerror)))
-    (nth (vimish-tab-index) (vimish-tab-list))))
+    (nth index tabs)))
 
 (defun vimish-tab--property-hack (prop string)
   (when (and (eq prop 'tab) (null string))
