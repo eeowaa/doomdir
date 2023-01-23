@@ -7063,7 +7063,7 @@ npm install -g js-beautify stylelint
 npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 #+end_src
 
-** yaml [4/4]
+** yaml [5/5]
 :PROPERTIES:
 :CATEGORY: doom/yaml
 :END:
@@ -7106,6 +7106,15 @@ This currently requires [[*Unpin =tree-sitter-langs=][unpinning tree-sitter-lang
 *** DONE [#B] Allow YAML schemas to be decided in .dir-locals.el
 #+begin_src emacs-lisp :tangle yes
 (put 'lsp-yaml-schemas 'safe-local-variable #'always)
+#+end_src
+
+*** DONE [#B] Display line numbers in YAML mode
+~yaml-mode~ is derived from ~text-mode~, not ~prog-mode~, so we need to
+explicitly enable line numbers.
+
+#+begin_src emacs-lisp :tangle yes
+(setq-hook! 'yaml-mode-hook
+  display-line-numbers t)
 #+end_src
 
 ** zig [0/0] :ARCHIVE:

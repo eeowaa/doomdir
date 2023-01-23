@@ -2060,6 +2060,9 @@ Optional argument INFO is a plist of options."
 
 (put 'lsp-yaml-schemas 'safe-local-variable #'always)
 
+(setq-hook! 'yaml-mode-hook
+  display-line-numbers t)
+
 ;; REVIEW Compare `kubel' with `kubernetes-el'
 ;; - kubel is great for working with pods (listing, examining, modifying, logging, and interacting)
 ;; - kubernetes-el might be closer to Lens in terms of functionality, but I have not tried it yet
