@@ -12,17 +12,25 @@ another workaround.
 ** TODO Order is important in ~display-buffer-alist~
 ** TODO Use of the ~window-sides-vertical~ option
 ** TODO Migrate reference documentation from private config
-* Configuration [0/5]
+* Configuration [1/5]
+** DONE Define buffer groups in =config.el=
 ** TODO Split =buffer-group.el= into multiple files
 One file for buffer groups, another file for display rules. Should also include
 a file explaining how to use the package.
 
-** TODO Define buffer groups in =config.el=
 ** TODO Define display rules when =+defaults= is given
 ** TODO Add =+all= flag to set ~switch-to-buffer-obey-display-actions~
 ** TODO Add =+hacks.el= file
-* Features [0/4]
-** TODO Improve syntax of ~buffer-group-define~ macro
+* Features [0/8]
+** TODO Make ~buffer-group-define~ and ~buffer-group-property-pushnew~ variadic
+** TODO Refactor ~buffer-group-define~ to remove argument quoting
+Such syntactic sugar is conventional for this kind of macro.
+
+** TODO Create a macro that wraps ~buffer-group-define~ and ~buffer-group-property-pushnew~
+This macro should define a buffer group if one does not exist, otherwise it
+should modify an existing buffer group. This should allow for easier
+configuration.
+
 ** TODO Interactive functions to add and remove conditions to buffer groups
 I would like to make ~buffer-group-property-pushnew~ interactive and allow the
 user to select a regexp (defaulting to the current buffer's name) and/or a major
@@ -42,3 +50,15 @@ and management of such actions. Perhaps another alist?
 
 ** TODO Prevent other buffers from appearing in side window slots
 Refer to ~+popup/quit-window~ for inspiration.
+
+** TODO Add ~defcustom~ setter for buffer group definitions
+The setter should be a function that can be called directly by users if they
+prefer that over the =customize= machinery. Being able to automatically run code
+when a buffer group definition has been modified would be helpful in updating
+other packages (e.g. =vimish-tab=) that utilizes buffer groups.
+
+** TODO Refactor the buffer group property system
+- Create abstraction for pluggable properties
+- Distinguish between properties that help define a buffer group and properties
+  that are used to describe the behavior of buffer groups; might want to
+  separate into different data structures

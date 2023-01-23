@@ -1802,7 +1802,7 @@ display in side windows:
   (cl-pushnew 'treemacs-mode vimish-tab-exclude-modes))
 #+end_src
 
-** treemacs [9/11]
+** treemacs [9/12]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -1944,6 +1944,11 @@ Preferably, I would just automatically switch the project root in =treemacs=
 when switching worktrees using =magit=. Perhaps there is a hook that I could
 run, or advice if necessary.
 
+*** TODO [#C] Use the same icons in treemacs as in dired
+Dired seems to do a better job than Treemacs with picking file icons and
+aligning things properly. If this is too hard, at least create overrides for
+misaligned files such as =config.org_archive=.
+
 ** unicode [0/0] :ARCHIVE:
 #+begin_quote
 This module extends Doom's ability to display non-English unicode. It is
@@ -2025,7 +2030,7 @@ Observations:
 Displays a tilde(~) in the left fringe to indicate an empty line, similar to Vi.
 #+end_quote
 
-** window-select [2/4]
+** window-select [4/5]
 #+begin_quote
 This module provides several methods for selecting windows without the use of
 the mouse or spatial navigation (e.g. =C-w {h,j,k,l}=).
@@ -2063,7 +2068,11 @@ currently being displayed on the terminal.
 (setq aw-background nil)
 #+end_src
 
-*** LOOP [#B] Show =ace-window= selection indicators in ~*info*~ buffers
+*** OKAY [#B] Show =ace-window= selection indicators in ~*info*~ buffers
+:LOGBOOK:
+- Note taken on [2023-01-22 Sun 16:55] \\
+  This does not seem to be a problem for me anymore.
+:END:
 Displaying the indicator in the bottom-left instead of the top-left means that
 the overlay displayed by ~*info*~ buffers does not hide the =ace-window=
 indicator.
@@ -2072,13 +2081,22 @@ indicator.
 (setq aw-char-position 'left)
 #+end_src
 
-*** LOOP [#B] Make the selection character more visible
+*** OKAY [#B] Make the selection character more visible
+:LOGBOOK:
+- Note taken on [2023-01-22 Sun 16:57] \\
+  Right now, I'm happy with the default selection character face.
+:END:
 #+begin_src emacs-lisp :tangle no
 (custom-set-faces!
   '(aw-leading-char-face
     :foreground "white" :background "red"
     :weight bold :height 2.5 :box (:line-width 10 :color "red")))
 #+end_src
+
+*** TODO [#C] Make the selection character the default size in modus themes
+The modus themes (~modus-vivendi~ and ~modus-operandi~) make the selection
+character slightly larger than the default face, which makes the window content
+shift slightly downward, which is quite annoying.
 
 ** workspaces [2/3]
 #+begin_quote
@@ -6798,14 +6816,14 @@ This module adds [[https://en.wikipedia.org/wiki/Representational_state_transfer
 This module add Ruby and optional Ruby on Rails support to Emacs.
 #+end_quote
 
-** rust [1/3]
+** rust [2/3]
 #+begin_quote
 This module adds support for the Rust language and integration for its tools,
 e.g. ~cargo~.
 #+end_quote
 
-*** WAIT [#A] Install prerequisites :feat:
-**** WAIT macOS
+*** OKAY [#A] Install prerequisites :feat:
+**** OKAY macOS
 #+begin_src sh :tangle no
 # Install prerequisites for `lang/rust` module
 #+end_src
@@ -7683,7 +7701,7 @@ This can be done with ~#+INCLUDE~ directives. Doing so might make tangling
 faster, but currently I don't have any problems with performance. If and when I
 start to notice a problem, I'll revisit this item.
 
-** default [9/11]
+** default [10/11]
 #+begin_quote
 This module provides a set of reasonable defaults.
 #+end_quote
@@ -7832,7 +7850,15 @@ and uses visual instead."
                   which-key-replacement-alist))))
 #+end_src
 
-*** TODO [#A] Prevent the =which-key= popop from "bouncing" :bug:
+*** OKAY [#A] Prevent the =which-key= popop from "bouncing" :bug:
+:LOGBOOK:
+- Note taken on [2023-01-22 Sun 16:48] \\
+  I have set ~which-key-popup-type~ to ~minibuffer~ for compatibility with my new
+  window management system (powered by my custom =:ui buffer-group= module). This
+  had the incidental benefit of "fixing" the window bouncing, although the problem
+  would probably still exist for me if I were to go back to Doom's way of
+  displaying the =which-key= popup window.
+:END:
 **** Description
 - Sometimes the window overshoots its height and settles back down to where it
   should be. This is an annoying visual distraction.
