@@ -1058,6 +1058,13 @@ If the current frame has one window, restore the previous windows."
   (evil-ex-define-cmd "Vex[plore]" #'my/+dired-vsplit-jump)
   (evil-ex-define-cmd "Tex[plore]" #'my/+dired-tab-jump))
 
+(add-hook! ibuffer-mode
+  (defun my/ibuffer-mode-line-h ()
+    "Clean up the modeline and improve performance."
+    (setcar mode-line-process "by ")
+    (setf (nth 2 ibuffer-header-line-format) " by ")))
+    ;; (setf (alist-get 'header-line-format mode-line-process) "")))
+
 ;; This should already be enabled by emacs/undo/config.el
 (global-undo-tree-mode)
 

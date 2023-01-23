@@ -248,11 +248,11 @@ called by the latter."
 (buffer-group-side-window-setup
  (buffer-group-define internals
    `(:names ("^\\*\\(?:Process List\\|timer-list\\|Threads\\)\\*"
-             "^\\*\\(?:Ibuffer\\|Buffer List\\)\\*"
+             "^\\*Buffer List\\*"
              "^\\*Bookmark List\\*"
              "^\\*Packages\\*")
      :modes (process-menu-mode timer-list-mode thread-list-mode
-             Buffer-menu-mode ibuffer-mode
+             Buffer-menu-mode
              bookmark-bmenu-mode
              package-menu-mode)))
  '((side . top)))

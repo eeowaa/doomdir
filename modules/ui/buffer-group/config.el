@@ -52,6 +52,15 @@
        `((side . ,imenu-list-position)
          (window-width . ,imenu-list-size)))))
 
+  (when (modulep! :emacs ibuffer)
+    (buffer-group-property-pushnew
+     'internals :modes 'ibuffer-mode)
+    (buffer-group-property-pushnew
+     'internals :names "^\\*Ibuffer\\*")
+    (when (modulep! :ui workspaces)
+      (buffer-group-property-pushnew
+       'internals :names " buffers$")))
+
   (when (modulep! :checkers syntax)
     (buffer-group-property-pushnew
      'diagnostics :names "^\\*Flycheck errors\\*")

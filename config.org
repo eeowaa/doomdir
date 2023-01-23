@@ -3239,10 +3239,22 @@ sudo dnf -y install coreutils
 #+end_src
 
 ** electric [0/0]
-** ibuffer [0/0]
+** ibuffer [0/1]
 #+begin_quote
 This module augments ibuffer.
 #+end_quote
+
+*** STRT [#B] Clean up the modeline
+Performance can become an issue when listing workspace-specific buffers.
+
+#+begin_src emacs-lisp :tangle yes
+(add-hook! ibuffer-mode
+  (defun my/ibuffer-mode-line-h ()
+    "Clean up the modeline and improve performance."
+    (setcar mode-line-process "by ")
+    (setf (nth 2 ibuffer-header-line-format) " by ")))
+    ;; (setf (alist-get 'header-line-format mode-line-process) "")))
+#+end_src
 
 ** undo [0/1]
 #+begin_quote

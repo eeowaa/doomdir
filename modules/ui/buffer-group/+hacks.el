@@ -59,6 +59,14 @@ the command buffer. Also use `quit-window' instead of `delete-window'."
                      #'evil-window-move-far-right))
     (advice-add cmd :around #'+buffer-group-side-windows-save-a)))
 
+;;;###package ibuffer
+;; Do not pop to "*Ibuffer*" when opening workspace-specific buffer lists
+(when (modulep! :ui workspaces)
+  (defadvice! +buffer-group--ibuffer-suppress-pop-to-buffer (fn &rest args)
+    :around #'ibuffer-projectile-set-filter-groups
+    (letf! ((#'pop-to-buffer #'ignore))
+      (apply fn args))))
+
 ;;;###package man
 ;; Use `switch-to-buffer' to open new Man buffers
 (setq Man-notify-method 'pushy)
