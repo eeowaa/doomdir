@@ -1539,6 +1539,9 @@ See also: `ts-fold-summary--get'."
         mac-option-modifier 'super
         mac-right-option-modifier 'hyper))
 
+(setq-hook! 'c-mode-hook
+  lsp-lens-enable nil)
+
 (after! cc-mode
   (unless (stringp c-default-style)
     (if (assoc 'c-mode c-default-style)

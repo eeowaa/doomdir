@@ -5160,7 +5160,7 @@ This module adds support for [[https://beancount.github.io/][Beancount]] to Emac
 you [[https://plaintextaccounting.org/][manage your money in plain text]].
 #+end_quote
 
-** cc [1/3]
+** cc [2/3]
 #+begin_quote
 This module adds support for the C-family of languages: C, C++, and Objective-C.
 #+end_quote
@@ -5205,6 +5205,19 @@ sudo dnf -y install cmake
 pipx install cmake-language-server
 #+end_src
 
+*** DONE [#B] Disable reference tooltips in Emacs source tree
+When =lsp-mode= code lenses (i.e. reference count tooltips) are enabled, Emacs
+freezes while viewing its own C source code. This seems like a problem related
+to preprocessor macros, so it could conceivably be a problem in all C projects.
+For that reason, I have disabled code lenses by default in C source files:
+
+#+begin_src emacs-lisp :tangle yes
+(setq-hook! 'c-mode-hook
+  lsp-lens-enable nil)
+#+end_src
+
+=SPC c l T l= can be used to re-enable code lenses if desired.
+
 *** STRT [#B] Use Linux kernel style for C :tweak:
 Need to test this out once I need to read or write some C code.
 
@@ -5224,11 +5237,6 @@ Need to test this out once I need to read or write some C code.
    (setq tab-width
          (alist-get 'c-basic-offset (assoc "linux" c-style-alist)))))
 #+end_src
-
-*** TODO [#B] Disable reference tooltips in Emacs source tree
-When =lsp-mode= reference tooltips (code lenses?) are enabled while viewing code
-in the Emacs source tree, Emacs will frequently hang. =SPC c l T l= will provide
-temporary relief.
 
 ** clojure [0/0] :ARCHIVE:
 #+begin_quote
