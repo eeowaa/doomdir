@@ -15,6 +15,9 @@ Examples:
 (unless initial-window-system
   (remove-hook 'company-mode 'company-box-mode))
 
+(after! company-box
+  (add-to-list 'company-box-frame-parameters '(tab-bar-lines-keep-state . nil)))
+
 (setq company-idle-delay nil)
 
 (when (modulep! company +childframe)

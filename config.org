@@ -277,7 +277,7 @@ completion.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-** company [3/5]
+** company [4/5]
 #+begin_quote
 This module provides code completion, powered by [[https://github.com/company-mode/company-mode][company-mode]]. It is required
 for code completion in many of Doom's :lang modules.
@@ -294,6 +294,17 @@ Tangle to =config.el=:
 #+begin_src emacs-lisp :tangle yes
 (unless initial-window-system
   (remove-hook 'company-mode 'company-box-mode))
+#+end_src
+
+*** DONE [#A] Ensure that =tab-bar-mode= is disabled in =company-box= frames :hack:
+Fixed in [[https://github.com/sebastiencs/company-box/commit/79abd77f3357279c2726b74f8b20df27b71aa867][this commit]] of company-box, which I apparently have. What gives?
+*UPDATE:* This might be an issue that appears in Emacs 28.2 (IIRC this error
+appeared after I updated from 28.1 to 28.2). The following appears to fix the
+issue and should probably be PRed to =company-box= after a trial period.
+
+#+begin_src emacs-lisp :tangle yes
+(after! company-box
+  (add-to-list 'company-box-frame-parameters '(tab-bar-lines-keep-state . nil)))
 #+end_src
 
 *** DONE [#B] Never start completion automatically (require =C-SPC=)
@@ -362,9 +373,6 @@ the package for now to get the following updates:
 
 *There is still one more issue*. Documentation frames always appear below point,
 even when point is at the bottom of the frame.
-
-*** TODO [#A] Ensure that =tab-bar-mode= is disabled in =company-box= frames
-Fixed in [[https://github.com/sebastiencs/company-box/commit/79abd77f3357279c2726b74f8b20df27b71aa867][this commit]] of company-box, which I apparently have. What gives?
 
 ** helm [0/0] :ARCHIVE:
 #+begin_quote
