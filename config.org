@@ -4888,7 +4888,7 @@ Until I get things figured out, I am going to continue to use hash tables.
 (setq lsp-use-plists t)
 #+end_src
 
-** magit [1/3]
+** magit [2/4]
 *** STRT [#A] Install prerequisites :feat:
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -4921,6 +4921,13 @@ use Git Flow, but I do use worktrees, so this behavior is backwards for me.
 (setq magit-repository-directories
       '(("~/Documents/src" . 2)
         ("~/Documents/ref" . 1)))
+#+end_src
+
+*** OKAY [#C] Add keybindings
+#+begin_src emacs-lisp :tangle yes
+(map! (:after evil-collection-magit
+       (:map magit-status-mode-map
+        :nv "gz" #'magit-jump-to-stashes)))
 #+end_src
 
 ** make [0/0]

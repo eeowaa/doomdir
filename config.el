@@ -1506,6 +1506,10 @@ which causes problems even if there is no existing buffer."
       '(("~/Documents/src" . 2)
         ("~/Documents/ref" . 1)))
 
+(map! (:after evil-collection-magit
+       (:map magit-status-mode-map
+        :nv "gz" #'magit-jump-to-stashes)))
+
 ;; <https://emacs-lsp.github.io/lsp-mode/page/lsp-terraform-ls/>
 (when (modulep! :tools terraform +lsp)
   (setq
