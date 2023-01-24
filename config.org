@@ -4713,7 +4713,7 @@ sudo dnf -y install ripgrep sqlite-3
 
 *** DONE [#B] Do not automatically select documentation windows
 #+begin_src emacs-lisp :tangle yes
-(defvar my/select-doc-modes '(emacs-lisp-mode)
+(defvar my/select-doc-modes '(emacs-lisp-mode helpful-mode)
   "Modes where `+lookup/documentation' should pop to the doc buffer.")
 
 (defadvice! my/display-doc-buffer-a (fn &rest args)

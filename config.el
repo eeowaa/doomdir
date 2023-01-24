@@ -1452,7 +1452,7 @@ which causes problems even if there is no existing buffer."
 (setq eldoc-echo-area-use-multiline-p nil
       eldoc-echo-area-display-truncation-message nil)
 
-(defvar my/select-doc-modes '(emacs-lisp-mode)
+(defvar my/select-doc-modes '(emacs-lisp-mode helpful-mode)
   "Modes where `+lookup/documentation' should pop to the doc buffer.")
 
 (defadvice! my/display-doc-buffer-a (fn &rest args)
