@@ -1054,11 +1054,16 @@ If the current frame has one window, restore the previous windows."
   (select-window (split-window-right))
   (dired-jump))
 
+;; XXX This function is experimental
 (defun my/+dired-tab-jump ()
   (interactive)
-  (let ((vimish-tab-new-buffer-function #'current-buffer))
-    (vimish-tab-new)
-    (dired-jump)))
+  (let ((vimish-tab-new-buffer-function
+         (lambda ()
+           (vimish-tab-file-buffer
+            (if buffer-file-name
+                (file-name-directory buffer-file-name)
+              default-directory)))))
+    (vimish-tab-new)))
 
 (after! evil-ex
   (evil-ex-define-cmd "Ex[plore]"  #'dired-jump)
