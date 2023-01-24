@@ -429,6 +429,11 @@ Used by `vimish-tab-close-tab-or-window'."
   :type 'function
   :group 'vimish-tab)
 
+(defun vimish-tab-close-window ()
+  "Close the current window regardless of how many tabs."
+  (interactive)
+  (funcall vimish-tab-close-window-function))
+
 (defun vimish-tab-close-tab-or-window ()
   "Close the current tab or window (if only one tab left)."
   (interactive)

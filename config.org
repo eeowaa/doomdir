@@ -1726,6 +1726,9 @@ not indicate which tabs abstration is being operated on.
   (evil-collection-define-key 'normal 'Info-mode-map
     "gt" #'+tabs:next-window-tab
     "gT" #'+tabs:prev-window-tab))
+
+(define-key! evil-window-map
+  "C" #'+tabs/close-window)
 #+end_src
 
 *** DONE [#A] Bind =evil-ex= commands

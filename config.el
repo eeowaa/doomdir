@@ -580,6 +580,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     "gt" #'+tabs:next-window-tab
     "gT" #'+tabs:prev-window-tab))
 
+(define-key! evil-window-map
+  "C" #'+tabs/close-window)
+
 (after! evil-ex
   (evil-ex-define-cmd "tabnew"      #'+tabs:new-blank-window-tab)
   (evil-ex-define-cmd "tabe[dit]"   #'+tabs:new-window-tab)
