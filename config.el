@@ -1449,12 +1449,17 @@ which causes problems even if there is no existing buffer."
 (setq eldoc-echo-area-use-multiline-p nil
       eldoc-echo-area-display-truncation-message nil)
 
+(defvar my/select-doc-modes '(emacs-lisp-mode)
+  "Modes where `+lookup/documentation' should pop to the doc buffer.")
+
 (defadvice! my/display-doc-buffer-a (fn &rest args)
   "Display the documentation buffer without selecting it."
   :around #'+lookup/documentation
-  (letf! ((#'pop-to-buffer #'display-buffer))
-    (let (help-window-select)
-      (apply fn args))))
+  (if (memq major-mode my/select-doc-modes)
+      (apply fn args)
+    (letf! ((#'pop-to-buffer #'display-buffer))
+      (let (help-window-select)
+        (apply fn args)))))
 
 (when (modulep! :tools lookup +docsets)
   (defun my/ensure-docsets ()

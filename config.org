@@ -4710,12 +4710,17 @@ sudo dnf -y install ripgrep sqlite-3
 
 *** DONE [#B] Do not automatically select documentation windows
 #+begin_src emacs-lisp :tangle yes
+(defvar my/select-doc-modes '(emacs-lisp-mode)
+  "Modes where `+lookup/documentation' should pop to the doc buffer.")
+
 (defadvice! my/display-doc-buffer-a (fn &rest args)
   "Display the documentation buffer without selecting it."
   :around #'+lookup/documentation
-  (letf! ((#'pop-to-buffer #'display-buffer))
-    (let (help-window-select)
-      (apply fn args))))
+  (if (memq major-mode my/select-doc-modes)
+      (apply fn args)
+    (letf! ((#'pop-to-buffer #'display-buffer))
+      (let (help-window-select)
+        (apply fn args)))))
 #+end_src
 
 *** STRT [#A] Automatically install missing docsets :feat:
