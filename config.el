@@ -1456,6 +1456,41 @@ which causes problems even if there is no existing buffer."
          body)
        params))))
 
+(defvar-local my/linked-buffer nil
+  "The buffer that `my/send-region' sends text to.")
+
+(defun my/send-region (beg end)
+  "Send text in region to a linked buffer.
+
+If the current buffer does not have a linked buffer, or given a
+non-nil prefix argument, this function will prompt for a buffer
+and set the the linked buffer accordingly. Leading and trailing
+whitespace is removed from the region before sending to the
+linked buffer.
+
+Contrast this function to `send-region', which sends a region to
+a process instead of another buffer. Use `my/send-region' instead
+if you want to send region to a REPL or terminal emulator."
+  (interactive "r")
+  (let* ((region (buffer-substring-no-properties beg end))
+         (text (string-trim region))
+         (prompt (or (and (or (null my/linked-buffer) current-prefix-arg)
+                          "Select a buffer to link: ")
+                     (and (not (buffer-live-p my/linked-buffer))
+                          "Linked buffer is invalid. Select a new buffer: "))))
+    (when prompt
+      (setq my/linked-buffer
+            (get-buffer (read-buffer-to-switch prompt))))
+    (with-current-buffer my/linked-buffer
+      ;; TODO Test with `term', `shell', `eshell', various REPLs, and the
+      ;; scratch buffer. There is probably a better way to do this.
+      (pcase major-mode
+        ('vterm-mode (vterm-insert text))
+        (_ (insert text)))
+      (general-simulate-RET))))
+
+(map! :v (kbd "C-c e") #'my/send-region)
+
 (setq eldoc-echo-area-use-multiline-p nil
       eldoc-echo-area-display-truncation-message nil)
 
