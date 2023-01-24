@@ -68,16 +68,16 @@ updated. Actually, all that ~tab-line-mode~ does is set the buffer-local
 ~tab-line-format~ variable to ~(:eval (tab-line-format))~, which is supposed to
 handle the rest. That's a lot hinging on proper mode line updates!
 
-* Features [1/9]
+* Features [2/9]
 ** DONE Bind =C-w C= (capital "C") to ~vimish-tab-close-window-function~
 Users should have a mechanism to close windows at will, even when there is more
 than one tab in that window.
 
+** DONE Add =C-w gf= and =C-w gF= bindings for =ffap= behavior
 ** TODO Show a line beneath the tab bar just like in modus-operandi theme
 Can do this in private config for now, but this is useful enough to warrant
 inclusion in the Doom module.
 
-** TODO Add =C-w gf= and =C-w gF= bindings for =ffap= behavior
 ** TODO Implement standard Vim behavior for =gt=
 A numeric prefix argument should give the tab number, not how many times to
 repeat the command (like how =gT= works). There should be a user option to

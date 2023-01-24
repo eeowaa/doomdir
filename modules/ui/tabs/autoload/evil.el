@@ -22,9 +22,48 @@
 (evil-define-command +tabs:new-blank-window-tab (&optional count)
   "Ex wrapper to open a new blank window tab."
   (interactive "<c>")
-  (let ((vimish-tab-default-buffer-name "*scratch*")
+  (let ((vimish-tab-default-buffer vimish-tab-fallback-buffer)
         (vimish-tab-new-buffer-function #'vimish-tab-default-buffer))
     (funcall #'vimish-tab-new count)))
+
+
+;;;###autoload (autoload '+tabs:new-ffap-window-tab "ui/tabs/autoload/evil" nil t)
+(evil-define-command +tabs:new-ffap-window-tab (&optional count)
+  "Ex wrapper to open a new window tab displaying the file at point."
+  (interactive "<c>")
+  (let ((vimish-tab-new-buffer-function
+         (lambda ()
+           ;; TODO Remove dependency on `doom-thing-at-point-or-region'
+           (vimish-tab-file-buffer (doom-thing-at-point-or-region)))))
+    (funcall #'vimish-tab-new count)))
+
+;;;###autoload (autoload '+tabs:new-ffap-with-line-window-tab "ui/tabs/autoload/evil" nil t)
+(evil-define-command +tabs:new-ffap-with-line-window-tab (&optional count)
+  "Ex wrapper to open a new window tab displaying the file/line/col at point.
+This function heavily borrows from `evil-find-file-at-point-with-line'."
+  (interactive "<c>")
+  (require 'ffap)
+  (let* ((fname (or (with-no-warnings (ffap-file-at-point))
+                    (user-error "File does not exist.")))
+         (vimish-tab-new-buffer-function (lambda ()
+                                           (vimish-tab-file-buffer fname)))
+         (line-number-pattern ":\\([0-9]+\\)\\=" )
+         (line-and-column-numbers-pattern ":\\([0-9]+\\):\\([0-9]+\\)\\=")
+         (get-number (lambda (pattern match-number)
+                       (save-excursion
+                         (goto-char (cadr ffap-string-at-point-region))
+                         (and (re-search-backward pattern (line-beginning-position) t)
+                              (string-to-number (match-string match-number))))))
+         (line-number (or (funcall get-number line-and-column-numbers-pattern 1)
+                          (funcall get-number line-number-pattern 1)))
+         (column-number (funcall get-number line-and-column-numbers-pattern 2)))
+      (message "line: %s, column: %s" line-number column-number)
+      (funcall #'vimish-tab-new count)
+      (when line-number
+        (goto-char (point-min))
+        (forward-line (1- line-number))
+        (when column-number
+          (move-to-column (1- column-number))))))
 
 
 ;;;###autoload (autoload '+tabs:close-window-tab "ui/tabs/autoload/evil" nil t)

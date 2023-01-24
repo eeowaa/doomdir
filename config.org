@@ -1728,7 +1728,9 @@ not indicate which tabs abstration is being operated on.
     "gT" #'+tabs:prev-window-tab))
 
 (define-key! evil-window-map
-  "C" #'+tabs/close-window)
+  "C" #'+tabs/close-window
+  "gf" #'+tabs:new-ffap-window-tab
+  "gF" #'+tabs:new-ffap-with-line-window-tab)
 #+end_src
 
 *** DONE [#A] Bind =evil-ex= commands

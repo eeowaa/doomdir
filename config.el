@@ -581,7 +581,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     "gT" #'+tabs:prev-window-tab))
 
 (define-key! evil-window-map
-  "C" #'+tabs/close-window)
+  "C" #'+tabs/close-window
+  "gf" #'+tabs:new-ffap-window-tab
+  "gF" #'+tabs:new-ffap-with-line-window-tab)
 
 (after! evil-ex
   (evil-ex-define-cmd "tabnew"      #'+tabs:new-blank-window-tab)
