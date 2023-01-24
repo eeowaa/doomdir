@@ -7842,7 +7842,7 @@ on them."
 
 *** DONE [#B] Do not display line numbers in lisp interaction mode
 #+begin_src emacs-lisp :tangle yes
-(setq-hook! 'lisp-interaction-mode-hook
+(setq-hook! '(lisp-interaction-mode-hook doom-sandbox-emacs-lisp-mode-hook)
   display-line-numbers nil)
 #+end_src
 
