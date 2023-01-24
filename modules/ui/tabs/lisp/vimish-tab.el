@@ -123,13 +123,22 @@ Return VALUE."
   :type 'function
   :group 'vimish-tab)
 
-(defcustom vimish-tab-default-buffer-name "*scratch*"
+(defconst vimish-tab-fallback-buffer "*scratch*"
+  "Name of buffer to open in new tabs when all else fails.")
+
+(defcustom vimish-tab-default-buffer vimish-tab-fallback-buffer
   "Name of default buffer opened by `vimish-tab-default-buffer'."
-  :type 'string
+  :type '(choice
+          (string :tag "Name of buffer to get or create")
+          (function :tag "Function returning buffer object"))
   :group 'vimish-tab)
 
 (defun vimish-tab-default-buffer ()
-  (get-buffer-create vimish-tab-default-buffer-name))
+  (or (and (stringp vimish-tab-default-buffer)
+           (get-buffer-create vimish-tab-default-buffer))
+      (and (functionp vimish-tab-default-buffer)
+           (funcall vimish-tab-default-buffer))
+      (get-buffer-create vimish-tab-fallback-buffer)))
 
 (defun vimish-tab-select-buffer ()
   (condition-case nil
