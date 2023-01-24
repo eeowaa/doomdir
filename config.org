@@ -7817,11 +7817,22 @@ on them."
    (list (car (help--read-key-sequence 'no-mouse-movement)) current-prefix-arg))
   (where-is (cadr (help--analyze-key (car key) (cdr key))) insert))
 
+(defun my/find-command (key)
+  "Find the definition of the command bound to KEY."
+  (interactive
+   (letf! (defadvice my/find-command-prompt-a (args)
+            :filter-args #'read-key-sequence
+            (cons "Find function bound to the following key, mouse click, or menu item: "
+                  (cdr args)))
+     (list (car (help--read-key-sequence 'no-mouse-movement)))))
+  (find-function (cadr (help--analyze-key (car key) (cdr key)))))
+
 (define-key! help-map
-  "C-f" #'find-function      ;; replaces `view-emacs-FAQ' b/c I rarely use it
-  "C-l" #'find-library       ;; replaces `describe-language-environment'
+  "C-f" #'find-function     ;; replaces `view-emacs-FAQ' b/c I rarely use it
+  "C-l" #'find-library      ;; replaces `describe-language-environment'
   "C-v" #'find-variable
-  "C-w" #'my/alternate-keys) ;; replaces `describe-no-warranty' b/c I never use it
+  "C-w" #'my/alternate-keys ;; replaces `describe-no-warranty' b/c I never use it
+  "C-c" #'my/find-command)  ;; replaces `describe-coding-system' b/c I never use it
 #+end_src
 
 *** DONE [#B] Do not display line numbers in text mode
