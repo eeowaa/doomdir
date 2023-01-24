@@ -236,17 +236,22 @@ when switching between tabs containing the same buffer.
 This works by temporarily toggling the buffer-modified flag. For
 buffers not visiting a file, the variable `buffer-file-name' is
 temporarily set to a dummy file path."
-  (let ((mode-line-format (format-mode-line mode-line-format)))
-    (if buffer-file-name
-        (let ((flag (buffer-modified-p)))
-          (set-buffer-modified-p (not flag))
-          (force-mode-line-update)
-          (redisplay)
-          (set-buffer-modified-p flag))
-      (setq buffer-file-name "/tmp/.vimish-tab")
+  (let ((mode-line-format (format-mode-line mode-line-format))
+        (no-file (not buffer-file-name)))
+    (when no-file (setq buffer-file-name "/tmp/.vimish-tab"))
+    (let ((flag (buffer-modified-p)))
+      (set-buffer-modified-p (not flag))
       (force-mode-line-update)
       (redisplay)
-      (setq buffer-file-name nil))))
+      (set-buffer-modified-p flag))
+    (when no-file (setq buffer-file-name nil))))
+
+(defun vimish-tab--mode-line-update-hack (fn &rest args)
+  "Temporarily redefine `force-mode-line-update' for `vimish-tab'.
+Use as around advice for functions calling `force-mode-line-update'."
+  (cl-letf (((symbol-function 'force-mode-line-update)
+             #'vimish-tab-force-tab-line-update))
+    (apply fn args)))
 
 (defun vimish-tab-name-format (tab tabs)
   (let* ((selected-p (alist-get 'selected tab))
@@ -344,6 +349,7 @@ This function is assigned to the `select' alist entry of each tab."
             (funcall select tab)
             (force-mode-line-update)))))))
 
+(advice-add 'vimish-tab--select-tab-fix :around #'vimish-tab--mode-line-update-hack)
 (advice-add 'tab-line-select-tab :override #'vimish-tab--select-tab-fix)
 
 
@@ -436,6 +442,7 @@ N defaults to the index of the selected tab."
                               (unless (vimish-tab-show-p) 'none))))
 
 (vimish-tab--set 'tab-line-close-tab-function #'vimish-tab-close)
+(advice-add 'tab-line-close-tab :around #'vimish-tab--mode-line-update-hack)
 
 
 ;;; Cycling tabs
