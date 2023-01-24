@@ -149,7 +149,25 @@ If INDEX is not a workspace index, return nil."
   :unless noninteractive
   :hook (doom-init-ui . global-vimish-tab-mode)
   :config
-  (setq vimish-tab-new-button-show nil
+  (defun +tabs-project-scratch-buffer-fn ()
+    "Return the current project scratch buffer."
+    (save-window-excursion
+      (doom-scratch-buffer
+       nil
+       (cond ((eq doom-scratch-initial-major-mode t)
+                    (unless (or buffer-read-only
+                                (derived-mode-p 'special-mode)
+                                (string-match-p "^ ?\\*" (buffer-name)))
+                      major-mode))
+                   ((null doom-scratch-initial-major-mode)
+                    nil)
+                   ((symbolp doom-scratch-initial-major-mode)
+                    doom-scratch-initial-major-mode))
+       default-directory
+       (doom-project-name))))
+
+  (setq vimish-tab-default-buffer #'+tabs-project-scratch-buffer-fn
+        vimish-tab-new-button-show nil
         vimish-tab-close-button-show nil
         vimish-tab-switch-cycling t)
 
@@ -161,21 +179,4 @@ If INDEX is not a workspace index, return nil."
     (after! persp-mode
       (define-key! persp-mode-map
         [remap delete-window] #'vimish-tab-close-tab-or-window
-        [remap evil-window-delete] #'vimish-tab-close-tab-or-window)))
-
-  (defadvice! +tabs-project-scratch-buffer-a ()
-    "Return the current project scratch buffer."
-    :override #'vimish-tab-default-buffer
-    (doom-scratch-buffer
-     nil
-     (cond ((eq doom-scratch-initial-major-mode t)
-                  (unless (or buffer-read-only
-                              (derived-mode-p 'special-mode)
-                              (string-match-p "^ ?\\*" (buffer-name)))
-                    major-mode))
-                 ((null doom-scratch-initial-major-mode)
-                  nil)
-                 ((symbolp doom-scratch-initial-major-mode)
-                  doom-scratch-initial-major-mode))
-     default-directory
-     (doom-project-name))))
+        [remap evil-window-delete] #'vimish-tab-close-tab-or-window))))
