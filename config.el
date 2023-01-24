@@ -600,6 +600,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (after! tab-bar
   (setq tab-bar-tab-face-function #'tab-bar-tab-face-default))
 
+(setq display-time-day-and-date t ;; show the DoW and date in addition to the time
+      display-time-load-average-threshold 0) ;; always display the load average
+
 (after! vimish-tab
   (dolist (entry display-buffer-alist)
     (when-let ((condition (car entry))

@@ -1690,7 +1690,7 @@ Accepts the same arguments as `display-buffer-in-side-window'. You must set
 `window--sides-inhibit-check' to non-nil for this work properly.
 #+end_quote
 
-** tabs [4/5] :eeowaa:
+** tabs [5/7] :eeowaa:
 #+begin_quote
 +This module adds an Atom-esque tab bar to the Emacs UI.+
 Custom implementation of =:ui tabs=.
@@ -1785,6 +1785,15 @@ module, but for now I will just make a private customization.
   (setq tab-bar-tab-face-function #'tab-bar-tab-face-default))
 #+end_src
 
+*** OKAY [#C] Configure ~display-time-mode~ for tab bar
+There is probably more I can do (such as colorizing individual components), but
+this is OK for now.
+
+#+begin_src emacs-lisp :tangle yes
+(setq display-time-day-and-date t ;; show the DoW and date in addition to the time
+      display-time-load-average-threshold 0) ;; always display the load average
+#+end_src
+
 *** STRT [#B] Do not display tabs in side windows
 Side windows, especially those displayed on the top and bottom, are working with
 limited screen real estate. To save space, I'd like to hide the tab line.
@@ -1809,6 +1818,10 @@ display in side windows:
   ;; Treemacs buffers are treated specially
   (cl-pushnew 'treemacs-mode vimish-tab-exclude-modes))
 #+end_src
+
+*** HOLD [#C] Configure mail indicator
+Wait until you have a Maildir set up, then look at configuration options for
+~display-time-mode~.
 
 ** treemacs [9/12]
 #+begin_quote
