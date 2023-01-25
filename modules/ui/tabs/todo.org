@@ -78,6 +78,29 @@ than one tab in that window.
 Can do this in private config for now, but this is useful enough to warrant
 inclusion in the Doom module.
 
+*UPDATES*:
+
+- The modus themes achieve this by setting the ~box~ attribute for the ~tab-bar~
+  face. In effect, a border appears around the /entire/ tab bar, but you can't
+  really see the border on the sides or top due to contrast ratios of the modus
+  themes. Unfortunately, this does not look good with other themes.
+
+- In a response to [[https://www.reddit.com/r/emacs/comments/o2rmo4/how_to_add_border_between_tabbar_and_window/][this Reddit post]], one user reported that the ~tab-bar-border~
+  variable didn't work for them (it doesn't seem to work for me, either).
+  However, they found success by setting the ~internal-border-width~ frame
+  parameter to 1
+
+  #+begin_src emacs-lisp :tangle no
+  (setq tab-bar-border 'internal-border-width)
+  (set-frame-parameter nil 'internal-border-width 1)
+  (custom-set-faces!
+    '(border :inherit window-divider)
+    '(internal-border :inherit window-divider))
+  #+end_src
+
+- For consistency, the ~window-divider~ (?) face should be inherited by whatever
+  face is used to separate the tab bar from the rest of the frame.
+
 ** TODO Implement standard Vim behavior for =gt=
 A numeric prefix argument should give the tab number, not how many times to
 repeat the command (like how =gT= works). There should be a user option to
@@ -106,9 +129,17 @@ For a true vim/tmux-like workflow, each vimish-tab should allow the window they
 describe to be split, yet still be tracked within that tab.
 
 - This should be possible via Emacs' atomic windows.
-- The tab bar should always appear above the topmost live window.
+- The tab line should always appear above the topmost live window.
 - A mode-line indicator can be used to help identify live windows belonging to
   an atomic window. (Maybe there is already such a feature or package?)
+  - Alternatively, the mode-line can be shared between all windows in the atomic
+    window group, appearing at the bottom of the parent window. This could be
+    more difficult to achieve, because we can't rely on there being a window at
+    the bottom of the window group that spans the full horizontal width of the
+    parent window. The mode-line would need to somehow be independent of any
+    "live" window; it would be attached to and appear at the bottom of the
+    "internal" (and "valid") parent window. An option should be exposed to allow
+    users to choose between mechanisms.
 
 ** TODO Provide full Vim emulation for ~count~ arguments in =evil-ex= commands
 Some tab commands in Vim have ~count~ arguments that accept both numbers and
