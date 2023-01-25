@@ -3421,7 +3421,7 @@ to =eshell=, it forcefully clears the file on disk.
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [6/10]
+** vterm [6/11]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
@@ -3621,6 +3621,9 @@ $ git graph
 I say "hidden" instead of "truncated" because if you kill the line and yank it
 into another buffer, you can see the "o". *Note that this is only a problem in
 GUI Emacs, not terminal Emacs. Also, this is only a problem in popup buffers.*
+
+*** TODO [#C] Get shell integration working while running ~tmux~ :feat:
+Just try running ~tmux~ from a =vterm= buffer and you'll see the problem.
 
 * :checkers
 ** Headers :SCAFFOLDING:
@@ -7230,7 +7233,7 @@ This module adds [[https://github.com/ethereum/solidity][Solidity]] support thro
 
 ** swift [0/0] :ARCHIVE:
 ** terra [0/0] :ARCHIVE:
-** web [1/1]
+** web [1/2]
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -7247,6 +7250,20 @@ sudo dnf -y install tidy
 npm install -g js-beautify stylelint
 npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 #+end_src
+
+*** TODO [#B] Indent HTML by 2 spaces
+Currently, I achieve this by adding the following text to an =.editorconfig=
+file in directory trees containing HTML files that I want to edit:
+
+#+begin_src editorconfig-conf
+[*.html]
+indent_style = space
+indent_size = 2
+#+end_src
+
+However, this solution will not work for HTML buffers that are
+non-file-visiting. Review the =editorconfig= package to see how it interprets
+indentation parameters for =web-mode=, and do what it does.
 
 ** yaml [5/5]
 :PROPERTIES:
