@@ -3300,10 +3300,15 @@ sudo dnf -y install coreutils
 #+end_src
 
 ** electric [0/0]
-** ibuffer [0/1]
+** ibuffer [0/2]
 #+begin_quote
 This module augments ibuffer.
 #+end_quote
+
+*** TODO [#B] Integrate with =ace-window=
+From =ibuffer=, I would like to open buffers in windows selected with
+=ace-window= (currently, it is somewhat hard to predict which window will be
+chosen). This should still respect ~display-buffer-alist~ rules.
 
 *** STRT [#B] Clean up the modeline
 Performance can become an issue when listing workspace-specific buffers.
