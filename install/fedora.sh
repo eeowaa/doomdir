@@ -485,6 +485,7 @@ cd ~/.local/src/utils/reveal.js
 ln -s "${slides_path}" .
 trap "rm '$PWD/${slides_file}'" EXIT
 npm start &
+sleep 2
 xdg-open "http://localhost:8000/${slides_file}"
 wait
 EOF
