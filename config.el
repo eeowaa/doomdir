@@ -748,7 +748,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
 (setq-default truncate-lines t)
 
-(evil-define-command my/evil-quit (&optional force)
+(evil-define-command my/evil-quit-a (&optional force)
   "Mark the current buffer as \"Done\" when performing a server
 edit; otherwise, just kill the current buffer. Prompt to save the
 current buffer first unless the `force' argument is given."
@@ -766,7 +766,35 @@ current buffer first unless the `force' argument is given."
     (kill-current-buffer)))
 
 ;; Works for all variations of `:q'
-(advice-add 'evil-quit :override #'my/evil-quit)
+(advice-add 'evil-quit :override #'my/evil-quit-a)
+
+(evil-define-command my/evil-delete-buffer-a (buffer &optional bang)
+  (interactive "<b><!>")
+  (with-current-buffer (or buffer (current-buffer))
+    (when bang
+      (set-buffer-modified-p nil)
+      (dolist (process (process-list))
+        (when (eq (process-buffer process) (current-buffer))
+          (set-process-query-on-exit-flag process nil))))
+    ;; get all windows that show this buffer
+    (let ((wins (get-buffer-window-list (current-buffer) nil t)))
+      ;; if the buffer which was initiated by emacsclient,
+      ;; call `server-edit' from server.el to avoid
+      ;; "Buffer still has clients" message
+      (if (and (fboundp 'server-edit)
+               (boundp 'server-buffer-clients)
+               server-buffer-clients)
+          (server-edit)
+        (kill-buffer nil))
+      ;; close all windows that showed this buffer
+      (mapc #'(lambda (w)
+                (condition-case nil
+                    (with-selected-window w
+                      (vimish-tab-close-tab-or-window))
+                  (error nil)))
+            wins))))
+
+(advice-add 'evil-delete-buffer :override #'my/evil-delete-buffer-a)
 
 (evil-define-command my/evil-window-split-a (&optional count file)
   "Same as `+evil-window-split-a', but does not recenter the window."
