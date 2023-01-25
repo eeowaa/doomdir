@@ -83,7 +83,7 @@ A numeric prefix argument should give the tab number, not how many times to
 repeat the command (like how =gT= works). There should be a user option to
 override this behavior if desired.
 
-** TODO Implement a mechanism to go to the last access tab page
+** TODO Implement a mechanism to go to the last accessed tab page
 Only need to keep track of the last-accessed tab, not the entire history of
 which tabs were last accessed in a window.
 

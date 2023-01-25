@@ -1487,7 +1487,8 @@ if you want to send region to a REPL or terminal emulator."
       (pcase major-mode
         ('vterm-mode (vterm-insert text))
         (_ (insert text)))
-      (general-simulate-RET))))
+      (require 'general)
+      (funcall (general-simulate-key "RET")))))
 
 (map! :v (kbd "C-c e") #'my/send-region)
 
