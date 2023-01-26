@@ -4,7 +4,7 @@
 :PROPERTIES:
 :CATEGORY: doom/inbox
 :END:
-* Upstream [0/10]
+* Upstream [0/8]
 :PROPERTIES:
 :CATEGORY: doom/upstream
 :END:
@@ -70,35 +70,6 @@ rm straight-x.el straight.el
 ln -s ../../repos/straight.el/straight.el straight.el
 ln -s ../../repos/straight.el/straight-x.el straight-x.el
 #+end_src
-
-** TODO [#B] Submit a PR for =lsp-yaml=
-The ~lsp-yaml-download-schema-store-db~ function is flawed:
-
-#+begin_src emacs-lisp :tangle no
-(defun lsp-yaml-download-schema-store-db (&optional force-downloading)
-  "Download the remote schema store at `lsp-yaml-schema-store-uri' into local cache.
-Set FORCE-DOWNLOADING to non-nil to force re-download the database."
-  (interactive "P")
-  (or force-downloading ;; FIXME We shouldn't short-circuit here!
-      (file-exists-p lsp-yaml-schema-store-local-db)
-      (url-copy-file lsp-yaml-schema-store-uri lsp-yaml-schema-store-local-db)))
-#+end_src
-
-Better implementation:
-
-#+begin_src emacs-lisp :tangle no
-(defun lsp-yaml-download-schema-store-db (&optional force-downloading)
-  "Download the remote schema store at `lsp-yaml-schema-store-uri' into local cache.
-Set FORCE-DOWNLOADING to non-nil to force re-download the database."
-  (interactive "P")
-  (when (or force-downloading
-            (not (file-exists-p lsp-yaml-schema-store-local-db)))
-    (url-copy-file lsp-yaml-schema-store-uri lsp-yaml-schema-store-local-db)))
-#+end_src
-
-** TODO [#B] Submit a PR for =make=
-Looking at the definition of ~+make/run~, only =Makefile= and =makefile= are
-searched for, but =GNUmakefile= should also be searched for.
 
 ** TODO [#B] Do not fail to store Org links before opening a PDF
 ~org-store-link~ fails with the following error message:

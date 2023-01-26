@@ -5019,7 +5019,106 @@ use Git Flow, but I do use worktrees, so this behavior is backwards for me.
         :nv "gz" #'magit-jump-to-stashes)))
 #+end_src
 
-** make [0/0]
+** make [3/3]
+*** DONE [#A] Search for =GNUmakefile= files :hack:
+Both =makefile-executor= and =:tools make= only look for files named "Makefile"
+and "makefile" (in that order). However, this is not how GNU Make goes about
+searching for makefiles. Quoting from the [[info:make#Makefile Names][GNU Make manual]]:
+
+#+begin_quote
+By default, when 'make' looks for the makefile, it tries the following
+names, in order: 'GNUmakefile', 'makefile' and 'Makefile'.
+#+end_quote
+
+Rather than hard-code what I personally want, I'll implement a configurable
+solution that will be easier to PR:
+
+#+begin_src emacs-lisp :tangle yes
+(defvar my/makefile-search-list '("GNUmakefile" "makefile" "Makefile")
+  "List of makefile names to sequentially search for.")
+
+(defadvice! my/+make/run-a ()
+  :override #'+make/run
+  (interactive)
+  (if (doom-project-p)
+      (makefile-executor-execute-project-target)
+    (let ((makefile (cl-loop with buffer-file = (or buffer-file-name default-directory)
+                             for file in my/makefile-search-list
+                             if (locate-dominating-file buffer-file file)
+                             return file)))
+      (unless makefile
+        (user-error "Cannot find a makefile in the current project"))
+      (let ((default-directory (file-name-directory makefile)))
+        (makefile-executor-execute-target makefile)))))
+
+(after! makefile-executor
+  (defadvice! my/makefile-executor--initial-input-a (files)
+    :override #'makefile-executor--initial-input
+    (let* ((bn (or (buffer-file-name) default-directory))
+           ;; NOTE `makefile-executor' requires `dash', but not `cl-lib'
+           (fn (-first (lambda (m) (locate-dominating-file bn m))
+                        my/makefile-search-list))
+           (relpath (file-relative-name fn (projectile-project-root))))
+      (if (not (s-equals? relpath "./"))
+          relpath
+        ""))))
+#+end_src
+
+*** DONE [#A] Do not allow ~include~ statements to break target listing :hack:
+According to [[https://stackoverflow.com/a/26339924][this StackOverflow post]], an ~include~ statement in a makefile will
+break the carefully-crafted rule used by =makefile-executor= to list targets. We
+can fix that via the following modifications:
+
+1. Insert ~THIS_FILE := $(lastword $(MAKEFILE_LIST))~ at the top of the file.
+2. Replace ~-f $(lastword $(MAKEFILE_LIST))~ with ~-f $(THIS_FILE)~.
+
+(We might as well move the special rule to the top of the file, as well,
+although that shouldn't have any effect beyond keeping our special constructs
+grouped together.)
+
+Beyond that, a couple of bugs in the recommended rule have been found and fixed
+in recent edits to that StackOverflow post (namely setting ~LC_ALL~ and
+modifying the ~awk~ regexps):
+
+#+begin_src diff
+- @$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
++ @LC_ALL=C $(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/(^|\n)# Files(\n|$$)/,/(^|\n)# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
+#+end_src
+
+Let's fix things:
+
+#+begin_src emacs-lisp :tangle yes
+(after! makefile-executor
+  (defvar my/makefile-executor-file-variable "EMACS__MAKEFILE__FILE")
+  (setq makefile-executor-list-target-code
+        (format "%s := $(lastword $(MAKEFILE_LIST))\n.PHONY: %s\n%s:\n	@LC_ALL=C $(MAKE) -pRrq -f $(%s) : 2>/dev/null | awk -v RS= -F: '/(^|\\n)# Files(\\n|$$)/,/(^|\\n)# Finished Make data base/ {if ($$1 !~ \"^[#.]\") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'\n"
+                my/makefile-executor-file-variable makefile-executor-special-target makefile-executor-special-target my/makefile-executor-file-variable))
+  (defadvice! my/makefile-executor-get-targets-a (filename)
+    :override #'makefile-executor-get-targets
+    (let* ((file (make-temp-file "makefile"))
+           (makefile-contents
+            (concat
+             makefile-executor-list-target-code "\n"
+             (with-temp-buffer
+               (insert-file-contents filename)
+               (buffer-string)))))
+      (f-write-text makefile-contents 'utf-8 file)
+      (let ((out (shell-command-to-string
+                  (format "make -f %s %s"
+                          (shell-quote-argument file)
+                          makefile-executor-special-target))))
+        (delete-file file)
+        (s-split "\n" out t)))))
+#+end_src
+
+*** DONE [#B] Bind ~+make/run~ to a key :tweak:
+#+begin_src emacs-lisp :tangle yes
+(map! :leader
+      (:prefix-map ("c" . "code")
+       :desc "Make target"      "m" #'+make/run
+       :desc "Make last target" "M" #'+make/run-last))
+#+end_src
+
 ** nginx [1/1] :eeowaa:
 *** DONE [#A] Install prerequisites
 **** DONE macOS

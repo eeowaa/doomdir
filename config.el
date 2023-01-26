@@ -1575,6 +1575,62 @@ if you want to send region to a REPL or terminal emulator."
        (:map magit-status-mode-map
         :nv "gz" #'magit-jump-to-stashes)))
 
+(defvar my/makefile-search-list '("GNUmakefile" "makefile" "Makefile")
+  "List of makefile names to sequentially search for.")
+
+(defadvice! my/+make/run-a ()
+  :override #'+make/run
+  (interactive)
+  (if (doom-project-p)
+      (makefile-executor-execute-project-target)
+    (let ((makefile (cl-loop with buffer-file = (or buffer-file-name default-directory)
+                             for file in my/makefile-search-list
+                             if (locate-dominating-file buffer-file file)
+                             return file)))
+      (unless makefile
+        (user-error "Cannot find a makefile in the current project"))
+      (let ((default-directory (file-name-directory makefile)))
+        (makefile-executor-execute-target makefile)))))
+
+(after! makefile-executor
+  (defadvice! my/makefile-executor--initial-input-a (files)
+    :override #'makefile-executor--initial-input
+    (let* ((bn (or (buffer-file-name) default-directory))
+           ;; NOTE `makefile-executor' requires `dash', but not `cl-lib'
+           (fn (-first (lambda (m) (locate-dominating-file bn m))
+                        my/makefile-search-list))
+           (relpath (file-relative-name fn (projectile-project-root))))
+      (if (not (s-equals? relpath "./"))
+          relpath
+        ""))))
+
+(after! makefile-executor
+  (defvar my/makefile-executor-file-variable "EMACS__MAKEFILE__FILE")
+  (setq makefile-executor-list-target-code
+        (format "%s := $(lastword $(MAKEFILE_LIST))\n.PHONY: %s\n%s:\n	@LC_ALL=C $(MAKE) -pRrq -f $(%s) : 2>/dev/null | awk -v RS= -F: '/(^|\\n)# Files(\\n|$$)/,/(^|\\n)# Finished Make data base/ {if ($$1 !~ \"^[#.]\") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'\n"
+                my/makefile-executor-file-variable makefile-executor-special-target makefile-executor-special-target my/makefile-executor-file-variable))
+  (defadvice! my/makefile-executor-get-targets-a (filename)
+    :override #'makefile-executor-get-targets
+    (let* ((file (make-temp-file "makefile"))
+           (makefile-contents
+            (concat
+             makefile-executor-list-target-code "\n"
+             (with-temp-buffer
+               (insert-file-contents filename)
+               (buffer-string)))))
+      (f-write-text makefile-contents 'utf-8 file)
+      (let ((out (shell-command-to-string
+                  (format "make -f %s %s"
+                          (shell-quote-argument file)
+                          makefile-executor-special-target))))
+        (delete-file file)
+        (s-split "\n" out t)))))
+
+(map! :leader
+      (:prefix-map ("c" . "code")
+       :desc "Make target"      "m" #'+make/run
+       :desc "Make last target" "M" #'+make/run-last))
+
 ;; <https://emacs-lsp.github.io/lsp-mode/page/lsp-terraform-ls/>
 (when (modulep! :tools terraform +lsp)
   (setq
