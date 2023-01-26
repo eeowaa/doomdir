@@ -1829,7 +1829,7 @@ display in side windows:
 Wait until you have a Maildir set up, then look at configuration options for
 ~display-time-mode~.
 
-** treemacs [9/12]
+** treemacs [10/13]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -1945,6 +1945,22 @@ https://github.com/doomemacs/doomemacs/issues/1177#issuecomment-464936107
 #+begin_src emacs-lisp :tangle yes
 (after! (:and treemacs ace-window)
   (setq aw-ignored-buffers (delq 'treemacs-mode aw-ignored-buffers)))
+#+end_src
+
+*** DONE [#C] Show the cursor in treemacs windows :tweak:
+Once you've gotten used to the cursor being hidden in the Treemacs file explorer
+window, seeing the cursor there can be visually jarring. However, consider the
+following benefits of enabling the cursor in Treemacs:
+
+1. *Easier to determine the selected window*. This is especially important when
+   debugging with =dap-mode=, since it uses Treemacs to display data windows.
+2. *Consistent UI between windows*. Just as enabling the mode-line in all
+   windows helps reduce cognitive overhead, so can enabling the cursor.
+3. *Consistent UI between graphical and TTY Emacs*. These days, I mostly use
+   graphical Emacs, but it used to be the other way around and could be again.
+
+#+begin_src emacs-lisp :tangle yes
+(setq treemacs-show-cursor t)
 #+end_src
 
 *** WAIT [#B] Display "+" and "-" icons in tty emacs :bug:
