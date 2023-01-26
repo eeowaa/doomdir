@@ -1813,6 +1813,11 @@ limited screen real estate. To save space, I'd like to hide the tab line.
 The following code excludes ~tab-line-mode~ from buffer groups configured to
 display in side windows:
 
+*UPDATE*: This doesn't catch buffer groups whose definitions are deferred. For
+example, the ~ilist~ buffer group doesn't get defined until after ~imenu-list~
+loads, so tabs will appear in the ~ilist~ buffer until you manually run the
+~dolist~ form below, kill the ~*Ilist*~ buffer, and open it again.
+
 #+begin_src emacs-lisp :tangle yes
 (after! vimish-tab
   (dolist (entry display-buffer-alist)
