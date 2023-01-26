@@ -20,6 +20,7 @@
 - [[#troubleshooting][Troubleshooting]]
   - [[#finding-an-lsp-server-for-a-language][Finding an LSP server for a language]]
   - [[#trouble-with-tangling-source-blocks-from-configorg][Trouble with tangling source blocks from =config.org=]]
+  - [[#doom-doctor-reports-stale-elc-files][=doom doctor= reports stale =.elc= files]]
 
 * Description
 In Doom Emacs, one's private configuration directory is technically a module,
@@ -147,3 +148,30 @@ means that the executable could be installed anywhere).
 Are you having trouble tangling [[file:config.org][config.org]] via =C-c C-v C-t=
 (~org-babel-tangle~)? Have you recently updated Doom Emacs using ~doom upgrade~?
 Why don't you try =M-x pdf-tools-install= and try again? 😃
+
+** =doom doctor= reports stale =.elc= files
+If you see ~<package>/<file>.elc is out-of-date~ messages in the output of =doom
+doctor=, just remove the ~<package>~ directory and run =doom sync=:
+
+#+begin_example
+$ doom doctor
+(...)
+> Checking for stale elc files...
+! ~/.config/emacs/.local/straight/build-28.2/ghub/buck.elc is out-of-date
+! ~/.config/emacs/.local/straight/build-28.2/ghub/ghub-graphql.elc is out-of-date
+! ~/.config/emacs/.local/straight/build-28.2/ghub/ghub-pkg.elc is out-of-date
+! ~/.config/emacs/.local/straight/build-28.2/ghub/ghub.elc is out-of-date
+! ~/.config/emacs/.local/straight/build-28.2/ghub/glab.elc is out-of-date
+! ~/.config/emacs/.local/straight/build-28.2/ghub/gogs.elc is out-of-date
+! ~/.config/emacs/.local/straight/build-28.2/ghub/gsexp.elc is out-of-date
+! ~/.config/emacs/.local/straight/build-28.2/ghub/gtea.elc is out-of-date
+(...)
+$ rm -rf ~/.config/emacs/.local/straight/build-28.2/ghub
+$ doom sync
+(...)
+  > Installing packages...
+    > Building ghub...
+    ✓ Installed 1 packages
+(...)
+  - Restart Emacs or use 'M-x doom/reload' for changes to take effect
+#+end_example

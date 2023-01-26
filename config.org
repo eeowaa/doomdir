@@ -4663,7 +4663,7 @@ A workaround is to simply *not export* the results.
 
 ** elasticsearch [0/0] :eeowaa:
 ** eval [1/1]
-*** DONE [#A] Implement arbitrary region copy/paste between buffers
+*** DONE [#A] Implement arbitrary region copy/paste between buffers :feat:
 I would like to be able to "send" a region from one buffer to another buffer
 completely at will.
 
