@@ -43,6 +43,12 @@
                shortdoc-mode)))
    '((slot . 1)))
 
+  (buffer-group-side-window-setup
+   (buffer-group-define imenu
+     `(:names ("^\\*lsp-ui-imenu\\*"
+               "^\\*LSP Symbols List\\*") ;; REVIEW This uses Treemacs
+       :modes (lsp-ui-imenu-mode)))
+   '((slot . 1)))
   (when (modulep! :ui ilist)
     (after! imenu-list
       (buffer-group-side-window-setup

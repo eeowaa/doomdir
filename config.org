@@ -4940,7 +4940,7 @@ is currently only a problem on Emacs 28.
 *** TODO [#C] Add definitions to word completions :feat:
 Seems like an offline dictionary will be required for this.
 
-** lsp [5/8]
+** lsp [5/12]
 *** COMMENT Documentation
 + [[doom-modules:tools/lsp/README.org][tools/lsp module documentation]]
 + [[doom:.local/straight/repos/lsp-mode/README.md][lsp-mode package README]]
@@ -5008,6 +5008,79 @@ https://emacs-lsp.github.io/lsp-mode/page/main-features/#code-actions-on-modelin
 #+begin_src emacs-lisp :tangle yes
 (setq lsp-modeline-code-actions-segments nil)
 #+end_src
+
+*** STRT [#B] Add alternate bindings for some LSP commands :tweak:
+Each LSP command requires 4 keystrokes to execute (=SPC c l <prefix> <cmd>=),
+which is fine for infrequently-used commands such as toggles, but unacceptable
+for commands that I want to use frequently while reading or editing code. Doom
+already provides alternate mappings for some commands, but not everything.
+
+#+begin_src emacs-lisp :tangle yes
+(map! :leader
+      (:prefix-map ("c" . "code")
+       :desc "Glance documentation" "g" #'lsp-ui-doc-glance
+       :desc "UI sideline symbols"  "u" #'lsp-ui-sideline-toggle-symbols-info))
+#+end_src
+
+*** STRT [#B] Display symbols in a right side window :tweak:
+#+begin_src emacs-lisp :tangle yes
+(after! treemacs
+  (setq lsp-treemacs-symbols-position-params
+        `((side . right)
+          (slot . 0)
+          (window-width . ,treemacs-width))))
+#+end_src
+
+*** STRT [#B] Sync the timing of display updates :tweak:
+- Eldoc (~eldoc-idle-delay~)
+- Sideline (~lsp-ui-sideline-delay~)
+- Doc glance (~lsp-ui-doc-delay~)
+- Breadcrumbs (???)
+
+#+begin_src emacs-lisp :tangle yes
+;; TODO Convert to `defcustom' with a setter
+(defvar my/lsp-ui-delay 0.5
+  "Number of seconds before refreshing LSP UI elements.
+This variable should be set ")
+
+(defvar my/lsp-ui-delay-vars
+  '(eldoc-idle-delay
+    lsp-ui-sideline-delay
+    lsp-ui-doc-delay)
+  "Variables holding delay durations for LSP UI elements.")
+
+(defun my/lsp-ui-set-delay (delay)
+  "Set the delay for LSP UI elements."
+  (interactive "nDelay in seconds: ")
+  (setq my/lsp-ui-delay delay)
+  (dolist (var my/lsp-ui-delay-vars)
+    (set var my/lsp-ui-delay)))
+
+(my/lsp-ui-set-delay my/lsp-ui-delay)
+#+end_src
+
+*** TODO [#A] Do not delete fringes when the LSP Symbols buffer refreshes :bug:
+This is very similar to the problem I was seeing earlier with breakpoints
+disappearing in =dap-mode=, which -- like LSP Symbols -- uses Treemacs. In this
+case, the fringe disappears from the selected window after the LSP Symbols
+window refreshes. The fringe can be reactivated using =C-l= (bound to
+~my/redraw~, which evaluates ~(set-window-buffer nil (current-buffer))~ -- the
+code that restores fringes).
+
+The following works for LSP Symbols (not sure about =dap-mode=, as I haven't
+tested yet):
+
+#+begin_src emacs-lisp :tangle yes
+;; Removed `doom-themes-hide-fringes-maybe', `doom-themes-hide-modeline', and
+;; `doom-themes-define-treemacs-fringe-indicator-bitmap'
+(setq treemacs-mode-hook '(doom-themes-setup-line-spacing doom-themes-setup-tab-width))
+#+end_src
+
+*UPDATE*: Actually, the LSP Symbols functionality completely breaks if you run
+~my/treemacs-modify-icons~ *after* you already have the LSP Symbols window open.
+
+Also, ~treemacs-mode-hook~ gets reset to its original value at some point
+(either after ~my/treemacs-modify-icons~ or after opening LSP Symbols again.
 
 *** LOOP [#B] Automatically restart the LSP server when it crashes :tweak:
 This can result in infinite loops, so I've disabled it for now:
@@ -8363,6 +8436,15 @@ and uses visual instead."
     (setq-local sentence-end-double-space nil)
     (message "Sentences end with 1 space")))
 
+;; TODO Toggle cursor hover for other tooltip applications
+(defun my/toggle-cursor-hover ()
+  "Toggle cursor hover to activate tooltips."
+  (interactive)
+  (when lsp-ui-doc-mode
+    (unless (setq lsp-ui-doc-show-with-cursor
+                  (not lsp-ui-doc-show-with-cursor))
+      (lsp-ui-doc-hide))))
+
 (map! :leader
       (:prefix-map ("t" . "toggle")
        :desc "Whitespace mode"       "SPC" #'whitespace-mode
@@ -8372,6 +8454,7 @@ and uses visual instead."
        :desc "Battery indicator"     "B"   #'display-battery-mode
        :desc "Fill column indicator" "c"   #'display-fill-column-indicator-mode
        :desc "Column highlight"      "C"   #'column-highlight-mode
+       :desc "Cursor hover"          "g"   #'my/toggle-cursor-hover
        :desc "Hard newlines"         "h"   #'use-hard-newlines
        :desc "Line highlight"        "L"   #'hl-line-mode
        :desc "Menu bar"              "M"   #'menu-bar-mode

@@ -1648,6 +1648,41 @@ if you want to send region to a REPL or terminal emulator."
 
 (setq lsp-modeline-code-actions-segments nil)
 
+(map! :leader
+      (:prefix-map ("c" . "code")
+       :desc "Glance documentation" "g" #'lsp-ui-doc-glance
+       :desc "UI sideline symbols"  "u" #'lsp-ui-sideline-toggle-symbols-info))
+
+(after! treemacs
+  (setq lsp-treemacs-symbols-position-params
+        `((side . right)
+          (slot . 0)
+          (window-width . ,treemacs-width))))
+
+;; TODO Convert to `defcustom' with a setter
+(defvar my/lsp-ui-delay 0.5
+  "Number of seconds before refreshing LSP UI elements.
+This variable should be set ")
+
+(defvar my/lsp-ui-delay-vars
+  '(eldoc-idle-delay
+    lsp-ui-sideline-delay
+    lsp-ui-doc-delay)
+  "Variables holding delay durations for LSP UI elements.")
+
+(defun my/lsp-ui-set-delay (delay)
+  "Set the delay for LSP UI elements."
+  (interactive "nDelay in seconds: ")
+  (setq my/lsp-ui-delay delay)
+  (dolist (var my/lsp-ui-delay-vars)
+    (set var my/lsp-ui-delay)))
+
+(my/lsp-ui-set-delay my/lsp-ui-delay)
+
+;; Removed `doom-themes-hide-fringes-maybe', `doom-themes-hide-modeline', and
+;; `doom-themes-define-treemacs-fringe-indicator-bitmap'
+(setq treemacs-mode-hook '(doom-themes-setup-line-spacing doom-themes-setup-tab-width))
+
 (define-key! doom-leader-toggle-map
   "i" #'lsp-ui-imenu)
 
@@ -2527,6 +2562,15 @@ and uses visual instead."
     (setq-local sentence-end-double-space nil)
     (message "Sentences end with 1 space")))
 
+;; TODO Toggle cursor hover for other tooltip applications
+(defun my/toggle-cursor-hover ()
+  "Toggle cursor hover to activate tooltips."
+  (interactive)
+  (when lsp-ui-doc-mode
+    (unless (setq lsp-ui-doc-show-with-cursor
+                  (not lsp-ui-doc-show-with-cursor))
+      (lsp-ui-doc-hide))))
+
 (map! :leader
       (:prefix-map ("t" . "toggle")
        :desc "Whitespace mode"       "SPC" #'whitespace-mode
@@ -2536,6 +2580,7 @@ and uses visual instead."
        :desc "Battery indicator"     "B"   #'display-battery-mode
        :desc "Fill column indicator" "c"   #'display-fill-column-indicator-mode
        :desc "Column highlight"      "C"   #'column-highlight-mode
+       :desc "Cursor hover"          "g"   #'my/toggle-cursor-hover
        :desc "Hard newlines"         "h"   #'use-hard-newlines
        :desc "Line highlight"        "L"   #'hl-line-mode
        :desc "Menu bar"              "M"   #'menu-bar-mode
