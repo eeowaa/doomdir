@@ -1788,6 +1788,10 @@ I have two main gripes with ~+tabs-workspace-tab-face-fn~:
 Both of these gripes can (and probably should) be resolved in the =:ui tabs=
 module, but for now I will just make a private customization.
 
+*UPDATE*: This same kind of problem appears in Treemacs with the
+~doom-themes-treemacs-enable-variable-pitch~ option enabled, so maybe the
+problem has to do with variable pitch font.
+
 #+begin_src emacs-lisp :tangle yes
 (after! tab-bar
   (setq tab-bar-tab-face-function #'tab-bar-tab-face-default))
@@ -1831,7 +1835,7 @@ display in side windows:
 Wait until you have a Maildir set up, then look at configuration options for
 ~display-time-mode~.
 
-** treemacs [10/13]
+** treemacs [10/14]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -1965,13 +1969,147 @@ following benefits of enabling the cursor in Treemacs:
 (setq treemacs-show-cursor t)
 #+end_src
 
-*** WAIT [#B] Display "+" and "-" icons in tty emacs :bug:
+*** STRT [#B] Display "+" and "-" icons in tty emacs :bug:
 :LOGBOOK:
 - Note taken on [2022-11-23 Wed 11:27] \\
   This is an open issue with Doom Emacs. It is not so much of a nuisance that I
   want to fix it myself, so for now, I'll just wait for a fix.
 :END:
 https://github.com/hlissner/emacs-doom-themes/issues/489
+
+Work has been done towards this in the [[*Align all Treemacs icons][following task]] (I incidentally discovered
+a way to fix this while solving another problem).
+
+*** STRT [#B] Align all Treemacs icons :bug:
+Some files, like =config.org_archive=, do not have icons configured in
+=doom-themes-ext-treemacs=. This has been a recurring problem for me, despite
+the gradual improvements upstream.
+
+I still have more work to do, but for now, I have a decent manual workaround
+(performed once per Emacs session). See the ~FIXME~ comment lines in the
+following code block for more information.
+
+The workaround is as follows:
+1. =M-: my/treemacs-modify-icons RET=
+2. =M-x treemacs-kill-buffer RET= (from the Treemacs window)
+3. =SPC o p=
+
+#+begin_src emacs-lisp :tangle yes
+(defvar my/treemacs-icon-extension-alist
+  '(("org" . ("org_archive")))
+  "Alist of file extension mappings for Treemacs icons.
+
+The `car' of each element is a file extension with a desirable
+Treemacs icon; the `cdr' is a list of file extensions that should
+use that same icon.")
+
+(defvar my/treemacs-fallback-icon-alist
+  '((dir-closed . " +\t")
+    (dir-open . " -\t")
+    (root-closed . " +\t")
+    (root-open . " -\t"))
+  "Alist of file extension mappings for Treemacs TUI icons.
+
+The `car' of each element is a file extension or a symbol
+representing a special Treemacs entry (see documentation for the
+EXTENSIONS argument of `treemacs-create-icon' for more info).
+
+The `cdr' of each element is a string to use in place of an icon
+in TTY Emacs (or whenever Treemacs cannot render icons).")
+
+(defvar my/treemacs-fallback-icon-default "  \t"
+  "Default fallback string for TUI icons.
+
+This string is used as the TUI icon for all Treemacs entries not
+matched in `my/treemacs-icon-fallback-alist'.")
+
+(defun my/treemacs-fallback-icon (extension)
+  "Return the fallback icon corresponding to EXTENSION."
+  (or (alist-get extension my/treemacs-fallback-icon-alist)
+      my/treemacs-fallback-icon-default))
+
+(after! treemacs
+  (defun my/treemacs-modify-icons (&optional theme)
+    "Modify the icons for the Treemacs THEME (default current).
+The following variables are consulted when modifying the theme:
+
+  `my/treemacs-icon-extension-alist'
+  `my/treemacs-fallback-icon-alist'
+  `my/treemacs-fallback-icon-default'
+
+Call this function after `treemacs-create-theme' is called to
+ensure your customizations take hold."
+    (unless (treemacs-theme-p theme)
+      (setq theme (if (stringp theme)
+                      (treemacs--find-theme theme)
+                    treemacs--current-theme)))
+    (let ((gui-icons (treemacs-theme->gui-icons theme))
+          (tui-icons (treemacs-theme->tui-icons theme)))
+
+      ;; Modify GUI icons
+      (dolist (entry my/treemacs-icon-extension-alist)
+        (let* ((gui-icon (treemacs-get-icon-value (car entry)))
+               (extension-list (cdr entry)))
+          (dolist (extension extension-list)
+            (ht-set! gui-icons extension gui-icon))))
+
+      ;; Modify TUI icons
+      (treemacs--maphash tui-icons (extension _)
+        (ht-set! tui-icons extension (my/treemacs-fallback-icon extension)))))
+
+  ;; FIXME: This advice either causes errors or fails to run
+  (undefadvice! my/treemacs-modify-icons-a (theme &rest _)
+    :after #'treemacs-create-theme
+    :before #'treemacs-load-theme
+    (my/treemacs-modify-icons theme))
+
+  ;; FIXME: This doesn't work, either (this is easy to see when
+  ;; `doom-themes-treemacs-theme' is set to `doom-color', or when running in TTY
+  ;; Emacs). The only workaround I've found is to run `my/treemacs-modify-icons'
+  ;; manually after opening Treemacs, closing the Treemacs window via
+  ;; `treemacs-kill-buffer', and then opening Treemacs again.
+  (add-hook! 'doom-load-theme-hook :append #'my/treemacs-modify-icons)
+
+  ;; FIXME This function does not work when the Treemacs window is selected.
+  ;; Also, the Treemacs window is always selected after this function runs, and
+  ;; I'd rather keep the current window selected.
+  (defun my/treemacs-select-theme ()
+    "Select and load a new Treemacs theme.
+Closes and re-opens Treemacs to apply the new theme."
+    (interactive)
+    (call-interactively #'treemacs-load-theme)
+    (unless (eq (treemacs-current-visibility) 'none)
+      (treemacs-select-window)
+      (treemacs-kill-buffer)
+      (treemacs)))
+
+  (defun my/treemacs-current-theme ()
+    "Return the name of the current Treemacs theme."
+    (treemacs-theme->name treemacs--current-theme)))
+#+end_src
+
+*** STRT [#C] Use the same icons in treemacs as in dired :tweak:
+I think there are at least two ways to achieve this:
+
+1. Set ~doom-themes-treemacs-theme~ to ~doom-colors~, which uses
+   =all-the-icons=, just like =dired= has been configured to use.
+2. Enable ~treemacs-icons-dired-mode~ to use =treemacs= icons in =dired=.
+
+Attempting the first option:
+
+#+begin_src emacs-lisp :tangle no
+;; I think I actually prefer the `doom-atom' theme -- it's less distracting
+(setq doom-themes-treemacs-theme "doom-colors")
+#+end_src
+
+*UPDATE*: This does bring the Treemacs icon set closer to the Dired icon set,
+but there are still some differences:
+
+1. Most icons are the same, but some are different.
+2. Treemacs uses slightly smaller icons (see ~all-the-icons-scale-factor~).
+3. Treemacs uses different fallback icons (e.g. for =config.org_archive=).
+
+That third difference is the most annoying in Treemacs.
 
 *** TODO [#B] Allow switching git worktrees :feat:
 My convention is to put alternate worktrees under =.git/worktree-paths=, which
@@ -1988,11 +2126,6 @@ would break =direnv=, which I heavily rely upon.
 Preferably, I would just automatically switch the project root in =treemacs=
 when switching worktrees using =magit=. Perhaps there is a hook that I could
 run, or advice if necessary.
-
-*** TODO [#C] Use the same icons in treemacs as in dired
-Dired seems to do a better job than Treemacs with picking file icons and
-aligning things properly. If this is too hard, at least create overrides for
-misaligned files such as =config.org_archive=.
 
 ** unicode [0/0] :ARCHIVE:
 #+begin_quote

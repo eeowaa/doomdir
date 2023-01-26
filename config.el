@@ -654,6 +654,98 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
 (setq treemacs-show-cursor t)
 
+(defvar my/treemacs-icon-extension-alist
+  '(("org" . ("org_archive")))
+  "Alist of file extension mappings for Treemacs icons.
+
+The `car' of each element is a file extension with a desirable
+Treemacs icon; the `cdr' is a list of file extensions that should
+use that same icon.")
+
+(defvar my/treemacs-fallback-icon-alist
+  '((dir-closed . " +\t")
+    (dir-open . " -\t")
+    (root-closed . " +\t")
+    (root-open . " -\t"))
+  "Alist of file extension mappings for Treemacs TUI icons.
+
+The `car' of each element is a file extension or a symbol
+representing a special Treemacs entry (see documentation for the
+EXTENSIONS argument of `treemacs-create-icon' for more info).
+
+The `cdr' of each element is a string to use in place of an icon
+in TTY Emacs (or whenever Treemacs cannot render icons).")
+
+(defvar my/treemacs-fallback-icon-default "  \t"
+  "Default fallback string for TUI icons.
+
+This string is used as the TUI icon for all Treemacs entries not
+matched in `my/treemacs-icon-fallback-alist'.")
+
+(defun my/treemacs-fallback-icon (extension)
+  "Return the fallback icon corresponding to EXTENSION."
+  (or (alist-get extension my/treemacs-fallback-icon-alist)
+      my/treemacs-fallback-icon-default))
+
+(after! treemacs
+  (defun my/treemacs-modify-icons (&optional theme)
+    "Modify the icons for the Treemacs THEME (default current).
+The following variables are consulted when modifying the theme:
+
+  `my/treemacs-icon-extension-alist'
+  `my/treemacs-fallback-icon-alist'
+  `my/treemacs-fallback-icon-default'
+
+Call this function after `treemacs-create-theme' is called to
+ensure your customizations take hold."
+    (unless (treemacs-theme-p theme)
+      (setq theme (if (stringp theme)
+                      (treemacs--find-theme theme)
+                    treemacs--current-theme)))
+    (let ((gui-icons (treemacs-theme->gui-icons theme))
+          (tui-icons (treemacs-theme->tui-icons theme)))
+
+      ;; Modify GUI icons
+      (dolist (entry my/treemacs-icon-extension-alist)
+        (let* ((gui-icon (treemacs-get-icon-value (car entry)))
+               (extension-list (cdr entry)))
+          (dolist (extension extension-list)
+            (ht-set! gui-icons extension gui-icon))))
+
+      ;; Modify TUI icons
+      (treemacs--maphash tui-icons (extension _)
+        (ht-set! tui-icons extension (my/treemacs-fallback-icon extension)))))
+
+  ;; FIXME: This advice either causes errors or fails to run
+  (undefadvice! my/treemacs-modify-icons-a (theme &rest _)
+    :after #'treemacs-create-theme
+    :before #'treemacs-load-theme
+    (my/treemacs-modify-icons theme))
+
+  ;; FIXME: This doesn't work, either (this is easy to see when
+  ;; `doom-themes-treemacs-theme' is set to `doom-color', or when running in TTY
+  ;; Emacs). The only workaround I've found is to run `my/treemacs-modify-icons'
+  ;; manually after opening Treemacs, closing the Treemacs window via
+  ;; `treemacs-kill-buffer', and then opening Treemacs again.
+  (add-hook! 'doom-load-theme-hook :append #'my/treemacs-modify-icons)
+
+  ;; FIXME This function does not work when the Treemacs window is selected.
+  ;; Also, the Treemacs window is always selected after this function runs, and
+  ;; I'd rather keep the current window selected.
+  (defun my/treemacs-select-theme ()
+    "Select and load a new Treemacs theme.
+Closes and re-opens Treemacs to apply the new theme."
+    (interactive)
+    (call-interactively #'treemacs-load-theme)
+    (unless (eq (treemacs-current-visibility) 'none)
+      (treemacs-select-window)
+      (treemacs-kill-buffer)
+      (treemacs)))
+
+  (defun my/treemacs-current-theme ()
+    "Return the name of the current Treemacs theme."
+    (treemacs-theme->name treemacs--current-theme)))
+
 (after! diff-hl
   (unless (window-system) (diff-hl-margin-mode)))
 
