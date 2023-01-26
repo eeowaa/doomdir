@@ -318,3 +318,122 @@ It just takes too long. 🙁
 (remove-hook 'org-mode-hook #'+literate-enable-recompile-h)
 #+end_src
 
+
+* KILL [#A] Reveal point after ~consult-org-heading~ (=SPC m .=) :bug:
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-26 Thu 00:15
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :lang/org/Document Structure
+:ARCHIVE_CATEGORY: doom/org
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2022-12-05 Mon 16:57] \\
+  I am no longer seeing this error and cannot replicate it.
+:END:
+Right now, the point is hidden unless it jumps to a destination that was already
+revealed (no folds). Unfortunately, ~org-reveal~ (=C-c C-r=) does not help.
+
+
+* KILL [#B] Create a ~:tabmove~ command for Evil mode :feat:
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-26 Thu 00:15
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :ui/workspaces
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2023-01-25 Wed 23:00] \\
+  Now that I've implemented =vimish-tab= and have bound =:tabmove= to
+  ~+tabs:move-window-tab~, there is no reason to attempt this anymore.
+- Note taken on [2022-12-05 Mon 13:27] \\
+  This is still not working, but seems pretty close.
+:END:
+Reference:
++ ~+workspace/swap-left~
++ ~+workspace/swap-right~
++ ~my/evil-quit~
+
+#+begin_src emacs-lisp :tangle no
+(evil-define-command my/workspace-move (&optional index)
+  "Move the current workspace to zero-based INDEX.
+Without INDEX, move to the end."
+  (interactive "<c>")
+  (let* ((current-name (+workspace-current-name))
+         (index (cl-position current-name persp-names-cache :test #'equal))
+         (names (remove current-name persp-names-cache)))
+    (unless names
+      (user-error "Only one workspace"))
+    (let ((index (min (max 0 index) (length names))))
+      (setq persp-names-cache
+            (append (cl-subseq names 0 index)
+                    (list current-name)
+                    (cl-subseq names index))))
+    (when (called-interactively-p 'any)
+      (+workspace/display))))
+
+(evil-ex-define-cmd "tabm[ove]" #'my/workspace-move)
+#+end_src
+
+
+* KILL [#C] Bind ~+vc/gutter-hydra/body~ to another key
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-26 Thu 00:15
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :ui/vc-gutter
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2022-09-02 Fri 01:09] \\
+  Sadly, Henrik removed the hydra in commit ~27a448b04b~. The =hydra= module is
+  now deprecated (I didn't notice), so I guess I can't count on this ever coming
+  back. I'll keep this Org entry around for a while just in case.
+:END:
+Currently, ~+vc/gutter-hydra/body~ gets bound to =SPC g .=, but that binding
+gets overridden by ~magit-file-dispatch~ in =+evil-bindings.el= (located in the
+=:config default= module). A better (unused) binding would be =SPC g v=.
+
+To get started on this, open =+evil-bindings.el= by searching for it with
+~doom/find-file-in-emacsd~ (=SPC f e=) and then search for
+"+vc/gutter-hydra/body" in the file.
+
+#+begin_src emacs-lisp :tangle no
+(when (and (modulep! :ui vc-gutter)
+           (modulep! :ui hydra))
+
+  (define-key! doom-leader-git-map
+    "v" #'+vc/gutter-hydra/body)
+
+  (after! which-key
+    (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
+      (cl-pushnew `((,(format "\\`%s g v\\'" prefix-re)) nil . "VCGutter")
+                  which-key-replacement-alist))))
+#+end_src
+
+
+* KILL [#C] Create popup rule for Docker list buffers :tweak:
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-01-26 Thu 00:15
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :tools/docker
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2023-01-25 Wed 22:58] \\
+  I have replaced =:ui popup= with my own =:ui buffer-group= and have defined
+  displayed rules for Docker windows in that module.
+:END:
+#+begin_src emacs-lisp :tangle no
+(set-popup-rule! "^\\*docker-\\(?:containers\\|images\\|networks\\|volumes\\)"
+  :size 0.25
+  :select t
+  :quit 'current)
+#+end_src
+
