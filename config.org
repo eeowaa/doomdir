@@ -351,7 +351,7 @@ Turns out, we need this for =company-box=, too, so let's add that:
           (company-abort))))))
 #+end_src
 
-*** STRT [#A] Ensure that =company-box-doc= popup frames and their content are fully visible
+*** STRT [#A] Ensure that =company-box-doc= popup frames and their content are fully visible :bug:
 There were two issues that I was experiencing:
 
 1. Lines of content in documentation frames did not wrap, so documentation was
@@ -528,7 +528,7 @@ Taken from tecosaur's configuration.
 *** TODO [#B] Configure =vdiff= :feat:
 See also: [[file:~/.config/emacs/.local/straight/repos/evil-collection/modes/vdiff/evil-collection-vdiff.el][evil-collection-vdiff]]
 
-** buffer-group [4/5] :eeowaa:
+** buffer-group [3/5] :eeowaa:
 #+begin_quote
 Doom's way of handling windows (through =:ui popup=) is too magical for my
 liking and forces a specific way of doing things. I've never been able to get
@@ -640,29 +640,19 @@ string    = ?elisp string? .
 bufferobj = ?elisp buffer object? .
 #+end_src
 
-*** DONE Use full frame height for left and right side windows
+*** DONE [#A] Use full frame height for left and right side windows
 #+begin_src emacs-lisp :tangle yes
 (setq window-sides-vertical t)
 #+end_src
 
-*** DONE Make ~switch-to-buffer~ respect ~display-buffer-alist~
+*** DONE [#A] Make ~switch-to-buffer~ respect ~display-buffer-alist~
 https://www.masteringemacs.org/article/demystifying-emacs-window-manager
 
 #+begin_src emacs-lisp :tangle yes
 (setq switch-to-buffer-obey-display-actions t)
 #+end_src
 
-*** DONE Keep window dividers aligned
-Sometimes, spliting a window will result in jagged window placement, just a few
-pixels off. This can cause issues with selecting windows when point is near a
-jagged border. Doom disabled this feature to prevent crashes... let's hope that
-it doesn't cause any crashes for us.
-
-#+begin_src emacs-lisp :tangle yes
-(setq window-resize-pixelwise t)
-#+end_src
-
-*** DONE Open buffers in the current window by default
+*** DONE [#A] Open buffers in the current window by default
 This is cool, but it screws up some nice things that Doom does for Magit
 (although eventually, I'd like to fine-tune Magit, as well):
 
@@ -677,7 +667,19 @@ Instead of that, let's try something a bit milder and see how it goes:
 (setq display-buffer-base-action '((display-buffer-same-window) . nil))
 #+end_src
 
-*** STRT Replace key bindings for =:ui popup=
+*** STRT [#B] Keep window dividers aligned
+Sometimes, spliting a window will result in jagged window placement, just a few
+pixels off. This can cause issues with selecting windows when point is near a
+jagged border. Doom disabled this feature to prevent crashes... let's hope that
+it doesn't cause any crashes for us.
+
+#+begin_src emacs-lisp :tangle yes
+(setq window-resize-pixelwise t)
+#+end_src
+
+So far, this doesn't really seem to help much.
+
+*** STRT [#B] Replace key bindings for =:ui popup=
 #+begin_src emacs-lisp :tangle yes
 (map! "C-`"   #'window-toggle-side-windows)
    ;; "C-~"   #'+popup/raise
@@ -2136,12 +2138,12 @@ indicator.
     :weight bold :height 2.5 :box (:line-width 10 :color "red")))
 #+end_src
 
-*** TODO [#C] Make the selection character the default size in modus themes
+*** TODO [#C] Make the selection character the default size in modus themes :tweak:
 The modus themes (~modus-vivendi~ and ~modus-operandi~) make the selection
 character slightly larger than the default face, which makes the window content
 shift slightly downward, which is quite annoying.
 
-** workspaces [2/3]
+** workspaces [3/3]
 #+begin_quote
 This module adds support for workspaces, powered by persp_mode, as well as a API
 for manipulating them.
@@ -2193,8 +2195,11 @@ Note that although it is possible to move a tab behind the N-th one by using
         :desc "Move right" "L" #'+workspace/swap-right)))
 #+end_src
 
-*** STRT [#B] Create a ~:tabmove~ command for Evil mode :feat:
+*** KILL [#B] Create a ~:tabmove~ command for Evil mode :feat:
 :LOGBOOK:
+- Note taken on [2023-01-25 Wed 23:00] \\
+  Now that I've implemented =vimish-tab= and have bound =:tabmove= to
+  ~+tabs:move-window-tab~, there is no reason to attempt this anymore.
 - Note taken on [2022-12-05 Mon 13:27] \\
   This is still not working, but seems pretty close.
 :END:
@@ -3273,7 +3278,7 @@ yet opening an image file from the command line.
 This module provides configuration for dired.
 #+end_quote
 
-*** DONE Install prerequisites
+*** DONE [#A] Install prerequisites
 **** DONE macoS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `emacs/dired` module
@@ -3286,7 +3291,7 @@ brew install coreutils
 sudo dnf -y install coreutils
 #+end_src
 
-*** STRT Define directory-exploring =evil-ex= commands
+*** STRT [#A] Define directory-exploring =evil-ex= commands :feat:
 #+begin_src emacs-lisp :tangle yes
 (defun my/+dired-split-jump ()
   (interactive)
@@ -3322,12 +3327,12 @@ sudo dnf -y install coreutils
 This module augments ibuffer.
 #+end_quote
 
-*** TODO [#B] Integrate with =ace-window=
+*** TODO [#B] Integrate with =ace-window= :feat:
 From =ibuffer=, I would like to open buffers in windows selected with
 =ace-window= (currently, it is somewhat hard to predict which window will be
 chosen). This should still respect ~display-buffer-alist~ rules.
 
-*** STRT [#B] Clean up the modeline
+*** STRT [#B] Clean up the modeline :tweak:hack:
 Performance can become an issue when listing workspace-specific buffers.
 
 #+begin_src emacs-lisp :tangle yes
@@ -3339,13 +3344,17 @@ Performance can become an issue when listing workspace-specific buffers.
     ;; (setf (alist-get 'header-line-format mode-line-process) "")))
 #+end_src
 
-** undo [0/1]
+** undo [1/1]
 #+begin_quote
 This module augments Emacs' built-in undo system to be more intuitive and to
 persist across Emacs sessions.
 #+end_quote
 
-*** STRT [#A] Enable ~undo-tree~ :bug:
+*** OKAY [#A] Enable ~undo-tree~ :bug:
+:LOGBOOK:
+- Note taken on [2023-01-25 Wed 22:51] \\
+  This has been working well for me for a long time now.
+:END:
 Sometimes this doesn't seem to work.
 
 #+begin_src emacs-lisp :tangle yes
@@ -3919,7 +3928,7 @@ Reference:
       (advice-remove 'spell-fu--word-add-or-remove #'+spell--create-word-dict-a))))
 #+end_src
 
-*** TODO [#C] Make spelling corrections match recommendations
+*** TODO [#C] Make spelling corrections match recommendations :tweak:
 The =company= backend that provides spelling recommendations (via =C-SPC=) must
 use a different dictionary than the =spell= module that highlights errors and
 provides corrections. For example, the word "fluctuant" is highlighted as a
@@ -4398,7 +4407,7 @@ However, be wary of @purcell's comments on =direnv.el=:
   use the wrong environment. (This is probably quite rare in practice.)
 #+end_quote
 
-** docker [3/6]
+** docker [4/6]
 #+begin_quote
 This module allows you to manipulate Docker images, containers & more from
 Emacs.
@@ -4460,6 +4469,19 @@ npm install -g dockerfile-language-server-nodejs
 (delq! "/Dockerfile\\(?:\\.[^/\\]*\\)?\\'" auto-mode-alist #'assoc-string)
 (pushnew! auto-mode-alist
           '("/[^/\\]*\\<\\(Docker\\|Container\\)file\\>[^/\\]*$" . dockerfile-mode))
+#+end_src
+
+*** KILL [#C] Create popup rule for Docker list buffers :tweak:
+:LOGBOOK:
+- Note taken on [2023-01-25 Wed 22:58] \\
+  I have replaced =:ui popup= with my own =:ui buffer-group= and have defined
+  displayed rules for Docker windows in that module.
+:END:
+#+begin_src emacs-lisp :tangle no
+(set-popup-rule! "^\\*docker-\\(?:containers\\|images\\|networks\\|volumes\\)"
+  :size 0.25
+  :select t
+  :quit 'current)
 #+end_src
 
 *** TODO [#A] Seamlessly edit files from =vterm= buffers to Docker containers :feat:
@@ -4542,14 +4564,6 @@ And `vterm` supports _prompt tracking_. If this feature is enabled, Emacs knows
 where the prompt ends, you needn't customize `term-prompt-regexp` any more.
 Then you can use `vterm-next-prompt` and `vterm-previous-prompt`
 moving to end of next/previous prompt. The default keybinding is `C-c C-n` and `C-c C-p`.
-#+end_src
-
-*** STRT [#C] Create popup rule for Docker list buffers :tweak:
-#+begin_src emacs-lisp :tangle yes
-(set-popup-rule! "^\\*docker-\\(?:containers\\|images\\|networks\\|volumes\\)"
-  :size 0.25
-  :select t
-  :quit 'current)
 #+end_src
 
 ** editorconfig [1/1]
@@ -4860,7 +4874,7 @@ is currently only a problem on Emacs 28.
   (package! xref :pin "a82f459b37b31546bf274388baf8aca79e9c30d9"))
 #+end_src
 
-*** TODO [#C] Add definitions to word completions
+*** TODO [#C] Add definitions to word completions :feat:
 Seems like an offline dictionary will be required for this.
 
 ** lsp [5/8]
@@ -4932,8 +4946,9 @@ https://emacs-lsp.github.io/lsp-mode/page/main-features/#code-actions-on-modelin
 (setq lsp-modeline-code-actions-segments nil)
 #+end_src
 
-*** LOOP [#B] Automatically restart the LSP server when it crashes
+*** LOOP [#B] Automatically restart the LSP server when it crashes :tweak:
 This can result in infinite loops, so I've disabled it for now:
+
 #+begin_src emacs-lisp :tangle no
 (after! lsp-mode
   (setq lsp-restart 'auto-restart))
@@ -4993,7 +5008,7 @@ Until I get things figured out, I am going to continue to use hash tables.
 (setq lsp-use-plists t)
 #+end_src
 
-** magit [2/4]
+** magit [3/4]
 *** STRT [#A] Install prerequisites :feat:
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -5013,7 +5028,7 @@ sudo dnf -y install perl
 cpan install App::Git::Autofixup
 #+end_src
 
-*** STRT [#B] Remove gitflow configuration
+*** DONE [#B] Remove gitflow configuration
 Configuration for =magit-gitflow= shadows configuration for worktrees. I do not
 use Git Flow, but I do use worktrees, so this behavior is backwards for me.
 
@@ -6195,7 +6210,7 @@ Live preview still happens in =eww= buffers.
 + Open link: [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::defun markdown-toggle-markup-hiding (&optional arg][markdown-toggle-markup-hiding]]
 + Open link: [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][Markup Hiding]]
 
-*** STRT [#C] Support reveal.js
+*** STRT [#C] Support reveal.js :feat:
 [[https://revealjs.com/markup/][Reveal.js]] can be used to run a local HTTP server to present slides written in
 Markdown. Here is the basic structure of such a presentation:
 
@@ -6267,7 +6282,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [23/44]
+** org [23/43]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -6282,20 +6297,20 @@ intuitive out of the box.
 **** OKAY macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/org` module
-brew install gnuplot pandoc graphviz pngpaste
+brew install ditaa gnuplot pandoc graphviz pngpaste
 mkdir -p ~/org/roam
 #+end_src
 
 **** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `lang/org` module
-sudo dnf -y install gnuplot pandoc graphviz sqlite-3
+sudo dnf -y install ditaa gnuplot pandoc graphviz sqlite-3
 pipx install --include-deps jupyter
 pipx inject jupyter ipykernel
 sudo dnf -y install zeromq-devel libstdc++-static
 #+end_src
 
-*** Document Structure [1/5]
+*** Document Structure [2/5]
 **** DONE [#A] Do not indent headlines :hack:
 #+begin_src emacs-lisp :tangle yes
 (after! org
@@ -6376,7 +6391,7 @@ just perform a complete cycle of `org-cycle'."
                                 #'my/org-insert-heading-evil-state))
 #+end_src
 
-**** HOLD [#A] Reveal point after ~consult-org-heading~ (=SPC m .=) :bug:
+**** KILL [#A] Reveal point after ~consult-org-heading~ (=SPC m .=) :bug:
 :LOGBOOK:
 - Note taken on [2022-12-05 Mon 16:57] \\
   I am no longer seeing this error and cannot replicate it.
@@ -6432,7 +6447,7 @@ References:
 #+end_src
 
 **** TODO [#B] Create method to open links in specified window :feat:
-I have at least a few different options:
+I have at least four different options:
 
 1. Allow explicit selection via =ace-window=
    - [[help:display-buffer-overriding-action][display-buffer-overriding-action]]
@@ -6857,7 +6872,7 @@ Let's fix that:
                   org-src-lang-modes :key #'car)))
 #+end_src
 
-**** TODO [#B] Fix error output by ~jupyter-run-repl~
+**** TODO [#B] Fix error output by ~jupyter-run-repl~ :bug:
 I get the following error, even when this file exists:
 : ~/.local/pipx/venvs/jupyter/lib/python3.11/site-packages/ipykernel_launcher.py
 
@@ -6927,17 +6942,13 @@ of the time.
 **** TODO [#C] Use Org speed keys :feat:
 Just apply your old configuration.
 
-*** Contrib [2/3]
+*** Contrib [1/2]
 **** DONE [#C] Add ~ditaa~ JAR path
-You need ~ditaa~ installed for this to work:
-#+begin_src sh :tangle no
-brew install ditaa
-#+end_src
-
 #+begin_src emacs-lisp :tangle yes
 (setq org-ditaa-jar-path
-      (cond (IS-MAC
-             (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))))
+      (cond
+       (IS-MAC (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))
+       ((file-exists-p "/usr/share/java/ditaa.jar") "/usr/share/java/ditaa.jar")))
 #+end_src
 
 **** TODO [#C] Configure screenshot attachment :tweak:
@@ -6955,18 +6966,6 @@ hyperlinks for now.
 Note that the following keybindings are very helpful:
 + =SPC m a c= (~org-download-screenshot~) takes a new screenshot and attaches it
 + =SPC m a p= (~org-download-clipboard~) attaches an image from the clipboard
-
-**** DONE [#C] Add ~ditaa~ JAR path
-You need ~ditaa~ installed for this to work:
-#+begin_src sh :tangle no
-brew install ditaa
-#+end_src
-
-#+begin_src emacs-lisp :tangle yes
-(setq org-ditaa-jar-path
-      (cond (IS-MAC
-             (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))))
-#+end_src
 
 *** Pomodoro [2/3]
 **** DONE [#A] Always load =org-pomodoro= :hack:
@@ -7412,7 +7411,7 @@ npm install -g js-beautify stylelint
 npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 #+end_src
 
-*** TODO [#B] Indent HTML by 2 spaces
+*** TODO [#B] Indent HTML by 2 spaces :tweak:
 Currently, I achieve this by adding the following text to an =.editorconfig=
 file in directory trees containing HTML files that I want to edit:
 

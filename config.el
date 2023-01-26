@@ -71,9 +71,9 @@ buffer in current window."
 
 (setq switch-to-buffer-obey-display-actions t)
 
-(setq window-resize-pixelwise t)
-
 (setq display-buffer-base-action '((display-buffer-same-window) . nil))
+
+(setq window-resize-pixelwise t)
 
 (map! "C-`"   #'window-toggle-side-windows)
    ;; "C-~"   #'+popup/raise
@@ -1441,11 +1441,6 @@ which causes problems even if there is no existing buffer."
 (pushnew! auto-mode-alist
           '("/[^/\\]*\\<\\(Docker\\|Container\\)file\\>[^/\\]*$" . dockerfile-mode))
 
-(set-popup-rule! "^\\*docker-\\(?:containers\\|images\\|networks\\|volumes\\)"
-  :size 0.25
-  :select t
-  :quit 'current)
-
 (setq ein:output-area-inlined-images t)
 
 ;; HACK The machinery provided by `ob-ein-languages' and `ob-ein--babelize-lang'
@@ -2130,15 +2125,12 @@ Optional argument INFO is a plist of options."
             '("el" "org")))
 
 (setq org-ditaa-jar-path
-      (cond (IS-MAC
-             (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))))
+      (cond
+       (IS-MAC (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))
+       ((file-exists-p "/usr/share/java/ditaa.jar") "/usr/share/java/ditaa.jar")))
 
 (setq org-download-method 'directory
       org-download-image-dir "images")
-
-(setq org-ditaa-jar-path
-      (cond (IS-MAC
-             (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))))
 
 (require 'org-pomodoro)
 

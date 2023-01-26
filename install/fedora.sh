@@ -492,7 +492,7 @@ EOF
 chmod +x ~/.local/bin/revealjs
 
 # Install prerequisites for `lang/org` module
-sudo dnf -y install gnuplot pandoc graphviz sqlite-3
+sudo dnf -y install ditaa gnuplot pandoc graphviz sqlite-3
 pipx install --include-deps jupyter
 pipx inject jupyter ipykernel
 sudo dnf -y install zeromq-devel libstdc++-static

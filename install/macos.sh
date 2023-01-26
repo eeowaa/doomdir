@@ -184,7 +184,7 @@ brew install mactex texlab wget
 npm install -g markdownlint-cli marked
 
 # Install prerequisites for `lang/org` module
-brew install gnuplot pandoc graphviz pngpaste
+brew install ditaa gnuplot pandoc graphviz pngpaste
 mkdir -p ~/org/roam
 
 # Install prerequisites for `lang/python` module
