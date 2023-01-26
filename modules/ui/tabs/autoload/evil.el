@@ -26,6 +26,13 @@
         (vimish-tab-new-buffer-function #'vimish-tab-default-buffer))
     (funcall #'vimish-tab-new count)))
 
+;;;###autoload (autoload '+tabs:new-duplicate-window-tab "ui/tabs/autoload/evil" nil t)
+(evil-define-command +tabs:new-duplicate-window-tab (&optional count)
+  "Ex wrapper to open a new window tab displaying the current buffer."
+  (interactive "<c>")
+  (let ((vimish-tab-new-buffer-function #'current-buffer))
+    (funcall #'vimish-tab-new count)))
+
 
 ;;;###autoload (autoload '+tabs:new-ffap-window-tab "ui/tabs/autoload/evil" nil t)
 (evil-define-command +tabs:new-ffap-window-tab (&optional count)

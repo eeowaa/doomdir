@@ -1753,18 +1753,19 @@ definitions here:
 
 #+begin_src emacs-lisp :tangle yes
 (after! evil-ex
-  (evil-ex-define-cmd "tabnew"      #'+tabs:new-blank-window-tab)
-  (evil-ex-define-cmd "tabe[dit]"   #'+tabs:new-window-tab)
-  (evil-ex-define-cmd "tabf[ind]"   #'+tabs:new-project-window-tab)
-  (evil-ex-define-cmd "tabc[lose]"  #'+tabs:close-window-tab)
-  (evil-ex-define-cmd "tabo[nly]"   #'+tabs:close-other-window-tabs)
-  (evil-ex-define-cmd "tabn[ext]"   #'+tabs:next-window-tab)
-  (evil-ex-define-cmd "tabN[ext]"   #'+tabs:prev-window-tab)
-  (evil-ex-define-cmd "tabp[rev]"   #'+tabs:prev-window-tab)
-  (evil-ex-define-cmd "tabr[ewind]" #'+tabs:first-window-tab)
-  (evil-ex-define-cmd "tabfir[st]"  #'+tabs:first-window-tab)
-  (evil-ex-define-cmd "tabl[ast]"   #'+tabs:last-window-tab)
-  (evil-ex-define-cmd "tabm[ove]"   #'+tabs:move-window-tab))
+  (evil-ex-define-cmd "tabnew"         #'+tabs:new-blank-window-tab)
+  (evil-ex-define-cmd "tabe[dit]"      #'+tabs:new-window-tab)
+  (evil-ex-define-cmd "tabf[ind]"      #'+tabs:new-project-window-tab)
+  (evil-ex-define-cmd "tabd[uplicate]" #'+tabs:new-duplicate-window-tab)
+  (evil-ex-define-cmd "tabc[lose]"     #'+tabs:close-window-tab)
+  (evil-ex-define-cmd "tabo[nly]"      #'+tabs:close-other-window-tabs)
+  (evil-ex-define-cmd "tabn[ext]"      #'+tabs:next-window-tab)
+  (evil-ex-define-cmd "tabN[ext]"      #'+tabs:prev-window-tab)
+  (evil-ex-define-cmd "tabp[rev]"      #'+tabs:prev-window-tab)
+  (evil-ex-define-cmd "tabr[ewind]"    #'+tabs:first-window-tab)
+  (evil-ex-define-cmd "tabfir[st]"     #'+tabs:first-window-tab)
+  (evil-ex-define-cmd "tabl[ast]"      #'+tabs:last-window-tab)
+  (evil-ex-define-cmd "tabm[ove]"      #'+tabs:move-window-tab))
 #+end_src
 
 *** DONE [#C] Remove spaces between tabs
