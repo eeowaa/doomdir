@@ -80,7 +80,8 @@
     ;; For more buffer names, search for `get-buffer-create' in the Org package.
     (buffer-group-side-window-setup
      (buffer-group-define org-prompt
-       `(:names ("^\\*Org Note\\*")))
+       `(:names ("^\\*Org Note\\*"
+                 "^ \\*Agenda Commands\\*")))
      '((slot . 1))))
 
   (buffer-group-side-window-setup
