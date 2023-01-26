@@ -9,7 +9,7 @@ Migrate evil bindings from Doom module config. Refer to =treemacs-evil=,
 =kubernetes-evil=, and =kubel-evil= for how to do this.
 
 ** TODO Add a keymap for non-=evil= users
-* Bugs [0/5]
+* Bugs [0/6]
 ** HOLD Integrate =vimish-tab= with =winner=
 I do not have steps to replicate this at the moment.
 
@@ -67,6 +67,11 @@ It seems to me that ~tab-line-format~ is only ever called when the mode line is
 updated. Actually, all that ~tab-line-mode~ does is set the buffer-local
 ~tab-line-format~ variable to ~(:eval (tab-line-format))~, which is supposed to
 handle the rest. That's a lot hinging on proper mode line updates!
+
+** TODO Fix alignment of tab-bar status in TTY Emacs
+The status is not right-aligned in TTY Emacs, so I currently have it disabled in
+that operating mode. In my case, I can just rely on the tmux status bar for the
+time and battery status, as I nearly always run interactive sessions in tmux.
 
 * Features [2/9]
 ** DONE Bind =C-w C= (capital "C") to ~vimish-tab-close-window-function~

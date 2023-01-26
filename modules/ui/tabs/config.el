@@ -52,7 +52,7 @@ If INDEX is not a workspace index, return nil."
       (+workspace-current-name)))
 
   :init
-  (when (modulep! :ui modeline)
+  (when (and (modulep! :ui modeline) initial-window-system)
     (setq doom-modeline-display-misc-in-all-mode-lines nil
           doom-modeline-time nil
           doom-modeline-battery nil)
@@ -78,8 +78,9 @@ If INDEX is not a workspace index, return nil."
   (tab-bar-tab-name-format-function #'+tabs-workspace-tab-name-format-fn)
 
   :config
-  (display-time-mode +1)
-  (display-battery-mode +1)
+  (when initial-window-system
+    (display-time-mode +1)
+    (display-battery-mode +1))
 
   (setq tab-bar-tabs-function #'+tabs-workspace-tabs-fn
         tab-bar-tab-face-function #'+tabs-workspace-tab-face-fn
