@@ -2026,9 +2026,9 @@ just perform a complete cycle of `org-cycle'."
     "End up with the cursor in 'insert mode' at the end of the Org heading"
     ;; XXX Doom-specific
     (when evil-mode (evil-org-append-line 1)))
-  (add-hook! org-insert-heading #'my/org-insert-heading-spacing
-                                #'my/org-insert-heading-visibility
-                                #'my/org-insert-heading-evil-state))
+  (add-hook! 'org-insert-heading-hook #'my/org-insert-heading-spacing
+                                      #'my/org-insert-heading-visibility
+                                      #'my/org-insert-heading-evil-state))
 
 (after! org
   (pushnew! org-modules 'ol-man 'ol-info 'ol-w3m))
@@ -2580,7 +2580,10 @@ and uses visual instead."
        :desc "Battery indicator"     "B"   #'display-battery-mode
        :desc "Fill column indicator" "c"   #'display-fill-column-indicator-mode
        :desc "Column highlight"      "C"   #'column-highlight-mode
+
+       ;; FIXME The description text of "Evil goggles" is not replaced
        :desc "Cursor hover"          "g"   #'my/toggle-cursor-hover
+
        :desc "Hard newlines"         "h"   #'use-hard-newlines
        :desc "Line highlight"        "L"   #'hl-line-mode
        :desc "Menu bar"              "M"   #'menu-bar-mode
