@@ -52,26 +52,27 @@ If INDEX is not a workspace index, return nil."
       (+workspace-current-name)))
 
   :init
-  (when (and (modulep! :ui modeline) initial-window-system)
-    (setq doom-modeline-display-misc-in-all-mode-lines nil
-          doom-modeline-time nil
-          doom-modeline-battery nil)
-    (after! doom-modeline
-      ;; Battery
-      (advice-remove #'battery-update #'doom-modeline-update-battery-status)
-      (remove-hook! '(display-battery-mode-hook doom-modeline-mode-hook)
-        #'doom-modeline-override-battery-modeline)
-
-      ;; Time
-      (remove-hook! '(display-time-mode-hook doom-modeline-mode-hook)
-        #'doom-modeline-override-display-time-modeline)
-
-      ;; Battery and Time
-      (dolist (var '(doom-modeline-fn-alist doom-modeline-var-alist))
-        (when-let* ((alist (eval var))
-                    (element (or (assq 'battery alist)
-                                 (assq 'time alist))))
-          (set var (remove element alist))))))
+  (when initial-window-system
+    (when (modulep! :ui modeline)
+      (setq doom-modeline-display-misc-in-all-mode-lines nil
+            doom-modeline-time nil
+            doom-modeline-battery nil)
+      (after! doom-modeline
+        (advice-remove #'battery-update #'doom-modeline-update-battery-status)
+        (remove-hook! '(display-battery-mode-hook doom-modeline-mode-hook)
+          #'doom-modeline-override-battery-modeline)
+        (remove-hook! '(display-time-mode-hook doom-modeline-mode-hook)
+          #'doom-modeline-override-display-time-modeline)
+        (dolist (var '(doom-modeline-fn-alist doom-modeline-var-alist))
+          (when-let* ((alist (eval var))
+                      (element (or (assq 'battery alist)
+                                   (assq 'time alist))))
+            (set var (remove element alist))))))
+    (add-hook! 'tab-bar-mode-hook
+               (defun +tabs--tab-bar-mode-h ()
+                 (let ((toggle (if tab-bar-mode +1 -1)))
+                   (display-time-mode toggle)
+                   (display-battery-mode toggle)))))
 
   :custom
   (tab-bar-tab-name-function #'+workspace-current-name)
