@@ -1840,7 +1840,7 @@ loads, so tabs will appear in the ~ilist~ buffer until you manually run the
 Wait until you have a Maildir set up, then look at configuration options for
 ~display-time-mode~.
 
-** treemacs [10/14]
+** treemacs [10/15]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -1983,7 +1983,12 @@ following benefits of enabling the cursor in Treemacs:
 https://github.com/hlissner/emacs-doom-themes/issues/489
 
 Work has been done towards this in the [[*Align all Treemacs icons][following task]] (I incidentally discovered
-a way to fix this while solving another problem).
+a way to fix this while solving another problem). It might also be a decent idea
+to use the default Treemacs theme in TTY Emacs (the default theme might have
+better fallbacks).
+
+Better yet, =doom-themes-ext-treemacs= could be patched to use the fallback TUI
+icons from the default theme.
 
 *** STRT [#B] Align all Treemacs icons :bug:
 Some files, like =config.org_archive=, do not have icons configured in
@@ -2131,6 +2136,18 @@ would break =direnv=, which I heavily rely upon.
 Preferably, I would just automatically switch the project root in =treemacs=
 when switching worktrees using =magit=. Perhaps there is a hook that I could
 run, or advice if necessary.
+
+*** TODO [#C] Display truncation characters in the fringe :tweak:
+Fringes are not displayed in Treemacs. When the right fringe is not displayed,
+truncated lines end in ~$~. When running =C-l=, I can restore the fringes in
+Treemacs and truncated lines are indicated by an arrow in the right fringe.
+See also: [[info:emacs#Line Truncation][emacs#Line Truncation]]
+
+Basically, I want to display the right fringe in Treemacs. The left fringe is
+less important (only needed when scrolled to the right in order to show left
+truncation characters, or when ~treemacs-fringe-indicator-mode~ is enabled). I
+don't need ~treemacs-fringe-indicator-mode~ because ~hl-line-mode~ and
+~treemacs-show-cursor~ already provide good visual indicators.
 
 ** unicode [0/0] :ARCHIVE:
 #+begin_quote
@@ -8454,7 +8471,10 @@ and uses visual instead."
        :desc "Battery indicator"     "B"   #'display-battery-mode
        :desc "Fill column indicator" "c"   #'display-fill-column-indicator-mode
        :desc "Column highlight"      "C"   #'column-highlight-mode
+
+       ;; FIXME The description text of "Evil goggles" is not replaced
        :desc "Cursor hover"          "g"   #'my/toggle-cursor-hover
+
        :desc "Hard newlines"         "h"   #'use-hard-newlines
        :desc "Line highlight"        "L"   #'hl-line-mode
        :desc "Menu bar"              "M"   #'menu-bar-mode
