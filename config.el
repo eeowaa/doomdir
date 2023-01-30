@@ -2585,6 +2585,7 @@ and uses visual instead."
        :desc "Menu bar"              "M"   #'menu-bar-mode
        :desc "Overwrite"             "o"   #'overwrite-mode
        :desc "Truncate lines"        "t"   #'toggle-truncate-lines
+       :desc "Tab bar"               "T"   #'tab-bar-mode
        :desc "Visual fill column"    "|"   #'visual-fill-column-mode
        :desc "Page break lines"      "C-l" #'page-break-lines-mode
 
