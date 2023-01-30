@@ -2122,12 +2122,9 @@ just perform a complete cycle of `org-cycle'."
         ("\\`doom/misc\\'"     (,(all-the-icons-fileicon   "config"     nil nil :height 0.85 :face 'all-the-icons-lblue)))))
 
 (after! org
-  (defun my/org-footnote-sort ()
-    "Rearrange footnote definitions in the current buffer.
-Sort footnote definitions so they match order of footnote
-references.  Also relocate definitions at the end of their
-relative section or within a single footnote section, according
-to `org-footnote-section'.  Inline definitions are ignored."
+  (defadvice! my/org-footnote-sort-a (&rest _)
+    "Do not insert a leading newline before new footnote definitions."
+    :override #'org-footnote-sort
     (let ((references (org-footnote--collect-references)))
       (org-preserve-local-variables
        (let ((definitions (org-footnote--collect-definitions 'delete)))
@@ -2157,8 +2154,7 @@ to `org-footnote-section'.  Inline definitions are ignored."
             ;; Insert un-referenced footnote definitions at the end.
             (pcase-dolist (`(,label . ,definition) definitions)
               (unless (member label inserted)
-                (insert definition "\n")))))))))
-  (advice-add 'org-footnote-sort :override #'my/org-footnote-sort))
+                (insert definition "\n"))))))))))
 
 (use-package! ox-ipynb
   :when (modulep! :lang org +jupyter)
