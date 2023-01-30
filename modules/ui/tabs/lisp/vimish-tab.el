@@ -236,7 +236,9 @@ When NOERROR is provided, do not signal an error."
 
 (advice-add 'tab-line--get-tab-property :before-until #'vimish-tab--property-hack)
 
-;; TODO Get this working for magit buffers
+;; NOTE If this isn't working in some cases, you might want to try implementing
+;; a hack found in Doom's `+vterm/here' to force a redraw:
+;; (save-window-excursion (pop-to-buffer "*scratch*"))
 (defun vimish-tab-force-tab-line-update ()
   "Force-update the tab line of the current buffer.
 Use in place of `force-mode-line-update' to update the tab line
