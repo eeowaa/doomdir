@@ -6493,7 +6493,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [22/43]
+** org [24/45]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -7008,7 +7008,7 @@ Optional argument INFO is a plist of options."
 #+end_src
 
 *** Publishing [0/0]
-*** Working with Source Code [4/7]
+*** Working with Source Code [6/9]
 **** DONE [#A] Indent source blocks
 + https://emacs.stackexchange.com/a/9483/21977
 
@@ -7030,7 +7030,33 @@ Optional argument INFO is a plist of options."
       (setq display-buffer-alist +popup--display-buffer-alist))))
 #+end_src
 
-**** DONE [#B] Ignore errors in ~jupyter~ :bug:
+**** DONE [#B] Add ~bash~ kernel support to ~ob-jupyter~
+#+begin_src emacs-lisp :tangle yes
+(when (modulep! :lang org +jupyter)
+  (after! ob-async
+    (pushnew! ob-async-no-async-languages-alist "jupyter-bash"))
+
+  (after! org-src
+    (cl-pushnew '("jupyter-bash" . bash)
+                  org-src-lang-modes :key #'car)))
+#+end_src
+
+**** DONE [#A] Add mechanism to override jupyter environment :feat:
+#+begin_src emacs-lisp :tangle yes
+(defvar my/jupyter-envvars nil
+  "List of environment variable overrides for `jupyter'.
+This is a list of lists, not a list of cons cells.")
+
+(after! jupyter-env
+  (defadvice! my/jupyter-env-a (fn &rest args)
+    "Execute jupyter in a modified environment."
+    :around '(jupyter-command jupyter-run-repl)
+    (eval (macroexpand-1
+           `(letenv! ,my/jupyter-envvars
+              (apply fn args))))))
+#+end_src
+
+**** DONE [#A] Ignore frozen module warnings from jupyter :bug:
 If frozen modules are used by the ~jupyter~ system command, the command will
 output an error message like this:
 
@@ -7049,41 +7075,26 @@ json-read: Invalid number format: 5
 #+end_quote
 
 Let's fix that:
-
 #+begin_src emacs-lisp :tangle yes
-(when (modulep! :lang org +jupyter)
-  (after! jupyter-env
-    (defadvice! my/pydevd-disable-file-validation-a (orig-fun &rest args)
-      "Execute ORIG-FUN with the PYDEVD_DISABLE_FILE_VALIDATION envvar set to 1."
-      :around '(jupyter-command jupyter-run-repl)
-      (letenv! (("PYDEVD_DISABLE_FILE_VALIDATION" "1"))
-        (apply orig-fun args)))))
+(add-to-list 'my/jupyter-envvars '("PYDEVD_DISABLE_FILE_VALIDATION" "1"))
 #+end_src
 
-**** DONE [#B] Add ~bash~ kernel support to ~ob-jupyter~
+**** DONE [#A] Run jupyter in its pipx virtualenv :tweak:
 #+begin_src emacs-lisp :tangle yes
-(when (modulep! :lang org +jupyter)
-  (after! ob-async
-    (pushnew! ob-async-no-async-languages-alist "jupyter-bash"))
+(defun my/pipx-local-venvs ()
+  "Return value of PIPX_LOCAL_VENVS as a directory name."
+  (file-name-as-directory
+   (string-trim-right
+    (shell-command-to-string "pipx environment -v PIPX_LOCAL_VENVS"))))
 
-  (after! org-src
-    (cl-pushnew '("jupyter-bash" . bash)
-                  org-src-lang-modes :key #'car)))
+(let* ((venv (concat (my/pipx-local-venvs) "jupyter"))
+       (bindir (concat (file-name-as-directory venv) "bin")))
+  (pushnew! my/jupyter-envvars
+            (list "VIRTUAL_ENV" venv)
+            (list "PATH" (concat bindir (path-separator) (getenv "PATH")))))
 #+end_src
 
-**** STRT [#A] Fix compilation of =emacs-zmq= :bug:
-If you don't have a ZMQ dynamic module built when running ~jupyter-run-repl~,
-you will be prompted to download a module. What actually happens is ~make~ runs
-in =~/.config/emacs/.local/straight/build-28.2/zmq/=, but this fails because
-~./configure~ needs to be run first. The workaround is to run the following
-commands:
-
-#+begin_src :tangle no
-cd ~/.config/emacs/.local/straight/build-28.2/zmq
-./configure && make
-#+end_src
-
-**** TODO [#B] Fix error output by ~jupyter-run-repl~ :bug:
+**** TODO [#A] Fix error output by ~jupyter-run-repl~ with Python 3 kernel :bug:
 I get the following error, even when this file exists:
 : ~/.local/pipx/venvs/jupyter/lib/python3.11/site-packages/ipykernel_launcher.py
 
@@ -7101,7 +7112,7 @@ finalizer failed:
      #s(jupyter-spec-kernel
          (#<finalizer> #<finalizer used>)
          ("python3"
-          "/home/sam/.local/pipx/venvs/jupyter/share/jupyter/kernels/python3"
+          "/home/eeowaa/.local/pipx/venvs/jupyter/share/jupyter/kernels/python3"
           :argv ["python" "-m" "ipykernel_launcher" "-f" "{connection_file}"]
           :env nil
           :display_name "Python 3 (ipykernel)"
@@ -7125,18 +7136,32 @@ finalizer failed:
      nil))
 #+end_quote
 
-However, ~jupyter-run-repl~ works for me when I start a non-graphical Emacs
-instance from Jupyter's virtualenv like so:
+However, ~jupyter-run-repl~ works for me with Python when I start Emacs from
+Jupyter's virtualenv like so (I think because Emacs' notion of the "system
+python" has changed):
 
 #+begin_src sh :tangle no
 cd ~/.local/pipx/venvs/jupyter
 . bin/activate
-emacs -nw
+emacs
 #+end_src
 
 See also:
 - ~jupyter kernelspec list --json~
 - ~jupyter-available-kernelspecs~
+- ~process-environment~
+
+**** STRT [#A] Fix compilation of =emacs-zmq= :bug:
+If you don't have a ZMQ dynamic module built when running ~jupyter-run-repl~,
+you will be prompted to download a module. What actually happens is ~make~ runs
+in =~/.config/emacs/.local/straight/build-28.2/zmq/=, but this fails because
+~./configure~ needs to be run first. The workaround is to run the following
+commands:
+
+#+begin_src :tangle no
+cd ~/.config/emacs/.local/straight/build-28.2/zmq
+./configure && make
+#+end_src
 
 **** LOOP [#B] Make it easy to jump between source and tangled file :feat:
 Right now, I am only considering tangling to Elisp, since that's what I do most

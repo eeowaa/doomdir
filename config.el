@@ -2237,20 +2237,38 @@ Optional argument INFO is a plist of options."
       (setq display-buffer-alist +popup--display-buffer-alist))))
 
 (when (modulep! :lang org +jupyter)
-  (after! jupyter-env
-    (defadvice! my/pydevd-disable-file-validation-a (orig-fun &rest args)
-      "Execute ORIG-FUN with the PYDEVD_DISABLE_FILE_VALIDATION envvar set to 1."
-      :around '(jupyter-command jupyter-run-repl)
-      (letenv! (("PYDEVD_DISABLE_FILE_VALIDATION" "1"))
-        (apply orig-fun args)))))
-
-(when (modulep! :lang org +jupyter)
   (after! ob-async
     (pushnew! ob-async-no-async-languages-alist "jupyter-bash"))
 
   (after! org-src
     (cl-pushnew '("jupyter-bash" . bash)
                   org-src-lang-modes :key #'car)))
+
+(defvar my/jupyter-envvars nil
+  "List of environment variable overrides for `jupyter'.
+This is a list of lists, not a list of cons cells.")
+
+(after! jupyter-env
+  (defadvice! my/jupyter-env-a (fn &rest args)
+    "Execute jupyter in a modified environment."
+    :around '(jupyter-command jupyter-run-repl)
+    (eval (macroexpand-1
+           `(letenv! ,my/jupyter-envvars
+              (apply fn args))))))
+
+(add-to-list 'my/jupyter-envvars '("PYDEVD_DISABLE_FILE_VALIDATION" "1"))
+
+(defun my/pipx-local-venvs ()
+  "Return value of PIPX_LOCAL_VENVS as a directory name."
+  (file-name-as-directory
+   (string-trim-right
+    (shell-command-to-string "pipx environment -v PIPX_LOCAL_VENVS"))))
+
+(let* ((venv (concat (my/pipx-local-venvs) "jupyter"))
+       (bindir (concat (file-name-as-directory venv) "bin")))
+  (pushnew! my/jupyter-envvars
+            (list "VIRTUAL_ENV" venv)
+            (list "PATH" (concat bindir (path-separator) (getenv "PATH")))))
 
 (after! projectile
   (pushnew! projectile-other-file-alist
