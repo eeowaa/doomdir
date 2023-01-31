@@ -2034,7 +2034,8 @@ The workaround is as follows:
 
 #+begin_src emacs-lisp :tangle yes
 (defvar my/treemacs-icon-extension-alist
-  '(("org" . ("org_archive")))
+  '(("org" . ("org_archive"))
+    ("sh" . ("bat")))
   "Alist of file extension mappings for Treemacs icons.
 
 The `car' of each element is a file extension with a desirable
