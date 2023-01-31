@@ -2,6 +2,7 @@
 
 (defcli-group! "Demos"
   :docs "Demonstrations of basic Doom CLI functionality"
+
   (defcli! echo-hello ()
     "Say \"hello world\" by calling out to echo."
     ;; FIXME This now produces an error trace
@@ -21,3 +22,6 @@
                      (file-name-as-directory
                       (expand-file-name "bin" doom-private-dir))
                      "doom-checkout-main")))))
+
+(after! doom-cli-env
+  (add-to-list 'doom-env-deny "VTERM_BUFFER_NAME"))

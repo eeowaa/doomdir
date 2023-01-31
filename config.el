@@ -1266,6 +1266,17 @@ If the current frame has one window, restore the previous windows."
     (evil-collection-define-key 'insert 'vterm-mode-map
       (kbd key) 'vterm--self-insert)))
 
+(setq vterm-buffer-name-string "%s")
+(defadvice! my/vterm-popup-preserve-buffer-name-a (fn &rest args)
+  "Use Doom's standard buffer name for vterm popups."
+  :around #'+vterm/toggle
+  (let ((vterm-environment
+         `(,(format "VTERM_BUFFER_NAME=*doom:vterm-popup:%s*"
+                    (if (bound-and-true-p persp-mode)
+                        (safe-persp-name (get-current-persp))
+                      "main")))))
+    (apply fn args)))
+
 (after! vterm
 
   ;; This function is to be called in shell configuration to obtain the
@@ -1316,17 +1327,6 @@ ALIASES is a flat list of alias -> command pairs. e.g.
     ;; Define aliases for special Emacs functionality
     "w"    "eww-open-file"
     "gg"   "magit-status"))
-
-(setq vterm-buffer-name-string "%s")
-(defadvice! my/vterm-popup-preserve-buffer-name-a (fn &rest args)
-  "Use Doom's standard buffer name for vterm popups."
-  :around #'+vterm/toggle
-  (let ((vterm-environment
-         `(,(format "VTERM_BUFFER_NAME=*doom:vterm-popup:%s*"
-                    (if (bound-and-true-p persp-mode)
-                        (safe-persp-name (get-current-persp))
-                      "main")))))
-    (apply fn args)))
 
 (after! vterm
   (let ((alist (assoc-delete-all "kubectl" vterm-tramp-shells)))

@@ -53,6 +53,33 @@ WARNINGS:
                'append)))
 #+end_src
 
+#+begin_src emacs-lisp :tangle cli.el
+;;; DOOMDIR/cli.el -*- lexical-binding: t; -*-
+
+(defcli-group! "Demos"
+  :docs "Demonstrations of basic Doom CLI functionality"
+
+  (defcli! echo-hello ()
+    "Say \"hello world\" by calling out to echo."
+    ;; FIXME This now produces an error trace
+    (throw 'exit (list "echo" "hello world")))
+
+  (defcli! print-hello ()
+    "Say \"hello world\" by evaluating print!."
+    (print! "hello world")))
+
+(defcli-group! "Personal"
+  :docs "My own custom Doom CLI commands"
+
+  (defcli! checkout-main ()
+    "Checkout main branch for each repo managed by straight."
+    ;; FIXME This (probably) now produces an error trace
+    (throw 'exit `(,(concat
+                     (file-name-as-directory
+                      (expand-file-name "bin" doom-private-dir))
+                     "doom-checkout-main")))))
+#+end_src
+
 * Miscellany
 ** Install prerequisites [2/2]
 :PROPERTIES:
@@ -528,7 +555,7 @@ Taken from tecosaur's configuration.
 *** TODO [#B] Configure =vdiff= :feat:
 See also: [[file:~/.config/emacs/.local/straight/repos/evil-collection/modes/vdiff/evil-collection-vdiff.el][evil-collection-vdiff]]
 
-** buffer-group [3/5] :eeowaa:
+** buffer-group [3/6] :eeowaa:
 #+begin_quote
 Doom's way of handling windows (through =:ui popup=) is too magical for my
 liking and forces a specific way of doing things. I've never been able to get
@@ -667,7 +694,7 @@ Instead of that, let's try something a bit milder and see how it goes:
 (setq display-buffer-base-action '((display-buffer-same-window) . nil))
 #+end_src
 
-*** STRT [#B] Keep window dividers aligned
+*** STRT [#B] Keep window dividers aligned :tweak:
 Sometimes, spliting a window will result in jagged window placement, just a few
 pixels off. This can cause issues with selecting windows when point is near a
 jagged border. Doom disabled this feature to prevent crashes... let's hope that
@@ -679,13 +706,14 @@ it doesn't cause any crashes for us.
 
 So far, this doesn't really seem to help much.
 
-*** STRT [#B] Replace key bindings for =:ui popup=
+*** STRT [#B] Replace key bindings for =:ui popup= :tweak:
 #+begin_src emacs-lisp :tangle yes
 (map! "C-`"   #'window-toggle-side-windows)
    ;; "C-~"   #'+popup/raise
    ;; "C-x p" #'+popup/other
 #+end_src
 
+*** TODO [#A] Temporarily replace bottom side window(s) with minibuffer
 ** deft [0/0] :ARCHIVE:
 #+begin_quote
 [[https://jblevins.org/projects/deft/][Deft]] is a major mode for browsing and filtering notes written in plain text
@@ -3583,7 +3611,7 @@ to =eshell=, it forcefully clears the file on disk.
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [6/11]
+** vterm [5/12]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
@@ -3621,7 +3649,42 @@ sudo dnf -y install libvterm cmake
       (kbd key) 'vterm--self-insert)))
 #+end_src
 
-*** DONE [#B] Define aliases
+*** DONE [#B] Rename ~vterm~ buffers according to the host and directory
+Some extra shell-side configuration is needed for this, which I have stuck in my
+=~/.environ.d/vterm.sh= file.
+
+Note that we still want ~vterm~ popup buffers to have the same name
+(~"*doom:vterm-popup:<workspace>*"~) for window management purposes, so we need
+to account for that.
+
+#+begin_src emacs-lisp :tangle yes
+(setq vterm-buffer-name-string "%s")
+(defadvice! my/vterm-popup-preserve-buffer-name-a (fn &rest args)
+  "Use Doom's standard buffer name for vterm popups."
+  :around #'+vterm/toggle
+  (let ((vterm-environment
+         `(,(format "VTERM_BUFFER_NAME=*doom:vterm-popup:%s*"
+                    (if (bound-and-true-p persp-mode)
+                        (safe-persp-name (get-current-persp))
+                      "main")))))
+    (apply fn args)))
+#+end_src
+
+We must ensure that ~VTERM_BUFFER_NAME~ does not get set by =doom env=,
+otherwise *all* ~vterm~ buffers will be named according to that variable,
+regardless of whether the buffer is a popup or not.
+
+#+begin_src emacs-lisp :tangle cli.el
+(after! doom-cli-env
+  (add-to-list 'doom-env-deny "VTERM_BUFFER_NAME"))
+#+end_src
+
+*** STRT [#B] Define aliases
+:LOGBOOK:
+- Note taken on [2023-01-30 Mon 08:33] \\
+  The aliases that open files should work even without given arguments (e.g. ~vim~
+  should open the ~*scratch*~ buffer if not passed any arguments).
+:END:
 These depend on the existence of a ~vterm_cmd~ function. See the =README.md= for
 =vterm= for more information.
 
@@ -3676,25 +3739,6 @@ ALIASES is a flat list of alias -> command pairs. e.g.
     ;; Define aliases for special Emacs functionality
     "w"    "eww-open-file"
     "gg"   "magit-status"))
-#+end_src
-
-*** DONE [#B] Rename ~vterm~ buffers according to the host and directory
-Some extra shell-side configuration is needed for this, which I have stuck in my
-=~/.environ.d/vterm.sh= file. Note that we still want ~vterm~ popup buffers to
-have the same name (~"*doom:vterm-popup:<workspace>*"~) for window management
-purposes, so we need to account for that.
-
-#+begin_src emacs-lisp :tangle yes
-(setq vterm-buffer-name-string "%s")
-(defadvice! my/vterm-popup-preserve-buffer-name-a (fn &rest args)
-  "Use Doom's standard buffer name for vterm popups."
-  :around #'+vterm/toggle
-  (let ((vterm-environment
-         `(,(format "VTERM_BUFFER_NAME=*doom:vterm-popup:%s*"
-                    (if (bound-and-true-p persp-mode)
-                        (safe-persp-name (get-current-persp))
-                      "main")))))
-    (apply fn args)))
 #+end_src
 
 *** STRT [#A] Get =vterm= working with ~kubectl~ :bug:
