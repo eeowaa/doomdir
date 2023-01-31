@@ -73,7 +73,7 @@ The status is not right-aligned in TTY Emacs, so I currently have it disabled in
 that operating mode. In my case, I can just rely on the tmux status bar for the
 time and battery status, as I nearly always run interactive sessions in tmux.
 
-* Features [2/9]
+* Features [2/10]
 ** DONE Bind =C-w C= (capital "C") to ~vimish-tab-close-window-function~
 Users should have a mechanism to close windows at will, even when there is more
 than one tab in that window.
@@ -157,6 +157,7 @@ In order to implement such behavior, =vimish-tab= should define a new
 interactive code via ~evil-define-interactive-code~; refer to the =evil-types=
 library for how to do this.
 
+** TODO Add =ace-window= command to =treemacs= to open a file in a new window tab
 * Uncategorized [0/2]
 ** TODO Make windows behave more like ~tmux~ panes
 I would like for Emacs to obey the following precepts:

@@ -2028,8 +2028,8 @@ I still have more work to do, but for now, I have a decent manual workaround
 following code block for more information.
 
 The workaround is as follows:
-1. =M-: my/treemacs-modify-icons RET=
-2. =M-x treemacs-kill-buffer RET= (from the Treemacs window)
+1. =M-: my/treemacs-modify-icons RET= (from outside the Treemacs window)
+2. =Q= (from the Treemacs window)
 3. =SPC o p=
 
 #+begin_src emacs-lisp :tangle yes
