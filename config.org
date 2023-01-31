@@ -5243,7 +5243,7 @@ use Git Flow, but I do use worktrees, so this behavior is backwards for me.
         :nv "gz" #'magit-jump-to-stashes)))
 #+end_src
 
-** make [3/3]
+** make [4/4]
 *** DONE [#A] Search for =GNUmakefile= files :hack:
 Both =makefile-executor= and =:tools make= only look for files named "Makefile"
 and "makefile" (in that order). However, this is not how GNU Make goes about
@@ -5333,6 +5333,24 @@ Let's fix things:
                           makefile-executor-special-target))))
         (delete-file file)
         (s-split "\n" out t)))))
+#+end_src
+
+*** DONE [#A] Allow selection of Makefiles not seen by =projectile= :bug:
+~makefile-executor-execute-project-target~ requires an exact match when
+selecting a Makefile among the candidate list returned by
+~makefile-executor-get-makefiles~; the candidate list is constructed by
+~projectile-current-project-files~, which might not include Makefiles generated
+by Automake, CMake, etc.
+
+#+begin_src emacs-lisp :tangle yes
+(after! makefile-executor
+  (defadvice! my/with-completing-read-lenient-a (fn &rest args)
+    :around #'makefile-executor-execute-project-target
+    (letf! (defadvice my/completing-read-lenient-a (args)
+             :filter-args #'completing-read
+             (setf (nth 3 args) nil)
+             args)
+      (apply fn args))))
 #+end_src
 
 *** DONE [#B] Bind ~+make/run~ to a key :tweak:
@@ -6475,7 +6493,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [22/42]
+** org [22/43]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -6990,7 +7008,7 @@ Optional argument INFO is a plist of options."
 #+end_src
 
 *** Publishing [0/0]
-*** Working with Source Code [4/6]
+*** Working with Source Code [4/7]
 **** DONE [#A] Indent source blocks
 + https://emacs.stackexchange.com/a/9483/21977
 
@@ -7051,6 +7069,18 @@ Let's fix that:
   (after! org-src
     (cl-pushnew '("jupyter-bash" . bash)
                   org-src-lang-modes :key #'car)))
+#+end_src
+
+**** STRT [#A] Fix compilation of =emacs-zmq= :bug:
+If you don't have a ZMQ dynamic module built when running ~jupyter-run-repl~,
+you will be prompted to download a module. What actually happens is ~make~ runs
+in =~/.config/emacs/.local/straight/build-28.2/zmq/=, but this fails because
+~./configure~ needs to be run first. The workaround is to run the following
+commands:
+
+#+begin_src :tangle no
+cd ~/.config/emacs/.local/straight/build-28.2/zmq
+./configure && make
 #+end_src
 
 **** TODO [#B] Fix error output by ~jupyter-run-repl~ :bug:

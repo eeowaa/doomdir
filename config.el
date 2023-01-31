@@ -1751,6 +1751,15 @@ This variable should be set ")
         (delete-file file)
         (s-split "\n" out t)))))
 
+(after! makefile-executor
+  (defadvice! my/with-completing-read-lenient-a (fn &rest args)
+    :around #'makefile-executor-execute-project-target
+    (letf! (defadvice my/completing-read-lenient-a (args)
+             :filter-args #'completing-read
+             (setf (nth 3 args) nil)
+             args)
+      (apply fn args))))
+
 (map! :leader
       (:prefix-map ("c" . "code")
        :desc "Make target"      "m" #'+make/run
