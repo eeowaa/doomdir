@@ -3002,7 +3002,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [10/20]
+** Miscellany [11/20]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -3096,6 +3096,15 @@ This solves the problem for me and allows me to run =SPC f u=
     "\\)"
     ;; This is the (<section>) part
     "[ \t]*(\\(" Man-section-regexp "\\))")))
+#+end_src
+
+*** DONE [#B] Prevent AWS credentials from being written to ~doom-env-file~ :tweak:
+#+begin_src emacs-lisp :tangle cli.el
+(after! doom-cli-env
+  (pushnew! doom-env-deny
+            "^AWS_ACCESS_KEY_ID$"
+            "^AWS_SECRET_ACCESS_KEY$"
+            "^AWS_SESSION_TOKEN$"))
 #+end_src
 
 *** DONE [#C] Don't prompt about killing running processing when quitting
@@ -3270,20 +3279,6 @@ See the definition of ~evil-quit~ for an example of ~condition-case~.
 
 It might also be possible to add a function to ~+lookup-file-functions~ to
 identify files that require elevated privileges to open.
-
-*** TODO [#B] Prevent AWS credentials from being written to ~doom-env-file~ :tweak:
-- [ ] Look at recent changes to =core/cli/= and =core/core-cli-lib.el= to fix
-  this problem and others in =DOOMDIR/cli.el=.
-
-# :tangle early-init.el
-#+begin_src emacs-lisp :tangle no
-(when noninteractive
-  ;; FIXME This variable is not defined
-  (pushnew! doom-env-deny
-            "^AWS_ACCESS_KEY_ID$"
-            "^AWS_SECRET_ACCESS_KEY$"
-            "^AWS_SESSION_TOKEN$"))
-#+end_src
 
 *** TODO [#B] Configure WoMan for AWS CLI man pages :feat:
 *** LOOP [#B] Always trust file-location and directory-local variables :tweak:
