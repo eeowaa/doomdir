@@ -13,8 +13,7 @@
 
 ;;; :completion
 
-;; If this causes issues, try `(unpin! (:completion company))' instead
-(unpin! company-box)
+(unpin! (:completion company))
 
 ;;; :ui
 

@@ -417,8 +417,7 @@ the package for now to get the following updates:
 2. An updated ~company-box-doc--set-frame-position~ function (fixes #2).
 
 #+begin_src emacs-lisp :tangle packages.el
-;; If this causes issues, try `(unpin! (:completion company))' instead
-(unpin! company-box)
+(unpin! (:completion company))
 #+end_src
 
 *There is still one more issue*. Documentation frames always appear below point,
