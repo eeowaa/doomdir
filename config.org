@@ -304,13 +304,13 @@ completion.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-** company [4/5]
+** company [4/8]
 #+begin_quote
 This module provides code completion, powered by [[https://github.com/company-mode/company-mode][company-mode]]. It is required
 for code completion in many of Doom's :lang modules.
 #+end_quote
 
-*** DONE [#A] Do not use childframes for =company= in TTY Emacs
+*** DONE [#A] Do not use =company-box= in TTY Emacs
 Tangle to =early-init.el=:
 #+begin_src emacs-lisp :tangle early-init.el
 (unless initial-window-system
@@ -323,15 +323,20 @@ Tangle to =config.el=:
   (remove-hook 'company-mode 'company-box-mode))
 #+end_src
 
-*** DONE [#A] Ensure that =tab-bar-mode= is disabled in =company-box= frames :hack:
-Fixed in [[https://github.com/sebastiencs/company-box/commit/79abd77f3357279c2726b74f8b20df27b71aa867][this commit]] of company-box, which I apparently have. What gives?
-*UPDATE:* This might be an issue that appears in Emacs 28.2 (IIRC this error
-appeared after I updated from 28.1 to 28.2). The following appears to fix the
-issue and should probably be PRed to =company-box= after a trial period.
+*** DONE [#A] Enable echo frontend when disabling ~company-box-mode~ :hack:bug:
+With =+childframe=, Doom unconditionally removes
+~company-echo-metadata-frontend~ from ~company-frontends~. This is better
+implemented as a hook, so that ~company-box-mode~ can be disabled at runtime and
+we can still see documentation.
 
 #+begin_src emacs-lisp :tangle yes
 (after! company-box
-  (add-to-list 'company-box-frame-parameters '(tab-bar-lines-keep-state . nil)))
+  (cl-pushnew 'company-echo-metadata-frontend company-frontends)
+  (add-hook! company-box-mode
+    (defun my/company-box-toggles-h ()
+      (if company-box-mode
+          (delq! 'company-echo-metadata-frontend company-frontends)
+        (cl-pushnew 'company-echo-metadata-frontend company-frontends)))))
 #+end_src
 
 *** DONE [#B] Never start completion automatically (require =C-SPC=)
@@ -378,6 +383,24 @@ Turns out, we need this for =company-box=, too, so let's add that:
           (company-abort))))))
 #+end_src
 
+*** STRT [#A] Ensure that =tab-bar-mode= is disabled in =company-box= frames :hack:
+:LOGBOOK:
+- Note taken on [2023-01-31 Tue 20:56] \\
+  This is happening again for some reason.
+:END:
+Fixed in [[https://github.com/sebastiencs/company-box/commit/79abd77f3357279c2726b74f8b20df27b71aa867][this commit]] of company-box, which I apparently have. What gives?
+*UPDATE:* This might be an issue that appears in Emacs 28.2 (IIRC this error
+appeared after I updated from 28.1 to 28.2). The following appears to fix the
+issue and should probably be PRed to =company-box= after a trial period.
+
+#+begin_src emacs-lisp :tangle yes
+(after! company-box
+  (add-to-list 'company-box-frame-parameters '(tab-bar-lines-keep-state . nil)))
+#+end_src
+
+*UPDATE*: This problem reappears, but only after loading =org=. I'm guessing
+that some window- or frame-handling code is causing the issue.
+
 *** STRT [#A] Ensure that =company-box-doc= popup frames and their content are fully visible :bug:
 There were two issues that I was experiencing:
 
@@ -400,6 +423,21 @@ the package for now to get the following updates:
 
 *There is still one more issue*. Documentation frames always appear below point,
 even when point is at the bottom of the frame.
+
+*** STRT [#B] Lower the wait time before displaying documentation :tweak:
+When writing code, a 0.05-second delay feels nice (in some ways smoother than no
+delay). However, when completing in a REPL (like ~ielm~), this feels bad. Maybe
+a longer delay (such as the default of 0.5 seconds) or no delay would feel
+better. I need to experiment with this.
+
+#+begin_src emacs-lisp :tangle yes
+(setq company-box-doc-delay 0.05) ;; This feels a bit smoother than no delay
+#+end_src
+
+*** TODO [#A] Display doc buffer without =company-box= :feat:
+=C-h= is supposed to open a documentation buffer, but that doesn't work for me.
+Check ~company-active-map~, ~company-show-doc-buffer~, ~company-doc-buffer~, and
+~company--electric-do~.
 
 ** helm [0/0] :ARCHIVE:
 #+begin_quote

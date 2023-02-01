@@ -16,7 +16,12 @@ Examples:
   (remove-hook 'company-mode 'company-box-mode))
 
 (after! company-box
-  (add-to-list 'company-box-frame-parameters '(tab-bar-lines-keep-state . nil)))
+  (cl-pushnew 'company-echo-metadata-frontend company-frontends)
+  (add-hook! company-box-mode
+    (defun my/company-box-toggles-h ()
+      (if company-box-mode
+          (delq! 'company-echo-metadata-frontend company-frontends)
+        (cl-pushnew 'company-echo-metadata-frontend company-frontends)))))
 
 (setq company-idle-delay nil)
 
@@ -26,6 +31,11 @@ Examples:
       (defun +company-abort-h ()
         (when company-candidates
           (company-abort))))))
+
+(after! company-box
+  (add-to-list 'company-box-frame-parameters '(tab-bar-lines-keep-state . nil)))
+
+(setq company-box-doc-delay 0.05) ;; This feels a bit smoother than no delay
 
 (defun my/toggle-window-dedicated ()
   "Control whether or not Emacs is allowed to display another
