@@ -3644,7 +3644,7 @@ to =eshell=, it forcefully clears the file on disk.
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [5/12]
+** vterm [5/14]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
@@ -3842,13 +3842,54 @@ Example use:
              "ash"))
 #+end_src
 
-*** HOLD [#A] Allow scrolling back while output is being written :tweak:
+*** STRT [#A] Allow scrolling back while output is being written :tweak:
 https://github.com/akermu/emacs-libvterm/issues/397
 
 Right now, =C-c C-t= (~vterm-copy-mode~) can be used to toggle output being
 written to the buffer. When there is no output being written, you can freely
 scroll back in the buffer. Unfortunately there is no better way to do this at
 the moment, but it works pretty well anyway.
+
+*UPDATE*: Maybe I could have =ESC= enter ~vterm-copy-mode~. That is, when the
+=evil= state is anything but ~insert~, enable ~vterm-copy-mode~. Then when I
+switch back to ~insert~ state, disable ~vterm-copy-mode~.
+
+See [[*Prevent cursor misplacement when switching Evil states][this subtree]] for more information.
+
+*** TODO [#A] Prevent cursor misplacement when switching Evil states :bug:
+_Some common problems:_
+
++ When appending text to a command line, switching to ~normal~ state and back to
+  ~insert~ state (even with =a= to append) moves the cursor back one character.
+  The workaround is to use =C-e= in ~insert~ state to move the cursor back to
+  the end of the command line.
+
++ When switching to ~normal~ state and try to delete or modify text, weird
+  characters (like ~~~) get inserted into the buffer.
+
++ When switching back to ~insert~ state after moving the cursor to an
+  unprintable area, point doesn't move to the appropriate location until I start
+  typing. I often need to delete the text that I just inserted, move the cursor
+  to where I wanted to go, and then type it out again.
+
+_Some things to look at:_
+
++ =evil=
+  - ~evil-insert-state-exit-hook~
+  - ~evil-insert-state-entry-hook~
+  - ~evil-move-cursor-back~
++ =vterm=
+  - ~vterm--get-cursor-point~
+  - ~vterm--get-prompt-point~
+  - ~vterm--reset-point~
+  - ~vterm-reset-cursor-point~
+
+*** TODO [#B] Let =C-x C-e= pass through in Evil insert state :feat:
+#+begin_src emacs-lisp :tangle no
+(after! evil-collection-vterm
+  (evil-collection-define-key 'insert 'vterm-mode-map
+    (kbd "C-x C-e") 'vterm--self-insert))
+#+end_src
 
 *** TODO [#C] Prevent ~git-graph~ cutoff :bug:
 The last character ("o" in this case) gets hidden:
@@ -3863,6 +3904,28 @@ GUI Emacs, not terminal Emacs. Also, this is only a problem in popup buffers.*
 
 *** TODO [#C] Get shell integration working while running ~tmux~ :feat:
 Just try running ~tmux~ from a =vterm= buffer and you'll see the problem.
+
+*** WAIT [#C] Enable soft line wrapping :tweak:
+=term= has the ~term-suppress-hard-newline~ option, which is supposed to
+soft-wrap lines. (In practice, I haven't gotten this to work.) =vterm=, however,
+does not have such an option. There is an open issue for this:
+https://github.com/akermu/emacs-libvterm/issues/179
+
+Somebody worked around this by running GNU Screen in each ~vterm~ buffer:
+https://github.com/akermu/emacs-libvterm/issues/179#issuecomment-1045331359
+
+#+begin_src emacs-lisp :tangle no
+(setq vterm-shell "screen")
+#+end_src
+
+#+begin_src screen :tangle no
+# ~/.screenrc
+termcapinfo xterm* ti@:te@
+#+end_src
+
+I would be OK with doing this, but I wouldn't be surprised if I ran into shell
+integration issues just like I have when attempting to run ~tmux~ in ~vterm~
+buffers. For the time being, I'll just wait it out.
 
 * :checkers
 ** Headers :SCAFFOLDING:
