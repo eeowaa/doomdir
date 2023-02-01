@@ -5135,7 +5135,7 @@ already provides alternate mappings for some commands, but not everything.
 ;; TODO Convert to `defcustom' with a setter
 (defvar my/lsp-ui-delay 0.5
   "Number of seconds before refreshing LSP UI elements.
-This variable should be set ")
+This variable should be set by `my/lsp-ui-set-delay'.")
 
 (defvar my/lsp-ui-delay-vars
   '(eldoc-idle-delay
@@ -7132,8 +7132,11 @@ Let's fix that:
 #+end_src
 
 **** TODO [#A] Fix error output by ~jupyter-run-repl~ with Python 3 kernel :bug:
-I get the following error, even when this file exists:
-: ~/.local/pipx/venvs/jupyter/lib/python3.11/site-packages/ipykernel_launcher.py
+*NOTE*: This only happens with the Python kernel (Bash works fine).
+
+When running ~jupyter-run-repl~, I get the following error, even through
+=~/.local/pipx/venvs/jupyter/lib/python3.11/site-packages/ipykernel_launcher.py=
+exists on my system:
 
 #+begin_quote
 Kernel process exited:
@@ -7190,14 +7193,15 @@ See also:
 
 **** STRT [#A] Fix compilation of =emacs-zmq= :bug:
 If you don't have a ZMQ dynamic module built when running ~jupyter-run-repl~,
-you will be prompted to download a module. What actually happens is ~make~ runs
-in =~/.config/emacs/.local/straight/build-28.2/zmq/=, but this fails because
-~./configure~ needs to be run first. The workaround is to run the following
-commands:
+you will be prompted to build it ("ZMQ module not found. Build it? (y or n)").
+~make~ then runs in =~/.config/emacs/.local/straight/build-28.2/zmq/=, but this
+fails because ~./configure~ needs to be run in the child =src= directory
+(=~/.config/emacs/.local/straight/build-28.2/zmq/src=) first. The workaround is
+to run the following commands:
 
 #+begin_src :tangle no
-cd ~/.config/emacs/.local/straight/build-28.2/zmq
-./configure && make
+cd ~/.config/emacs/.local/straight/build-28.2/zmq/src
+make configure && make
 #+end_src
 
 **** LOOP [#B] Make it easy to jump between source and tangled file :feat:

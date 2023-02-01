@@ -1673,7 +1673,7 @@ if you want to send region to a REPL or terminal emulator."
 ;; TODO Convert to `defcustom' with a setter
 (defvar my/lsp-ui-delay 0.5
   "Number of seconds before refreshing LSP UI elements.
-This variable should be set ")
+This variable should be set by `my/lsp-ui-set-delay'.")
 
 (defvar my/lsp-ui-delay-vars
   '(eldoc-idle-delay

@@ -143,6 +143,7 @@ If INDEX is not a workspace index, return nil."
       (+workspace/switch-to (1- from-number)))
     (+workspace/new nil t)))
 
+
 ;;
 ;;; vimish-tab
 
