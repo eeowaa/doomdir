@@ -6593,7 +6593,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [24/45]
+** org [24/47]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -7039,7 +7039,7 @@ The current workaround is to select the "object" under point using =v i e= and
 then use the corresponding help command. This works well enough, but is an
 annoying extra step.
 
-*** Exporting [1/1]
+*** Exporting [1/2]
 **** DONE [#A] Support exporting to IPython notebooks
 #+begin_src emacs-lisp :tangle packages.el
 (when (modulep! :lang org +jupyter)
@@ -7107,8 +7107,12 @@ Optional argument INFO is a plist of options."
         (pushnew! ox-ipynb-language-infos (cons ein-key language-info))))))
 #+end_src
 
+**** TODO [#A] Fix error when exporting :bug:
+~+kubernetes--k8s-mode-match-fn~ throws an error when attempting to export Org
+buffers (at least using =ox-ipynb=).
+
 *** Publishing [0/0]
-*** Working with Source Code [6/9]
+*** Working with Source Code [6/10]
 **** DONE [#A] Indent source blocks
 + https://emacs.stackexchange.com/a/9483/21977
 
@@ -7194,6 +7198,24 @@ Let's fix that:
             (list "PATH" (concat bindir (path-separator) (getenv "PATH")))))
 #+end_src
 
+**** TODO [#A] Allow =jupyter= source blocks to be edited inline :bug:
+When adding a new line (though not when changing an existing line) in a source
+block with a language such as ~jupyter-bash~, I get the following error:
+
+#+begin_quote
+jupyter-repl-associate-buffer: Cannot associate buffer to REPL.  Wrong ‘major-mode’
+#+end_quote
+
+You can experiment with the following source block (note that =C-'= works as
+expected; there is only a problem when editing in the Org buffer):
+
+#+begin_src jupyter-bash :session doom-config :tangle no
+echo 'hello world'
+#+end_src
+
+To kill the session, kill the ~*jupyter-repl[bash nil]-doom-config*~ buffer that
+gets created. (This buffer is tied to =ob-jupyter= session and source blocks.)
+
 **** TODO [#A] Fix error output by ~jupyter-run-repl~ with Python 3 kernel :bug:
 *NOTE*: This only happens with the Python kernel (Bash works fine).
 
@@ -7260,12 +7282,21 @@ you will be prompted to build it ("ZMQ module not found. Build it? (y or n)").
 ~make~ then runs in =~/.config/emacs/.local/straight/build-28.2/zmq/=, but this
 fails because ~./configure~ needs to be run in the child =src= directory
 (=~/.config/emacs/.local/straight/build-28.2/zmq/src=) first. The workaround is
-to run the following commands:
+as follows:
 
-#+begin_src :tangle no
-cd ~/.config/emacs/.local/straight/build-28.2/zmq/src
-make configure && make
-#+end_src
+1. Run the following commands:
+
+   #+begin_src :tangle no
+   cd ~/.config/emacs/.local/straight/build-28.2/zmq/src
+   make configure && make
+   #+end_src
+
+2. Restart Emacs. Until then, you'll see the following error when attempting to
+   run =jupyter= source blocks (like ~jupyter-bash~):
+
+   #+begin_quote
+   defconst: Symbol’s value as variable is void: zmq-REQ
+   #+end_quote
 
 **** LOOP [#B] Make it easy to jump between source and tangled file :feat:
 Right now, I am only considering tangling to Elisp, since that's what I do most

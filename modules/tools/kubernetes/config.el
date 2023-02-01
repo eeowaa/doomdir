@@ -60,8 +60,9 @@ lines of the buffer are checked against this regexp. If there is a match,
     (let* ((file-name (buffer-file-name))
            (file-name-string-match-p
             (lambda (re)
-              (let ((case-fold-search t))
-                (string-match-p re file-name))))
+              (when re
+                (let ((case-fold-search t))
+                  (string-match-p re file-name)))))
            positives negatives)
       (dolist (element +kubernetes-k8s-mode-match-files)
         (cond
