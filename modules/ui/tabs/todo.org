@@ -9,7 +9,20 @@ Migrate evil bindings from Doom module config. Refer to =treemacs-evil=,
 =kubernetes-evil=, and =kubel-evil= for how to do this.
 
 ** TODO Add a keymap for non-=evil= users
-* Bugs [0/6]
+* Bugs [1/7]
+** DONE Display window tabs when point is in an EIN notebook cell
+=tab-line= disables ~tab-line-mode~ for buffers whose name begins with a space.
+When ~pm-hide-implementation-buffers~ is enabled, =polymode= (used by =poly-ein=
+in order to create =ein= notebooks displaying interleaved buffers) prepends a
+space to all notebook cell buffer names. Moving point to a cell will display the
+buffer name corresponding to point.
+
+Disabling ~pm-hide-implementation-buffers~ fixes the buffer names, but
+~vimish-tab-mode~ still does not get enabled in these notebook cells for some
+reason, despite all the conditions in ~vimish-tab-mode--turn-on~ being met and
+~vimish-tab-show-p~ returning ~t~. My guess is that there is some issue with how
+global minor modes operate on =polymode= implementation buffers.
+
 ** HOLD Integrate =vimish-tab= with =winner=
 I do not have steps to replicate this at the moment.
 

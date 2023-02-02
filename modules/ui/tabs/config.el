@@ -69,10 +69,10 @@ If INDEX is not a workspace index, return nil."
                                    (assq 'time alist))))
             (set var (remove element alist))))))
     (add-hook! 'tab-bar-mode-hook
-               (defun +tabs--tab-bar-mode-h ()
-                 (let ((toggle (if tab-bar-mode +1 -1)))
-                   (display-time-mode toggle)
-                   (display-battery-mode toggle)))))
+      (defun +tabs--tab-bar-mode-h ()
+        (let ((toggle (if tab-bar-mode +1 -1)))
+          (display-time-mode toggle)
+          (display-battery-mode toggle)))))
 
   :custom
   (tab-bar-tab-name-function #'+workspace-current-name)
@@ -147,10 +147,23 @@ If INDEX is not a workspace index, return nil."
 ;;
 ;;; vimish-tab
 
-;; TODO Implement desired functionality
 (use-package! vimish-tab
   :unless noninteractive
   :hook (doom-init-ui . global-vimish-tab-mode)
+  :preface
+  (defun +tabs-ensure-window-tabs ()
+    "Ensure that window tabs are enabled for the current buffer."
+    (unless vimish-tab-mode
+      (vimish-tab-mode +1)))
+
+  :init
+  (when (modulep! :tools ein)
+    (setq pm-hide-implementation-buffers nil)
+    (add-hook! 'global-vimish-tab-mode-hook
+      (defun +tabs--ein:notebook-setup-h ()
+        (funcall (if global-vimish-tab-mode #'add-hook #'remove-hook)
+                 'ein:notebook-mode-hook #'+tabs-ensure-window-tabs))))
+
   :config
   (defun +tabs-project-scratch-buffer-fn ()
     "Return the current project scratch buffer."
