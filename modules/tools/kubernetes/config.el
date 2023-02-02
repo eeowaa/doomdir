@@ -57,29 +57,28 @@ lines of the buffer are checked against this regexp. If there is a match,
                   (+kubernetes--k8s-mode-search-lines (1- line-count))))))
 
   (defun +kubernetes--k8s-mode-match-fn ()
-    (let* ((file-name (buffer-file-name))
-           (file-name-string-match-p
-            (lambda (re)
-              (when re
-                (let ((case-fold-search t))
-                  (string-match-p re file-name)))))
-           positives negatives)
-      (dolist (element +kubernetes-k8s-mode-match-files)
-        (cond
-         ((stringp element)
-          (push element positives))
-         ((and (eq 'not (car-safe element))
-               (stringp (cdr element)))
-          (push (cdr element) negatives))))
-      (and
-       (cl-some file-name-string-match-p positives)
-       (or (and (not (string-empty-p +kubernetes-helm-output-dir))
-                (string-prefix-p (file-name-as-directory +kubernetes-helm-output-dir)
-                                 file-name))
-           (cl-notany file-name-string-match-p negatives))
-       (save-excursion
-         (goto-char 1)
-         (+kubernetes--k8s-mode-search-lines +kubernetes-k8s-mode-match-lines)))))
+    (when-let* ((file-name (buffer-file-name)))
+      (let ((file-name-string-match-p
+             (lambda (re)
+               (let ((case-fold-search t))
+                 (string-match-p re file-name))))
+            positives negatives)
+        (dolist (element +kubernetes-k8s-mode-match-files)
+          (cond
+           ((stringp element)
+            (push element positives))
+           ((and (eq 'not (car-safe element))
+                 (stringp (cdr element)))
+            (push (cdr element) negatives))))
+        (and
+         (cl-some file-name-string-match-p positives)
+         (or (and (not (string-empty-p +kubernetes-helm-output-dir))
+                  (string-prefix-p (file-name-as-directory +kubernetes-helm-output-dir)
+                                   file-name))
+             (cl-notany file-name-string-match-p negatives))
+         (save-excursion
+           (goto-char 1)
+           (+kubernetes--k8s-mode-search-lines +kubernetes-k8s-mode-match-lines))))))
 
   (when (modulep! +lsp)
     (defun +kubernetes--k8s-mode-set-yaml-schema-h ()
