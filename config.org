@@ -304,7 +304,7 @@ completion.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-** company [4/8]
+** company [3/8]
 #+begin_quote
 This module provides code completion, powered by [[https://github.com/company-mode/company-mode][company-mode]]. It is required
 for code completion in many of Doom's :lang modules.
@@ -355,7 +355,12 @@ invoke using =C-SPC= (~+company/complete~), but not something that just pops up
 on its own.
 #+end_quote
 
-*** DONE [#C] Quit =company-box= when switching modes :bug:
+*** STRT [#C] Quit =company-box= when switching modes :bug:
+:LOGBOOK:
+- Note taken on [2023-02-01 Wed 19:58] \\
+  This stopped working all of a sudden. Might want to look into
+  ~doom-escape-hook~, too.
+:END:
 Doom has the following configuration for =company=:
 
 #+begin_src emacs-lisp :tangle no
@@ -398,8 +403,8 @@ issue and should probably be PRed to =company-box= after a trial period.
   (add-to-list 'company-box-frame-parameters '(tab-bar-lines-keep-state . nil)))
 #+end_src
 
-*UPDATE*: This problem reappears, but only after loading =org=. I'm guessing
-that some window- or frame-handling code is causing the issue.
+*UPDATE*: This problem reappears, but only after loading =org= *and* =lsp-mode=.
+I'm guessing that some window- or frame-handling code is causing the issue.
 
 *** STRT [#A] Ensure that =company-box-doc= popup frames and their content are fully visible :bug:
 There were two issues that I was experiencing:
@@ -421,7 +426,10 @@ the package for now to get the following updates:
 #+end_src
 
 *There is still one more issue*. Documentation frames always appear below point,
-even when point is at the bottom of the frame.
+even when point is at the bottom of the frame. See the following functions:
+
+- ~company-box--compute-frame-position~
+- ~company-box--update-frame-position~
 
 *** STRT [#B] Lower the wait time before displaying documentation :tweak:
 When writing code, a 0.05-second delay feels nice (in some ways smoother than no
@@ -435,8 +443,8 @@ better. I need to experiment with this.
 
 *** TODO [#A] Display doc buffer without =company-box= :feat:
 =C-h= is supposed to open a documentation buffer, but that doesn't work for me.
-Check ~company-active-map~, ~company-show-doc-buffer~, ~company-doc-buffer~, and
-~company--electric-do~.
+Check ~company-active-map~, ~company-show-doc-buffer~, ~company-doc-buffer~,
+~company--electric-do~, and ~company-mode-hook~ (~evil-normalize-keys~).
 
 ** helm [0/0] :ARCHIVE:
 #+begin_quote
