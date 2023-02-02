@@ -186,6 +186,12 @@ Return VALUE."
           (vimish-tab-file-buffer (expand-file-name file project-root))))
     (quit (vimish-tab-default-buffer))))
 
+
+;;; Hooks
+
+;; TODO Make this function more lightweight and do most of the heavy lifting in
+;; in various package functions only when needed (not every time a window
+;; changes its buffer).
 (defun vimish-tab--update ()
   "Update the selected tab with current buffer info.
 Creates new window parameters if they are missing and fixes corruption."
@@ -194,7 +200,7 @@ Creates new window parameters if they are missing and fixes corruption."
         ((index (vimish-tab-index t))
          (tabs (vimish-tab-list t))
          (selected-tab (nth index tabs))
-         (buffer (current-buffer)))
+         (buffer (window-buffer)))
         (progn
           (setf (alist-get 'buffer selected-tab) buffer)
           (setf (alist-get 'name selected-tab) (buffer-name buffer))
@@ -203,19 +209,24 @@ Creates new window parameters if they are missing and fixes corruption."
       (set-window-parameter nil 'vimish-tab-index 0)
       (set-window-parameter nil 'vimish-tab-list
        (list (vimish-tab--make-tab (current-buffer) 0 t))))
-    (set-window-parameter nil 'tab-line-format
-                          (unless (vimish-tab-show-p) 'none))))
+    (vimish-tab-redisplay)))
+
+(put 'vimish-tab-update-window 'permanent-local-hook t)
+(defun vimish-tab-update-window (window)
+  (when (windowp window)
+    (with-selected-window window
+      (vimish-tab--update))))
+
+;; TODO Advise `rename-buffer' and `kill-buffer' to update the tab lists of all
+;; windows (including those not displayed).
 
 ;; REVIEW Ensure that the tab list gets updated appropriately
-;;
 ;; `window-buffer-change-functions'
 ;;     Functions called during redisplay when window buffers have changed.
 ;; `window-selection-change-functions'
 ;;     Functions called during redisplay when the selected window has changed.
 ;; `buffer-list-update-hook'
 ;;     Hook run when the buffer list changes.
-;;
-(add-hook 'buffer-list-update-hook #'vimish-tab--update)
 
 
 ;;; Listing tabs
@@ -236,10 +247,23 @@ When NOERROR is provided, do not signal an error."
 
 (advice-add 'tab-line--get-tab-property :before-until #'vimish-tab--property-hack)
 
-;; NOTE If this isn't working in some cases, you might want to try implementing
-;; a hack found in Doom's `+vterm/here' to force a redraw:
+(defconst vimish-tab--force-mode-line-update
+  (symbol-function 'force-mode-line-update)
+  "Constant definition of `force-mode-line-update'.
+Needed by `vimish-tab-force-mode-line-update' when called from
+`vimish-tab--mode-line-update-hack' to avoid an infinite loop.")
+
+(defvar vimish-tab--force-updating nil)
+
+;;;###autoload
+(defun vimish-tab-force-updating-p ()
+  "Return non-nil if `vimish-tab-force-tab-line-update' is executing."
+  vimish-tab--force-updating)
+
+;; NOTE If this isn't working in some cases, we might want to try implementing a
+;; hack found in Doom's `+vterm/here' to force a redraw:
 ;; (save-window-excursion (pop-to-buffer "*scratch*"))
-(defun vimish-tab-force-tab-line-update ()
+(defun vimish-tab-force-tab-line-update (&rest _)
   "Force-update the tab line of the current buffer.
 Use in place of `force-mode-line-update' to update the tab line
 when switching between tabs containing the same buffer.
@@ -252,7 +276,7 @@ temporarily set to a dummy file path."
     (when no-file (setq buffer-file-name "/tmp/.vimish-tab"))
     (let ((flag (buffer-modified-p)))
       (set-buffer-modified-p (not flag))
-      (force-mode-line-update)
+      (funcall vimish-tab--force-mode-line-update)
       (redisplay)
       (set-buffer-modified-p flag))
     (when no-file (setq buffer-file-name nil))))
@@ -313,6 +337,11 @@ Use as around advice for functions calling `force-mode-line-update'."
 ;; `vimish-tab-close-other-tabs'.
 (cl-pushnew '(tab-line-format . writable) window-persistent-parameters)
 
+(defun vimish-tab-redisplay ()
+  "Selectively redisplay the tab line."
+  (set-window-parameter nil 'tab-line-format
+                            (unless (vimish-tab-show-p) 'none)))
+
 
 ;;; Selecting tabs
 
@@ -330,6 +359,9 @@ Use as around advice for functions calling `force-mode-line-update'."
             (setq buffer
                   (if (bufferp buf) buf
                     (warn "Selected tab does not specify a live buffer")
+                    ;; FIXME Creating a new buffer when `global-vimish-tab-mode'
+                    ;; is enabled will call `vimish-tab-mode' on the new buffer.
+                    ;; This probably results in conflicts.
                     (funcall vimish-tab-new-buffer-function)))
             (setf (alist-get 'selected tab) t))
         (setf (alist-get 'selected tab) nil))
@@ -339,8 +371,8 @@ Use as around advice for functions calling `force-mode-line-update'."
     (if (eq buffer old-buffer)
         (vimish-tab-force-tab-line-update)
       (let ((display-buffer-overriding-action '(display-buffer-same-window)))
-        (pop-to-buffer buffer)
-        (vimish-tab-mode +1))))) ;; REVIEW Why is this necessary?
+        (pop-to-buffer buffer)))))
+;;      (vimish-tab-mode +1))))) ;; REVIEW Why is this necessary?
 
 (defun vimish-tab-select (tab &optional tabs)
   "Make TAB current in the selected window.
@@ -409,7 +441,8 @@ Selects another tab if the Nth tab is currently selected."
          (new-tabs (append left right)))
     (if (<= n index)
         (vimish-tab-select-nth (max 0 (1- index)) new-tabs)
-      (set-window-parameter nil 'vimish-tab-list new-tabs))))
+      (set-window-parameter nil 'vimish-tab-list new-tabs)
+      (vimish-tab-redisplay))))
 
 (defun vimish-tab-close (tab &optional tabs)
   "Close TAB in the selected window.
@@ -450,12 +483,11 @@ N defaults to the index of the selected tab."
   (interactive)
   (unless (< -1 n (length tabs))
     (error "Out of bounds tab closing index"))
-  (let ((tab (vimish-tab-current)))
+  (let ((tab (nth n tabs)))
     (setf (alist-get 'index tab) 0)
     (set-window-parameter nil 'vimish-tab-list (list tab))
     (set-window-parameter nil 'vimish-tab-index 0)
-    (set-window-parameter nil 'tab-line-format
-                              (unless (vimish-tab-show-p) 'none))))
+    (vimish-tab-redisplay)))
 
 (vimish-tab--set 'tab-line-close-tab-function #'vimish-tab-close)
 (advice-add 'tab-line-close-tab :around #'vimish-tab--mode-line-update-hack)
@@ -556,8 +588,10 @@ You probably want to use `global-vimish-tab-mode' instead."
   (if vimish-tab-mode
       (progn
         (vimish-tab--update)
+        (add-hook 'window-buffer-change-functions #'vimish-tab-update-window nil t)
         (setq-local tab-line-format '(:eval (tab-line-format)))
         (tab-line-mode +1))
+    (remove-hook 'window-buffer-change-functions #'vimish-tab-update-window t)
     (tab-line-mode -1)))
 
 (defun vimish-tab-mode--turn-on ()

@@ -9,7 +9,7 @@ Migrate evil bindings from Doom module config. Refer to =treemacs-evil=,
 =kubernetes-evil=, and =kubel-evil= for how to do this.
 
 ** TODO Add a keymap for non-=evil= users
-* Bugs [1/7]
+* Bugs [2/8]
 ** DONE Display window tabs when point is in an EIN notebook cell
 =tab-line= disables ~tab-line-mode~ for buffers whose name begins with a space.
 When ~pm-hide-implementation-buffers~ is enabled, =polymode= (used by =poly-ein=
@@ -17,11 +17,26 @@ in order to create =ein= notebooks displaying interleaved buffers) prepends a
 space to all notebook cell buffer names. Moving point to a cell will display the
 buffer name corresponding to point.
 
-Disabling ~pm-hide-implementation-buffers~ fixes the buffer names, but
+*UPDATE*: Disabling ~pm-hide-implementation-buffers~ fixes the buffer names, but
 ~vimish-tab-mode~ still does not get enabled in these notebook cells for some
 reason, despite all the conditions in ~vimish-tab-mode--turn-on~ being met and
 ~vimish-tab-show-p~ returning ~t~. My guess is that there is some issue with how
-global minor modes operate on =polymode= implementation buffers.
+global minor modes operate on =polymode= implementation buffers. I fixed this in
+the ~use-package~ form for =vimish-tab=
+
+** DONE Fix confusion after LSP documentation popup
+When =company-box= displays a documentation childframe in
+~lsp-completion-mode~, selecting a different tab in the current window causes
+the previously-selected tab (the one where =company= completion was invoked) to
+display ~*lsp-documentation*~, created by ~lsp-doc-buffer~.
+
+*UPDATE*: The issue was that ~vimish-tab--update~ triggered on
+~buffer-list-update-hook~, which gets run when ~get-buffer-create~ is called
+with an unset ~inhibit-buffer-hooks~ argument; ~lsp-doc-buffer~ makes such a
+function call when creating or obtaining the ~*lsp-documentation*~ buffer. (Of
+course, this happens in many elisp packages.) I fixed this by refactoring
+=vimish-tab= to use the ~window-buffer-change-functions~ hook instead of
+~buffer-list-update-hook~.
 
 ** HOLD Integrate =vimish-tab= with =winner=
 I do not have steps to replicate this at the moment.

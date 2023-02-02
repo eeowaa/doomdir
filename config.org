@@ -389,7 +389,7 @@ Turns out, we need this for =company-box=, too, so let's add that:
   This is happening again for some reason.
 :END:
 Fixed in [[https://github.com/sebastiencs/company-box/commit/79abd77f3357279c2726b74f8b20df27b71aa867][this commit]] of company-box, which I apparently have. What gives?
-*UPDATE:* This might be an issue that appears in Emacs 28.2 (IIRC this error
+*UPDATE*: This might be an issue that appears in Emacs 28.2 (IIRC this error
 appeared after I updated from 28.1 to 28.2). The following appears to fix the
 issue and should probably be PRed to =company-box= after a trial period.
 
@@ -571,7 +571,9 @@ buffer in current window."
         (:eval
          (let ((project-name (projectile-project-name)))
            (unless (string= "-" project-name)
-             (format (if (buffer-modified-p)  " ◉ %s" "  ●  %s") project-name))))))
+             (format (if (and (buffer-modified-p) (vimish-tab-force-updating-p))
+                         " ◉ %s"
+                       "  ●  %s") project-name))))))
 #+end_src
 
 *** DONE [#C] Start Emacs with a maximized frame

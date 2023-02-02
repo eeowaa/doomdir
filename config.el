@@ -68,7 +68,9 @@ buffer in current window."
         (:eval
          (let ((project-name (projectile-project-name)))
            (unless (string= "-" project-name)
-             (format (if (buffer-modified-p)  " ◉ %s" "  ●  %s") project-name))))))
+             (format (if (and (buffer-modified-p) (vimish-tab-force-updating-p))
+                         " ◉ %s"
+                       "  ●  %s") project-name))))))
 
 (setf (alist-get 'fullscreen initial-frame-alist) 'maximized)
 
