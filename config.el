@@ -25,6 +25,8 @@ Examples:
 
 (setq company-idle-delay nil)
 
+(setq company-box-doc-delay 0.3) ;; This feels a bit smoother than no delay
+
 (when (modulep! company +childframe)
   (after! company
     (add-hook! 'evil-normal-state-entry-hook
@@ -34,8 +36,6 @@ Examples:
 
 (after! company-box
   (add-to-list 'company-box-frame-parameters '(tab-bar-lines-keep-state . nil)))
-
-(setq company-box-doc-delay 0.05) ;; This feels a bit smoother than no delay
 
 (defun my/toggle-window-dedicated ()
   "Control whether or not Emacs is allowed to display another

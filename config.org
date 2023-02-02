@@ -304,7 +304,7 @@ completion.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-** company [3/8]
+** company [4/8]
 #+begin_quote
 This module provides code completion, powered by [[https://github.com/company-mode/company-mode][company-mode]]. It is required
 for code completion in many of Doom's :lang modules.
@@ -354,6 +354,22 @@ buffers. I guess I'd like to have spelling completion as an option that I could
 invoke using =C-SPC= (~+company/complete~), but not something that just pops up
 on its own.
 #+end_quote
+
+*** DONE [#B] Lower the wait time before displaying documentation :tweak:
+With my current workstation setup, a 0.3-second delay feels great.
+
+- It is fast enough that I am not consciously waiting for a documentation popup,
+  even when I am scrolling through completion candidates (one by one) to see
+  which ones have documentation.
+
+- It is slow enough that when I hold down =C-j= or =C-k= to scroll quickly,
+  documentation popups do not produce a flickering effect (popups appearing and
+  immediately disappearing when passing by the completion candidate), even at
+  the start of when there is a slight delay before repeated keyboard input.
+
+#+begin_src emacs-lisp :tangle yes
+(setq company-box-doc-delay 0.3) ;; This feels a bit smoother than no delay
+#+end_src
 
 *** STRT [#C] Quit =company-box= when switching modes :bug:
 :LOGBOOK:
@@ -430,16 +446,6 @@ even when point is at the bottom of the frame. See the following functions:
 
 - ~company-box--compute-frame-position~
 - ~company-box--update-frame-position~
-
-*** STRT [#B] Lower the wait time before displaying documentation :tweak:
-When writing code, a 0.05-second delay feels nice (in some ways smoother than no
-delay). However, when completing in a REPL (like ~ielm~), this feels bad. Maybe
-a longer delay (such as the default of 0.5 seconds) or no delay would feel
-better. I need to experiment with this.
-
-#+begin_src emacs-lisp :tangle yes
-(setq company-box-doc-delay 0.05) ;; This feels a bit smoother than no delay
-#+end_src
 
 *** TODO [#A] Display doc buffer without =company-box= :feat:
 =C-h= is supposed to open a documentation buffer, but that doesn't work for me.
