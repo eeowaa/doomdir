@@ -6622,7 +6622,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [24/46]
+** org [24/50]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -7068,7 +7068,7 @@ The current workaround is to select the "object" under point using =v i e= and
 then use the corresponding help command. This works well enough, but is an
 annoying extra step.
 
-*** Exporting [1/1]
+*** Exporting [1/5]
 **** DONE [#A] Support exporting to IPython notebooks
 #+begin_src emacs-lisp :tangle packages.el
 (when (modulep! :lang org +jupyter)
@@ -7123,18 +7123,35 @@ Optional argument INFO is a plist of options."
                                          (name . "bash")
                                          (pygments_lexer . "bash")))) language-infos)))
 
-  ;; Support exporting from `ein-LANG' source blocks
-  (when (modulep! :tools ein)
-    (dolist (pair '((ipython . "python")
-                    (sh . "bash")))
-      (let* ((key (car pair))
-             (lang (cdr pair))
-             (ein-key (intern (concat "ein-" lang)))
-             (kernelspec (alist-get key ox-ipynb-kernelspecs))
-             (language-info (alist-get key ox-ipynb-language-infos)))
-        (pushnew! ox-ipynb-kernelspecs (cons ein-key kernelspec))
-        (pushnew! ox-ipynb-language-infos (cons ein-key language-info))))))
+  ;; Support exporting from `jupyter-LANG' and `ein-LANG' source blocks
+  (dolist (pair '((ipython . "python")
+                  (sh . "bash")))
+    (let* ((key (car pair))
+           (lang (cdr pair))
+           (kernelspec (alist-get key ox-ipynb-kernelspecs))
+           (language-info (alist-get key ox-ipynb-language-infos))
+           (extra-keys (cons (intern (concat "jupyter-" lang))
+                             (when (modulep! :tools ein)
+                               (list (intern (concat "ein-" lang)))))))
+      (dolist (ext-key extra-keys)
+        (add-to-list 'ox-ipynb-kernelspecs (cons ext-key kernelspec))
+        (add-to-list 'ox-ipynb-language-infos (cons ext-key language-info))))))
 #+end_src
+
+**** TODO [#B] Fix bug with output cells in =ox-ipynb= :bug:
+Verbatim output from Org source blocks (at least when wrapped in an "example")
+contains the ~#+begin~ and ~#+end~ delimiters when output to a Jupyter notebook.
+
+**** TODO [#C] Fix bug with quote cells in =ox-ipynb= :bug:
+Currently, when exporting from =ox-ipynb=, quote blocks absorb the paragraph
+directly following them. The notebooks still run, but there is a rendering
+issue. For now, just avoid quote blocks.
+
+**** TODO [#C] Fix bug with nested markup in =ox-ipynb= :bug:
+/*NOTE*: Text like this will not export properly./
+
+**** TODO [#C] Do not wrap output cells in notebooks output by =ox-ipynb= :tweak:
+https://stackoverflow.com/questions/53482343/how-to-disable-line-wrapping-in-jupyter-notebook-output-cells
 
 *** Publishing [0/0]
 *** Working with Source Code [6/10]
@@ -7301,7 +7318,7 @@ See also:
 - ~jupyter-available-kernelspecs~
 - ~process-environment~
 
-**** STRT [#A] Fix compilation of =emacs-zmq= :bug:
+**** STRT [#A] Fix compilation of =emacs-zmq= :bug:hack:
 If you don't have a ZMQ dynamic module built when running ~jupyter-run-repl~,
 you will be prompted to build it ("ZMQ module not found. Build it? (y or n)").
 ~make~ then runs in =~/.config/emacs/.local/straight/build-28.2/zmq/=, but this
@@ -7312,7 +7329,7 @@ as follows:
 1. Run the following commands:
 
    #+begin_src :tangle no
-   cd ~/.config/emacs/.local/straight/build-28.2/zmq/src
+   cd ~/.config/emacs/.local/straight/build-28.2/zmq
    make configure && make
    #+end_src
 
@@ -7322,6 +7339,34 @@ as follows:
    #+begin_quote
    defconst: Symbol’s value as variable is void: zmq-REQ
    #+end_quote
+
+*UPDATE*: The ~zmq-load~ function builds the ZMQ module with this command:
+~(compile (concat "make" (when emacs (concat " EMACS=" emacs))))~. Advising the
+function allows us to pass ~configure~, as well:
+
+#+begin_src emacs-lisp :tangle yes
+(after! zmq
+  (defadvice! my/fix-zmq-build-a (fn &rest args)
+    :around #'zmq-load
+    (letf! (defadvice my/zmq-compile-a (command)
+             :filter-args #'compile
+             (let ((configure (concat command " configure"))
+                   (make command))
+               (format "sh -c \"%s && %s" configure make)))
+      (funcall fn args))))
+#+end_src
+
+This fixes the compilation error, but I still get the following command after
+compilation, if that compilation was triggered by executing a ~jupyter-bash~
+source block in Org mode:
+
+#+begin_quote
+org-babel-jupyter-session-key: Need a valid session and a kernel to form a key
+#+end_quote
+
+The workaround is to simply try again. This is not a problem in an interactive
+workflow, but it would be a problem if one wanted to jump straight to exporting
+an Org file containing ~jupyter-bash~ source blocks to a =.ipynb= file.
 
 **** LOOP [#B] Make it easy to jump between source and tangled file :feat:
 Right now, I am only considering tangling to Elisp, since that's what I do most

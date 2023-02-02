@@ -2236,17 +2236,19 @@ Optional argument INFO is a plist of options."
                                          (name . "bash")
                                          (pygments_lexer . "bash")))) language-infos)))
 
-  ;; Support exporting from `ein-LANG' source blocks
-  (when (modulep! :tools ein)
-    (dolist (pair '((ipython . "python")
-                    (sh . "bash")))
-      (let* ((key (car pair))
-             (lang (cdr pair))
-             (ein-key (intern (concat "ein-" lang)))
-             (kernelspec (alist-get key ox-ipynb-kernelspecs))
-             (language-info (alist-get key ox-ipynb-language-infos)))
-        (pushnew! ox-ipynb-kernelspecs (cons ein-key kernelspec))
-        (pushnew! ox-ipynb-language-infos (cons ein-key language-info))))))
+  ;; Support exporting from `jupyter-LANG' and `ein-LANG' source blocks
+  (dolist (pair '((ipython . "python")
+                  (sh . "bash")))
+    (let* ((key (car pair))
+           (lang (cdr pair))
+           (kernelspec (alist-get key ox-ipynb-kernelspecs))
+           (language-info (alist-get key ox-ipynb-language-infos))
+           (extra-keys (cons (intern (concat "jupyter-" lang))
+                             (when (modulep! :tools ein)
+                               (list (intern (concat "ein-" lang)))))))
+      (dolist (ext-key extra-keys)
+        (add-to-list 'ox-ipynb-kernelspecs (cons ext-key kernelspec))
+        (add-to-list 'ox-ipynb-language-infos (cons ext-key language-info))))))
 
 (after! org
   (setq org-src-preserve-indentation nil
@@ -2294,6 +2296,16 @@ This is a list of lists, not a list of cons cells.")
   (pushnew! my/jupyter-envvars
             (list "VIRTUAL_ENV" venv)
             (list "PATH" (concat bindir (path-separator) (getenv "PATH")))))
+
+(after! zmq
+  (defadvice! my/fix-zmq-build-a (fn &rest args)
+    :around #'zmq-load
+    (letf! (defadvice my/zmq-compile-a (command)
+             :filter-args #'compile
+             (let ((configure (concat command " configure"))
+                   (make command))
+               (format "sh -c \"%s && %s" configure make)))
+      (funcall fn args))))
 
 (after! projectile
   (pushnew! projectile-other-file-alist
