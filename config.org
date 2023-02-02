@@ -2080,14 +2080,24 @@ The workaround is as follows:
 3. =SPC o p=
 
 #+begin_src emacs-lisp :tangle yes
+;; REVIEW Consider detecting troublesome icons and automatically falling back to
+;; the default icon for text files.
 (defvar my/treemacs-icon-extension-alist
   '(("org" . ("org_archive"))
-    ("sh" . ("bat")))
+    ("sh" . ("bat"))
+    ("txt" . ("Pipfile"))
+    ("json" . ("Pipfile.lock"))) ;; "configuration" icon
   "Alist of file extension mappings for Treemacs icons.
 
 The `car' of each element is a file extension with a desirable
 Treemacs icon; the `cdr' is a list of file extensions that should
-use that same icon.")
+use that same icon.
+
+If the `car' is a string, it is treated case-insensitively, as
+Treemacs defines string extensions as lowercase. See the
+`treemacs-icons' package for more info; for a quick reference,
+see how `treemacs-create-theme' is used to define the \"Default\"
+Treemacs theme.")
 
 (defvar my/treemacs-fallback-icon-alist
   '((dir-closed . " +\t")
@@ -2111,6 +2121,8 @@ matched in `my/treemacs-icon-fallback-alist'.")
 
 (defun my/treemacs-fallback-icon (extension)
   "Return the fallback icon corresponding to EXTENSION."
+  (when (stringp extension)
+    (setq extension (downcase extension)))
   (or (alist-get extension my/treemacs-fallback-icon-alist)
       my/treemacs-fallback-icon-default))
 
@@ -2134,10 +2146,11 @@ ensure your customizations take hold."
 
       ;; Modify GUI icons
       (dolist (entry my/treemacs-icon-extension-alist)
-        (let* ((gui-icon (treemacs-get-icon-value (car entry)))
+        (let* ((key (car entry))
+               (gui-icon (treemacs-get-icon-value (if (stringp key) (downcase key) key)))
                (extension-list (cdr entry)))
-          (dolist (extension extension-list)
-            (ht-set! gui-icons extension gui-icon))))
+          (dolist (ext extension-list)
+            (ht-set! gui-icons (if (stringp ext) (downcase ext) ext) gui-icon))))
 
       ;; Modify TUI icons
       (treemacs--maphash tui-icons (extension _)
