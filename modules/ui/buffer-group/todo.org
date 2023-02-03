@@ -1,27 +1,10 @@
 #+title: Buffer-Group
 
-* Documentation [0/5]
-** TODO Buffer name regexps vs. major modes
-Sometimes buffers are displayed before the major mode is set. In these cases,
-major modes in buffer group definitions will not be checked in order to
-determine where to display the buffer. Therefore, it is good to define buffer
-groups based on buffer name regexps as well as major modes. I have not found
-another workaround.
-
-** TODO Incompatibility with =:ui popup=
-** TODO Order is important in ~display-buffer-alist~
-** TODO Use of the ~window-sides-vertical~ option
-** TODO Migrate reference documentation from private config
-* Configuration [1/5]
-** DONE Define buffer groups in =config.el=
+* Internals [0/7]
 ** TODO Split =buffer-group.el= into multiple files
 One file for buffer groups, another file for display rules. Should also include
 a file explaining how to use the package.
 
-** TODO Define display rules when =+defaults= is given
-** TODO Add =+all= flag to set ~switch-to-buffer-obey-display-actions~
-** TODO Add =+hacks.el= file
-* Features [0/8]
 ** TODO Make ~buffer-group-define~ and ~buffer-group-property-pushnew~ variadic
 ** TODO Refactor ~buffer-group-define~ to remove argument quoting
 Such syntactic sugar is conventional for this kind of macro.
@@ -31,6 +14,38 @@ This macro should define a buffer group if one does not exist, otherwise it
 should modify an existing buffer group. This should allow for easier
 configuration.
 
+** TODO Add ~defcustom~ setter for buffer group definitions
+The setter should be a function that can be called directly by users if they
+prefer that over the =customize= machinery. Being able to automatically run code
+when a buffer group definition has been modified would be helpful in updating
+other packages (e.g. =vimish-tab=) that utilizes buffer groups.
+
+** TODO Refactor the buffer group property system
+- Create abstraction for pluggable properties
+- Distinguish between properties that help define a buffer group and properties
+  that are used to describe the behavior of buffer groups; might want to
+  separate into different data structures
+
+** TODO Create a function to toggle debugging functionality
+This could help with package development, but more importantly, it can help
+users diagnose issues and would make the package easier to support. Some initial
+ideas for debugging functionality:
+
+- Trace calls to ~display-buffer~
+- Trace calls to the [[info:elisp#Buffer Display Action Functions][well-known buffer display action functions]]
+- Watch changes to ~display-buffer-alist~
+- Watch changes to [[info:elisp#Choosing Window Options][common user options for displaying buffers]]
+
+* Bugs [0/1]
+** TODO Prevent other buffers from appearing in side window slots
+Refer to ~+popup/quit-window~ for inspiration.
+
+*UPDATE*: After running ~quit-window~ once in a window (for example, =q= in a
+=helpful= buffer), the ~quit-restore~ window parameter gets set to ~nil~. Unless
+you visit another buffer in that window, running ~quit-window~ a second time
+will delete the window. See the [[info:elisp#Quitting Windows][Quitting Windows]] documentation for more info.
+
+* Features [0/3]
 ** TODO Interactive functions to add and remove conditions to buffer groups
 I would like to make ~buffer-group-property-pushnew~ interactive and allow the
 user to select a regexp (defaulting to the current buffer's name) and/or a major
@@ -48,17 +63,31 @@ buffer group and a corresponding ~display-buffer-alist~ action for that buffer
 group. Before that can happen, I'll need to lay some groundwork for the creation
 and management of such actions. Perhaps another alist?
 
-** TODO Prevent other buffers from appearing in side window slots
-Refer to ~+popup/quit-window~ for inspiration.
+** TODO Implement optional =window-purpose=-like functionality
+A window could be dedicated to a specific buffer group or collection of buffer
+groups. Consult the [[info:elisp#Dedicated Windows][Dedicated Windows]] documentation for ideas on how to
+accomplish this via a custom value supplied to the ~dedicated~ window parameter.
 
-** TODO Add ~defcustom~ setter for buffer group definitions
-The setter should be a function that can be called directly by users if they
-prefer that over the =customize= machinery. Being able to automatically run code
-when a buffer group definition has been modified would be helpful in updating
-other packages (e.g. =vimish-tab=) that utilizes buffer groups.
+This could be configurable during buffer-group definition, although I think it
+would be best as a dynamic option. For example, a user could run a command to
+dedicate the selected window to the buffer group of the current buffer. If using
+=vimish-tab= (or vanilla =tab-line=), all tabs containing buffers *not* in that
+buffer group get removed from the window.
 
-** TODO Refactor the buffer group property system
-- Create abstraction for pluggable properties
-- Distinguish between properties that help define a buffer group and properties
-  that are used to describe the behavior of buffer groups; might want to
-  separate into different data structures
+* Configuration [1/4]
+** DONE Define buffer groups in =config.el=
+** TODO Define display rules when =+defaults= is given
+** TODO Add =+all= flag to set ~switch-to-buffer-obey-display-actions~
+** TODO Add =+hacks.el= file
+* Documentation [0/5]
+** TODO Buffer name regexps vs. major modes
+Sometimes buffers are displayed before the major mode is set. In these cases,
+major modes in buffer group definitions will not be checked in order to
+determine where to display the buffer. Therefore, it is good to define buffer
+groups based on buffer name regexps as well as major modes. I have not found
+another workaround.
+
+** TODO Incompatibility with =:ui popup=
+** TODO Order is important in ~display-buffer-alist~
+** TODO Use of the ~window-sides-vertical~ option
+** TODO Migrate reference documentation from private config

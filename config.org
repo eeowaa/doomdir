@@ -767,6 +767,13 @@ So far, this doesn't really seem to help much.
 #+end_src
 
 *** TODO [#A] Temporarily replace bottom side window(s) with minibuffer
++ [[info:elisp#Minibuffer Windows][elisp#Minibuffer Windows]]
+  - ~resize-mini-windows~
+  - ~max-mini-window-height~
++ [[info:elisp#Minibuffers and Frames][elisp#Minibuffers and Frames]]
++ [[info:elisp#Buffer Parameters][elisp#Buffer Parameters]]
+  - ~minibuffer~
+
 ** deft [0/0] :ARCHIVE:
 #+begin_quote
 [[https://jblevins.org/projects/deft/][Deft]] is a major mode for browsing and filtering notes written in plain text
@@ -2297,7 +2304,7 @@ Observations:
 Displays a tilde(~) in the left fringe to indicate an empty line, similar to Vi.
 #+end_quote
 
-** window-select [4/5]
+** window-select [4/6]
 #+begin_quote
 This module provides several methods for selecting windows without the use of
 the mouse or spatial navigation (e.g. =C-w {h,j,k,l}=).
@@ -2359,6 +2366,12 @@ indicator.
     :foreground "white" :background "red"
     :weight bold :height 2.5 :box (:line-width 10 :color "red")))
 #+end_src
+
+*** TODO [#B] Display window numbers in the mode line :feat:
+Take a look at ~doom-modeline-segment--window-number~ (currently unused in my
+config), which uses =ace-window= to display line numbers in the mode line. I
+could either make this permanent, or just temporarily display window numbers
+when I activate window selection functions.
 
 *** TODO [#C] Make the selection character the default size in modus themes :tweak:
 The modus themes (~modus-vivendi~ and ~modus-operandi~) make the selection

@@ -9,7 +9,7 @@ Migrate evil bindings from Doom module config. Refer to =treemacs-evil=,
 =kubernetes-evil=, and =kubel-evil= for how to do this.
 
 ** TODO Add a keymap for non-=evil= users
-* Bugs [2/8]
+* Bugs [2/9]
 ** DONE Display window tabs when point is in an EIN notebook cell
 =tab-line= disables ~tab-line-mode~ for buffers whose name begins with a space.
 When ~pm-hide-implementation-buffers~ is enabled, =polymode= (used by =poly-ein=
@@ -38,36 +38,11 @@ course, this happens in many elisp packages.) I fixed this by refactoring
 =vimish-tab= to use the ~window-buffer-change-functions~ hook instead of
 ~buffer-list-update-hook~.
 
-** HOLD Integrate =vimish-tab= with =winner=
-I do not have steps to replicate this at the moment.
-
-** TODO Integrate =vimish-tab= with =persp=
-Should ensure a package-agnostic mechanism so that =tab-bar= users not using
-=persp= can still benefit.
-
-** TODO Integrate =vimish-tab= with =better-jumper=
-Currently, the jump history is recorded per window, which can cause some
-unexpected behavior when using multiple tabs in the same window. Consider adding
-another parameter to each tab to track the jump list.
-
-** TODO Preserve buffer position in window tabs
-- _Steps to replicate:_
-  1. Open a buffer in a window tab
-  2. Open the same buffer in a new tab in the same window
-  3. Move point in the new tab
-  4. Select the previous tab
-
-- _Expected behavior:_ \\
-  The point and buffer position should be as I left them
-
-- _Actual behavior:_ \\
-  The point and buffer position were updated to match the new tab
-
-Note that this is not a problem when a buffer is displayed in multiple live
-windows (point and buffer position are independent between windows). Are window
-parameters used to achieve this?
-
-** TODO Fix bugs in tab caching
+** LOOP Fix bugs in tab caching
+:LOGBOOK:
+- Note taken on [2023-02-02 Thu 17:44] \\
+  Recent bug fixes might have resolved this issue, as I can no longer replicate it.
+:END:
 The ~tab-line-format~ function manages a ~tab-line-cache~ window parameter that
 is used in displaying tab names as well as keeping track of buffers within tabs.
 This mechanism does not always work correctly.
@@ -96,17 +71,124 @@ updated. Actually, all that ~tab-line-mode~ does is set the buffer-local
 ~tab-line-format~ variable to ~(:eval (tab-line-format))~, which is supposed to
 handle the rest. That's a lot hinging on proper mode line updates!
 
+** TODO Integrate =vimish-tab= with =winner=
+After ~winner-undo~, the tab state does not get updated appropriately. To
+replicate, perform the following steps (*[LOG]* means to run ~vimish-tab-list~
+and ~vimish-tab-index~ to log the state to the ~*Messages*~ buffer):
+
+1. Open a new window
+2. Open a new tab in that window (at the end of the tab list); *[LOG]*
+3. Close the new tab; *[LOG]*
+4. Run ~winner-undo~ in the new window; *[LOG]*
+
+After all of these steps, both of the tabs have a ~(selected . t)~ member in
+their respective ~vimish-tab-parameters~ structure. Could it be that
+~vimish-tab--update~ is conflicting with how =ace-window= restores window
+parameters, specifically the ~vimish-tab-list~ window parameter?
+
+** TODO Integrate =vimish-tab= with =persp=
+Currently, if a window is reused between perspectives, the =vimish-tabs= do not
+get saved and restored properly when switching between perspectives. The manual
+workaround I've been employing is as follows:
+
+1. After opening a new perspective (Doom workspace), create a new window split.
+2. Switch to the new window split.
+3. Run ~delete-other-windows~ (bound to =C-x 1= and =C-w C-o=).
+4. Use the perspective like you normally would.
+
+This works reasonably well, although it isn't 100% reliable. After using the new
+perspective for a while, I sometimes notice =vimish-tab= state being shared
+between windows in different perspectives. My guess as to why this happens is
+that I eventually delete the window that I created using my manual workaround,
+and the [[info:elisp#Windows and Frames][window tree]] rearranges itself in such a way that windows become shared
+again between perspectives.
+
+I think there are two approaches to fix this issue:
+
+1. Automate my manual workaround, including additional steps to improve
+   reliability (see above paragraph).
+2. Figure out /how/ =persp-mode= actually saves and restores window
+   configurations, and work with that. Some functions to look at (all taking a
+   frame as their first argument):
+   - ~persp-activate~
+     - ~persp--deactivate~
+       - ~persp-before-deactivate-functions~ (hook)
+       - ~persp-frame-save-state~
+     - ~persp-restore-window-window-conf~
+     - ~persp-activate-functions~ (hook)
+
+Ideally, I would use a package-agnostic mechanism so that =tab-bar= users not
+using =persp-mode= can still benefit.
+
+** TODO Integrate =vimish-tab= with =better-jumper=
+Currently, the jump history is recorded per window, which can cause some
+unexpected behavior when using multiple tabs in the same window. Consider adding
+another parameter to each tab to track the jump list.
+
+** TODO Preserve buffer position in window tabs
+- _Steps to replicate:_
+  1. Open a buffer in a window tab
+  2. Open the same buffer in a new tab in the same window
+  3. Move point in the new tab
+  4. Select the previous tab
+
+- _Expected behavior:_ \\
+  The point and buffer position should be as I left them
+
+- _Actual behavior:_ \\
+  The point and buffer position were updated to match the new tab
+
+Note that this is not a problem when a buffer is displayed in multiple live
+windows (point and buffer position are independent between windows). Are window
+parameters used to achieve this?
+
 ** TODO Fix alignment of tab-bar status in TTY Emacs
 The status is not right-aligned in TTY Emacs, so I currently have it disabled in
 that operating mode. In my case, I can just rely on the tmux status bar for the
 time and battery status, as I nearly always run interactive sessions in tmux.
 
-* Features [2/10]
+* Features [2/15]
 ** DONE Bind =C-w C= (capital "C") to ~vimish-tab-close-window-function~
 Users should have a mechanism to close windows at will, even when there is more
 than one tab in that window.
 
 ** DONE Add =C-w gf= and =C-w gF= bindings for =ffap= behavior
+** TODO Create ~display-buffer~ functions for opening buffers in =vimish-tab= tabs
+Could have at least two different functions:
+
+1. Open the buffer in a new tab of the current window.
+2. If the buffer is assigned to a tab of a live window, display the buffer in
+   that tab (make that tab current). At least two ambiguities could arise:
+   - When multiple live windows have a tab for the buffer.
+   - When a live window has multiple tabs for the buffer.
+
+** TODO Add =ace-window= command to =treemacs= to open a file in a new window tab
+This will require a new ~display-buffer~ function (see the previous item).
+
+** TODO Add =ace-window= command to "move" the selected tab to another window
+The implementation of this would probably be similar to that of the previous
+item (might be able to share an underlying function).
+
+** TODO Implement a command to select a tab in the current window using ~completing-read~
+To account for cases where there are multiple tabs displaying the same buffer, I
+should prepend the tab index to the buffer name. It would also be nice to show a
+prevent of the buffer as part of the selection process.
+
+** TODO Implement a command to select a tab in the current frame using ~completing-read~
+This would be similar to the command for selecting a tab in the current window,
+except it would also prepend the window number.
+
+** TODO Implement a mechanism to dedicate a window to its current tabs
+Essentially, I want a mechanism similar to [[info:elisp#Dedicated Windows][dedicated windows]] (although perhaps
+implemented through other [[info:elisp#Window Parameters][window parameters]]) such that ~display-buffer~ will not
+allow any buffers to be displayed in a specific window except for the buffers
+currently assigned to one of its window tabs.
+
+I would like to wrap this in a toggle function that I can then incorporate into
+my private ~my/toggle-window-dedicated~ command (if ~vimish-tab-mode~ is
+enabled, call the toggle function provided by =vimish-tab=, otherwise toggle
+standard window dedication).
+
 ** TODO Show a line beneath the tab bar just like in modus-operandi theme
 Can do this in private config for now, but this is useful enough to warrant
 inclusion in the Doom module.
@@ -185,7 +267,6 @@ In order to implement such behavior, =vimish-tab= should define a new
 interactive code via ~evil-define-interactive-code~; refer to the =evil-types=
 library for how to do this.
 
-** TODO Add =ace-window= command to =treemacs= to open a file in a new window tab
 * Uncategorized [0/2]
 ** TODO Make windows behave more like ~tmux~ panes
 I would like for Emacs to obey the following precepts:
