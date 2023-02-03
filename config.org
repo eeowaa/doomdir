@@ -1821,6 +1821,9 @@ not indicate which tabs abstration is being operated on.
   "C" #'+tabs/close-window
   "gf" #'+tabs:new-ffap-window-tab
   "gF" #'+tabs:new-ffap-with-line-window-tab)
+
+;; NOTE This overrides `+workspace/new'
+(map! :n "C-t" #'+tabs:new-blank-window-tab)
 #+end_src
 
 *** DONE [#A] Bind =evil-ex= commands
@@ -3716,10 +3719,10 @@ sudo dnf -y install libvterm cmake
   (defalias 'vterm-send-C-m #'vterm-send-return))
 #+end_src
 
-*** DONE [#B] Let =C-j= and =<M-backspace>= pass through in Evil insert state
+*** DONE [#B] Let =C-u=, =C-j=, and =<M-backspace>= pass through in Evil insert state
 #+begin_src emacs-lisp :tangle yes
 (after! evil-collection-vterm
-  (dolist (key '("C-j" "<M-backspace>"))
+  (dolist (key '("C-u" "C-j" "<M-backspace>"))
     (evil-collection-define-key 'insert 'vterm-mode-map
       (kbd key) 'vterm--self-insert)))
 #+end_src

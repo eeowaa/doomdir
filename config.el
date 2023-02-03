@@ -597,6 +597,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   "gf" #'+tabs:new-ffap-window-tab
   "gF" #'+tabs:new-ffap-with-line-window-tab)
 
+;; NOTE This overrides `+workspace/new'
+(map! :n "C-t" #'+tabs:new-blank-window-tab)
+
 (after! evil-ex
   (evil-ex-define-cmd "tabnew"         #'+tabs:new-blank-window-tab)
   (evil-ex-define-cmd "tabe[dit]"      #'+tabs:new-window-tab)
@@ -1288,7 +1291,7 @@ If the current frame has one window, restore the previous windows."
   (defalias 'vterm-send-C-m #'vterm-send-return))
 
 (after! evil-collection-vterm
-  (dolist (key '("C-j" "<M-backspace>"))
+  (dolist (key '("C-u" "C-j" "<M-backspace>"))
     (evil-collection-define-key 'insert 'vterm-mode-map
       (kbd key) 'vterm--self-insert)))
 
