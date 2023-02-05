@@ -1993,6 +1993,8 @@ See also: `ts-fold-summary--get'."
         :localleader
         "." #'consult-markdown-goto)))
 
+(setq markdown-enable-math nil)
+
 (pushnew! auto-mode-alist '("\\.mdx\\'" . markdown-mode))
 
 (add-hook! markdown-mode

@@ -1,20 +1,11 @@
 #+STARTUP:  overview
 #+FILETAGS: :doom:
-* Inbox [0/6]
+* Inbox [0/4]
 :PROPERTIES:
 :CATEGORY: doom/inbox
 :END:
 ** TODO Implement mechanism for editing terminal/REPL input in indirect buffers :feat:
 Start with =vterm= and extend to other modes.
-
-** TODO Create display rules for temporary =org= buffers :bug:
-I would like for most (if not all) temporary =org= buffers to appear in a
-bottom-right side window.
-
-1. Search =org= sources for a known buffer name string
-2. Identify the function or macro used to create =org= buffers
-3. Search for the elisp form identified in the previous step
-4. Create a buffer group for all buffer name strings passed to this form
 
 ** TODO Save/restore buffer position before/after jumps :bug:
 _Replication steps:_
@@ -41,13 +32,6 @@ _Actual behavior:_
 
 ** TODO Restore previous buffer position in =info= after ~Info-history-back~ :bug:
 I assume that this problem is closely related to the previous one.
-
-** TODO Introduce a mechanism to display a side window across all slots :feat:
-Sometimes, a side window should always span the entire length of its side.
-Perhaps there is an existing ~display-buffer~ action alist entry or window
-parameter that can help with this. If not, you can implement a custom
-~display-buffer~ function with a custom parameter. See =:ui popup= for
-reference.
 
 ** TODO Temporarily replace bottom side window(s) with minibuffer :tweak:
 When the minibuffer window grows vertically (e.g. when displaying completion

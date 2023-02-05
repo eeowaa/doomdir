@@ -33,7 +33,7 @@ Migrate evil bindings from Doom module config. Refer to =treemacs-evil=,
 =kubernetes-evil=, and =kubel-evil= for how to do this.
 
 ** TODO Add a keymap for non-=evil= users
-* Bugs [2/10]
+* Bugs [2/11]
 ** DONE Display window tabs when point is in an EIN notebook cell
 =tab-line= disables ~tab-line-mode~ for buffers whose name begins with a space.
 When ~pm-hide-implementation-buffers~ is enabled, =polymode= (used by =poly-ein=
@@ -158,7 +158,25 @@ another parameter to each tab to track the jump list.
 
 Note that this is not a problem when a buffer is displayed in multiple live
 windows (point and buffer position are independent between windows). Are window
-parameters used to achieve this?
+parameters used to achieve this? If so, I could save those same window
+parameters in the window tab's alist (accessible by ~vimish-tab-parameters~) and
+prefer those when restoring buffer position. Maybe I could have a separate
+~window-parameters~ entry in each tab's alist and always restore those.
+
+** TODO Do not hide the tab-bar when =gd= present multiple definitions
+When ~+lookup/definition~ (bound to =gd=) presents multiple candidate
+definitions, the tab-bar gets hidden for some reason.
+
+_Replication steps:_
+
+1. =C-h C-f vterm--internal RET=
+2. =gd= on that ~defun~ name
+
+The tab-bar will be hidden.
+
+_Debugging ideas:_
+
+- Look at the ~elisp-def~ function definition
 
 ** TODO Fix alignment of tab-bar status in TTY Emacs
 The status is not right-aligned in TTY Emacs, so I currently have it disabled in

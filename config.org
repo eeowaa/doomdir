@@ -6543,6 +6543,14 @@ which is perfect for ~:around~ advice:
         "." #'consult-markdown-goto)))
 #+end_src
 
+*** DONE [#B] Disable LateX syntax highlighting by default
+I am more likely to use literal dollar signs in Markdown files than I am to use
+inline LaTeX (for that, I would use Org mode).
+
+#+begin_src emacs-lisp :tangle yes
+(setq markdown-enable-math nil)
+#+end_src
+
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
 (pushnew! auto-mode-alist '("\\.mdx\\'" . markdown-mode))
