@@ -483,7 +483,7 @@ sudo sudo dnf -y install ripgrep
 (setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
 #+end_src
 
-** vertico [2/3]
+** vertico [2/4]
 #+begin_quote
 This module enhances the Emacs search and completion experience, and also
 provides a united interface for project search and replace, powered by [[https://github.com/BurntSushi/ripgrep/][ripgrep]].
@@ -511,6 +511,11 @@ When previewing themes with =consult=, sometimes the cursor color gets stuck
 (changing themes does not change the cursor color). When this happens, some
 themes become ugly or even unusable. *UPDATE*: Might want to look into the
 ~cursor-color~ frame parameter.
+
+*** TODO [#A] Prevent Emacs from freezing during ~consult-org-heading~ :bug:
+Lately, Emacs will occasionally freeze when searching for headlines in this
+buffer using =SPC m .=. I wonder if the recent addition of a ~jupyter-bash~
+source block is somehow causing this.
 
 * :ui
 #+begin_quote
@@ -765,14 +770,6 @@ So far, this doesn't really seem to help much.
    ;; "C-~"   #'+popup/raise
    ;; "C-x p" #'+popup/other
 #+end_src
-
-*** TODO [#A] Temporarily replace bottom side window(s) with minibuffer
-+ [[info:elisp#Minibuffer Windows][elisp#Minibuffer Windows]]
-  - ~resize-mini-windows~
-  - ~max-mini-window-height~
-+ [[info:elisp#Minibuffers and Frames][elisp#Minibuffers and Frames]]
-+ [[info:elisp#Buffer Parameters][elisp#Buffer Parameters]]
-  - ~minibuffer~
 
 ** deft [0/0] :ARCHIVE:
 #+begin_quote
@@ -6392,7 +6389,7 @@ github_binary_release \
                 "main.lua")))
 #+end_src
 
-** markdown [9/12]
+** markdown [10/13]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:

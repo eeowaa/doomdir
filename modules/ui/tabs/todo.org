@@ -1,15 +1,39 @@
 #+title: Tabs
 
-* Internals [1/3]
+* Internals [1/5]
 ** DONE Create a =vimish-tab= global minor mode
 Sort of like ~global-tab-line-mode~.
+
+** TODO Refactor how =vimish-tab= redisplays the tab line
+Right now, this is completely hacked together. For reference, these are the
+forms that have at least something to do with tab line display:
+
+- ~vimish-tab-mode~ minor mode definition
+- ~vimish-tab-update-window~ hook function
+- ~vimish-tab--update~ function
+- ~vimish-tab-redisplay~ function
+- ~tab-line-format~ buffer-local variable
+- ~tab-line-format~ window parameter
+- ~vimish-tab-force-tab-line-update~ function
+- ~vimish-tab--mode-line-update-hack~ advice function
+- ~vimish-tab--select-tab-fix~ advice function
+
+The above functions are called by other functions, as well. I think that in
+order for me to tackle this problem, I first need to explain my current
+understanding of the system in writing.
+
+** TODO Optimize =vimish-tab= through direct window parameter manipulation
+Currently, I mostly copy existing tab structures, modify the copy, and modify
+the ~vimish-tab-list~ window parameter by assigning the copy to it. A more
+efficient method would be to use the ~vimish-tab-parameter~ and
+~set-vimish-tab-parameter~ macros to modify the window parameters in-place.
 
 ** TODO Create a =vimish-tab-evil= library
 Migrate evil bindings from Doom module config. Refer to =treemacs-evil=,
 =kubernetes-evil=, and =kubel-evil= for how to do this.
 
 ** TODO Add a keymap for non-=evil= users
-* Bugs [2/9]
+* Bugs [2/10]
 ** DONE Display window tabs when point is in an EIN notebook cell
 =tab-line= disables ~tab-line-mode~ for buffers whose name begins with a space.
 When ~pm-hide-implementation-buffers~ is enabled, =polymode= (used by =poly-ein=
@@ -38,38 +62,32 @@ course, this happens in many elisp packages.) I fixed this by refactoring
 =vimish-tab= to use the ~window-buffer-change-functions~ hook instead of
 ~buffer-list-update-hook~.
 
-** LOOP Fix bugs in tab caching
-:LOGBOOK:
-- Note taken on [2023-02-02 Thu 17:44] \\
-  Recent bug fixes might have resolved this issue, as I can no longer replicate it.
-:END:
-The ~tab-line-format~ function manages a ~tab-line-cache~ window parameter that
-is used in displaying tab names as well as keeping track of buffers within tabs.
-This mechanism does not always work correctly.
+** TODO Update window tab names when renaming buffers
+~rename-buffer~ should be advised to update the tab lists of all windows
+containing the buffer that was renamed. This should include *all* windows, not
+just live windows.
 
-- _Steps to replicate:_
-  1. Use =:Tex= to open a new dired tab
-  2. Use =-= to navigate up a directory
-  3. Use =gT= to navigate to the previous tab
+Unfortunately, the local hook ~window-buffer-change-functions~ does not trigger
+on buffer renames. ~buffer-list-update-hook~ does get triggered on buffer
+renames, but unfortunately it gets triggered in some undesirable places, too
+(like when ~get-buffer-create~ is called with an unset ~inhibit-buffer-hooks~
+argument -- a common occurence in elisp code). Therefore, advice seems to be the
+best implementation strategy.
 
-- _Expected behavior:_ \\
-  The name of the new dired tab is that of the directory that I navigated up to.
-  Switching between tabs does not affect tab names or buffer content.
+** TODO Update window tab lists when killing buffers
+~kill-buffer~ should be advised to update the tab lists of all windows
+containing the buffer that was killed. This should include *all* windows, not
+just live windows. For the same reasons mentioned in the [[*Update window tab names when renaming buffers][previous item]], advice
+is the best implementation strategy.
 
-- _Actual behavior:_ \\
-  The name of the new dired tab goes back to the original directory. Switching
-  back to the dired tab from the original tab takes me to the original
-  directory.
+Considerations:
 
-  If I use =-= to navigate up a directory again, then switch to the original
-  tab, the new dired tab shows the parent directory as the name. Switching back
-  to the dired tab takes me to the parent directory. At this point, switching
-  back and forth between tabs works as expected.
+- Should tabs be deleted, or should they be replaced with fallback buffers?
+- If tabs should be deleted and there is only one tab left in a window, should
+  the window be deleted, too?
+- If fallback buffers should be used, how should they be determined?
 
-It seems to me that ~tab-line-format~ is only ever called when the mode line is
-updated. Actually, all that ~tab-line-mode~ does is set the buffer-local
-~tab-line-format~ variable to ~(:eval (tab-line-format))~, which is supposed to
-handle the rest. That's a lot hinging on proper mode line updates!
+User options for the above considerations seems like a good idea.
 
 ** TODO Integrate =vimish-tab= with =winner=
 After ~winner-undo~, the tab state does not get updated appropriately. To
@@ -147,6 +165,39 @@ The status is not right-aligned in TTY Emacs, so I currently have it disabled in
 that operating mode. In my case, I can just rely on the tmux status bar for the
 time and battery status, as I nearly always run interactive sessions in tmux.
 
+** LOOP Fix bugs in tab caching
+:LOGBOOK:
+- Note taken on [2023-02-02 Thu 17:44] \\
+  Recent bug fixes might have resolved this issue, as I can no longer replicate it.
+:END:
+The ~tab-line-format~ function manages a ~tab-line-cache~ window parameter that
+is used in displaying tab names as well as keeping track of buffers within tabs.
+This mechanism does not always work correctly.
+
+- _Steps to replicate:_
+  1. Use =:Tex= to open a new dired tab
+  2. Use =-= to navigate up a directory
+  3. Use =gT= to navigate to the previous tab
+
+- _Expected behavior:_ \\
+  The name of the new dired tab is that of the directory that I navigated up to.
+  Switching between tabs does not affect tab names or buffer content.
+
+- _Actual behavior:_ \\
+  The name of the new dired tab goes back to the original directory. Switching
+  back to the dired tab from the original tab takes me to the original
+  directory.
+
+  If I use =-= to navigate up a directory again, then switch to the original
+  tab, the new dired tab shows the parent directory as the name. Switching back
+  to the dired tab takes me to the parent directory. At this point, switching
+  back and forth between tabs works as expected.
+
+It seems to me that ~tab-line-format~ is only ever called when the mode line is
+updated. Actually, all that ~tab-line-mode~ does is set the buffer-local
+~tab-line-format~ variable to ~(:eval (tab-line-format))~, which is supposed to
+handle the rest. That's a lot hinging on proper mode line updates!
+
 * Features [2/15]
 ** DONE Bind =C-w C= (capital "C") to ~vimish-tab-close-window-function~
 Users should have a mechanism to close windows at will, even when there is more
@@ -188,33 +239,6 @@ I would like to wrap this in a toggle function that I can then incorporate into
 my private ~my/toggle-window-dedicated~ command (if ~vimish-tab-mode~ is
 enabled, call the toggle function provided by =vimish-tab=, otherwise toggle
 standard window dedication).
-
-** TODO Show a line beneath the tab bar just like in modus-operandi theme
-Can do this in private config for now, but this is useful enough to warrant
-inclusion in the Doom module.
-
-*UPDATES*:
-
-- The modus themes achieve this by setting the ~box~ attribute for the ~tab-bar~
-  face. In effect, a border appears around the /entire/ tab bar, but you can't
-  really see the border on the sides or top due to contrast ratios of the modus
-  themes. Unfortunately, this does not look good with other themes.
-
-- In a response to [[https://www.reddit.com/r/emacs/comments/o2rmo4/how_to_add_border_between_tabbar_and_window/][this Reddit post]], one user reported that the ~tab-bar-border~
-  variable didn't work for them (it doesn't seem to work for me, either).
-  However, they found success by setting the ~internal-border-width~ frame
-  parameter to 1
-
-  #+begin_src emacs-lisp :tangle no
-  (setq tab-bar-border 'internal-border-width)
-  (set-frame-parameter nil 'internal-border-width 1)
-  (custom-set-faces!
-    '(border :inherit window-divider)
-    '(internal-border :inherit window-divider))
-  #+end_src
-
-- For consistency, the ~window-divider~ (?) face should be inherited by whatever
-  face is used to separate the tab bar from the rest of the frame.
 
 ** TODO Implement standard Vim behavior for =gt=
 A numeric prefix argument should give the tab number, not how many times to
@@ -266,6 +290,33 @@ index of the last-accessed tab.
 In order to implement such behavior, =vimish-tab= should define a new
 interactive code via ~evil-define-interactive-code~; refer to the =evil-types=
 library for how to do this.
+
+** TODO Show a line beneath the tab bar just like in modus-operandi theme
+Can do this in private config for now, but this is useful enough to warrant
+inclusion in the Doom module.
+
+*UPDATES*:
+
+- The modus themes achieve this by setting the ~box~ attribute for the ~tab-bar~
+  face. In effect, a border appears around the /entire/ tab bar, but you can't
+  really see the border on the sides or top due to contrast ratios of the modus
+  themes. Unfortunately, this does not look good with other themes.
+
+- In a response to [[https://www.reddit.com/r/emacs/comments/o2rmo4/how_to_add_border_between_tabbar_and_window/][this Reddit post]], one user reported that the ~tab-bar-border~
+  variable didn't work for them (it doesn't seem to work for me, either).
+  However, they found success by setting the ~internal-border-width~ frame
+  parameter to 1
+
+  #+begin_src emacs-lisp :tangle no
+  (setq tab-bar-border 'internal-border-width)
+  (set-frame-parameter nil 'internal-border-width 1)
+  (custom-set-faces!
+    '(border :inherit window-divider)
+    '(internal-border :inherit window-divider))
+  #+end_src
+
+- For consistency, the ~window-divider~ (?) face should be inherited by whatever
+  face is used to separate the tab bar from the rest of the frame.
 
 * Uncategorized [0/2]
 ** TODO Make windows behave more like ~tmux~ panes

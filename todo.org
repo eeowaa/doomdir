@@ -1,9 +1,142 @@
 #+STARTUP:  overview
 #+FILETAGS: :doom:
-* Inbox [0/0]
+* Inbox [0/6]
 :PROPERTIES:
 :CATEGORY: doom/inbox
 :END:
+** TODO Implement mechanism for editing terminal/REPL input in indirect buffers :feat:
+Start with =vterm= and extend to other modes.
+
+** TODO Create display rules for temporary =org= buffers :bug:
+I would like for most (if not all) temporary =org= buffers to appear in a
+bottom-right side window.
+
+1. Search =org= sources for a known buffer name string
+2. Identify the function or macro used to create =org= buffers
+3. Search for the elisp form identified in the previous step
+4. Create a buffer group for all buffer name strings passed to this form
+
+** TODO Save/restore buffer position before/after jumps :bug:
+_Replication steps:_
+
+1. Open =config.org=.
+2. Expand all org subtrees.
+3. Navigate to somewhere around the middle of the buffer.
+4. Input =zz= to center point vertically in the window.
+5. Input =gg= to jump to the top of the buffer.
+6. Input =C-,= to return to where you jumped from.
+
+_Expected behavior:_
+
+- Point is centered vertically in the window as in step 4.
+- If the number of hard lines displayed in the window has changed since step 4
+  (either due to the window being resized vertically, the window being resized
+  horizontally to a sufficient degree with soft line wrapping enabled, and/or
+  soft line wrapping being toggled), point will stay at the same proportionate
+  vertical position as in step 4.
+
+_Actual behavior:_
+
+- Point is in the bottom fully-visible line of the window.
+
+** TODO Restore previous buffer position in =info= after ~Info-history-back~ :bug:
+I assume that this problem is closely related to the previous one.
+
+** TODO Introduce a mechanism to display a side window across all slots :feat:
+Sometimes, a side window should always span the entire length of its side.
+Perhaps there is an existing ~display-buffer~ action alist entry or window
+parameter that can help with this. If not, you can implement a custom
+~display-buffer~ function with a custom parameter. See =:ui popup= for
+reference.
+
+** TODO Temporarily replace bottom side window(s) with minibuffer :tweak:
+When the minibuffer window grows vertically (e.g. when displaying completion
+candidates), it temporarily covers a part of the frame used by existing windows.
+Hiding this content can sometimes hide important context that is useful when
+interacting with the minibuffer.
+
+However, the way I use Emacs, bottom side windows rarely contain such important
+context. Therefore, if bottom side windows exist when the minibuffer must grow
+vertically, the minibuffer might as well consume that part of the screen while
+leaving most other windows alone (preserving their size and position).
+
+There are two potential approaches to handling left and right side windows:
+
+1. *Temporarily hide the last few lines of left and right side windows, so that
+   the minibuffer spans the entire frame width*. On the plus side, the
+   minibuffer prompt would always appear in the bottom-left corner of the frame,
+   regardless of the presence of a left side window or the value of the
+   ~window-sides-vertical~ user option. On the flip side, the minibuffer rarely
+   needs full horizontal frame width when fullscreen on modern wide-screen
+   displays, and it might not look as clean as fitting the minibuffer into
+   already-allocated screen space.
+
+2. *Display the expanded minibuffer in a full-width bottom side window.* This
+   would look the cleanest and would be enough space in the vast majority of use
+   cases. Unfortunately, at first blush, it seems harder to implement. See the
+   references gathered below for more information.
+
+_Reference:_
+
+- [[info:elisp#Intro to Minibuffers][Intro to Minibuffers]]
+  + "Minibuffers are displayed only in special windows used only for
+    minibuffers; these windows always appear at the bottom of a frame."
+  + "The minibuffer's window is normally a single line; it grows automatically
+    if the contents require more space."
+
+- [[info:elisp#Text from Minibuffer][Text from Minibuffer]]
+  + ~read-minibuffer-restore-windows~: "If this option is non-`nil' (the
+    default), getting input from the minibuffer will restore, on exit, the
+    window configurations of the frame where the minibuffer was entered from
+    and, if it is different, the frame that owns the minibuffer window. This
+    means that if, for example, a user splits a window while getting input from
+    the minibuffer on the same frame, that split will be undone when exiting the
+    minibuffer."
+
+- [[info:elisp#Minibuffer Completion][Minibuffer Completion]]
+  + ~completing-read-function~: "The value of this variable must be a function,
+    which is called by `completing-read' to actually do its work. It should
+    accept the same arguments as `completing-read'. This can be bound to a
+    different function to completely override the normal behavior of
+    `completing-read'.
+
+- [[info:elisp#Completion Commands][Completion Commands]]
+  + ~minibuffer-completion-help~: "This function creates a list of the possible
+    completions of the current minibuffer contents. (...) The list of
+    completions is displayed as text in a buffer named `*Completions*'."
+  + ~display-completion-list~: "This function displays COMPLETIONS to the stream
+    in `standard-output', usually a buffer. (...) This function is called by
+    `minibuffer-completion-help'.
+  + ~completion-setup-hook~: "Normal hook run at the end of setting up a
+    completion list buffer. When this hook is run, the current buffer is the one
+    in which the command to display the completion list buffer was run. The
+    completion list buffer is available as the value of `standard-output'. See
+    also `display-completion-list'."
+
+- [[info:elisp#Minibuffer Windows][Minibuffer Windows]]
+  + ~resize-mini-windows~: "This option specifies whether minibuffer windows are
+    resized automatically. (...) If the value is `nil', a minibuffer window
+    never changes size automatically."
+
+- [[info:elisp#Minibuffers and Frames][Minibuffers and Frames]]
+  + "Normally, each frame has its own minibuffer window at the bottom, which is
+    used whenever that frame is selected. (...) However, you can also create a
+    frame without a minibuffer. Such a frame must use the minibuffer window of
+    some other frame."
+  + "If you use a minibuffer-only frame, you might want that frame to raise when
+    you enter the minibuffer. If so, set the variable `minibuffer-auto-raise' to
+    `t'."
+
+- [[info:elisp#Buffer Parameters][Buffer Parameters]]
+  + ~minibuffer~: "Whether this frame has its own minibuffer. The value `t'
+    means yes, `nil' means no, `only' means this frame is just a minibuffer. If
+    the value is a minibuffer window (in some other frame), the frame uses that
+    minibuffer."
+
+You may also want to reference the package (or configuration options) that
+implements minibuffer completion in a centered popup frame. Perform a web search
+to find your way.
+
 * Upstream [0/8]
 :PROPERTIES:
 :CATEGORY: doom/upstream

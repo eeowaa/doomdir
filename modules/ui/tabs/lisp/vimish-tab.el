@@ -77,8 +77,8 @@ When NOERROR is provided, do not signal an error."
      (noerror nil)
      (t (error "Window parameter `vimish-tab-list' is not a list")))))
 
-;; TODO See about adding window parameters set by `tab-line':
-;; `tab-line-groups', `tab-line-group', `tab-line-hscroll', `tab-line-cache'
+;; TODO See about adding other window parameters set by `tab-line':
+;; `tab-line-groups', `tab-line-group', and `tab-line-hscroll'
 (cl-pushnew '(tab-line-cache . writable) window-persistent-parameters)
 
 
@@ -111,7 +111,7 @@ TAB can be any tab and defaults to the selected one."
 
 (defmacro set-vimish-tab-parameter (tab parameter value)
   "Set TAB's value of PARAMETER to VALUE.
-TAB can be any window and defaults to the selected one.
+TAB can be any tab and defaults to the selected one.
 Return VALUE."
   `(setf (vimish-tab-parameter ,tab ,parameter) ,value))
 
