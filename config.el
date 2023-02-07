@@ -815,6 +815,7 @@ Closes and re-opens Treemacs to apply the new theme."
   (defvar my/zen--old-tab-bar-mode nil)
   (defvar my/zen--old-tab-line-mode nil)
   (defvar my/zen--old-vi-tilde-fringe-mode nil)
+  (defvar my/zen--old-diff-hl-mode nil)
 
   (add-hook! writeroom-mode :append
     (defun my/zen-toggle-h ()
@@ -835,7 +836,9 @@ Closes and re-opens Treemacs to apply the new theme."
                   my/zen--old-tab-line-mode
                   (bound-and-true-p tab-line-mode)
                   my/zen--old-vi-tilde-fringe-mode
-                  (and (modulep! :ui vi-tilde-fringe) (bound-and-true-p vi-tilde-fringe-mode)))
+                  (bound-and-true-p vi-tilde-fringe-mode)
+                  my/zen--old-diff-hl-mode
+                  (bound-and-true-p diff-hl-mode))
 
             ;; Remove distractions
             (setq display-line-numbers nil)
@@ -844,7 +847,8 @@ Closes and re-opens Treemacs to apply the new theme."
             (display-fill-column-indicator-mode -1)
             (tab-bar-mode -1)
             (tab-line-mode -1)
-            (vi-tilde-fringe-mode -1))
+            (vi-tilde-fringe-mode -1)
+            (diff-hl-mode -1))
 
         ;; Restore previous state
         (setq display-line-numbers my/zen--old-display-line-numbers)
@@ -853,7 +857,8 @@ Closes and re-opens Treemacs to apply the new theme."
         (if my/zen--old-display-fill-column-indicator-mode (display-fill-column-indicator-mode +1))
         (if my/zen--old-tab-bar-mode (tab-bar-mode +1))
         (if my/zen--old-tab-line-mode (tab-line-mode +1))
-        (if my/zen--old-vi-tilde-fringe-mode (vi-tilde-fringe-mode +1))))))
+        (if my/zen--old-vi-tilde-fringe-mode (vi-tilde-fringe-mode +1))
+        (if my/zen--old-diff-hl-mode (diff-hl-mode +1))))))
 
 ;; Display ^L characters as horizontal lines
 (use-package! page-break-lines
