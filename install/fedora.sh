@@ -1,5 +1,14 @@
 #!/bin/sh
 
+# Lock Emacs at version 28.2 using DNF
+target_version=28.2
+actual_version=`rpm -q --qf '%{version}' emacs`
+sudo dnf -y install 'dnf-command(versionlock)'
+sudo dnf versionlock add emacs-1:$target_version
+[ "X$target_version" = "X$actual_version" ] || cat >&2 <<EOF
+WARNING: Incorrect Emacs version (using $actual_version, want $target_version)
+EOF
+
 # Obtain Emacs source code corresponding to installed RPM
 (
     # Create ~/rpmbuild directory tree

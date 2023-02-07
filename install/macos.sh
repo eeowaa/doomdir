@@ -1,5 +1,17 @@
 #!/bin/sh
 
+cat >&2 <<EOF
+WARNING: If installed by a package manager, Emacs might not be pinned at a
+specific version (Doom has no knowledge of whether this is the case). System
+package updates may upgrade Emacs, resulting in:
+
+  1. Potential package breakages
+  2. Potential configuration breakages
+  3. The need to run \`doom build'
+
+*** Use caution when performing system updates! ***
+EOF
+
 # Install Homebrew to install system packages
 curl -Lo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
 

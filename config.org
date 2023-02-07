@@ -81,6 +81,40 @@ WARNINGS:
 #+end_src
 
 * Miscellany
+** Use Emacs version 28.2 [2/2]
+*** OKAY macOS
+#+begin_src sh :tangle install/macos.sh
+#!/bin/sh
+
+cat >&2 <<EOF
+WARNING: If installed by a package manager, Emacs might not be pinned at a
+specific version (Doom has no knowledge of whether this is the case). System
+package updates may upgrade Emacs, resulting in:
+
+  1. Potential package breakages
+  2. Potential configuration breakages
+  3. The need to run \`doom build'
+
+,*** Use caution when performing system updates! ***
+EOF
+#+end_src
+
+*** DONE Fedora
+Reference: https://unix.stackexchange.com/a/657797
+
+#+begin_src sh :tangle install/fedora.sh
+#!/bin/sh
+
+# Lock Emacs at version 28.2 using DNF
+target_version=28.2
+actual_version=`rpm -q --qf '%{version}' emacs`
+sudo dnf -y install 'dnf-command(versionlock)'
+sudo dnf versionlock add emacs-1:$target_version
+[ "X$target_version" = "X$actual_version" ] || cat >&2 <<EOF
+WARNING: Incorrect Emacs version (using $actual_version, want $target_version)
+EOF
+#+end_src
+
 ** Install prerequisites [2/2]
 :PROPERTIES:
 :header-args: :noweb yes
@@ -152,8 +186,6 @@ $func: (recursively) delete? [y/N]: "
 
 *** DONE macOS
 #+begin_src sh :tangle install/macos.sh
-#!/bin/sh
-
 # Install Homebrew to install system packages
 curl -Lo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
 
@@ -168,8 +200,6 @@ brew install jq
 
 *** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
-#!/bin/sh
-
 # Obtain Emacs source code corresponding to installed RPM
 (
     # Create ~/rpmbuild directory tree
