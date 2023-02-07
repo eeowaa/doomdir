@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: sh
+# key: sh
+# uuid: sh
+# --
+#+begin_src sh :eval no
+`%`$0
+#+end_src
