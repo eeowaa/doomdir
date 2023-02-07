@@ -2456,6 +2456,7 @@ This is a list of lists, not a list of cons cells.")
   :when (modulep! :editor evil +everywhere))
 
 (setq +lookup-open-url-fn #'w3m-browse-url)
+(setq w3m-display-mode 'plain)
 
 (after! elfeed
   (add-hook! elfeed-search-mode #'elfeed-update))

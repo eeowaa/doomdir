@@ -8170,6 +8170,7 @@ sudo dnf -y install w3m
 
 #+begin_src emacs-lisp :tangle yes
 (setq +lookup-open-url-fn #'w3m-browse-url)
+(setq w3m-display-mode 'plain)
 #+end_src
 
 ** calendar [0/0] :ARCHIVE:

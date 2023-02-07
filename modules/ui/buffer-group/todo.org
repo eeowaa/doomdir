@@ -79,7 +79,11 @@ This could be configurable during buffer-group definition, although I think it
 would be best as a dynamic option. For example, a user could run a command to
 dedicate the selected window to the buffer group of the current buffer. If using
 =vimish-tab= (or vanilla =tab-line=), all tabs containing buffers *not* in that
-buffer group get removed from the window.
+buffer group get removed from the window; no buffers besides those in the
+specified buffer group(s) can be displayed in that window after that.
+
+One example where this functionality would be useful is for W3M. Each web page
+could have its own tab and exist in that window.
 
 * Configuration [1/5]
 ** DONE Define buffer groups in =config.el=
