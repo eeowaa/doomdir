@@ -262,7 +262,12 @@ Needed by `vimish-tab-force-mode-line-update' when called from
 
 ;; NOTE If this isn't working in some cases, we might want to try implementing a
 ;; hack found in Doom's `+vterm/here' to force a redraw:
-;; (save-window-excursion (pop-to-buffer "*scratch*"))
+;;
+;;   (save-window-excursion (pop-to-buffer "*scratch*"))
+;;
+;; FIXME Speaking of which, `vterm' buffers created with `+vterm/here' do not
+;; redraw their tab-line appropriately even when directly calling
+;; `vimish-tab-force-tab-line-update'. Something else to look into.
 (defun vimish-tab-force-tab-line-update (&rest _)
   "Force-update the tab line of the current buffer.
 Use in place of `force-mode-line-update' to update the tab line

@@ -276,6 +276,13 @@ for autoload cookies or byte-compilation.
 (add-load-path! (concat doom-user-dir "lisp"))
 #+end_src
 
+*** DONE [#A] Load my own local packages
+#+begin_src emacs-lisp :tangle yes
+;; (require 'eeowaa-debug) NOTE: This is providing nothing of value right now
+(require 'eeowaa-project)
+(require 'eeowaa-refresh)
+#+end_src
+
 *** DONE [#B] Define helper constructs
 #+begin_src emacs-lisp :tangle yes
 (defmacro my/doom-use-face (face other-face)
@@ -1591,12 +1598,19 @@ I just need to test this functionality.
   ("SPC" hydra-table/body "Menu" :exit 1))
 #+end_src
 
-** ilist [1/1] :eeowaa:
-**** DONE Window configuration
+** ilist [2/2] :eeowaa:
+**** DONE [#A] Window configuration :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setq imenu-list-mode-line-format "  Ilist"
       imenu-list-position 'right
       imenu-list-size 35) ;; same as treemacs
+#+end_src
+
+**** DONE [#C] Configure =eeowaa-refresh= :tweak:
+#+begin_src emacs-lisp :tangle yes
+(after! imenu-list
+  (add-to-list 'eeowaa-refresh-mode-alist
+               (cons 'imenu-list-major-mode #'imenu-list-refresh)))
 #+end_src
 
 ** indent-guides [0/0] :ARCHIVE:
@@ -1958,7 +1972,7 @@ loads, so tabs will appear in the ~ilist~ buffer until you manually run the
 Wait until you have a Maildir set up, then look at configuration options for
 ~display-time-mode~.
 
-** treemacs [10/15]
+** treemacs [11/16]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -2090,6 +2104,13 @@ following benefits of enabling the cursor in Treemacs:
 
 #+begin_src emacs-lisp :tangle yes
 (setq treemacs-show-cursor t)
+#+end_src
+
+*** DONE [#C] Configure =eeowaa-refresh= :tweak:
+#+begin_src emacs-lisp :tangle yes
+(after! treemacs
+  (add-to-list 'eeowaa-refresh-mode-alist
+               (cons 'treemacs-mode #'treemacs-refresh)))
 #+end_src
 
 *** STRT [#B] Display "+" and "-" icons in tty emacs :bug:
@@ -2546,7 +2567,7 @@ Modules that affect and augment your ability to manipulate or insert text.
 ;;; :editor
 #+end_src
 
-** Miscellany [2/3]
+** Miscellany [2/4]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -2561,16 +2582,10 @@ Miscellaneous configuration without a corresponding module.
 ;; window (like most shells do)
 (setq recenter-positions '(top bottom middle))
 
-;; When using `evil', have C-l redraw the display (like Vim does). Use zt, zz,
-;; and zb to reposition the current line instead of C-l.
+;; When using `evil', have C-l refresh the buffer and and redraw the display.
+;; Use zt, zz, and zb to reposition the current line instead of C-l.
 (when (modulep! :editor evil)
-  (defun my/redraw ()
-    (interactive)
-    (redraw-display)
-    (set-window-buffer nil (current-buffer))
-    (when (fboundp 'vimish-tab-force-tab-line-update)
-      (vimish-tab-force-tab-line-update)))
-  (global-set-key (kbd "C-l") #'my/redraw))
+  (global-set-key (kbd "C-l") #'eeowaa-refresh-buffer-and-display))
 
 ;; Perform a line feed after jumping to a ^L character
 (defadvice! my/recenter-top-a (&rest _)
@@ -2590,6 +2605,13 @@ https://emacs.stackexchange.com/questions/51989/how-to-truncate-lines-by-default
 
 #+begin_src emacs-lisp :tangle yes
 (setq-default truncate-lines t)
+#+end_src
+
+*** STRT [#C] Configure =eeowaa-refresh= :tweak:
+#+begin_src emacs-lisp :tangle yes
+(pushnew! eeowaa-refresh-mode-alist
+          '(process-menu-mode . list-processes)
+          '(timer-list-mode . list-timers))
 #+end_src
 
 ** evil [7/9]
@@ -3548,10 +3570,17 @@ sudo dnf -y install coreutils
 #+end_src
 
 ** electric [0/0]
-** ibuffer [0/2]
+** ibuffer [1/3]
 #+begin_quote
 This module augments ibuffer.
 #+end_quote
+
+*** DONE [#C] Configure =eeowaa-refresh= :tweak:
+#+begin_src emacs-lisp :tangle yes
+(after! ibuffer
+  (add-to-list 'eeowaa-refresh-mode-alist
+               (cons 'ibuffer-mode #'ibuffer-redisplay)))
+#+end_src
 
 *** TODO [#B] Integrate with =ace-window= :feat:
 From =ibuffer=, I would like to open buffers in windows selected with
@@ -3716,7 +3745,7 @@ to =eshell=, it forcefully clears the file on disk.
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [5/14]
+** vterm [6/15]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
@@ -3782,6 +3811,15 @@ regardless of whether the buffer is a popup or not.
 #+begin_src emacs-lisp :tangle cli.el
 (after! doom-cli-env
   (add-to-list 'doom-env-deny "VTERM_BUFFER_NAME"))
+#+end_src
+
+*** DONE [#C] Configure =eeowaa-refresh= :tweak:
+#+begin_src emacs-lisp :tangle yes
+(after! vterm
+  (add-to-list 'eeowaa-refresh-mode-alist
+               (cons 'vterm-mode #'vterm-clear))
+  (map! :map vterm-mode-map
+        "C-l" #'eeowaa-refresh-buffer-and-display))
 #+end_src
 
 *** STRT [#B] Define aliases
@@ -5373,7 +5411,7 @@ Until I get things figured out, I am going to continue to use hash tables.
 (setq lsp-use-plists t)
 #+end_src
 
-** magit [3/4]
+** magit [4/5]
 *** STRT [#A] Install prerequisites :feat:
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -5391,6 +5429,13 @@ sudo dnf -y install perl
 # TODO: Find equivalent to git-absorb
 # TODO: Fix cpan install command
 cpan install App::Git::Autofixup
+#+end_src
+
+*** DONE [#C] Configure =eeowaa-refresh= :tweak:
+#+begin_src emacs-lisp :tangle yes
+(after! magit
+  (add-to-list 'eeowaa-refresh-mode-alist
+               (cons 'magit-status-mode #'magit-refresh)))
 #+end_src
 
 *** DONE [#B] Remove gitflow configuration
@@ -6048,12 +6093,6 @@ This module extends support for Emacs Lisp in Doom Emacs.
        expansion/. Instead, refer to the argument /in the expansion/.
     5. Avoid side-effects on objects constructed /during expansion/, as this can
        cause issues in byte-compiled code.
-
-*** DONE [#A] Load my own local packages
-#+begin_src emacs-lisp :tangle yes
-(require 'eeowaa-project)
-;; (require 'eeowaa-debug) NOTE: This is providing nothing of value right now
-#+end_src
 
 *** DONE [#B] Prepend ";; => " to output in Lisp Interaction Mode
 https://www.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_thread/eqrf693?utm_source=share&utm_medium=web2x

@@ -1,5 +1,9 @@
 (add-load-path! (concat doom-user-dir "lisp"))
 
+;; (require 'eeowaa-debug) NOTE: This is providing nothing of value right now
+(require 'eeowaa-project)
+(require 'eeowaa-refresh)
+
 (defmacro my/doom-use-face (face other-face)
   "Force FACE to be the same as OTHER-FACE.
 Examples:
@@ -533,6 +537,10 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
       imenu-list-position 'right
       imenu-list-size 35) ;; same as treemacs
 
+(after! imenu-list
+  (add-to-list 'eeowaa-refresh-mode-alist
+               (cons 'imenu-list-major-mode #'imenu-list-refresh)))
+
 (setq +ligatures-in-modes '(org-mode)
       +ligatures-extras-in-modes '(org-mode))
 
@@ -668,6 +676,10 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   (setq aw-ignored-buffers (delq 'treemacs-mode aw-ignored-buffers)))
 
 (setq treemacs-show-cursor t)
+
+(after! treemacs
+  (add-to-list 'eeowaa-refresh-mode-alist
+               (cons 'treemacs-mode #'treemacs-refresh)))
 
 ;; REVIEW Consider detecting troublesome icons and automatically falling back to
 ;; the default icon for text files.
@@ -851,16 +863,10 @@ Closes and re-opens Treemacs to apply the new theme."
 ;; window (like most shells do)
 (setq recenter-positions '(top bottom middle))
 
-;; When using `evil', have C-l redraw the display (like Vim does). Use zt, zz,
-;; and zb to reposition the current line instead of C-l.
+;; When using `evil', have C-l refresh the buffer and and redraw the display.
+;; Use zt, zz, and zb to reposition the current line instead of C-l.
 (when (modulep! :editor evil)
-  (defun my/redraw ()
-    (interactive)
-    (redraw-display)
-    (set-window-buffer nil (current-buffer))
-    (when (fboundp 'vimish-tab-force-tab-line-update)
-      (vimish-tab-force-tab-line-update)))
-  (global-set-key (kbd "C-l") #'my/redraw))
+  (global-set-key (kbd "C-l") #'eeowaa-refresh-buffer-and-display))
 
 ;; Perform a line feed after jumping to a ^L character
 (defadvice! my/recenter-top-a (&rest _)
@@ -871,6 +877,10 @@ Closes and re-opens Treemacs to apply the new theme."
 (setq default-input-method "latin-postfix")
 
 (setq-default truncate-lines t)
+
+(pushnew! eeowaa-refresh-mode-alist
+          '(process-menu-mode . list-processes)
+          '(timer-list-mode . list-timers))
 
 (evil-define-command my/evil-quit-a (&optional force)
   "Mark the current buffer as \"Done\" when performing a server
@@ -1223,6 +1233,10 @@ If the current frame has one window, restore the previous windows."
   (evil-ex-define-cmd "Vex[plore]" #'my/+dired-vsplit-jump)
   (evil-ex-define-cmd "Tex[plore]" #'my/+dired-tab-jump))
 
+(after! ibuffer
+  (add-to-list 'eeowaa-refresh-mode-alist
+               (cons 'ibuffer-mode #'ibuffer-redisplay)))
+
 (add-hook! ibuffer-mode
   (defun my/ibuffer-mode-line-h ()
     "Clean up the modeline and improve performance."
@@ -1305,6 +1319,12 @@ If the current frame has one window, restore the previous windows."
                         (safe-persp-name (get-current-persp))
                       "main")))))
     (apply fn args)))
+
+(after! vterm
+  (add-to-list 'eeowaa-refresh-mode-alist
+               (cons 'vterm-mode #'vterm-clear))
+  (map! :map vterm-mode-map
+        "C-l" #'eeowaa-refresh-buffer-and-display))
 
 (after! vterm
 
@@ -1720,6 +1740,10 @@ This variable should be set by `my/lsp-ui-set-delay'.")
     (cl-pushnew `((,(format "\\`%s t i\\'" prefix-re)) nil . "LSP Imenu")
                 which-key-replacement-alist)))
 
+(after! magit
+  (add-to-list 'eeowaa-refresh-mode-alist
+               (cons 'magit-status-mode #'magit-refresh)))
+
 (setq magit-repository-directories
       '(("~/Documents/src" . 2)
         ("~/Documents/ref" . 1)))
@@ -1891,9 +1915,6 @@ See also: `ts-fold-summary--get'."
 
 (after! ws-butler
   (pushnew! ws-butler-global-exempt-modes 'tsv-mode))
-
-(require 'eeowaa-project)
-;; (require 'eeowaa-debug) NOTE: This is providing nothing of value right now
 
 (defadvice! my/format-result-a (f &rest r)
   "Prepend \";; =>\"."
