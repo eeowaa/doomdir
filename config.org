@@ -7417,6 +7417,23 @@ See also:
 - ~process-environment~
 
 **** STRT [#A] Fix compilation of =emacs-zmq= :bug:hack:
+:LOGBOOK:
+- Note taken on [2023-02-07 Tue 10:38] \\
+  This has been failing for me lately with the following backtrace:
+  #+begin_example
+  Debugger entered--Lisp error: (wrong-number-of-arguments (0 . 0) 1)
+    (#f(compiled-function () #<bytecode 0xf1450ab544c3e63>) nil)
+    (funcall #f(compiled-function () #<bytecode 0xf1450ab544c3e63>) nil)
+    (unwind-protect (funcall fn args) (let ((--dolist-tail-- (list (cons :filter-args (ensure-list #'compile)))) targets) (while --dolist-tail-- (setq targets (car --dolist-tail--)) (let ((--dolist-tail-- (cdr targets)) target) (while --dolist-tail-- (setq target (car --dolist-tail--)) (advice-remove target #'my/zmq-compile-a) (setq --dolist-tail-- (cdr --dolist-tail--)))) (setq --dolist-tail-- (cdr --dolist-tail--)))))
+    (progn (progn (defalias 'my/zmq-compile-a #'(lambda (command) (let ((configure ...) (make command)) (format "sh -c \"%s && %s" configure make)))) (let ((--dolist-tail-- (list (cons :filter-args (ensure-list ...)))) targets) (while --dolist-tail-- (setq targets (car --dolist-tail--)) (let ((--dolist-tail-- (cdr targets)) target) (while --dolist-tail-- (setq target (car --dolist-tail--)) (advice-add target (car targets) #'my/zmq-compile-a) (setq --dolist-tail-- (cdr --dolist-tail--)))) (setq --dolist-tail-- (cdr --dolist-tail--))))) (unwind-protect (funcall fn args) (let ((--dolist-tail-- (list (cons :filter-args (ensure-list ...)))) targets) (while --dolist-tail-- (setq targets (car --dolist-tail--)) (let ((--dolist-tail-- (cdr targets)) target) (while --dolist-tail-- (setq target (car --dolist-tail--)) (advice-remove target #'my/zmq-compile-a) (setq --dolist-tail-- (cdr --dolist-tail--)))) (setq --dolist-tail-- (cdr --dolist-tail--))))))
+    (my/fix-zmq-build-a #f(compiled-function () #<bytecode 0xf1450ab544c3e63>))
+    (apply my/fix-zmq-build-a #f(compiled-function () #<bytecode 0xf1450ab544c3e63>) nil)
+    (zmq-load)
+    (eval-expression (zmq-load) nil nil 127)
+    (funcall-interactively eval-expression (zmq-load) nil nil 127)
+    (command-execute eval-expression)
+  #+end_example
+:END:
 If you don't have a ZMQ dynamic module built when running ~jupyter-run-repl~,
 you will be prompted to build it ("ZMQ module not found. Build it? (y or n)").
 ~make~ then runs in =~/.config/emacs/.local/straight/build-28.2/zmq/=, but this
