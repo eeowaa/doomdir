@@ -6712,7 +6712,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [24/50]
+** org [25/51]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -7158,7 +7158,15 @@ The current workaround is to select the "object" under point using =v i e= and
 then use the corresponding help command. This works well enough, but is an
 annoying extra step.
 
-*** Exporting [1/5]
+*** Exporting [2/6]
+**** DONE [#A] Do not execute source blocks when exporting :tweak:
+If source blocks have results, I just want to export those. I do not want to
+execute all source blocks again during export.
+
+#+begin_src emacs-lisp :tangle yes
+(setq org-export-babel-evaluate nil)
+#+end_src
+
 **** DONE [#A] Support exporting to IPython notebooks
 #+begin_src emacs-lisp :tangle packages.el
 (when (modulep! :lang org +jupyter)

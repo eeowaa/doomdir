@@ -2217,6 +2217,8 @@ just perform a complete cycle of `org-cycle'."
               (unless (member label inserted)
                 (insert definition "\n"))))))))))
 
+(setq org-export-babel-evaluate nil)
+
 (use-package! ox-ipynb
   :when (modulep! :lang org +jupyter)
   :after ox
