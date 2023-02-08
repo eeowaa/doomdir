@@ -73,6 +73,15 @@ This function heavily borrows from `evil-find-file-at-point-with-line'."
           (move-to-column (1- column-number))))))
 
 
+;;;###autoload (autoload '+tabs:new-lookup-definition-window-tab "ui/tabs/autoload/evil" nil t)
+;; TODO Implement this by passing a custom display-buffer function to
+;; `+lookup--jump-to' (one that opens the buffer in a new window tab).
+(evil-define-command +tabs:new-lookup-definition-window-tab (&optional count)
+  "Ex wrapper to open a new window tab displaying the definition at point."
+  (interactive "<c>")
+  (warn "This function is unimplemented."))
+
+
 ;;;###autoload (autoload '+tabs:close-window-tab "ui/tabs/autoload/evil" nil t)
 (evil-define-command +tabs:close-window-tab (&optional count)
   "Ex wrapper around `vimish-tab-close-nth'."

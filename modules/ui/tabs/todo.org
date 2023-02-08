@@ -78,7 +78,8 @@ best implementation strategy.
 ~kill-buffer~ should be advised to update the tab lists of all windows
 containing the buffer that was killed. This should include *all* windows, not
 just live windows. For the same reasons mentioned in the [[*Update window tab names when renaming buffers][previous item]], advice
-is the best implementation strategy.
+is the best implementation strategy. See also: ~my/evil-delete-buffer-a~ (used
+by =:bd=).
 
 Considerations:
 

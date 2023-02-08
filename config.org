@@ -1861,7 +1861,8 @@ not indicate which tabs abstration is being operated on.
 (define-key! evil-window-map
   "C" #'+tabs/close-window
   "gf" #'+tabs:new-ffap-window-tab
-  "gF" #'+tabs:new-ffap-with-line-window-tab)
+  "gF" #'+tabs:new-ffap-with-line-window-tab
+  "gd" #'+tabs:new-lookup-definition-window-tab)
 
 ;; NOTE This overrides `+workspace/new'
 (map! :n "C-t" #'+tabs:new-blank-window-tab)
@@ -2804,6 +2805,19 @@ builtin game.
     (kbd "C-i") 'Info-next-reference
     (kbd "M-,") 'Info-history-back
     (kbd "C-M-,") 'Info-history-forward))
+#+end_src
+
+*** DONE [#C] Bind base64-encoding/decoding commands
+Currently, =] b= and =[ b= are bound to ~next-buffer~ and ~previous-buffer~,
+respectively. However, I rarely use those commands, and they are also available
+via =SPC b n= and =SPC b p=.
+
+*UPDATE*: I can just bind the base64 commands in visual state and leave the
+buffer-visiting commands alone:
+
+#+begin_src emacs-lisp :tangle yes
+(map! :v "]b" #'base64-encode-region
+      :v "[b" #'base64-decode-region)
 #+end_src
 
 *** STRT [#B] Define modes that should always come up in Emacs state :tweak:

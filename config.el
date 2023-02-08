@@ -603,7 +603,8 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (define-key! evil-window-map
   "C" #'+tabs/close-window
   "gf" #'+tabs:new-ffap-window-tab
-  "gF" #'+tabs:new-ffap-with-line-window-tab)
+  "gF" #'+tabs:new-ffap-with-line-window-tab
+  "gd" #'+tabs:new-lookup-definition-window-tab)
 
 ;; NOTE This overrides `+workspace/new'
 (map! :n "C-t" #'+tabs:new-blank-window-tab)
@@ -1027,6 +1028,9 @@ current buffer first unless the `force' argument is given."
     (kbd "C-i") 'Info-next-reference
     (kbd "M-,") 'Info-history-back
     (kbd "C-M-,") 'Info-history-forward))
+
+(map! :v "]b" #'base64-encode-region
+      :v "[b" #'base64-decode-region)
 
 (pushnew! evil-emacs-state-modes 'noaa-mode 'vterm-mode)
 
