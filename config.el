@@ -1238,6 +1238,8 @@ If the current frame has one window, restore the previous windows."
   (evil-ex-define-cmd "Vex[plore]" #'my/+dired-vsplit-jump)
   (evil-ex-define-cmd "Tex[plore]" #'my/+dired-tab-jump))
 
+(add-hook 'ibuffer-mode-hook #'ibuffer-auto-mode)
+
 (after! ibuffer
   (add-to-list 'eeowaa-refresh-mode-alist
                (cons 'ibuffer-mode #'ibuffer-redisplay)))

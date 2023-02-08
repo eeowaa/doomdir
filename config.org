@@ -3575,10 +3575,20 @@ sudo dnf -y install coreutils
 #+end_src
 
 ** electric [0/0]
-** ibuffer [1/3]
+** ibuffer [2/8]
 #+begin_quote
 This module augments ibuffer.
 #+end_quote
+
+*** DONE [#B] Auto-update ibuffer contents :tweak:
+By default, ~ibuffer-auto-mode~ must be manually enabled in ~ibuffer~ through
+=C-c C-a=. Enabling this mode is potentially expensive
+(~ibuffer-auto-update-changed~ is added to ~post-command-hook~), but it's easy
+to forget to refresh the buffer.
+
+#+begin_src emacs-lisp :tangle yes
+(add-hook 'ibuffer-mode-hook #'ibuffer-auto-mode)
+#+end_src
 
 *** DONE [#C] Configure =eeowaa-refresh= :tweak:
 #+begin_src emacs-lisp :tangle yes
@@ -3586,11 +3596,6 @@ This module augments ibuffer.
   (add-to-list 'eeowaa-refresh-mode-alist
                (cons 'ibuffer-mode #'ibuffer-redisplay)))
 #+end_src
-
-*** TODO [#B] Integrate with =ace-window= :feat:
-From =ibuffer=, I would like to open buffers in windows selected with
-=ace-window= (currently, it is somewhat hard to predict which window will be
-chosen). This should still respect ~display-buffer-alist~ rules.
 
 *** STRT [#B] Clean up the modeline :tweak:hack:
 Performance can become an issue when listing workspace-specific buffers.
@@ -3603,6 +3608,30 @@ Performance can become an issue when listing workspace-specific buffers.
     (setf (nth 2 ibuffer-header-line-format) " by ")))
     ;; (setf (alist-get 'header-line-format mode-line-process) "")))
 #+end_src
+
+*** TODO [#A] Figure out how to dynamically resize ~ibuffer~ columns :feat:
+~ibuffer-mode~ derives from ~special-mode~, so it doesn't inherit the
+column-resizing functionality of ~tabulated-list-mode~.
+
+At first glace, it does not look like there is any machinery to do this except
+by modifying ~ibuffer-formats~. The only command that could be used for
+implementation reference is ~ibuffer-switch-format~ (bound to =`= in
+~ibuffer-mode~).
+
+*** TODO [#A] Provide a prefix map for ~ibuffer-mode~ :feat:
+I can never remember the keybindings, despite how much I use ~ibuffer~.
+
+*** TODO [#B] Fix ~ibuffer-do-view~ and related commands :bug:
+With how I've configured ~display-buffer-alist~ (via =:ui buffer-group=), I
+cannot open buffers this way in ~ibuffer~.
+
+*** TODO [#B] Integrate with =ace-window= :feat:
+From =ibuffer=, I would like to open buffers in windows selected with
+=ace-window= (currently, it is somewhat hard to predict which window will be
+chosen). This should still respect ~display-buffer-alist~ rules.
+
+*** TODO [#C] Adjust ~ibuffer~ table format :tweak:
+Some columns are too close together. See ~ibuffer-formats~ (configured by Doom).
 
 ** undo [1/1]
 #+begin_quote
