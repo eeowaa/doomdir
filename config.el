@@ -1312,7 +1312,7 @@ If the current frame has one window, restore the previous windows."
   (defalias 'vterm-send-C-m #'vterm-send-return))
 
 (after! evil-collection-vterm
-  (dolist (key '("C-u" "C-j" "<M-backspace>"))
+  (dolist (key '("C-h" "C-u" "C-j" "<M-backspace>"))
     (evil-collection-define-key 'insert 'vterm-mode-map
       (kbd key) 'vterm--self-insert)))
 

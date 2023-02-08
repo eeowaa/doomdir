@@ -3809,10 +3809,10 @@ sudo dnf -y install libvterm cmake
   (defalias 'vterm-send-C-m #'vterm-send-return))
 #+end_src
 
-*** DONE [#B] Let =C-u=, =C-j=, and =<M-backspace>= pass through in Evil insert state
+*** DONE [#B] Let =C-h=, =C-u=, =C-j=, and =<M-backspace>= pass through in Evil insert state
 #+begin_src emacs-lisp :tangle yes
 (after! evil-collection-vterm
-  (dolist (key '("C-u" "C-j" "<M-backspace>"))
+  (dolist (key '("C-h" "C-u" "C-j" "<M-backspace>"))
     (evil-collection-define-key 'insert 'vterm-mode-map
       (kbd key) 'vterm--self-insert)))
 #+end_src
