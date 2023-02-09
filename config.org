@@ -2111,7 +2111,7 @@ following benefits of enabling the cursor in Treemacs:
 #+begin_src emacs-lisp :tangle yes
 (after! treemacs
   (setq-hook! 'treemacs-mode-hook
-    revert-buffer-function #'treemacs-refresh))
+    revert-buffer-function (lambda (&rest _) (treemacs-refresh))))
 #+end_src
 
 *** STRT [#B] Display "+" and "-" icons in tty emacs :bug:

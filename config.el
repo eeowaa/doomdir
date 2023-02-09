@@ -680,7 +680,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
 (after! treemacs
   (setq-hook! 'treemacs-mode-hook
-    revert-buffer-function #'treemacs-refresh))
+    revert-buffer-function (lambda (&rest _) (treemacs-refresh))))
 
 ;; REVIEW Consider detecting troublesome icons and automatically falling back to
 ;; the default icon for text files.
