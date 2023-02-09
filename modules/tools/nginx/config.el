@@ -1,3 +1,5 @@
+;;; tools/nginx/config.el -*- lexical-binding: t; -*-
+
 (use-package! nginx-mode
   :mode "nginx.*\\.conf"
   :config

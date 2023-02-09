@@ -173,6 +173,9 @@ sudo dnf -y install aspell
 pipx install ansible-core
 ansible-galaxy collection install community.general
 
+# Install prerequisites for `tools/bitwarden` module
+npm install -g @bitwarden/cli
+
 # Install prerequisites for `tools/debugger` module
 sudo dnf -y install lldb gdb unzip
 nvm install node

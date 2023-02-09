@@ -1484,6 +1484,10 @@ which causes problems even if there is no existing buffer."
         (".envrc")
         (".editorconfig")))
 
+(setq +bitwarden-item-name-width 50
+      +bitwarden-user-name-width 68
+      +bitwarden-revision-date-width 24)
+
 (after! dap-mode
   (defun my/refresh-window (&rest arg)
     "Refresh the current window's display margins, fringes, and scroll bars."

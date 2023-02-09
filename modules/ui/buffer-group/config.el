@@ -21,6 +21,13 @@
      `(:names ("^\\*Holidays\\*")))
    '((slot . 1)))
 
+  (when (modulep! :tools bitwarden)
+    (buffer-group-side-window-setup
+     (buffer-group-define secrets
+       `(:names ("^\\*bitwarden-list\\*")
+         :modes (bitwarden-list-dialog-mode)))
+     '((side . top))))
+
   (when (modulep! :tools docker)
     ;; TODO Configure Transient windows
     ;; Currently, Transient buffers open in the window below the selected window. IIRC,

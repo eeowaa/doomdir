@@ -109,6 +109,9 @@ brew install aspell
 # Install prerequisites for `tools/ansible` module
 brew install ansible
 
+# Install prerequisites for `tools/bitwarden` module
+npm install -g @bitwarden/cli
+
 # Install prerequisites for `tools/debugger` module
 # https://stackoverflow.com/questions/18423124/please-check-gdb-is-codesigned-see-taskgated8-how-to-get-gdb-installed-w
 brew install gdb

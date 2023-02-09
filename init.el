@@ -97,6 +97,7 @@
        :tools
        ansible
        ;;biblio            ; Writes a PhD for you (citation needed)
+       bitwarden           ; XXX user module
        ;;cloudformation  ; TODO XXX user module
        (debugger +lsp)   ; FIXME stepping through code, to help you add bugs
        direnv

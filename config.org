@@ -3145,7 +3145,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [11/20]
+** Miscellany [11/19]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -3455,9 +3455,6 @@ For now, just trust ~projectile-*~ variables as long as they apply to files in
                          doom-user-dir))
                 t)))))))
 #+end_src
-
-*** TODO [#B] Add BitWarden as ~auth-source~ backend :feat:
-https://github.com/seanfarley/emacs-bitwarden
 
 *** TODO [#B] Figure out the autosave and backup situation for Doom Emacs :tweak:
 Compare with my old config and try to match it.
@@ -4396,6 +4393,41 @@ brew install ansible
 pipx install ansible-core
 ansible-galaxy collection install community.general
 #+end_src
+
+** biblio [0/0] :ARCHIVE:
+** bitwarden [2/3]
+*** DONE [#A] Install prerequisites
+**** DONE macOS
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `tools/bitwarden` module
+npm install -g @bitwarden/cli
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `tools/bitwarden` module
+npm install -g @bitwarden/cli
+#+end_src
+
+*** DONE [#A] Configure bitwarden
+The username should go in =~/.config/doom/custom.el=:
+
+#+begin_src emacs-lisp :tangle no
+;; Bitwarden
+(setq bitwarden-user "johndoe@example.com")
+#+end_src
+
+*** STRT [#B] Configure UI elements
+The following works well with standard-sized left and right side windows
+displayed on the laptop I am currently using:
+
+#+begin_src emacs-lisp :tangle yes
+(setq +bitwarden-item-name-width 50
+      +bitwarden-user-name-width 68
+      +bitwarden-revision-date-width 24)
+#+end_src
+
+I would prefer to make this dynamic.
 
 ** cloudformation [0/0] :eeowaa:ARCHIVE:
 ** debugger [1/9]
