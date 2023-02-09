@@ -4395,7 +4395,7 @@ ansible-galaxy collection install community.general
 #+end_src
 
 ** biblio [0/0] :ARCHIVE:
-** bitwarden [2/3]
+** bitwarden [3/4]
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -4415,6 +4415,13 @@ The username should go in =~/.config/doom/custom.el=:
 #+begin_src emacs-lisp :tangle no
 ;; Bitwarden
 (setq bitwarden-user "johndoe@example.com")
+#+end_src
+
+*** DONE [#B] Bind key to open Bitwarden vault
+#+begin_src emacs-lisp :tangle yes
+(map! :leader
+      (:prefix-map ("o" . "open")
+       :desc "Bitwarden vault" "v" #'bitwarden-list-all))
 #+end_src
 
 *** STRT [#B] Configure UI elements

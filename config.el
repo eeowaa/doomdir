@@ -1484,6 +1484,10 @@ which causes problems even if there is no existing buffer."
         (".envrc")
         (".editorconfig")))
 
+(map! :leader
+      (:prefix-map ("o" . "open")
+       :desc "Bitwarden vault" "v" #'bitwarden-list-all))
+
 (setq +bitwarden-item-name-width 50
       +bitwarden-user-name-width 68
       +bitwarden-revision-date-width 24)
