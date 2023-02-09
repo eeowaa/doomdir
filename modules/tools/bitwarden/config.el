@@ -16,6 +16,22 @@
 The function must take a buffer object as its first argument.")
 
   :config
+  (defun +bitwarden--list-all ()
+    (interactive)
+    (bitwarden-list-dialog "*bitwarden-list*"
+      (tree-widget-set-theme "folder")
+      (apply 'widget-create
+             `(group
+               :indent 0
+               :format "%v\n"
+               ,@(bitwarden-list-all-items
+                  (bitwarden-search))))
+      (widget-create
+       'push-button
+       :notify 'bitwarden-list-cancel-dialog
+       "Cancel")
+      (goto-char (point-min))))
+
   (defadvice! +bitwarden-list-all-a ()
     :override #'bitwarden-list-all
     (interactive)
@@ -24,27 +40,19 @@ The function must take a buffer object as its first argument.")
        ((buffer-live-p buffer)
         (pop-to-buffer buffer))
        ((bitwarden-unlocked-p)
-        (bitwarden-list-dialog
-          (tree-widget-set-theme "folder")
-          (apply 'widget-create
-                 `(group
-                   :indent 0
-                   :format "%v\n"
-                   ,@(bitwarden-list-all-items
-                      (bitwarden-search))))
-          (widget-create
-           'push-button
-           :notify 'bitwarden-list-cancel-dialog
-           "Cancel")
-          (goto-char (point-min))))
-       (t (bitwarden--message "vault not unlocked!" nil t)))))
+        (+bitwarden--list-all))
+       (t
+        (bitwarden-unlock)
+        (set-process-sentinel
+         (get-process "bitwarden")
+         (lambda (process event)
+           (when (string-match-p "\\`finished" event)
+             (+bitwarden--list-all))))))))
 
   (defadvice! +bitwarden--list-all-make-element-a (item)
     :override #'bitwarden-list-all-make-element
     (let* ((folder-id (gethash "folderId" item))
-           (login-item (gethash "login" item))
-           (width (window-width)))
-      (message "Window width: %s" width)
+           (login-item (gethash "login" item)))
       (cons folder-id
             (list (cons (concat
                          (bitwarden-pad-to-width (gethash "name" item) +bitwarden-item-name-width)
