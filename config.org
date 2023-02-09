@@ -1606,11 +1606,11 @@ I just need to test this functionality.
       imenu-list-size 35) ;; same as treemacs
 #+end_src
 
-**** DONE [#C] Configure =eeowaa-refresh= :tweak:
+**** DONE [#C] Configure revert-buffer :tweak:
 #+begin_src emacs-lisp :tangle yes
 (after! imenu-list
-  (add-to-list 'eeowaa-refresh-mode-alist
-               (cons 'imenu-list-major-mode #'imenu-list-refresh)))
+  (setq-hook! 'imenu-list-major-mode-hook
+    revert-buffer-function #'imenu-list-refresh))
 #+end_src
 
 ** indent-guides [0/0] :ARCHIVE:
@@ -2107,11 +2107,11 @@ following benefits of enabling the cursor in Treemacs:
 (setq treemacs-show-cursor t)
 #+end_src
 
-*** DONE [#C] Configure =eeowaa-refresh= :tweak:
+*** DONE [#C] Configure revert-buffer :tweak:
 #+begin_src emacs-lisp :tangle yes
 (after! treemacs
-  (add-to-list 'eeowaa-refresh-mode-alist
-               (cons 'treemacs-mode #'treemacs-refresh)))
+  (setq-hook! 'treemacs-mode-hook
+    revert-buffer-function #'treemacs-refresh))
 #+end_src
 
 *** STRT [#B] Display "+" and "-" icons in tty emacs :bug:
@@ -2613,14 +2613,7 @@ https://emacs.stackexchange.com/questions/51989/how-to-truncate-lines-by-default
 (setq-default truncate-lines t)
 #+end_src
 
-*** STRT [#C] Configure =eeowaa-refresh= :tweak:
-#+begin_src emacs-lisp :tangle yes
-(pushnew! eeowaa-refresh-mode-alist
-          '(process-menu-mode . list-processes)
-          '(timer-list-mode . list-timers))
-#+end_src
-
-** evil [7/9]
+** evil [8/10]
 #+begin_quote
 This holy module brings the vim experience to Emacs.
 #+end_quote
@@ -3589,7 +3582,7 @@ sudo dnf -y install coreutils
 #+end_src
 
 ** electric [0/0]
-** ibuffer [2/8]
+** ibuffer [1/7]
 #+begin_quote
 This module augments ibuffer.
 #+end_quote
@@ -3602,13 +3595,6 @@ to forget to refresh the buffer.
 
 #+begin_src emacs-lisp :tangle yes
 (add-hook 'ibuffer-mode-hook #'ibuffer-auto-mode)
-#+end_src
-
-*** DONE [#C] Configure =eeowaa-refresh= :tweak:
-#+begin_src emacs-lisp :tangle yes
-(after! ibuffer
-  (add-to-list 'eeowaa-refresh-mode-alist
-               (cons 'ibuffer-mode #'ibuffer-redisplay)))
 #+end_src
 
 *** STRT [#B] Clean up the modeline :tweak:hack:
@@ -3861,11 +3847,11 @@ regardless of whether the buffer is a popup or not.
   (add-to-list 'doom-env-deny "VTERM_BUFFER_NAME"))
 #+end_src
 
-*** DONE [#C] Configure =eeowaa-refresh= :tweak:
+*** DONE [#C] Configure revert-buffer :tweak:
 #+begin_src emacs-lisp :tangle yes
 (after! vterm
-  (add-to-list 'eeowaa-refresh-mode-alist
-               (cons 'vterm-mode #'vterm-clear))
+  (setq-hook! 'vterm-mode-hook
+    revert-buffer-function #'vterm-clear)
   (map! :map vterm-mode-map
         "C-l" #'eeowaa-refresh-buffer-and-display))
 #+end_src
@@ -5477,13 +5463,6 @@ sudo dnf -y install perl
 # TODO: Find equivalent to git-absorb
 # TODO: Fix cpan install command
 cpan install App::Git::Autofixup
-#+end_src
-
-*** DONE [#C] Configure =eeowaa-refresh= :tweak:
-#+begin_src emacs-lisp :tangle yes
-(after! magit
-  (add-to-list 'eeowaa-refresh-mode-alist
-               (cons 'magit-status-mode #'magit-refresh)))
 #+end_src
 
 *** DONE [#B] Remove gitflow configuration

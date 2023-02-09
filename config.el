@@ -538,8 +538,8 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
       imenu-list-size 35) ;; same as treemacs
 
 (after! imenu-list
-  (add-to-list 'eeowaa-refresh-mode-alist
-               (cons 'imenu-list-major-mode #'imenu-list-refresh)))
+  (setq-hook! 'imenu-list-major-mode-hook
+    revert-buffer-function #'imenu-list-refresh))
 
 (setq +ligatures-in-modes '(org-mode)
       +ligatures-extras-in-modes '(org-mode))
@@ -679,8 +679,8 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (setq treemacs-show-cursor t)
 
 (after! treemacs
-  (add-to-list 'eeowaa-refresh-mode-alist
-               (cons 'treemacs-mode #'treemacs-refresh)))
+  (setq-hook! 'treemacs-mode-hook
+    revert-buffer-function #'treemacs-refresh))
 
 ;; REVIEW Consider detecting troublesome icons and automatically falling back to
 ;; the default icon for text files.
@@ -883,10 +883,6 @@ Closes and re-opens Treemacs to apply the new theme."
 (setq default-input-method "latin-postfix")
 
 (setq-default truncate-lines t)
-
-(pushnew! eeowaa-refresh-mode-alist
-          '(process-menu-mode . list-processes)
-          '(timer-list-mode . list-timers))
 
 (evil-define-command my/evil-quit-a (&optional force)
   "Mark the current buffer as \"Done\" when performing a server
@@ -1244,10 +1240,6 @@ If the current frame has one window, restore the previous windows."
 
 (add-hook 'ibuffer-mode-hook #'ibuffer-auto-mode)
 
-(after! ibuffer
-  (add-to-list 'eeowaa-refresh-mode-alist
-               (cons 'ibuffer-mode #'ibuffer-redisplay)))
-
 (add-hook! ibuffer-mode
   (defun my/ibuffer-mode-line-h ()
     "Clean up the modeline and improve performance."
@@ -1332,8 +1324,8 @@ If the current frame has one window, restore the previous windows."
     (apply fn args)))
 
 (after! vterm
-  (add-to-list 'eeowaa-refresh-mode-alist
-               (cons 'vterm-mode #'vterm-clear))
+  (setq-hook! 'vterm-mode-hook
+    revert-buffer-function #'vterm-clear)
   (map! :map vterm-mode-map
         "C-l" #'eeowaa-refresh-buffer-and-display))
 
@@ -1750,10 +1742,6 @@ This variable should be set by `my/lsp-ui-set-delay'.")
   (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
     (cl-pushnew `((,(format "\\`%s t i\\'" prefix-re)) nil . "LSP Imenu")
                 which-key-replacement-alist)))
-
-(after! magit
-  (add-to-list 'eeowaa-refresh-mode-alist
-               (cons 'magit-status-mode #'magit-refresh)))
 
 (setq magit-repository-directories
       '(("~/Documents/src" . 2)
