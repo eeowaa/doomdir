@@ -22,8 +22,7 @@
 (evil-define-command +tabs:new-blank-window-tab (&optional count)
   "Ex wrapper to open a new blank window tab."
   (interactive "<c>")
-  (let ((vimish-tab-default-buffer vimish-tab-fallback-buffer)
-        (vimish-tab-new-buffer-function #'vimish-tab-default-buffer))
+  (let ((vimish-tab-new-buffer-function #'vimish-tab-default-buffer))
     (funcall #'vimish-tab-new count)))
 
 ;;;###autoload (autoload '+tabs:new-duplicate-window-tab "ui/tabs/autoload/evil" nil t)
