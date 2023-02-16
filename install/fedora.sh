@@ -458,6 +458,9 @@ sudo dnf -y install texlive-scheme-basic
 sudo dnf -y install luarocks lua-devel
 luarocks --local install digestif
 
+## Install ulem.sty for org preview
+sudo dnf -y install texlive-ulem
+
 # Install prerequisites for `lang/lua` module
 github_binary_release \
     --repo sumneko/lua-language-server \

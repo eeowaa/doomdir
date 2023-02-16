@@ -6442,13 +6442,13 @@ This module adds support for [[https://julialang.org/][the Julia language]] to D
 This module adds Kotlin support to Emacs.
 #+end_quote
 
-** latex [1/1]
+** latex [1/2]
 #+begin_quote
 Provide a helping hand when working with LaTeX documents.
 #+end_quote
 
 *** DONE [#A] Install prerequisites
-**** DONE macOS
+**** OKAY macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/latex` module
 brew install mactex texlab wget
@@ -6463,6 +6463,14 @@ sudo dnf -y install texlive-scheme-basic
 ## Install lsp server: digestif
 sudo dnf -y install luarocks lua-devel
 luarocks --local install digestif
+
+## Install ulem.sty for org preview
+sudo dnf -y install texlive-ulem
+#+end_src
+
+*** STRT [#B] Configure LaTeX preview in Org files
+#+begin_src emacs-lisp :tangle no
+(setq org-preview-latex-default-process 'dvipng)
 #+end_src
 
 ** lean [0/0] :ARCHIVE:
