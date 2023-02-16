@@ -1208,9 +1208,6 @@ If the current frame has one window, restore the previous windows."
                          doom-user-dir))
                 t)))))))
 
-(unless (member "IMAGEMAGICK" (split-string system-configuration-features))
-  (setq imagemagick-types-inhibit t))
-
 (defun my/+dired-split-jump ()
   (interactive)
   (select-window (split-window-below))
@@ -1971,13 +1968,6 @@ See also: `ts-fold-summary--get'."
         lsp-clients-lua-language-server-main-location
         (concat (file-name-as-directory lsp-clients-lua-language-server-install-dir)
                 "main.lua")))
-
-(pushnew! font-lock-extra-managed-props 'display)
-(font-lock-add-keywords
- 'markdown-mode
- '(("\\(\\\\\\)[[().-]" 1 '(face nil display ""))
-   ("&copy;" 0 '(face nil display "©"))
-   ("<a name=\".*\"></a>" 0 '(face nil display ""))))
 
 (after! markdown
   (defun my/markdown-preview (f &rest r)

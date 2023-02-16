@@ -3145,7 +3145,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [11/19]
+** Miscellany [11/18]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -3458,30 +3458,6 @@ For now, just trust ~projectile-*~ variables as long as they apply to files in
 
 *** TODO [#B] Figure out the autosave and backup situation for Doom Emacs :tweak:
 Compare with my old config and try to match it.
-
-*** TODO [#B] Fix =image-mode= in running instances of Doom Emacs :bug:
-At first, I thought that lack of ImageMagick support was to blame, but the
-following doesn't seem to make much difference:
-#+begin_src emacs-lisp :tangle yes
-(unless (member "IMAGEMAGICK" (split-string system-configuration-features))
-  (setq imagemagick-types-inhibit t))
-#+end_src
-
-Errors include:
-#+begin_quote
-image-display-size: Invalid image specification: nil
-Error during redisplay: (eval (doom-modeline-segment--media-info)) signaled (error "Invalid image specification")
-#+end_quote
-
-Function calls:
-1. ~image-mode--display~
-2. ~image-toggle-display-image~
-
-Interestingly, I can successfully view images when passing the image file path
-to a new Emacs instance via ~emacs <file>~ on the command line. It is only when
-I have opened Emacs /and then/ attempt to open an image that it will not work. I
-am guessing that the problem is caused by lazy-loaded code that has not loaded
-yet opening an image file from the command line.
 
 *** HOLD [#A] Override builtin ~restart-emacs~ function :bug:
 :LOGBOOK:
@@ -6533,7 +6509,7 @@ github_binary_release \
                 "main.lua")))
 #+end_src
 
-** markdown [10/13]
+** markdown [9/13]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
@@ -6586,27 +6562,6 @@ xdg-open "http://localhost:8000/${slides_file}"
 wait
 EOF
 chmod +x ~/.local/bin/revealjs
-#+end_src
-
-*** DONE [#B] Improve Markdown readability
-+ https://emacs.stackexchange.com/questions/3753/prettify-symbols-mode-character-replacement-regex
-
-| Before      | After |
-|-------------+-------|
-| \\.         | .     |
-| \\(         | (     |
-| \\)         | )     |
-| \\-         | -     |
-| &copy       | ©    |
-| <a.*>.*</a> |       |
-
-#+begin_src emacs-lisp :tangle yes
-(pushnew! font-lock-extra-managed-props 'display)
-(font-lock-add-keywords
- 'markdown-mode
- '(("\\(\\\\\\)[[().-]" 1 '(face nil display ""))
-   ("&copy;" 0 '(face nil display "©"))
-   ("<a name=\".*\"></a>" 0 '(face nil display ""))))
 #+end_src
 
 *** DONE [#B] Preview Markdown buffers in an external browser
@@ -6707,6 +6662,58 @@ inline LaTeX (for that, I would use Org mode).
     "Hide markdown markup."
     (markdown-toggle-markup-hiding 1)))
 #+end_src
+
+*** TODO [#B] Improve Markdown readability :tweak:
+:LOGBOOK:
+- Note taken on [2023-02-16 Thu 13:25] \\
+  This causes image-mode to break (it will not display images). You should make
+  an effort to replace =font-lock= hiding with native =markdown-mode= hiding.
+:END:
++ https://emacs.stackexchange.com/questions/3753/prettify-symbols-mode-character-replacement-regex
+
+| Before      | After |
+|-------------+-------|
+| \\.         | .     |
+| \\(         | (     |
+| \\)         | )     |
+| \\-         | -     |
+| &copy       | ©    |
+| <a.*>.*</a> |       |
+
+#+begin_src emacs-lisp :tangle no
+(pushnew! font-lock-extra-managed-props 'display)
+(font-lock-add-keywords
+ 'markdown-mode
+ '(("\\(\\\\\\)[[().-]" 1 '(face nil display ""))
+   ("&copy;" 0 '(face nil display "©"))
+   ("<a name=\".*\"></a>" 0 '(face nil display ""))))
+#+end_src
+
+**** COMMENT Initial TODO item to fix images in Emacs
+_Fix =image-mode= in running instances of Doom Emacs_
+
+At first, I thought that lack of ImageMagick support was to blame, but the
+following doesn't seem to make much difference:
+#+begin_src emacs-lisp :tangle yes
+(unless (member "IMAGEMAGICK" (split-string system-configuration-features))
+  (setq imagemagick-types-inhibit t))
+#+end_src
+
+Errors include:
+#+begin_quote
+image-display-size: Invalid image specification: nil
+Error during redisplay: (eval (doom-modeline-segment--media-info)) signaled (error "Invalid image specification")
+#+end_quote
+
+Function calls:
+1. ~image-mode--display~
+2. ~image-toggle-display-image~
+
+Interestingly, I can successfully view images when passing the image file path
+to a new Emacs instance via ~emacs <file>~ on the command line. It is only when
+I have opened Emacs /and then/ attempt to open an image that it will not work. I
+am guessing that the problem is caused by lazy-loaded code that has not loaded
+yet opening an image file from the command line.
 
 *** TODO [#B] Live-preview Markdown buffers in an external browser :tweak:
 Live preview still happens in =eww= buffers.
