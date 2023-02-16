@@ -6802,7 +6802,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [25/51]
+** org [26/52]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -7342,7 +7342,7 @@ issue. For now, just avoid quote blocks.
 https://stackoverflow.com/questions/53482343/how-to-disable-line-wrapping-in-jupyter-notebook-output-cells
 
 *** Publishing [0/0]
-*** Working with Source Code [6/10]
+*** Working with Source Code [7/11]
 **** DONE [#A] Indent source blocks
 + https://emacs.stackexchange.com/a/9483/21977
 
@@ -7582,6 +7582,13 @@ of the time.
   (pushnew! projectile-other-file-alist
             '("org" "el")
             '("el" "org")))
+#+end_src
+
+**** DONE [#C] Show ~dot~ source blocks in ~graphviz-dot-mode~
+#+begin_src emacs-lisp :tangle yes
+(after! ob
+  (pushnew! org-src-lang-modes
+            '("dot" . graphviz-dot)))
 #+end_src
 
 *** Miscellaneous [0/1]

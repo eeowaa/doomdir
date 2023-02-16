@@ -2337,6 +2337,10 @@ This is a list of lists, not a list of cons cells.")
             '("org" "el")
             '("el" "org")))
 
+(after! ob
+  (pushnew! org-src-lang-modes
+            '("dot" . graphviz-dot)))
+
 (setq org-ditaa-jar-path
       (cond
        (IS-MAC (file-expand-wildcards "/usr/local/Cellar/ditaa/*/libexec/ditaa-*-standalone.jar"))
