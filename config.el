@@ -688,7 +688,11 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   '(("org" . ("org_archive"))
     ("sh" . ("bat"))
     ("txt" . ("Pipfile"))
-    ("json" . ("Pipfile.lock" "project"))) ;; "configuration" icon
+    ("json" ;; "configuration" icon
+     . ("project"
+        "Pipfile.lock"
+        "Cargo.lock"
+        "Cargo.toml")))
   "Alist of file extension mappings for Treemacs icons.
 
 The `car' of each element is a file extension with a desirable
