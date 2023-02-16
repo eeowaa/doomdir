@@ -5504,6 +5504,15 @@ sudo dnf -y install perl
 cpan install App::Git::Autofixup
 #+end_src
 
+*** DONE [#A] Pin packages for compatibility :bug:hack:
+- https://www.reddit.com/r/emacs/comments/1118o25/doom_emacs_error_running_hook_globalgitcommitmode/
+- https://github.com/magit/with-editor/commit/59867aebe16454be4d8c0c858f3b00b8a34f3f61
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! transient :pin "c2bdf7e12c530eb85476d3aef317eb2941ab9440")
+(package! with-editor :pin "bbc60f68ac190f02da8a100b6fb67cf1c27c53ab")
+#+end_src
+
 *** DONE [#B] Remove gitflow configuration
 Configuration for =magit-gitflow= shadows configuration for worktrees. I do not
 use Git Flow, but I do use worktrees, so this behavior is backwards for me.
