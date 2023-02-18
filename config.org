@@ -2617,7 +2617,7 @@ https://emacs.stackexchange.com/questions/51989/how-to-truncate-lines-by-default
 (setq-default truncate-lines t)
 #+end_src
 
-** evil [8/10]
+** evil [7/10]
 #+begin_quote
 This holy module brings the vim experience to Emacs.
 #+end_quote
@@ -2727,11 +2727,6 @@ form). Using ~:override~ advice in this case seems brittle, but works for now.
 (advice-add #'+evil-window-vsplit-a :override #'my/evil-window-vsplit-a)
 #+end_src
 
-*** DONE [#B] Do not automatically balance windows
-#+begin_src emacs-lisp :tangle yes
-(setq evil-auto-balance-windows nil)
-#+end_src
-
 *** DONE [#B] Always select newly-split window
 #+begin_src emacs-lisp :tangle yes
 (setq evil-split-window-below t
@@ -2815,6 +2810,14 @@ buffer-visiting commands alone:
 #+begin_src emacs-lisp :tangle yes
 (map! :v "]b" #'base64-encode-region
       :v "[b" #'base64-decode-region)
+#+end_src
+
+*** STRT [#B] Do not automatically balance windows :tweak:
+The following works when splitting windows, but not when moving windows (e.g.
+with =C-w L=, =C-w H=, and the like).
+
+#+begin_src emacs-lisp :tangle yes
+(setq evil-auto-balance-windows nil)
 #+end_src
 
 *** STRT [#B] Define modes that should always come up in Emacs state :tweak:
@@ -3149,7 +3152,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [11/18]
+** Miscellany [11/19]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -3462,6 +3465,10 @@ For now, just trust ~projectile-*~ variables as long as they apply to files in
 
 *** TODO [#B] Figure out the autosave and backup situation for Doom Emacs :tweak:
 Compare with my old config and try to match it.
+
+*** TODO [#C] Configure the world clock :tweak:
+I mostly want to do this to have an easier time tracking the local time of
+servers I have deployed around the world.
 
 *** HOLD [#A] Override builtin ~restart-emacs~ function :bug:
 :LOGBOOK:
@@ -6521,7 +6528,7 @@ github_binary_release \
                 "main.lua")))
 #+end_src
 
-** markdown [9/13]
+** markdown [8/13]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
@@ -6593,27 +6600,6 @@ preview Markdown rendering in the system browser.
 (setq markdown-fontify-code-blocks-natively t)
 #+end_src
 
-*** DONE [#B] Disable error reporting in markdown-mode buffers
-Reference: [[*Disable error reporting in sh-mode buffers][Disable error reporting in sh-mode buffers]]
-
-#+begin_src emacs-lisp :tangle yes
-;; Prevent flycheck from being automatically enabled
-(if (or (not (boundp 'flycheck-global-modes))
-        (not (eq 'not (car flycheck-global-modes))))
-    (setq flycheck-global-modes '(not markdown-mode))
-  (let ((modes (cdr flycheck-global-modes)))
-    (setcdr flycheck-global-modes (pushnew! modes 'markdown-mode))))
-
-;; Prevent lsp diagnostics from being enabled
-(if (boundp 'lsp-diagnostics-disabled-modes)
-    (pushnew! lsp-diagnostics-disabled-modes 'markdown-mode)
-  (setq lsp-diagnostics-disabled-modes '(markdown-mode)))
-
-;; Don't bother checking for an LSP diagnostics provider in markdown-mode
-(setq-hook! 'markdown-mode-hook
-  lsp-diagnostics-provider :none)
-#+end_src
-
 *** DONE [#B] Show edit buffer in the current window
 The call stack for =C-c '= is as follows:
 
@@ -6673,6 +6659,31 @@ inline LaTeX (for that, I would use Org mode).
   (defun my/markdown-hide-markup-h ()
     "Hide markdown markup."
     (markdown-toggle-markup-hiding 1)))
+#+end_src
+
+*** LOOP [#B] Disable error reporting in markdown-mode buffers
+:LOGBOOK:
+- Note taken on [2023-02-16 Thu 14:58] \\
+  Flycheck gets enabled anyway.
+:END:
+Reference: [[*Disable error reporting in sh-mode buffers][Disable error reporting in sh-mode buffers]]
+
+#+begin_src emacs-lisp :tangle yes
+;; Prevent flycheck from being automatically enabled
+(if (or (not (boundp 'flycheck-global-modes))
+        (not (eq 'not (car flycheck-global-modes))))
+    (setq flycheck-global-modes '(not markdown-mode))
+  (let ((modes (cdr flycheck-global-modes)))
+    (setcdr flycheck-global-modes (pushnew! modes 'markdown-mode))))
+
+;; Prevent lsp diagnostics from being enabled
+(if (boundp 'lsp-diagnostics-disabled-modes)
+    (pushnew! lsp-diagnostics-disabled-modes 'markdown-mode)
+  (setq lsp-diagnostics-disabled-modes '(markdown-mode)))
+
+;; Don't bother checking for an LSP diagnostics provider in markdown-mode
+(setq-hook! 'markdown-mode-hook
+  lsp-diagnostics-provider :none)
 #+end_src
 
 *** TODO [#B] Improve Markdown readability :tweak:
@@ -6806,7 +6817,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [26/52]
+** org [26/53]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -7346,7 +7357,7 @@ issue. For now, just avoid quote blocks.
 https://stackoverflow.com/questions/53482343/how-to-disable-line-wrapping-in-jupyter-notebook-output-cells
 
 *** Publishing [0/0]
-*** Working with Source Code [7/11]
+*** Working with Source Code [7/12]
 **** DONE [#A] Indent source blocks
 + https://emacs.stackexchange.com/a/9483/21977
 
@@ -8188,7 +8199,7 @@ loaded last*, before =:config= modules.
 ;;; :app
 #+end_src
 
-** Miscellany [2/5]
+** Miscellany [1/5]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -8201,16 +8212,70 @@ Miscellaneous configuration without a corresponding module.
 sudo dnf -y install w3m
 #+end_src
 
-*** DONE [#A] Install packages
+*** STRT [#A] Install packages
+I've started looking through all of the packages in ~package-list-packages~ and
+have listed some commented-out packages below that I would like to install.
+*UPDATE*: It got late, so I stopped right before the =dired-*= packages.
+
 #+begin_src emacs-lisp :tangle packages.el
-;; Music
+;;; Music playback
+;;(package! bluesound)
+;;(package! bongo)
 (package! counsel-spotify)
+;;(package! dionysos)
+;;(package! lyrics)
+;;(package! lyrics-fetcher)
 
-;; Weather
+;;; Music creation
+;;(package! abc-mode)
+;;(package! csound-mode)
+;;(package! metronome)
+
+;;; Fun and games
+;;(package! crossword)
+;;(package! dad-joke)
+;;(package! dilbert)
+
+;;; Weather
 (package! noaa)
+;;(package! aqi)
 
-;; Ebooks
+;;; Clocks and timers
+;; TODO Configure `world-clock'
+;;(package! countdown)
+
+;;; Ebooks
 (package! nov)
+;;(package! sicp)
+
+;;; Browsing
+(package! w3m) ;; Better than `eww' IMO
+;;(package! arxiv-mode)
+;;(package! devdocs-browser)
+
+;; Packaging
+;;(package! archive-rpm)
+;;(package! conventional-changelog)
+
+;; System configuration
+;;(package! crontab-mode)
+;;(package! daemons)
+
+;; System
+;;(package! backlight)
+;;(package! battery-notifier)
+;;(package! bluetooth)
+;;(package! desktop-environment)
+
+;; External programs
+;;(package! desktop-mail-user-agent)
+
+;; Inferior processes
+;;(package! detached)
+
+;; Jupyter
+;; REVIEW jupytext: https://jupytext.readthedocs.io/en/latest/
+;;(package! code-cells)
 
 ;; Kubernetes
 (package! kubel)      ;; interaction with pods
@@ -8219,8 +8284,37 @@ sudo dnf -y install w3m
   (package! kubel-evil)
   (package! kubernetes-evil))
 
-;; Browsing
-(package! w3m) ;; Better than `eww' IMO
+;; Git
+;;(package! blamer)
+;;(package! browse-at-remote)
+;;(package! magit-annex)
+;;(package! magit-lfs)
+
+;; Projects
+;;(package! bookmark-in-project)
+
+;; Logging
+;;(package! logview)
+;;(package! cabledolphin)
+
+;; Test-driven development
+;;(package! cov)
+
+;; Diffs
+;;(package! diff-ansi)
+;;(package! diffview)
+
+;; Self-improvement
+;;(package! leetcode)
+;;(package! metrics-tracker)
+
+;; Finance
+;;(package! ledger-mode)
+;;(package! btc-ticker)
+;;(package! coin-ticker)
+
+;; Social
+;;(package! mastadon)
 #+end_src
 
 *** STRT [#A] Configure kubel :feat:
@@ -8267,6 +8361,8 @@ sudo dnf -y install w3m
 #+begin_src emacs-lisp :tangle yes
 (use-package! kubernetes
   :defer t
+  :init
+  (defvar +kubernetes-workspace-name "*kubernetes*")
   :commands (kubernetes-overview)
   :config
   (setq ;; Disable automatic refresh (call `kubernetes-refresh' manually)
@@ -8274,7 +8370,29 @@ sudo dnf -y install w3m
         kubernetes-redraw-frequency 3600
 
         ;; Display pods even if they are done running
-        kubernetes-pods-display-completed t))
+        kubernetes-pods-display-completed t)
+
+  (setq-hook! 'kubernetes-overview-mode-hook
+    revert-buffer-function (lambda (&rest _) (kubernetes-refresh)))
+
+  (defun =kubernetes ()
+    "Activate (or switch to) `kubernetes' in its workspace."
+    (interactive)
+    (if (modulep! :ui workspaces)
+        (progn
+          (+workspace-switch +kubernetes-workspace-name t)
+          (unless (memq (buffer-local-value 'major-mode
+                                            (window-buffer
+                                             (selected-window)))
+                        ;; TODO Add more major modes
+                        '(kubernetes-overview-mode))
+            (doom/switch-to-scratch-buffer)
+            (kubernetes-overview))
+          (+workspace/display))
+      (setq +kubernetes--wconf (current-window-configuration))
+      (delete-other-windows)
+      (switch-to-buffer (doom-fallback-buffer))
+      (kubernetes-overview))))
 
 (use-package! kubernetes-evil
   :after kubernetes-modes

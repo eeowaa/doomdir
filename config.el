@@ -967,8 +967,6 @@ current buffer first unless the `force' argument is given."
 (advice-add #'+evil-window-split-a :override #'my/evil-window-split-a)
 (advice-add #'+evil-window-vsplit-a :override #'my/evil-window-vsplit-a)
 
-(setq evil-auto-balance-windows nil)
-
 (setq evil-split-window-below t
       evil-vsplit-window-right t)
 
@@ -1031,6 +1029,8 @@ current buffer first unless the `force' argument is given."
 
 (map! :v "]b" #'base64-encode-region
       :v "[b" #'base64-decode-region)
+
+(setq evil-auto-balance-windows nil)
 
 (pushnew! evil-emacs-state-modes 'noaa-mode 'vterm-mode)
 
@@ -1981,22 +1981,6 @@ See also: `ts-fold-summary--get'."
 
 (setq markdown-fontify-code-blocks-natively t)
 
-;; Prevent flycheck from being automatically enabled
-(if (or (not (boundp 'flycheck-global-modes))
-        (not (eq 'not (car flycheck-global-modes))))
-    (setq flycheck-global-modes '(not markdown-mode))
-  (let ((modes (cdr flycheck-global-modes)))
-    (setcdr flycheck-global-modes (pushnew! modes 'markdown-mode))))
-
-;; Prevent lsp diagnostics from being enabled
-(if (boundp 'lsp-diagnostics-disabled-modes)
-    (pushnew! lsp-diagnostics-disabled-modes 'markdown-mode)
-  (setq lsp-diagnostics-disabled-modes '(markdown-mode)))
-
-;; Don't bother checking for an LSP diagnostics provider in markdown-mode
-(setq-hook! 'markdown-mode-hook
-  lsp-diagnostics-provider :none)
-
 (after! markdown-mode
   (defun my/markdown-edit-code-block (f &rest r)
     (let ((display-buffer-overriding-action (list #'display-buffer-same-window)))
@@ -2023,6 +2007,22 @@ See also: `ts-fold-summary--get'."
   (defun my/markdown-hide-markup-h ()
     "Hide markdown markup."
     (markdown-toggle-markup-hiding 1)))
+
+;; Prevent flycheck from being automatically enabled
+(if (or (not (boundp 'flycheck-global-modes))
+        (not (eq 'not (car flycheck-global-modes))))
+    (setq flycheck-global-modes '(not markdown-mode))
+  (let ((modes (cdr flycheck-global-modes)))
+    (setcdr flycheck-global-modes (pushnew! modes 'markdown-mode))))
+
+;; Prevent lsp diagnostics from being enabled
+(if (boundp 'lsp-diagnostics-disabled-modes)
+    (pushnew! lsp-diagnostics-disabled-modes 'markdown-mode)
+  (setq lsp-diagnostics-disabled-modes '(markdown-mode)))
+
+;; Don't bother checking for an LSP diagnostics provider in markdown-mode
+(setq-hook! 'markdown-mode-hook
+  lsp-diagnostics-provider :none)
 
 (after! org
   (setq org-hide-leading-stars nil
@@ -2447,6 +2447,8 @@ This is a list of lists, not a list of cons cells.")
 
 (use-package! kubernetes
   :defer t
+  :init
+  (defvar +kubernetes-workspace-name "*kubernetes*")
   :commands (kubernetes-overview)
   :config
   (setq ;; Disable automatic refresh (call `kubernetes-refresh' manually)
@@ -2454,7 +2456,29 @@ This is a list of lists, not a list of cons cells.")
         kubernetes-redraw-frequency 3600
 
         ;; Display pods even if they are done running
-        kubernetes-pods-display-completed t))
+        kubernetes-pods-display-completed t)
+
+  (setq-hook! 'kubernetes-overview-mode-hook
+    revert-buffer-function (lambda (&rest _) (kubernetes-refresh)))
+
+  (defun =kubernetes ()
+    "Activate (or switch to) `kubernetes' in its workspace."
+    (interactive)
+    (if (modulep! :ui workspaces)
+        (progn
+          (+workspace-switch +kubernetes-workspace-name t)
+          (unless (memq (buffer-local-value 'major-mode
+                                            (window-buffer
+                                             (selected-window)))
+                        ;; TODO Add more major modes
+                        '(kubernetes-overview-mode))
+            (doom/switch-to-scratch-buffer)
+            (kubernetes-overview))
+          (+workspace/display))
+      (setq +kubernetes--wconf (current-window-configuration))
+      (delete-other-windows)
+      (switch-to-buffer (doom-fallback-buffer))
+      (kubernetes-overview))))
 
 (use-package! kubernetes-evil
   :after kubernetes-modes

@@ -95,14 +95,64 @@
 
 ;;; :app
 
-;; Music
+;;; Music playback
+;;(package! bluesound)
+;;(package! bongo)
 (package! counsel-spotify)
+;;(package! dionysos)
+;;(package! lyrics)
+;;(package! lyrics-fetcher)
 
-;; Weather
+;;; Music creation
+;;(package! abc-mode)
+;;(package! csound-mode)
+;;(package! metronome)
+
+;;; Fun and games
+;;(package! crossword)
+;;(package! dad-joke)
+;;(package! dilbert)
+
+;;; Weather
 (package! noaa)
+;;(package! aqi)
 
-;; Ebooks
+;;; Clocks and timers
+;; TODO Configure `world-clock'
+;;(package! countdown)
+
+;;; Ebooks
 (package! nov)
+;;(package! sicp)
+
+;;; Browsing
+(package! w3m) ;; Better than `eww' IMO
+;;(package! arxiv-mode)
+;;(package! devdocs-browser)
+
+;; Packaging
+;;(package! archive-rpm)
+;;(package! conventional-changelog)
+
+;; System configuration
+;;(package! crontab-mode)
+;;(package! daemons)
+
+;; System
+;;(package! backlight)
+;;(package! battery-notifier)
+;;(package! bluetooth)
+;;(package! desktop-environment)
+
+;; External programs
+;;(package! desktop-mail-user-agent)
+
+;; Inferior processes
+;;(package! detached)
+
+;; Jupyter
+;; REVIEW jupytext: https://jupytext.readthedocs.io/en/latest/
+;;(package! code-cells)
 
 ;; Kubernetes
 (package! kubel)      ;; interaction with pods
@@ -111,8 +161,37 @@
   (package! kubel-evil)
   (package! kubernetes-evil))
 
-;; Browsing
-(package! w3m) ;; Better than `eww' IMO
+;; Git
+;;(package! blamer)
+;;(package! browse-at-remote)
+;;(package! magit-annex)
+;;(package! magit-lfs)
+
+;; Projects
+;;(package! bookmark-in-project)
+
+;; Logging
+;;(package! logview)
+;;(package! cabledolphin)
+
+;; Test-driven development
+;;(package! cov)
+
+;; Diffs
+;;(package! diff-ansi)
+;;(package! diffview)
+
+;; Self-improvement
+;;(package! leetcode)
+;;(package! metrics-tracker)
+
+;; Finance
+;;(package! ledger-mode)
+;;(package! btc-ticker)
+;;(package! coin-ticker)
+
+;; Social
+;;(package! mastadon)
 
 (package! elfeed-goodies :disable t)
 
