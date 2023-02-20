@@ -647,8 +647,49 @@ Taken from tecosaur's configuration.
 (add-hook 'Info-selection-hook 'info-colors-fontify-node)
 #+end_src
 
-*** TODO [#B] Configure =vdiff= :feat:
+*** STRT [#B] Configure =vdiff= :feat:
 See also: [[file:~/.config/emacs/.local/straight/repos/evil-collection/modes/vdiff/evil-collection-vdiff.el][evil-collection-vdiff]]
+
+#+begin_src emacs-lisp :tangle yes
+;; Automatically highlight differences in hunks, down to the symbol.
+;;
+;; FIXME Highlighting for an added line spills over to the first character of
+;; the other buffer.
+;;
+(setq vdiff-auto-refine t
+      vdiff-default-refinement-syntax-code "w_")
+
+(after! vdiff
+  ;; Do not highlight lines in `vdiff-mode'.
+  (add-hook! 'vdiff-mode-hook :append (hl-line-mode -1))
+
+  ;; Use `C-l' to immediately update the diff (otherwise, just wait
+  ;; `vdiff--after-change-refresh-delay' seconds).
+  (setq-hook! 'vdiff-mode-hook
+    revert-buffer-function (lambda (&rest _) (vdiff-refresh))
+    eeowaa-refresh-force t)
+
+  ;; Bind `vdiff-mode-prefix-map' to a convenient key.
+  ;;
+  ;; FIXME Use one of Doom's idiomatic key binding mechanisms for better
+  ;; integration with leader keys (e.g. M-SPC in insert state) and which-key.
+  ;;
+  (evil-define-key 'normal vdiff-mode-map (kbd "SPC v") vdiff-mode-prefix-map)
+  (evil-define-key 'normal vdiff-3way-mode-map (kbd "SPC v") vdiff-mode-prefix-map))
+
+;; TODO Bind `vdiff-magit' command to a transient key in magit. For the time
+;; being, just use `M-x vdiff-magit RET' to open the transient.
+(after! magit
+  (require 'vdiff-magit))
+
+;; TODO Integrate vdiff folding with `:editor fold'.
+
+;; TODO Integrate vdiff window configuration with `:ui workspaces' (reference
+;; how Doom configures `ediff' for this).
+
+;; TODO Configure `vdiff-3way-mode', `vdiff-magit-resolve', and
+;; `vdiff-magit-compare' to work similarly to my git-vimdiff shell script.
+#+end_src
 
 ** buffer-group [3/6] :eeowaa:
 #+begin_quote
