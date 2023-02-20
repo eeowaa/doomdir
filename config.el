@@ -1212,6 +1212,10 @@ deleting the final newline before inserting the \")))\"."
       (:prefix-map ("f" . "file")
        :desc "chmod +x this file" "X" #'my/make-buffer-file-executable))
 
+(after! helpful
+  (setq-hook! 'helpful-mode-hook
+    revert-buffer-function (lambda (&rest _) (helpful-update))))
+
 (defun my/zoomwin-toggle ()
   "Zoom or unzoom the selected window.
 If the current frame has multiple windows, delete other windows.

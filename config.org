@@ -3193,7 +3193,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [11/19]
+** Miscellany [12/20]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -3344,6 +3344,13 @@ automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
 (map! :leader
       (:prefix-map ("f" . "file")
        :desc "chmod +x this file" "X" #'my/make-buffer-file-executable))
+#+end_src
+
+*** DONE [#C] Configure revert-buffer for ~helpful-mode~ :tweak:
+#+begin_src emacs-lisp :tangle yes
+(after! helpful
+  (setq-hook! 'helpful-mode-hook
+    revert-buffer-function (lambda (&rest _) (helpful-update))))
 #+end_src
 
 *** STRT [#B] Configure the timeclock :feat:
