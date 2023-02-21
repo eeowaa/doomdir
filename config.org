@@ -4344,28 +4344,55 @@ provides corrections. For example, the word "fluctuant" is highlighted as a
 spelling error by the =spell= module but is a completion for "flu" (just type
 =C-SPC= in Evil insert state with the cursor positioned after the "u" in "flu").
 
-** grammar [1/1] :ARCHIVE:
+** grammar [2/3]
 #+begin_quote
 This module adds grammar checking to Emacs to aid your writing by combining
 =lang-tool= and =writegood-mode=.
 #+end_quote
 
-*** STRT [#A] Install prerequisites
-**** DONE macOS
+*** OKAY [#A] Install prerequisites
+**** OKAY macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `checkers/grammar` module
 brew install languagetool
 sudo ln -sfn /usr/local/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk
 #+end_src
 
-**** STRT Fedora
+**** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `checkers/grammar` module
-curl -L https://raw.githubusercontent.com/languagetool-org/languagetool/master/install.sh | sudo bash
-# TODO: See if the following command is needed
-# sudo ln -sfn /usr/local/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk
+# Reference: <https://raw.githubusercontent.com/languagetool-org/languagetool/master/install.sh>
+sudo dnf -y install unzip java-latest-openjdk-headless
+(
+    set -e
+    mkdir -p ~/.local/src/doom
+    cd ~/.local/src/doom
+
+    # Download stable release of LanguageTool
+    rm -f LanguageTool-stable.zip
+    curl -o LanguageTool-stable.zip \
+         -l https://languagetool.org/download/LanguageTool-stable.zip
+
+    # Unzip the tool and determine the release number
+    release_dir=$(unzip -u LanguageTool-stable.zip | awk '!x&&/creating:/{print$2;x=1}')
+
+    # Move into place and clean up
+    rm -rf LanguageTool
+    mv "$release_dir" LanguageTool
+    rm LanguageTool-stable.zip
+)
 #+end_src
 
+*** DONE [#A] Specify JAR paths on Linux
+#+begin_src emacs-lisp :tangle yes
+(when IS-LINUX
+  (let ((langtool-dir (concat (file-name-as-directory (getenv "HOME"))
+                              ".local/src/doom/LanguageTool/")))
+    (setq langtool-language-tool-jar (concat langtool-dir "languagetool-commandline.jar")
+          langtool-language-tool-server-jar (concat langtool-dir "languagetool-server.jar"))))
+#+end_src
+
+*** TODO [#B] Add toggle bindings for =lang-tool= and/or =writegood-mode=
 * :tools
 #+begin_quote
 Small modules that give Emacs access to external tools & services.

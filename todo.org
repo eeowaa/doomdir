@@ -254,7 +254,7 @@ keybindings.
   ;;   presentations or streaming.
   #+end_quote
 
-* Config [6/12]
+* Config [6/13]
 :PROPERTIES:
 :CATEGORY: doom/config
 :END:
@@ -395,6 +395,11 @@ References:
 + [[help:features]]
 + [[help:use-package-compute-statistics]]
 + [[help:use-package-report]]
+
+** TODO [#C] Normalize curl calls in prerequisite installation
+As of now, I pass different combinations of flags to ~curl~ without much thought
+or understanding. It would be best to wrap the command in a function that I call
+in all code blocks used to install prerequisites.
 
 ** TODO [#C] Figure out how to patch specific functions in Doom
 + =el-patch= looks great: https://github.com/raxod502/el-patch

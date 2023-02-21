@@ -1514,6 +1514,12 @@ which causes problems even if there is no existing buffer."
     (when (fboundp '+spell--create-word-dict-a)
       (advice-remove 'spell-fu--word-add-or-remove #'+spell--create-word-dict-a))))
 
+(when IS-LINUX
+  (let ((langtool-dir (concat (file-name-as-directory (getenv "HOME"))
+                              ".local/src/doom/LanguageTool/")))
+    (setq langtool-language-tool-jar (concat langtool-dir "languagetool-commandline.jar")
+          langtool-language-tool-server-jar (concat langtool-dir "languagetool-server.jar"))))
+
 (setq eeowaa-project-init-files-alist
       '(;; Git
         (".gitignore")
