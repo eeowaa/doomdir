@@ -42,7 +42,7 @@ The function must take a buffer object as its first argument.")
        ((bitwarden-unlocked-p)
         (+bitwarden--list-all))
        (t
-        (bitwarden-unlock)
+        (bitwarden-login)
         (set-process-sentinel
          (get-process "bitwarden")
          (lambda (process event)
