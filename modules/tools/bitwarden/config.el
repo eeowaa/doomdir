@@ -42,10 +42,12 @@ The function must take a buffer object as its first argument.")
        ((bitwarden-unlocked-p)
         (+bitwarden--list-all))
        (t
-        (bitwarden-login)
+        (if (bitwarden-logged-in-p)
+            (bitwarden-unlock)
+          (bitwarden-login))
         (set-process-sentinel
          (get-process "bitwarden")
-         (lambda (process event)
+         (lambda (_process event)
            (when (string-match-p "\\`finished" event)
              (+bitwarden--list-all))))))))
 
