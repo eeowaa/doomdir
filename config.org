@@ -5157,7 +5157,7 @@ echo "Hi, ${name}!"
 A workaround is to simply *not export* the results.
 
 ** elasticsearch [0/0] :eeowaa:
-** eval [2/2]
+** eval [2/4]
 *** DONE [#A] Implement arbitrary region copy/paste between buffers :feat:
 I would like to be able to "send" a region from one buffer to another buffer
 completely at will.
@@ -5215,6 +5215,15 @@ if you want to send region to a REPL or terminal emulator."
   (setq-hook! 'comint-mode-hook
     revert-buffer-function (lambda (&rest _) (comint-clear-buffer))))
 #+end_src
+
+*** TODO [#B] Send =C-d= straight through to comint :tweak:
+Currently, =C-c C-d= sends =C-d=.
+
+*** TODO [#B] Configure comint to select previous input in an intelligent way :bug:
+Every time a newline is entered in a comint buffer, the line is treated as
+independent input, so ~comint-previous-input~ and ~comint-next-input~ operate on
+those lines. However, I want to cycle through entire /statements/, even if those
+statements span multiple input lines.
 
 ** gist [0/0] :ARCHIVE:
 ** kubernetes [1/1] :eeowaa:
