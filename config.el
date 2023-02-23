@@ -1692,7 +1692,7 @@ which causes problems even if there is no existing buffer."
 
 If the current buffer does not have a linked buffer, or given a
 non-nil prefix argument, this function will prompt for a buffer
-and set the the linked buffer accordingly. Leading and trailing
+and set the linked buffer accordingly. Leading and trailing
 whitespace is removed from the region before sending to the
 linked buffer.
 
@@ -1712,13 +1712,26 @@ if you want to send region to a REPL or terminal emulator."
     (with-current-buffer my/linked-buffer
       ;; TODO Test with `term', `shell', `eshell', various REPLs, and the
       ;; scratch buffer. There is probably a better way to do this.
-      (pcase major-mode
-        ('vterm-mode (vterm-insert text))
-        (_ (insert text)))
-      (require 'general)
-      (funcall (general-simulate-key "RET")))))
+      (cond
+        ((eq major-mode 'vterm-mode)
+         (vterm-insert text)
+         (require 'general)
+         (funcall (general-simulate-key "RET")))
+        ((derived-mode-p 'comint-mode)
+         (end-of-buffer)
+         ;; TODO Do not block execution waiting for output
+         (let ((comint-process-echoes t))
+           (dolist (line (split-string text "\r?\n"))
+             (insert line)
+             (comint-send-input))))
+        (t
+         (message "Unsupported mode: %s" major-mode))))))
 
 (map! :v (kbd "C-c e") #'my/send-region)
+
+(after! comint
+  (setq-hook! 'comint-mode-hook
+    revert-buffer-function (lambda (&rest _) (comint-clear-buffer))))
 
 (setq eldoc-echo-area-use-multiline-p nil
       eldoc-echo-area-display-truncation-message nil)
