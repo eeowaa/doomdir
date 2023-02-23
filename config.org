@@ -7757,7 +7757,7 @@ This module adds support for PHP 5.3+ (including PHP7).
 
 ** plantuml [0/0] :ARCHIVE:
 ** purescript [0/0] :ARCHIVE:
-** python [6/8]
+** python [7/9]
 :PROPERTIES:
 :CATEGORY: doom/python
 :END:
@@ -7829,6 +7829,11 @@ More than a simple "Hello World":
   (add-to-list 'projectile-project-root-files "pyvenv.cfg")
   (add-to-list 'projectile-project-search-path
                `(,(concat (file-name-as-directory (getenv "HOME")) ".local/pipx/venvs") . 1)))
+#+end_src
+
+*** DONE [#B] Install texinfo documentation :feat:
+#+begin_src emacs-lisp :tangle packages.el
+(package! python-info)
 #+end_src
 
 *** DONE [#C] Filename-mode associations

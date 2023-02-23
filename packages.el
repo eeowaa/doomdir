@@ -91,6 +91,8 @@
   (package! ox-ipynb
     :recipe (:host github :repo "jkitchin/ox-ipynb")))
 
+(package! python-info)
+
 ;;; :email
 
 ;;; :app
