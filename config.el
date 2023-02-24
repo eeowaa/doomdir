@@ -1738,8 +1738,19 @@ if you want to send region to a REPL or terminal emulator."
 (map! :v (kbd "C-c e") #'my/send-region)
 
 (after! comint
+  (defun my/comint-clear ()
+    "Scroll the prompt to the top of the window."
+    (interactive)
+    (cl-assert (derived-mode-p 'comint-mode))
+    (let ((inhibit-redisplay t))
+      (end-of-buffer)
+      (comint-next-prompt 1))
+    (recenter 0))
+  (defalias 'my/comint-clear-scrollback #'comint-clear-buffer)
   (setq-hook! 'comint-mode-hook
-    revert-buffer-function (lambda (&rest _) (comint-clear-buffer))))
+    revert-buffer-function (lambda (&rest _) (my/comint-clear)))
+  (map! :map comint-mode-map
+        "C-c C-l" #'my/comint-clear-scrollback))
 
 (setq eldoc-echo-area-use-multiline-p nil
       eldoc-echo-area-display-truncation-message nil)

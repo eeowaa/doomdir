@@ -5178,7 +5178,7 @@ echo "Hi, ${name}!"
 A workaround is to simply *not export* the results.
 
 ** elasticsearch [0/0] :eeowaa:
-** eval [2/4]
+** eval [1/4]
 *** DONE [#A] Implement arbitrary region copy/paste between buffers :feat:
 I would like to be able to "send" a region from one buffer to another buffer
 completely at will.
@@ -5230,11 +5230,27 @@ if you want to send region to a REPL or terminal emulator."
 (map! :v (kbd "C-c e") #'my/send-region)
 #+end_src
 
-*** DONE [#C] Configure revert-buffer for comint :tweak:
+*** STRT [#C] Configure =comint= scrollback behave similarly to =vterm= :tweak:
+- [X] Define separate functions for clearing and clearing scrollback
+- [X] Bind ~my/comint-clear-scrollback~ to =C-c C-l= in ~comint-mode-map~
+- [ ] Prevent =comint= from scrolling the buffer after entering a command
+- [ ] Ensure that =C-p= and =C-n= work even after Doom loads the python module
+
 #+begin_src emacs-lisp :tangle yes
 (after! comint
+  (defun my/comint-clear ()
+    "Scroll the prompt to the top of the window."
+    (interactive)
+    (cl-assert (derived-mode-p 'comint-mode))
+    (let ((inhibit-redisplay t))
+      (end-of-buffer)
+      (comint-next-prompt 1))
+    (recenter 0))
+  (defalias 'my/comint-clear-scrollback #'comint-clear-buffer)
   (setq-hook! 'comint-mode-hook
-    revert-buffer-function (lambda (&rest _) (comint-clear-buffer))))
+    revert-buffer-function (lambda (&rest _) (my/comint-clear)))
+  (map! :map comint-mode-map
+        "C-c C-l" #'my/comint-clear-scrollback))
 #+end_src
 
 *** TODO [#B] Send =C-d= straight through to comint :tweak:
