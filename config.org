@@ -459,6 +459,9 @@ issue and should probably be PRed to =company-box= after a trial period.
 *UPDATE*: This problem reappears, but only after loading =org= *and* =lsp-mode=.
 I'm guessing that some window- or frame-handling code is causing the issue.
 
+*UPDATE*: The issue only appears after toggling running ~+zen/toggle~. See this
+todo item: [[*Do not allow the toggling of tab-bar-mode to affect company-box][Do not allow the toggling of tab-bar-mode to affect company-box]].
+
 *** STRT [#A] Ensure that =company-box-doc= popup frames and their content are fully visible :bug:
 There were two issues that I was experiencing:
 
@@ -2543,7 +2546,7 @@ for standard Emacs bindings (snippet from =+emacs-bindings.el=):
     "C-c p" #'projectile-command-map))
 #+end_src
 
-** zen [1/1]
+** zen [0/2]
 #+begin_quote
 This module provides two minor modes that make Emacs into a more comfortable
 writing or coding environment. Folks familiar with "distraction-free" or "zen"
@@ -2551,7 +2554,7 @@ modes from other editors -- or [[https://github.com/rnkn/olivetti][olivetti]], [
 plugins) -- will feel right at home.
 #+end_quote
 
-*** DONE [#C] Unclutter the interface in additional ways
+*** STRT [#C] Unclutter the interface in additional ways
 #+begin_src emacs-lisp :tangle yes
 (after! writeroom-mode
 
@@ -2559,7 +2562,7 @@ plugins) -- will feel right at home.
   (defvar my/zen--old-hl-line-mode nil)
   (defvar my/zen--old-column-highlight-mode nil)
   (defvar my/zen--old-display-fill-column-indicator-mode nil)
-  (defvar my/zen--old-tab-bar-mode nil)
+  ;; (defvar my/zen--old-tab-bar-mode nil)
   (defvar my/zen--old-tab-line-mode nil)
   (defvar my/zen--old-vi-tilde-fringe-mode nil)
   (defvar my/zen--old-diff-hl-mode nil)
@@ -2578,8 +2581,8 @@ plugins) -- will feel right at home.
                   (bound-and-true-p column-highlight-mode)
                   my/zen--old-display-fill-column-indicator-mode
                   (bound-and-true-p display-fill-column-indicator-mode)
-                  my/zen--old-tab-bar-mode
-                  (bound-and-true-p tab-bar-mode)
+                  ;; my/zen--old-tab-bar-mode
+                  ;; (bound-and-true-p tab-bar-mode)
                   my/zen--old-tab-line-mode
                   (bound-and-true-p tab-line-mode)
                   my/zen--old-vi-tilde-fringe-mode
@@ -2592,7 +2595,7 @@ plugins) -- will feel right at home.
             (hl-line-mode -1)
             (column-highlight-mode -1)
             (display-fill-column-indicator-mode -1)
-            (tab-bar-mode -1)
+            ;; (tab-bar-mode -1)
             (tab-line-mode -1)
             (vi-tilde-fringe-mode -1)
             (diff-hl-mode -1))
@@ -2602,11 +2605,14 @@ plugins) -- will feel right at home.
         (if my/zen--old-hl-line-mode (hl-line-mode +1))
         (if my/zen--old-column-highlight-mode (column-highlight-mode +1))
         (if my/zen--old-display-fill-column-indicator-mode (display-fill-column-indicator-mode +1))
-        (if my/zen--old-tab-bar-mode (tab-bar-mode +1))
+        ;; (if my/zen--old-tab-bar-mode (tab-bar-mode +1))
         (if my/zen--old-tab-line-mode (tab-line-mode +1))
         (if my/zen--old-vi-tilde-fringe-mode (vi-tilde-fringe-mode +1))
         (if my/zen--old-diff-hl-mode (diff-hl-mode +1))))))
 #+end_src
+
+*** TODO [#A] Do not allow the toggling of tab-bar-mode to affect company-box
+After running ~+zen/toggle~, popup frames from =company-box= display a tab bar.
 
 * :editor
 #+begin_quote

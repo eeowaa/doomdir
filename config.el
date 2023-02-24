@@ -856,7 +856,7 @@ Closes and re-opens Treemacs to apply the new theme."
   (defvar my/zen--old-hl-line-mode nil)
   (defvar my/zen--old-column-highlight-mode nil)
   (defvar my/zen--old-display-fill-column-indicator-mode nil)
-  (defvar my/zen--old-tab-bar-mode nil)
+  ;; (defvar my/zen--old-tab-bar-mode nil)
   (defvar my/zen--old-tab-line-mode nil)
   (defvar my/zen--old-vi-tilde-fringe-mode nil)
   (defvar my/zen--old-diff-hl-mode nil)
@@ -875,8 +875,8 @@ Closes and re-opens Treemacs to apply the new theme."
                   (bound-and-true-p column-highlight-mode)
                   my/zen--old-display-fill-column-indicator-mode
                   (bound-and-true-p display-fill-column-indicator-mode)
-                  my/zen--old-tab-bar-mode
-                  (bound-and-true-p tab-bar-mode)
+                  ;; my/zen--old-tab-bar-mode
+                  ;; (bound-and-true-p tab-bar-mode)
                   my/zen--old-tab-line-mode
                   (bound-and-true-p tab-line-mode)
                   my/zen--old-vi-tilde-fringe-mode
@@ -889,7 +889,7 @@ Closes and re-opens Treemacs to apply the new theme."
             (hl-line-mode -1)
             (column-highlight-mode -1)
             (display-fill-column-indicator-mode -1)
-            (tab-bar-mode -1)
+            ;; (tab-bar-mode -1)
             (tab-line-mode -1)
             (vi-tilde-fringe-mode -1)
             (diff-hl-mode -1))
@@ -899,7 +899,7 @@ Closes and re-opens Treemacs to apply the new theme."
         (if my/zen--old-hl-line-mode (hl-line-mode +1))
         (if my/zen--old-column-highlight-mode (column-highlight-mode +1))
         (if my/zen--old-display-fill-column-indicator-mode (display-fill-column-indicator-mode +1))
-        (if my/zen--old-tab-bar-mode (tab-bar-mode +1))
+        ;; (if my/zen--old-tab-bar-mode (tab-bar-mode +1))
         (if my/zen--old-tab-line-mode (tab-line-mode +1))
         (if my/zen--old-vi-tilde-fringe-mode (vi-tilde-fringe-mode +1))
         (if my/zen--old-diff-hl-mode (diff-hl-mode +1))))))
