@@ -1520,6 +1520,14 @@ which causes problems even if there is no existing buffer."
     (setq langtool-language-tool-jar (concat langtool-dir "languagetool-commandline.jar")
           langtool-language-tool-server-jar (concat langtool-dir "languagetool-server.jar"))))
 
+(remove-hook! '(org-mode-hook
+                markdown-mode-hook
+                rst-mode-hook
+                asciidoc-mode-hook
+                latex-mode-hook
+                LaTeX-mode-hook)
+  #'writegood-mode)
+
 (setq eeowaa-project-init-files-alist
       '(;; Git
         (".gitignore")
