@@ -523,7 +523,7 @@ sudo sudo dnf -y install ripgrep
 (setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
 #+end_src
 
-** vertico [2/4]
+** vertico [3/5]
 #+begin_quote
 This module enhances the Emacs search and completion experience, and also
 provides a united interface for project search and replace, powered by [[https://github.com/BurntSushi/ripgrep/][ripgrep]].
@@ -546,16 +546,20 @@ sudo sudo dnf -y install ripgrep
 - [X] Enable in =init.el=
 - [X] Refactor for =vertico=
 
-*** TODO [#B] Fix bug with cursor color getting stuck when previewing themes :bug:
-When previewing themes with =consult=, sometimes the cursor color gets stuck
-(changing themes does not change the cursor color). When this happens, some
-themes become ugly or even unusable. *UPDATE*: Might want to look into the
-~cursor-color~ frame parameter.
+*** DONE [#B] Find a reference for the symbols in the completing-read buffer
+These symbols are described in the docstring for the function
+~marginalia--symbol-class~.
 
 *** TODO [#A] Prevent Emacs from freezing during ~consult-org-heading~ :bug:
 Lately, Emacs will occasionally freeze when searching for headlines in this
 buffer using =SPC m .=. I wonder if the recent addition of a ~jupyter-bash~
 source block is somehow causing this.
+
+*** TODO [#B] Fix bug with cursor color getting stuck when previewing themes :bug:
+When previewing themes with =consult=, sometimes the cursor color gets stuck
+(changing themes does not change the cursor color). When this happens, some
+themes become ugly or even unusable. *UPDATE*: Might want to look into the
+~cursor-color~ frame parameter.
 
 * :ui
 #+begin_quote
