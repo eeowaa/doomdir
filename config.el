@@ -1700,16 +1700,23 @@ which causes problems even if there is no existing buffer."
 
 If the current buffer does not have a linked buffer, or given a
 non-nil prefix argument, this function will prompt for a buffer
-and set the linked buffer accordingly. Leading and trailing
-whitespace is removed from the region before sending to the
-linked buffer.
+and set the linked buffer accordingly.
+
+Leading and trailing whitespace is removed from the region before
+sending to the linked buffer; however, only one trailing newline
+is removed. This helps in situations where consecutive trailing
+newlines have special meaning, such as in Python function
+definitions.
 
 Contrast this function to `send-region', which sends a region to
 a process instead of another buffer. Use `my/send-region' instead
 if you want to send region to a REPL or terminal emulator."
   (interactive "r")
   (let* ((region (buffer-substring-no-properties beg end))
-         (text (string-trim region))
+         (trailing-newlines (if (string-match "\\(\\(?:\r?\n\\)+\\)\r?\n\\'" region)
+                                (match-string 1 region)
+                              ""))
+         (text (concat (string-trim region) trailing-newlines))
          (prompt (or (and (or (null my/linked-buffer) current-prefix-arg)
                           "Select a buffer to link: ")
                      (and (not (buffer-live-p my/linked-buffer))
@@ -1750,7 +1757,9 @@ if you want to send region to a REPL or terminal emulator."
   (setq-hook! 'comint-mode-hook
     revert-buffer-function (lambda (&rest _) (my/comint-clear)))
   (map! :map comint-mode-map
-        "C-c C-l" #'my/comint-clear-scrollback))
+        "C-c C-l" #'my/comint-clear-scrollback
+        :i "C-d" #'comint-send-eof)
+  (setq-default comint-scroll-show-maximum-output nil))
 
 (setq eldoc-echo-area-use-multiline-p nil
       eldoc-echo-area-display-truncation-message nil)
