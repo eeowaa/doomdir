@@ -1377,7 +1377,7 @@ If the current frame has one window, restore the previous windows."
 
 (after! vterm
   (setq-hook! 'vterm-mode-hook
-    revert-buffer-function #'vterm-clear)
+    revert-buffer-function (lambda (&rest _) (vterm-clear)))
   (map! :map vterm-mode-map
         "C-l" #'eeowaa-refresh-buffer-and-display))
 

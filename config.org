@@ -3904,7 +3904,7 @@ regardless of whether the buffer is a popup or not.
 #+begin_src emacs-lisp :tangle yes
 (after! vterm
   (setq-hook! 'vterm-mode-hook
-    revert-buffer-function #'vterm-clear)
+    revert-buffer-function (lambda (&rest _) (vterm-clear)))
   (map! :map vterm-mode-map
         "C-l" #'eeowaa-refresh-buffer-and-display))
 #+end_src
