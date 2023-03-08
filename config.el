@@ -1216,6 +1216,14 @@ deleting the final newline before inserting the \")))\"."
   (setq-hook! 'helpful-mode-hook
     revert-buffer-function (lambda (&rest _) (helpful-update))))
 
+(after! man
+  (setq-hook! 'Man-mode-hook
+    revert-buffer-function (lambda (&rest _) (Man-update-manpage))))
+
+(after! woman
+  (setq-hook! 'woman-mode-hook
+    revert-buffer-function (lambda (&rest _) (woman-reformat-last-file))))
+
 (defun my/zoomwin-toggle ()
   "Zoom or unzoom the selected window.
 If the current frame has multiple windows, delete other windows.
