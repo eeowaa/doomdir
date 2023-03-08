@@ -1984,6 +1984,8 @@ See also: `ts-fold-summary--get'."
         mac-option-modifier 'super
         mac-right-option-modifier 'hyper))
 
+(add-hook 'desktop-entry-mode-hook #'font-lock-update)
+
 (after! markup-faces
   (dolist (sub-group (mapcar #'car (custom-group-members 'markup-faces t)))
     (dolist (group-member (custom-group-members sub-group nil))

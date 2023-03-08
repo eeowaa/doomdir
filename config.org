@@ -6030,7 +6030,7 @@ Modules that bring support for a language or group of languages to Emacs.
 ;;; :lang
 #+end_src
 
-** Miscellany [1/2]
+** Miscellany [2/4]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -6068,6 +6068,11 @@ Miscellaneous configuration without a corresponding module.
 
 Note that MongoDB queries use Javascript syntax, so there is no Mongo-specific
 mode derived from ~prog-mode~ (just use ~js-mode~).
+
+*** DONE [#C] Enable font locking in Desktop Entry mode :bug:
+#+begin_src emacs-lisp :tangle yes
+(add-hook 'desktop-entry-mode-hook #'font-lock-update)
+#+end_src
 
 *** STRT [#B] Configure faces used by AsciiDoc mode :tweak:
 =adoc-mode= uses the =markup-faces= package to define faces. Unfortunately, many
