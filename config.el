@@ -1984,6 +1984,13 @@ See also: `ts-fold-summary--get'."
         mac-option-modifier 'super
         mac-right-option-modifier 'hyper))
 
+(after! markup-faces
+  (dolist (sub-group (mapcar #'car (custom-group-members 'markup-faces t)))
+    (dolist (group-member (custom-group-members sub-group nil))
+      (when (eq (cadr group-member) 'custom-face)
+        (set-face-attribute (car group-member) nil
+          :height 1.0)))))
+
 (setq-hook! 'c-mode-hook
   lsp-lens-enable nil)
 
