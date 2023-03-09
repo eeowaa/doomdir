@@ -8455,6 +8455,9 @@ have listed some commented-out packages below that I would like to install.
 ;; System configuration
 ;;(package! crontab-mode)
 ;;(package! daemons)
+;;(package! etc-sudoers-mode)
+;;(package! su)
+;;(package! udev-mode)
 
 ;; System
 ;;(package! backlight)

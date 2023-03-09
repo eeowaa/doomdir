@@ -139,6 +139,9 @@
 ;; System configuration
 ;;(package! crontab-mode)
 ;;(package! daemons)
+;;(package! etc-sudoers-mode)
+;;(package! su)
+;;(package! udev-mode)
 
 ;; System
 ;;(package! backlight)
