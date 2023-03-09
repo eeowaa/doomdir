@@ -2188,13 +2188,14 @@ Entry content
 
 I cannot figure out where the visibility state is saved, so I
 just perform a complete cycle of `org-cycle'."
-    (save-window-excursion
+    (let ((inhibit-redisplay t))
       (save-excursion
         (org-previous-visible-heading 1)
         ;; XXX Doom-specific
         (when evil-mode (evil-normal-state))
         (call-interactively #'org-cycle)
-        (call-interactively #'org-cycle))))
+        (call-interactively #'org-cycle)))
+    (redisplay))
   (defun my/org-insert-heading-evil-state ()
     "End up with the cursor in 'insert mode' at the end of the Org heading"
     ;; XXX Doom-specific
