@@ -78,6 +78,10 @@ buffer in current window."
 
 (setf (alist-get 'fullscreen initial-frame-alist) 'maximized)
 
+(after! col-highlight
+  (require 'hl-line)
+  (my/doom-use-face col-highlight hl-line))
+
 (use-package! info-colors
   :commands (info-colors-fontify-node))
 

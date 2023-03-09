@@ -571,7 +571,7 @@ Aesthetic modules that affect the Emacs interface or user experience.
 ;;; :ui
 #+end_src
 
-** Miscellany [7/8]
+** Miscellany [8/9]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -642,6 +642,13 @@ buffer in current window."
 *** DONE [#C] Start Emacs with a maximized frame
 #+begin_src emacs-lisp :tangle yes
 (setf (alist-get 'fullscreen initial-frame-alist) 'maximized)
+#+end_src
+
+*** DONE [#C] Configure =col-highlight= :tweak:
+#+begin_src emacs-lisp :tangle yes
+(after! col-highlight
+  (require 'hl-line)
+  (my/doom-use-face col-highlight hl-line))
 #+end_src
 
 *** DONE [#C] Configure =info-colors= :tweak:
