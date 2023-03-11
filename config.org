@@ -6718,7 +6718,7 @@ github_binary_release \
                 "main.lua")))
 #+end_src
 
-** markdown [8/13]
+** markdown [9/14]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
@@ -6836,6 +6836,25 @@ inline LaTeX (for that, I would use Org mode).
 
 #+begin_src emacs-lisp :tangle yes
 (setq markdown-enable-math nil)
+#+end_src
+
+*** DONE [#B] Select code block at point with =vie= evil binding :feat:
+References:
+- ~evil-org-inner-element~
+- ~markdown-element-textobj~
+- ~markdown-edit-code-block~
+
+#+begin_src emacs-lisp :tangle yes
+(after! evil-markdown
+  (evil-define-text-object my/evil-markdown-inner-element (count &optional beg end type)
+    "Inner markdown element.
+Currently only includes code blocks."
+    (let* ((bounds (markdown-get-enclosing-fenced-block-construct))
+           (begin (and bounds (not (null (nth 0 bounds))) (goto-char (nth 0 bounds)) (point-at-bol 2)))
+           (end (and bounds (not (null (nth 1 bounds))) (goto-char (nth 1 bounds)) (point-at-bol 1))))
+      (list begin end)))
+  (evil-define-key '(visual operator) evil-markdown-mode-map
+    "ie" #'my/evil-markdown-inner-element))
 #+end_src
 
 *** DONE [#C] Filename-mode associations

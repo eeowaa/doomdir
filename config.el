@@ -2112,6 +2112,17 @@ See also: `ts-fold-summary--get'."
 
 (setq markdown-enable-math nil)
 
+(after! evil-markdown
+  (evil-define-text-object my/evil-markdown-inner-element (count &optional beg end type)
+    "Inner markdown element.
+Currently only includes code blocks."
+    (let* ((bounds (markdown-get-enclosing-fenced-block-construct))
+           (begin (and bounds (not (null (nth 0 bounds))) (goto-char (nth 0 bounds)) (point-at-bol 2)))
+           (end (and bounds (not (null (nth 1 bounds))) (goto-char (nth 1 bounds)) (point-at-bol 1))))
+      (list begin end)))
+  (evil-define-key '(visual operator) evil-markdown-mode-map
+    "ie" #'my/evil-markdown-inner-element))
+
 (pushnew! auto-mode-alist '("\\.mdx\\'" . markdown-mode))
 
 (add-hook! markdown-mode
