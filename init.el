@@ -187,8 +187,9 @@
        (rust +lsp +tree-sitter) ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
        ;;scala             ; java, but good
        ;;(scheme +guile)   ; a fully conniving family of lisps
-       (sh +lsp +tree-sitter +fish +powershell)
+       (sh +lsp +fish +powershell)
                          ; she sells {ba,z,fi}sh shells on the C xor
+                         ; FIXME +tree-sitter breaks markdown code blocks
        ;;sml
        ;;solidity          ; do you need a blockchain? No.
        ;;swift             ; who asked for emoji variables?

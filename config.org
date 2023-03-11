@@ -5890,7 +5890,7 @@ sudo dnf -y install terraform terraform-ls
 *** DONE [#A] Unpin =tree-sitter-langs=
 Unfortunately, the font-locking provided by =yaml-mode= does not properly
 fontify multiline quoted strings within string literals. My hope is that
-=tree-sitter= will provided more accurante syntax highlighting for YAML.
+=tree-sitter= will provided more accurate syntax highlighting for YAML.
 
 Doom currently uses an old version of =tree-sitter-langs= without support for
 YAML, so I am going to unpin that package for now.
