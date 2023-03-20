@@ -6718,7 +6718,7 @@ github_binary_release \
                 "main.lua")))
 #+end_src
 
-** markdown [9/14]
+** markdown [9/15]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
@@ -6870,6 +6870,70 @@ Currently only includes code blocks."
     (markdown-toggle-markup-hiding 1)))
 #+end_src
 
+*** STRT [#B] Remove Doom's =M-b= and =M-i= insert state bindings from Markdown
+#+begin_src emacs-lisp :tangle yes
+(after! evil-markdown
+  (map! :map evil-markdown-mode-map
+        :i "M-b" nil
+        :i "M-i" nil))
+#+end_src
+
+*** STRT [#C] Support reveal.js :feat:
+[[https://revealjs.com/markup/][Reveal.js]] can be used to run a local HTTP server to present slides written in
+Markdown. Here is the basic structure of such a presentation:
+
+#+begin_src html :tangle no
+<html>
+  <head>
+    <link rel="stylesheet" href="dist/reveal.css">
+    <link rel="stylesheet" href="dist/theme/serif.css">
+    <!-- See: https://revealjs.com/themes/ -->
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section data-markdown>
+          <textarea data-template>
+            ## Slide 1
+            A paragraph with some text and a [link](https://hakim.se).
+            ---
+            ## Slide 2
+            ---
+            ## Slide 3
+          </textarea>
+        </section>
+      </div>
+    </div>
+    <script src="dist/reveal.js"></script>
+    <script src="plugin/markdown/markdown.js"></script>
+    <script>
+      Reveal.initialize({
+        plugins: [ RevealMarkdown ]
+      });
+    </script>
+  </body>
+</html>
+#+end_src
+
+Once you have your presentation saved to a file (e.g. =slides.html=), run the
+following commands to start a local web server on port 8000:
+
+#+begin_src sh :tangle no
+cd ~/.local/src/utils/reveal.js
+npm start
+#+end_src
+
+Now, symlink your slides into place (yes, this is an ugly hack and I hope to
+find a better way to do this):
+
+#+begin_src sh :tangle no
+ln -s slides.html ~/.local/src/utils/reveal.js/slides.html
+#+end_src
+
+View your slideshow by opening http://localhost:8000/slides.html in a browser.
+Once finished, remove the symlink of =slides.html= from the =reveal.js=
+directory. *NOTE*: This entire process is wrapped by the ~revealjs~ script
+generated in the literate prerequisite installation section.
 *** LOOP [#B] Disable error reporting in markdown-mode buffers
 :LOGBOOK:
 - Note taken on [2023-02-16 Thu 14:58] \\
@@ -6954,62 +7018,6 @@ Live preview still happens in =eww= buffers.
 + Open link: [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::defun markdown-toggle-markup-hiding (&optional arg][markdown-toggle-markup-hiding]]
 + Open link: [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][Markup Hiding]]
 
-*** STRT [#C] Support reveal.js :feat:
-[[https://revealjs.com/markup/][Reveal.js]] can be used to run a local HTTP server to present slides written in
-Markdown. Here is the basic structure of such a presentation:
-
-#+begin_src html :tangle no
-<html>
-  <head>
-    <link rel="stylesheet" href="dist/reveal.css">
-    <link rel="stylesheet" href="dist/theme/serif.css">
-    <!-- See: https://revealjs.com/themes/ -->
-  </head>
-  <body>
-    <div class="reveal">
-      <div class="slides">
-        <section data-markdown>
-          <textarea data-template>
-            ## Slide 1
-            A paragraph with some text and a [link](https://hakim.se).
-            ---
-            ## Slide 2
-            ---
-            ## Slide 3
-          </textarea>
-        </section>
-      </div>
-    </div>
-    <script src="dist/reveal.js"></script>
-    <script src="plugin/markdown/markdown.js"></script>
-    <script>
-      Reveal.initialize({
-        plugins: [ RevealMarkdown ]
-      });
-    </script>
-  </body>
-</html>
-#+end_src
-
-Once you have your presentation saved to a file (e.g. =slides.html=), run the
-following commands to start a local web server on port 8000:
-
-#+begin_src sh :tangle no
-cd ~/.local/src/utils/reveal.js
-npm start
-#+end_src
-
-Now, symlink your slides into place (yes, this is an ugly hack and I hope to
-find a better way to do this):
-
-#+begin_src sh :tangle no
-ln -s slides.html ~/.local/src/utils/reveal.js/slides.html
-#+end_src
-
-View your slideshow by opening http://localhost:8000/slides.html in a browser.
-Once finished, remove the symlink of =slides.html= from the =reveal.js=
-directory. *NOTE*: This entire process is wrapped by the ~revealjs~ script
-generated in the literate prerequisite installation section.
 
 ** nim [0/0] :ARCHIVE:
 #+begin_quote

@@ -2130,6 +2130,11 @@ Currently only includes code blocks."
     "Hide markdown markup."
     (markdown-toggle-markup-hiding 1)))
 
+(after! evil-markdown
+  (map! :map evil-markdown-mode-map
+        :i "M-b" nil
+        :i "M-i" nil))
+
 ;; Prevent flycheck from being automatically enabled
 (if (or (not (boundp 'flycheck-global-modes))
         (not (eq 'not (car flycheck-global-modes))))
