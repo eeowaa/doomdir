@@ -1228,6 +1228,26 @@ deleting the final newline before inserting the \")))\"."
   (setq-hook! 'woman-mode-hook
     revert-buffer-function (lambda (&rest _) (woman-reformat-last-file))))
 
+(defvar my/last-message ""
+  "The last message written to the \"*Messages*\" buffer by `message'.")
+
+(defadvice! my/message-save-a (message-string)
+  :filter-return #'message
+  (setq my/last-message message-string))
+
+(defadvice! my/message-nosave-a (fn &rest args)
+  :around #'eldoc--message
+  (let ((last-message my/last-message))
+    (apply fn args)
+    (setq my/last-message last-message)))
+
+(defun my/copy-last-message ()
+  "Add the last message to the kill ring."
+  (interactive)
+  (kill-new my/last-message))
+
+(define-key! help-map "y" #'my/copy-last-message)
+
 (defun my/zoomwin-toggle ()
   "Zoom or unzoom the selected window.
 If the current frame has multiple windows, delete other windows.

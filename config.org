@@ -3210,7 +3210,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [13/21]
+** Miscellany [14/22]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -3379,6 +3379,29 @@ automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
 (after! woman
   (setq-hook! 'woman-mode-hook
     revert-buffer-function (lambda (&rest _) (woman-reformat-last-file))))
+#+end_src
+
+*** DONE [#C] Create and bind a function to copy the last message written :feat:
+#+begin_src emacs-lisp :tangle yes
+(defvar my/last-message ""
+  "The last message written to the \"*Messages*\" buffer by `message'.")
+
+(defadvice! my/message-save-a (message-string)
+  :filter-return #'message
+  (setq my/last-message message-string))
+
+(defadvice! my/message-nosave-a (fn &rest args)
+  :around #'eldoc--message
+  (let ((last-message my/last-message))
+    (apply fn args)
+    (setq my/last-message last-message)))
+
+(defun my/copy-last-message ()
+  "Add the last message to the kill ring."
+  (interactive)
+  (kill-new my/last-message))
+
+(define-key! help-map "y" #'my/copy-last-message)
 #+end_src
 
 *** STRT [#B] Configure the timeclock :feat:
