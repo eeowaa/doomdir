@@ -3210,7 +3210,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [14/22]
+** Miscellany [13/22]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -3381,8 +3381,24 @@ automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
     revert-buffer-function (lambda (&rest _) (woman-reformat-last-file))))
 #+end_src
 
-*** DONE [#C] Create and bind a function to copy the last message written :feat:
-#+begin_src emacs-lisp :tangle yes
+*** STRT [#B] Create and bind a function to copy the last message written :feat:
+Although this mostly works as intended, I think it is slowing down Emacs.
+
+I should consider another mechanism, perhaps by using markers in the
+~*Messages*~ buffer to keep track of the start of new messages. This offers
+at least two advantages:
+
+1. It will avoid the issue of ~message~ calls that do not insert text (or at
+   least visible text) into the ~*Messages*~ buffer. At least =eldoc= and =evil=
+   both do this, but I imagine that other packages do, too.
+   ~my/message-nosave-a~ is an expensive and kludgy workaround.
+
+2. By using markers in the ~*Messages*~ buffer, I can not only easily grab the
+   last visible message, but I can easily implememt a mechanism to jump between
+   the starting positions of multiline messages, sort of like what =vterm= does
+   with the prompt string.
+
+#+begin_src emacs-lisp :tangle no
 (defvar my/last-message ""
   "The last message written to the \"*Messages*\" buffer by `message'.")
 
