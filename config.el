@@ -2202,6 +2202,136 @@ Currently only includes code blocks."
         :i "M-b" nil
         :i "M-i" nil))
 
+(after! markdown-mode
+  (defun my/markdown-pre-block-bounds ()
+    "Return the bounds of a pre block at point.
+
+This is slightly more effective than `markdown-code-block-at-point-p'
+at determining bounds for pre blocks containing multiple
+consecutive blank lines, and it only returns non-nil when the
+block at point is a pre block (as opposed to a code block)."
+    (save-excursion
+      (let ((pos (point)))
+        (while (and (not (bobp))
+                    (markdown-cur-line-blank-p))
+          (forward-line -1))
+        (when-let ((bounds (get-text-property (point) 'markdown-pre))
+                   (begin (car bounds))
+                   (end (cadr bounds)))
+          (when (<= begin pos end)
+            bounds)))))
+
+  (defun my/markdown-pre-block-string ()
+    "Return string of pre block at point, indentation removed."
+    (when-let ((bounds (my/markdown-pre-block-bounds))
+               (text (apply #'buffer-substring-no-properties bounds))
+               (indentation (length (markdown-pre-indentation (car bounds)))))
+      (replace-regexp-in-string (format "^ \\{1,%d\\}" indentation) "" text)))
+
+  (defvar-local my/markdown--indirect-indentation nil)
+  (defvar-local my/markdown--indirect-block-type nil)
+
+  (defun my/markdown-edit-pre-block ()
+    "Edit Markdown pre block in an indirect buffer."
+    (interactive)
+    (save-excursion
+      (if (fboundp 'edit-indirect-region)
+          (if-let ((bounds (my/markdown-pre-block-bounds))
+                   (begin (car bounds))
+                   (end (cadr bounds))
+                   (indentation (length (markdown-pre-indentation begin))))
+              (with-current-buffer (edit-indirect-region begin end 'display-buffer)
+                (setq my/markdown--indirect-indentation indentation
+                      my/markdown--indirect-block-type 'pre)
+                (indent-rigidly (point-min) (point-max) (- indentation)))
+            (user-error "Not inside a pre block"))
+        (warn "Package edit-indirect needed to edit preformatted blocks.")
+        nil)))
+
+  ;; HACK Added indentation instrumentation to this function
+  (defadvice! my/markdown--edit-code-block-a ()
+    :override #'markdown-edit-code-block
+    (interactive)
+    (save-excursion
+      (if (fboundp 'edit-indirect-region)
+          (let* ((bounds (markdown-get-enclosing-fenced-block-construct))
+                 (begin (and bounds (not (null (nth 0 bounds))) (goto-char (nth 0 bounds)) (point-at-bol 2)))
+                 (end (and bounds (not (null (nth 1 bounds)))  (goto-char (nth 1 bounds)) (point-at-bol 1))))
+            (if (and begin end)
+                (let* ((indentation (and (goto-char (nth 0 bounds)) (current-indentation)))
+                       (lang (markdown-code-block-lang))
+                       (mode (or (and lang (markdown-get-lang-mode lang))
+                                 markdown-edit-code-block-default-mode))
+                       (edit-indirect-guess-mode-function
+                        (lambda (_parent-buffer _beg _end)
+                          (funcall mode)))
+                       (indirect-buf (edit-indirect-region begin end 'display-buffer)))
+                  ;; reset `sh-shell' when indirect buffer
+                  (when (and (not (member system-type '(ms-dos windows-nt)))
+                             (member mode '(shell-script-mode sh-mode))
+                             (member lang (append
+                                           (mapcar (lambda (e) (symbol-name (car e)))
+                                                   sh-ancestor-alist)
+                                           '("csh" "rc" "sh"))))
+                    (with-current-buffer indirect-buf
+                      (sh-set-shell lang)))
+                  (when (> indentation 0) ;; un-indent in edit-indirect buffer
+                    (with-current-buffer indirect-buf
+                      (setq my/markdown--indirect-indentation indentation
+                            my/markdown--indirect-block-type 'code)
+                      (indent-rigidly (point-min) (point-max) (- indentation)))))
+              (user-error "Not inside a GFM or tilde fenced code block")))
+        (warn "Package edit-indirect needed to edit code blocks.")
+        nil)))
+
+  ;; HACK Removed indentation and newline insertion from this hook
+  (defadvice! my/markdown--edit-indirect-after-commit-function-a (beg end)
+    :override #'markdown--edit-indirect-after-commit-function
+    (font-lock-ensure))
+
+  (defun my/markdown-edit-block ()
+    "Edit a code or pre block at point in an indirect buffer."
+    (interactive)
+    (cond
+     ((markdown-get-enclosing-fenced-block-construct)
+      (markdown-edit-code-block))
+     ((my/markdown-pre-block-bounds)
+      (my/markdown-edit-pre-block))
+     (t
+      (message "No block at point can be edited indirectly."))))
+
+  (define-key markdown-mode-map
+    [remap markdown-edit-code-block] #'my/markdown-edit-block)
+
+  (defun my/markdown--edit-indirect-before-commit-function-h ()
+    "Re-indent indirect buffer before commiting."
+    (when (wholenump my/markdown--indirect-indentation)
+      (let ((inhibit-redisplay t))
+        (indent-rigidly (point-min) (point-max) my/markdown--indirect-indentation))))
+
+  (defun my/markdown--edit-indirect-after-creation-hook-h ()
+    "Add buffer-local hooks to indirect buffer."
+    (setq header-line-format
+      (substitute-command-keys
+       "Edit, then exit with `\\[edit-indirect-commit]' or abort with \
+`\\[edit-indirect-abort]'"))
+    (add-hook 'edit-indirect-before-commit-hook
+              #'my/markdown--edit-indirect-before-commit-function-h
+              nil 'local))
+
+  (defun my/markdown-edit-indirect-setup-h ()
+    "Instrument indirect editing for `markdown-mode' buffers."
+    (add-hook 'edit-indirect-after-creation-hook
+              #'my/markdown--edit-indirect-after-creation-hook-h
+              nil 'local))
+
+  (add-hook! markdown-mode #'my/markdown-edit-indirect-setup-h)
+
+  ;; In case the major mode is changed within the indirect buffer
+  (put 'my/markdown--edit-indirect-before-commit-function-h 'permanent-local-hook t)
+  (put 'my/markdown--indirect-indentation 'permanent-local t)
+  (put 'my/markdown--indirect-block-type 'permanent-local t))
+
 ;; Prevent flycheck from being automatically enabled
 (if (or (not (boundp 'flycheck-global-modes))
         (not (eq 'not (car flycheck-global-modes))))
