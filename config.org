@@ -6854,7 +6854,7 @@ github_binary_release \
                 "main.lua")))
 #+end_src
 
-** markdown [9/15]
+** markdown [10/17]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
@@ -7006,7 +7006,7 @@ Currently only includes code blocks."
     (markdown-toggle-markup-hiding 1)))
 #+end_src
 
-*** STRT [#B] Remove Doom's =M-b= and =M-i= insert state bindings from Markdown
+*** DONE [#B] Remove Doom's =M-b= and =M-i= insert state bindings from Markdown
 #+begin_src emacs-lisp :tangle yes
 (after! evil-markdown
   (map! :map evil-markdown-mode-map
