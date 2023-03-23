@@ -4199,7 +4199,8 @@ _Some common problems:_
       (let ((inhibit-redisplay t))
         (or (vterm-goto-char (point))
             (vterm-reset-cursor-point))
-        (vterm-send-right))
+        (or (looking-at-p " *$")
+            (vterm-send-right)))
       (evil-insert-state))
 
     ;; HACK Send C-a instead of relying on vterm functions

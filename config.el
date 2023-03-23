@@ -1503,7 +1503,8 @@ which causes problems even if there is no existing buffer."
     (let ((inhibit-redisplay t))
       (or (vterm-goto-char (point))
           (vterm-reset-cursor-point))
-      (vterm-send-right))
+      (or (looking-at-p " *$")
+          (vterm-send-right)))
     (evil-insert-state))
 
   ;; HACK Send C-a instead of relying on vterm functions
