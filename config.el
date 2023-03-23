@@ -1459,6 +1459,71 @@ which causes problems even if there is no existing buffer."
                (vterm-shell command-str))
           (vterm-other-window))))))
 
+;; NOTE Allow cursor to appear after last character in line
+(after! vterm
+  (setq-hook! 'vterm-mode-hook
+    evil-move-beyond-eol t))
+
+;; HACK Send <backspace> instead of <delete>
+;; C-d works, too, but it can send EOF and close vterm
+(after! vterm
+  (defadvice! my/vterm-delete-region-a (start end)
+    :override #'vterm-delete-region
+    (when vterm--term
+      (if (vterm-goto-char end)
+          (cl-loop repeat (- end start) do
+                   (vterm-send-key "<backspace>" nil nil nil t))
+        (let ((inhibit-read-only nil))
+          (vterm--delete-region start end))))))
+
+;; HACK Prevent vterm from changing cursor type (e.g. when quitting out of top(1))
+;; <https://github.com/akermu/emacs-libvterm/issues/313>
+(after! vterm
+  (defadvice! my/vterm--redraw-a (fn &rest args)
+    "Prevent vterm from changing the cursor type."
+    :around #'vterm--redraw
+    (let ((cursor-type cursor-type))
+      (apply fn args))))
+
+(after! evil-collection-vterm
+
+  ;; HACK If `vterm-goto-char' fails, reset cursor point
+  (defadvice! my/evil-collection-vterm-insert-a ()
+    :override #'evil-collection-vterm-insert
+    (interactive)
+    (let ((inhibit-redisplay t))
+      (or (vterm-goto-char (point))
+          (vterm-reset-cursor-point)))
+    (evil-insert-state))
+
+  ;; HACK Send <right> before entering insert state
+  (defadvice! my/evil-collection-vterm-append-a ()
+    :override #'evil-collection-vterm-append
+    (interactive)
+    (let ((inhibit-redisplay t))
+      (or (vterm-goto-char (point))
+          (vterm-reset-cursor-point))
+      (vterm-send-right))
+    (evil-insert-state))
+
+  ;; HACK Send C-a instead of relying on vterm functions
+  (defadvice! my/evil-collection-vterm-insert-line-a ()
+    :override #'evil-collection-vterm-insert-line
+    (interactive)
+    (let ((inhibit-redisplay t))
+      (vterm-reset-cursor-point)
+      (vterm-send-C-a))
+    (evil-insert-state))
+
+  ;; HACK Send C-e instead of relying on vterm functions
+  (defadvice! my/evil-collection-vterm-append-line-a ()
+    :override #'evil-collection-vterm-append-line
+    (interactive)
+    (let ((inhibit-redisplay t))
+      (vterm-reset-cursor-point)
+      (vterm-send-C-e))
+    (evil-insert-state)))
+
 (after! flycheck
   (defadvice! my/org-src-a (&rest _)
     "Consider Org Src buffers as ephemeral (do not enable flycheck)."

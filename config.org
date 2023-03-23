@@ -2883,6 +2883,8 @@ with =C-w L=, =C-w H=, and the like).
 (setq evil-auto-balance-windows nil)
 #+end_src
 
+Maybe take a look at the ~even-window-sizes~ variable.
+
 *** STRT [#B] Define modes that should always come up in Emacs state :tweak:
 For whatever reason, ~vterm~ is starting in "insert" state.
 
@@ -4100,11 +4102,34 @@ the moment, but it works pretty well anyway.
 
 *UPDATE*: Maybe I could have =ESC= enter ~vterm-copy-mode~. That is, when the
 =evil= state is anything but ~insert~, enable ~vterm-copy-mode~. Then when I
-switch back to ~insert~ state, disable ~vterm-copy-mode~.
+switch back to ~insert~ state, disable ~vterm-copy-mode~. See [[*Prevent cursor misplacement when switching Evil states][this subtree]] for
+more information.
 
-See [[*Prevent cursor misplacement when switching Evil states][this subtree]] for more information.
+*UPDATE*: The following code works OK, but it steps on ~vterm-undo~ and I
+haven't tested it thoroughly enough. For now, it will stay disabled.
 
-*** TODO [#A] Prevent cursor misplacement when switching Evil states :bug:
+#+begin_src emacs-lisp :tangle no
+(after! vterm
+  (defvar-local my/vterm-echo nil)
+  (add-hook! vterm-mode
+    (defun my/evil-vterm-mode-h ()
+      (setq my/vterm-echo 'on)
+      (add-hook! '(evil-normal-state-entry-hook
+                   evil-visual-state-entry-hook)
+                 :local #'vterm-send-stop)
+      (add-hook! '(evil-insert-state-entry-hook
+                   evil-replace-state-entry-hook
+                   evil-emacs-state-entry-hook)
+                 :local #'vterm-send-start)))
+  (defadvice! my/vterm-stop-a (&rest _)
+    :after #'vterm-send-stop
+    (setq my/vterm-echo 'off))
+  (defadvice! my/vterm-start-a (&rest _)
+    :after #'vterm-send-start
+    (setq my/vterm-echo 'on)))
+#+end_src
+
+*** STRT [#A] Prevent cursor misplacement when switching Evil states :bug:
 _Some common problems:_
 
 + When appending text to a command line, switching to ~normal~ state and back to
@@ -4112,27 +4137,94 @@ _Some common problems:_
   The workaround is to use =C-e= in ~insert~ state to move the cursor back to
   the end of the command line.
 
-+ When switching to ~normal~ state and try to delete or modify text, weird
+  #+begin_src emacs-lisp :tangle yes
+  ;; NOTE Allow cursor to appear after last character in line
+  (after! vterm
+    (setq-hook! 'vterm-mode-hook
+      evil-move-beyond-eol t))
+  #+end_src
+
++ When switching to ~normal~ state and trying to delete or modify text, weird
   characters (like ~~~) get inserted into the buffer.
+
+  #+begin_src emacs-lisp :tangle yes
+  ;; HACK Send <backspace> instead of <delete>
+  ;; C-d works, too, but it can send EOF and close vterm
+  (after! vterm
+    (defadvice! my/vterm-delete-region-a (start end)
+      :override #'vterm-delete-region
+      (when vterm--term
+        (if (vterm-goto-char end)
+            (cl-loop repeat (- end start) do
+                     (vterm-send-key "<backspace>" nil nil nil t))
+          (let ((inhibit-read-only nil))
+            (vterm--delete-region start end))))))
+  #+end_src
+
++ When exiting TUI apps such as ~top~, the cursor shape gets changed to a block
+  even in insert state.
+
+  #+begin_src emacs-lisp :tangle yes
+  ;; HACK Prevent vterm from changing cursor type (e.g. when quitting out of top(1))
+  ;; <https://github.com/akermu/emacs-libvterm/issues/313>
+  (after! vterm
+    (defadvice! my/vterm--redraw-a (fn &rest args)
+      "Prevent vterm from changing the cursor type."
+      :around #'vterm--redraw
+      (let ((cursor-type cursor-type))
+        (apply fn args))))
+  #+end_src
 
 + When switching back to ~insert~ state after moving the cursor to an
   unprintable area, point doesn't move to the appropriate location until I start
   typing. I often need to delete the text that I just inserted, move the cursor
   to where I wanted to go, and then type it out again.
 
-_Some things to look at:_
+  #+begin_src emacs-lisp :tangle yes
+  (after! evil-collection-vterm
 
-+ =evil=
-  - ~evil-insert-state-exit-hook~
-  - ~evil-insert-state-entry-hook~
-  - ~evil-move-cursor-back~
-+ =vterm=
-  - ~vterm--get-cursor-point~
-  - ~vterm--get-prompt-point~
-  - ~vterm--reset-point~
-  - ~vterm-reset-cursor-point~
+    ;; HACK If `vterm-goto-char' fails, reset cursor point
+    (defadvice! my/evil-collection-vterm-insert-a ()
+      :override #'evil-collection-vterm-insert
+      (interactive)
+      (let ((inhibit-redisplay t))
+        (or (vterm-goto-char (point))
+            (vterm-reset-cursor-point)))
+      (evil-insert-state))
+
+    ;; HACK Send <right> before entering insert state
+    (defadvice! my/evil-collection-vterm-append-a ()
+      :override #'evil-collection-vterm-append
+      (interactive)
+      (let ((inhibit-redisplay t))
+        (or (vterm-goto-char (point))
+            (vterm-reset-cursor-point))
+        (vterm-send-right))
+      (evil-insert-state))
+
+    ;; HACK Send C-a instead of relying on vterm functions
+    (defadvice! my/evil-collection-vterm-insert-line-a ()
+      :override #'evil-collection-vterm-insert-line
+      (interactive)
+      (let ((inhibit-redisplay t))
+        (vterm-reset-cursor-point)
+        (vterm-send-C-a))
+      (evil-insert-state))
+
+    ;; HACK Send C-e instead of relying on vterm functions
+    (defadvice! my/evil-collection-vterm-append-line-a ()
+      :override #'evil-collection-vterm-append-line
+      (interactive)
+      (let ((inhibit-redisplay t))
+        (vterm-reset-cursor-point)
+        (vterm-send-C-e))
+      (evil-insert-state)))
+  #+end_src
 
 *** TODO [#B] Let =C-x C-e= pass through in Evil insert state :feat:
+Ultimately, I would like for this to take the contents of the prompt and send it
+to Emacs in an indirect buffer (server mode).
+
 #+begin_src emacs-lisp :tangle no
 (after! evil-collection-vterm
   (evil-collection-define-key 'insert 'vterm-mode-map
