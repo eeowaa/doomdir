@@ -5332,7 +5332,7 @@ echo "Hi, ${name}!"
 A workaround is to simply *not export* the results.
 
 ** elasticsearch [0/0] :eeowaa:
-** eval [1/4]
+** eval [1/5]
 *** DONE [#A] Implement arbitrary region copy/paste between buffers :feat:
 I would like to be able to "send" a region from one buffer to another buffer
 completely at will.
@@ -5416,6 +5416,9 @@ if you want to send region to a REPL or terminal emulator."
         :i "C-d" #'comint-send-eof)
   (setq-default comint-scroll-show-maximum-output nil))
 #+end_src
+
+*** TODO [#A] Use evil/rectangular regions when sending text :feat:
+Take a look at Doom's ~+eval/region~ to see if that helps.
 
 *** TODO [#B] Configure comint to select previous input in an intelligent way :bug:
 Every time a newline is entered in a comint buffer, the line is treated as
