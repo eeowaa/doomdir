@@ -91,6 +91,10 @@
   (package! ox-ipynb
     :recipe (:host github :repo "jkitchin/ox-ipynb")))
 
+;; (package! zmq :pin "00dea2f9f88cd3e723d3b909aea26313dd33f9c6")
+(unpin! zmq)
+(unpin! jupyter)
+
 (package! python-info)
 
 ;;; :email

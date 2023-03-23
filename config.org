@@ -8082,6 +8082,15 @@ The workaround is to simply try again. This is not a problem in an interactive
 workflow, but it would be a problem if one wanted to jump straight to exporting
 an Org file containing ~jupyter-bash~ source blocks to a =.ipynb= file.
 
+**** STRT [#A] Pin =zmq= to fix a bug :bug:hack:
+https://github.com/nnicandro/emacs-zmq/issues/21
+
+#+begin_src emacs-lisp :tangle packages.el
+;; (package! zmq :pin "00dea2f9f88cd3e723d3b909aea26313dd33f9c6")
+(unpin! zmq)
+(unpin! jupyter)
+#+end_src
+
 **** LOOP [#B] Make it easy to jump between source and tangled file :feat:
 Right now, I am only considering tangling to Elisp, since that's what I do most
 of the time.
