@@ -6858,7 +6858,7 @@ github_binary_release \
                 "main.lua")))
 #+end_src
 
-** markdown [10/16]
+** markdown [9/15]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
@@ -7000,14 +7000,6 @@ Currently only includes code blocks."
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
 (pushnew! auto-mode-alist '("\\.mdx\\'" . markdown-mode))
-#+end_src
-
-*** DONE [#C] Hide markup by default
-#+begin_src emacs-lisp :tangle yes
-(add-hook! markdown-mode
-  (defun my/markdown-hide-markup-h ()
-    "Hide markdown markup."
-    (markdown-toggle-markup-hiding 1)))
 #+end_src
 
 *** DONE [#B] Remove Doom's =M-b= and =M-i= insert state bindings from Markdown

@@ -437,3 +437,24 @@ To get started on this, open =+evil-bindings.el= by searching for it with
   :quit 'current)
 #+end_src
 
+
+* KILL [#C] Hide markup by default
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-03-24 Fri 13:44
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :lang/markdown
+:ARCHIVE_CATEGORY: doom/markdown
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2023-03-24 Fri 13:43] \\
+  I've changed my mind on this; now I actually prefer seeing the markup.
+:END:
+#+begin_src emacs-lisp :tangle yes
+(add-hook! markdown-mode
+  (defun my/markdown-hide-markup-h ()
+    "Hide markdown markup."
+    (markdown-toggle-markup-hiding +1)))
+#+end_src
+

@@ -2193,11 +2193,6 @@ Currently only includes code blocks."
 
 (pushnew! auto-mode-alist '("\\.mdx\\'" . markdown-mode))
 
-(add-hook! markdown-mode
-  (defun my/markdown-hide-markup-h ()
-    "Hide markdown markup."
-    (markdown-toggle-markup-hiding 1)))
-
 (after! evil-markdown
   (map! :map evil-markdown-mode-map
         :i "M-b" nil
