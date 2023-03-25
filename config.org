@@ -3139,7 +3139,7 @@ will infer some changes to keep Parens and Indentation inline with one another.
 This module adds snippets to Emacs, powered by yasnippet.
 #+end_quote
 
-*** DONE [#B] Fix ~projectile-edit-dir-locals~
+*** DONE [#B] Fix ~projectile-edit-dir-locals~ :bug:
 Technically, ~projectile-edit-dir-locals~ is implemented via =skeleton=, not
 =yasnippet=. However, I don't have a better place in my literate config to place
 this fix.
@@ -7010,7 +7010,7 @@ Currently only includes code blocks."
         :i "M-i" nil))
 #+end_src
 
-*** STRT [#B] Extend editing capabilities of code and pre blocks :feat:
+*** STRT [#B] Extend editing capabilities of code and pre blocks :feat:hack:
 - [X] Special recognition of pre blocks
 - [X] Editing in indirect buffers
 - [X] Automatic indentation/reindirection
