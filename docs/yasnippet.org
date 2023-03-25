@@ -1,0 +1,23 @@
+#+TITLE: Yasnippet development and usage
+
+* Documentation
+Look for Org files in the =doc/= subdirectory of the =yasnippets= package
+directory. You can do this manually as follows:
+
+1. =C-c C-l= (~find-library~)
+2. =yasnippet RET=
+3. =SPC .= (~find-file~)
+4. =doc RET=
+
+Otherwise, you can just run this code to open a listing of those Org files in a
+=dired= buffer:
+
+#+begin_src emacs-lisp :tangle no
+(find-dired (concat (file-name-directory (file-truename (find-library-name "yasnippet")))
+                    "doc")
+            "-type f -name '*.org'")
+#+end_src
+
+* Variables
++ ~doom-snippets-dir~
++ ~+snippets-dir~
