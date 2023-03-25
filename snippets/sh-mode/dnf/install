@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: sudo dnf -y install
+# key: dnfi
+# uuid: dnf-install
+# --
+sudo dnf -y install $0

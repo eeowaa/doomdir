@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: npm install -g
+# key: npmi
+# uuid: npm-install-g
+# --
+npm install -g $0

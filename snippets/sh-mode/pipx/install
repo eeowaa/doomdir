@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: pipx install
+# key: pipxi
+# uuid: pipx-install
+# --
+pipx install $0

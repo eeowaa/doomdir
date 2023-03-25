@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: npm uninstall -g
+# key: npmu
+# uuid: npm-uninstall-g
+# --
+npm uninstall -g $0

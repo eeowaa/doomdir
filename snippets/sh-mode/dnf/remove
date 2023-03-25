@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: sudo dnf -y remove
+# key: dnfr
+# uuid: dnf-remove
+# --
+sudo dnf -y remove $0

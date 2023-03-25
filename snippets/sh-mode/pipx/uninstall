@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: pipx uninstall
+# key: pipxu
+# uuid: pipx-uninstall
+# --
+pipx uninstall $0
