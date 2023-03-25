@@ -129,7 +129,7 @@ $func: (recursively) delete? [y/N]: "
 }
 
 # Install prerequisites for `completion/vertico` module
-sudo sudo dnf -y install ripgrep
+sudo dnf -y install ripgrep
 
 # Install prerequisites for `ui/doom` module
 sudo dnf -y install terminus-fonts

@@ -515,7 +515,7 @@ brew install ripgrep
 **** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `completion/ivy` module
-sudo sudo dnf -y install ripgrep
+sudo dnf -y install ripgrep
 #+end_src
 
 *** DONE [#A] Make it easier to jump to headlines across Org buffers
@@ -539,7 +539,7 @@ brew install ripgrep
 **** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `completion/vertico` module
-sudo sudo dnf -y install ripgrep
+sudo dnf -y install ripgrep
 #+end_src
 
 *** DONE [#B] Replace =ivy= with =vertico=
