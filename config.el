@@ -1263,6 +1263,28 @@ deleting the final newline before inserting the \")))\"."
   (setq-hook! 'woman-mode-hook
     revert-buffer-function (lambda (&rest _) (woman-reformat-last-file))))
 
+(defun my/font-lock-update (arg)
+  "Refontify some or all of the current buffer.
+
+With positive numeric prefix, refontify that many lines on each
+side of point. (Universal arguments are translated to numeric
+form by exponentiating 4 by the number of `C-u' sequences.)
+
+Without positive numeric prefix, refontify the active region if
+there is one. Otherwise, refontify the entire accessible portion
+of the current buffer."
+  (interactive "P")
+  (cl-destructuring-bind (type value) (my/parse-raw-prefix arg)
+    (cond
+     ((or (eq type 'universal) (and (eq type 'numeric) (cl-plusp value)))
+      (font-lock-fontify-block value))
+     ((region-active-p)
+      (font-lock-fontify-region (region-beginning) (region-end)))
+     (t
+      (font-lock-update)))))
+
+(global-set-key [remap font-lock-update] #'my/font-lock-update)
+
 (defun my/zoomwin-toggle ()
   "Zoom or unzoom the selected window.
 If the current frame has multiple windows, delete other windows.

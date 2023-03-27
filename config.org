@@ -3254,7 +3254,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [13/22]
+** Miscellany [14/23]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -3423,6 +3423,37 @@ automatically) or call ~woman-reformat-last-file~ in a =woman= buffer (bound to
 (after! woman
   (setq-hook! 'woman-mode-hook
     revert-buffer-function (lambda (&rest _) (woman-reformat-last-file))))
+#+end_src
+
+*** DONE [#C] Replace =C-x x f= binding with custom font-lock update function :tweak:
+By default, =C-x x f= is bound to ~font-lock-update~, which re-fontifies the
+current buffer. However, sometimes I only want to update font-lock around point,
+or within the active region. Thankfully, functions already exist for these two
+cases: ~font-lock-fontify-block~ and ~font-lock-fontify-region~. I would like to
+create a function that wraps all three functions.
+
+#+begin_src emacs-lisp :tangle yes
+(defun my/font-lock-update (arg)
+  "Refontify some or all of the current buffer.
+
+With positive numeric prefix, refontify that many lines on each
+side of point. (Universal arguments are translated to numeric
+form by exponentiating 4 by the number of `C-u' sequences.)
+
+Without positive numeric prefix, refontify the active region if
+there is one. Otherwise, refontify the entire accessible portion
+of the current buffer."
+  (interactive "P")
+  (cl-destructuring-bind (type value) (my/parse-raw-prefix arg)
+    (cond
+     ((or (eq type 'universal) (and (eq type 'numeric) (cl-plusp value)))
+      (font-lock-fontify-block value))
+     ((region-active-p)
+      (font-lock-fontify-region (region-beginning) (region-end)))
+     (t
+      (font-lock-update)))))
+
+(global-set-key [remap font-lock-update] #'my/font-lock-update)
 #+end_src
 
 *** STRT [#B] Create and bind a function to copy the last message written :feat:
