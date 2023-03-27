@@ -3639,7 +3639,7 @@ servers I have deployed around the world.
   ;;   `window-setup-hook'
   #+end_src
 
-** dired [1/2]
+** dired [2/3]
 #+begin_quote
 This module provides configuration for dired.
 #+end_quote
@@ -3657,7 +3657,50 @@ brew install coreutils
 sudo dnf -y install coreutils
 #+end_src
 
+*** DONE [#C] Format the results of ~find-dired~ to be like ~dired~ :tweak:
+Evaluate the following elisp forms to compare output buffer formats:
+
+#+begin_src emacs-lisp :tangle no
+;; `find-dired' example with default values:
+(let ((find-ls-option '("-ls" . "-dilsb"))
+      (find-dired-refine-function #'find-dired-sort-by-filename))
+  (find-dired default-directory "-type d ! -path . -prune -o -type f"))
+
+;; `dired' example:
+(dired default-directory)
+#+end_src
+
+Note how ~find-dired~ produces less human-readable output. The following code
+will normalize the output of ~find-dired~ to be like that of ~dired~:
+
+#+begin_src emacs-lisp :tangle yes
+;; NOTE `dired' is required by the `find-dired' library, so the following code
+;; will always execute before the `find-dired' function is called.
+(after! dired
+  (setq find-dired-refine-function nil
+        find-ls-option
+        (cons (format "-print0 | sort -z | xargs -0 -e %s %s -d"
+                      insert-directory-program
+                      dired-listing-switches)
+              (concat dired-listing-switches " -d"))))
+#+end_src
+
+Now run the following snippets and compare with the previous example:
+
+#+begin_src emacs-lisp :tangle no
+;; Same as previous `find-dired' example, with the defaults changed:
+(find-dired default-directory "-type d ! -path . -prune -o -type f")
+
+;; `find-grep-dired' should work in a similar manner:
+(find-grep-dired default-directory "kubernetes\\|k8s")
+#+end_src
+
 *** STRT [#A] Define directory-exploring =evil-ex= commands :feat:
+I would like to refactor ~my/+dired-tab-jump~ to use mechanisms similar to
+~dired-other-tab~ and ~switch-to-buffer-other-tab~. This will probably require
+some additional functionality in =vimish-tab= (namely a new function called
+~vimish-tab-switch-to-buffer-other-tab~).
+
 #+begin_src emacs-lisp :tangle yes
 (defun my/+dired-split-jump ()
   (interactive)

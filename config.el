@@ -1269,6 +1269,16 @@ If the current frame has one window, restore the previous windows."
                          doom-user-dir))
                 t)))))))
 
+;; NOTE `dired' is required by the `find-dired' library, so the following code
+;; will always execute before the `find-dired' function is called.
+(after! dired
+  (setq find-dired-refine-function nil
+        find-ls-option
+        (cons (format "-print0 | sort -z | xargs -0 -e %s %s -d"
+                      insert-directory-program
+                      dired-listing-switches)
+              (concat dired-listing-switches " -d"))))
+
 (defun my/+dired-split-jump ()
   (interactive)
   (select-window (split-window-below))
