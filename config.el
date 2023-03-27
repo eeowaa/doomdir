@@ -1291,8 +1291,8 @@ If the current frame has multiple windows, delete other windows.
 If the current frame has one window, restore the previous windows."
   (interactive)
   (if (= 1 (length
-            (-remove (lambda (w) (window-parameter w 'no-other-window))
-                     (window-list))))
+            (seq-remove (lambda (w) (window-parameter w 'no-other-window))
+                        (window-list))))
       (when-let ((zoomwin-state (persp-parameter 'my/zoomwin-state)))
         (set-window-configuration zoomwin-state))
     (set-persp-parameter 'my/zoomwin-state (current-window-configuration))
@@ -1317,7 +1317,7 @@ If the current frame has one window, restore the previous windows."
               (when
                   ;; ... we are in either XDG_DOCUMENTS_DIR or DOOMDIR
                   ;; TODO See about using `projectile-project-search-path'
-                  (-select
+                  (seq-filter
                    (lambda (dir)
                      (string-match-p dir (expand-file-name default-directory)))
                    (list (file-name-as-directory (xdg-user-dir "DOCUMENTS"))
