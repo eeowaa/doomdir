@@ -16,6 +16,39 @@ Examples:
                  (doom-plist-keys (face-attr-construct face)))
        :inherit ,other-face)))
 
+(defun my/parse-raw-prefix (arg)
+  "Parse raw prefix argument ARG passed to the parent function.
+Returns a list of (TYPE VALUE), where TYPE is a symbol and VALUE
+is an integer. Possible forms include:
+
+  (none 1)
+      No prefix argument was supplied.
+
+  (universal VALUE)
+      `C-u' was typed one or more times, without a following numeric value.
+      Evaluate `(log VALUE 4)' to determine how many times `C-u' was typed.
+
+  (negative -1)
+      `M--' or `C-u -' was typed, without following digits.
+
+  (numeric VALUE)
+      `C-u VALUE' or `M-VALUE' was typed, where VALUE is an integer.
+
+Example usage:
+
+  (defun my/test-function (arg)
+    (interactive \"P\") ;; raw prefix argument
+    (cl-destructuring-bind (type value) (my/parse-raw-prefix arg)
+      (message \"%s: %d\" type value)))
+
+See also: `(elisp) Prefix Command Arguments'."
+  (cond
+   ((null arg) (list 'none 1))
+   ((listp arg) (list 'universal (car arg)))
+   ((eq '- arg) (list 'negative -1))
+   ((integerp arg) (list 'numeric arg))
+   (t (error "Unrecognized prefix argument format: %s" arg))))
+
 (unless initial-window-system
   (remove-hook 'company-mode 'company-box-mode))
 
