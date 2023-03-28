@@ -887,6 +887,11 @@ Closes and re-opens Treemacs to apply the new theme."
   (define-key! projectile-mode-map
     "C-c p" #'projectile-command-map))
 
+(setq-default visual-fill-column-center-text t
+              visual-fill-column-width 120)
+
+(setq-default visual-fill-column-fringes-outside-margins nil)
+
 (after! writeroom-mode
 
   (defvar my/zen--old-display-line-numbers nil)

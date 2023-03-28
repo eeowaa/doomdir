@@ -2594,13 +2594,33 @@ for standard Emacs bindings (snippet from =+emacs-bindings.el=):
     "C-c p" #'projectile-command-map))
 #+end_src
 
-** zen [0/2]
+** zen [2/4]
 #+begin_quote
 This module provides two minor modes that make Emacs into a more comfortable
 writing or coding environment. Folks familiar with "distraction-free" or "zen"
 modes from other editors -- or [[https://github.com/rnkn/olivetti][olivetti]], [[https://github.com/zk-phi/sublimity][sublimity]], and [[https://github.com/IdoMagal/Tabula-Rasa][tabula-rasa]] (Emacs
 plugins) -- will feel right at home.
 #+end_quote
+
+*** DONE [#B] Create a minor mode to center text and do nothing else
+Options:
+1. Use ~centered-window-mode~
+2. Create a new minor mode utilizing ~visual-fill-column-mode~
+3. Modify global default value of ~visual-fill-column-center-text~ and just use
+   ~visual-fill-column-mode~.
+
+I never use ~visual-fill-column-mode~ by itself, so I will just hijack it for
+centering text within a window.
+
+#+begin_src emacs-lisp :tangle yes
+(setq-default visual-fill-column-center-text t
+              visual-fill-column-width 120)
+#+end_src
+
+*** DONE [#C] Keep the VC gutter close to the text in Zen mode
+#+begin_src emacs-lisp :tangle yes
+(setq-default visual-fill-column-fringes-outside-margins nil)
+#+end_src
 
 *** STRT [#C] Unclutter the interface in additional ways
 #+begin_src emacs-lisp :tangle yes
