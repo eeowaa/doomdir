@@ -1840,6 +1840,26 @@ which causes problems even if there is no existing buffer."
 (defvar-local my/linked-buffer nil
   "The buffer that `my/send-region' sends text to.")
 
+(defun my/region-string (beg end)
+  "Return contents of active region or evil selection.
+This function also works as expected on rectangular regions and
+evil block selections."
+  (interactive "r")
+  (let (apply-on-rectangle-fn)
+    (cond
+     (rectangle-mark-mode
+      (setq apply-on-rectangle-fn #'apply-on-rectangle))
+     ((and (eq 'visual (bound-and-true-p evil-state))
+           (eq evil-visual-selection 'block))
+      (setq apply-on-rectangle-fn #'evil-apply-on-rectangle)))
+    (if apply-on-rectangle-fn
+        (cl-letf ((lines (list nil))
+                  ((symbol-function 'buffer-substring) #'buffer-substring-no-properties))
+          (funcall apply-on-rectangle-fn #'extract-rectangle-line beg end lines)
+          (setq lines (nreverse (cdr lines)))
+          (mapconcat #'identity lines "\n"))
+      (buffer-substring-no-properties beg end))))
+
 (defun my/send-region (beg end)
   "Send text in region to a linked buffer.
 
@@ -1847,7 +1867,12 @@ If the current buffer does not have a linked buffer, or given a
 non-nil prefix argument, this function will prompt for a buffer
 and set the linked buffer accordingly.
 
-Leading and trailing whitespace is removed from the region before
+Indentation is removed from the region before sending to the
+linked buffer; the indentation level is defined by the first
+line. This helps when sending indented source blocks (e.g. in
+`org-mode' and `markdown-mode') to REPLs.
+
+Trailing whitespace is also removed from the region before
 sending to the linked buffer; however, only one trailing newline
 is removed. This helps in situations where consecutive trailing
 newlines have special meaning, such as in Python function
@@ -1857,11 +1882,16 @@ Contrast this function to `send-region', which sends a region to
 a process instead of another buffer. Use `my/send-region' instead
 if you want to send region to a REPL or terminal emulator."
   (interactive "r")
-  (let* ((region (buffer-substring-no-properties beg end))
-         (trailing-newlines (if (string-match "\\(\\(?:\r?\n\\)+\\)\r?\n\\'" region)
-                                (match-string 1 region)
+  (let* ((region-string (my/region-string beg end))
+         (region-noindent (with-temp-buffer
+                            (insert region-string)
+                            (goto-char (point-min))
+                            (indent-rigidly (point) (point-max) (- (current-indentation)))
+                            (buffer-string)))
+         (trailing-newlines (if (string-match "\\(\\(?:\r?\n\\)+\\)\r?\n\\'" region-noindent)
+                                (match-string 1 region-noindent)
                               ""))
-         (text (concat (string-trim region) trailing-newlines))
+         (text (concat (string-trim-right region-noindent) trailing-newlines))
          (prompt (or (and (or (null my/linked-buffer) current-prefix-arg)
                           "Select a buffer to link: ")
                      (and (not (buffer-live-p my/linked-buffer))

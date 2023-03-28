@@ -5444,7 +5444,7 @@ echo "Hi, ${name}!"
 A workaround is to simply *not export* the results.
 
 ** elasticsearch [0/0] :eeowaa:
-** eval [1/5]
+** eval [1/4]
 *** DONE [#A] Implement arbitrary region copy/paste between buffers :feat:
 I would like to be able to "send" a region from one buffer to another buffer
 completely at will.
@@ -5453,6 +5453,26 @@ completely at will.
 (defvar-local my/linked-buffer nil
   "The buffer that `my/send-region' sends text to.")
 
+(defun my/region-string (beg end)
+  "Return contents of active region or evil selection.
+This function also works as expected on rectangular regions and
+evil block selections."
+  (interactive "r")
+  (let (apply-on-rectangle-fn)
+    (cond
+     (rectangle-mark-mode
+      (setq apply-on-rectangle-fn #'apply-on-rectangle))
+     ((and (eq 'visual (bound-and-true-p evil-state))
+           (eq evil-visual-selection 'block))
+      (setq apply-on-rectangle-fn #'evil-apply-on-rectangle)))
+    (if apply-on-rectangle-fn
+        (cl-letf ((lines (list nil))
+                  ((symbol-function 'buffer-substring) #'buffer-substring-no-properties))
+          (funcall apply-on-rectangle-fn #'extract-rectangle-line beg end lines)
+          (setq lines (nreverse (cdr lines)))
+          (mapconcat #'identity lines "\n"))
+      (buffer-substring-no-properties beg end))))
+
 (defun my/send-region (beg end)
   "Send text in region to a linked buffer.
 
@@ -5460,7 +5480,12 @@ If the current buffer does not have a linked buffer, or given a
 non-nil prefix argument, this function will prompt for a buffer
 and set the linked buffer accordingly.
 
-Leading and trailing whitespace is removed from the region before
+Indentation is removed from the region before sending to the
+linked buffer; the indentation level is defined by the first
+line. This helps when sending indented source blocks (e.g. in
+`org-mode' and `markdown-mode') to REPLs.
+
+Trailing whitespace is also removed from the region before
 sending to the linked buffer; however, only one trailing newline
 is removed. This helps in situations where consecutive trailing
 newlines have special meaning, such as in Python function
@@ -5470,11 +5495,16 @@ Contrast this function to `send-region', which sends a region to
 a process instead of another buffer. Use `my/send-region' instead
 if you want to send region to a REPL or terminal emulator."
   (interactive "r")
-  (let* ((region (buffer-substring-no-properties beg end))
-         (trailing-newlines (if (string-match "\\(\\(?:\r?\n\\)+\\)\r?\n\\'" region)
-                                (match-string 1 region)
+  (let* ((region-string (my/region-string beg end))
+         (region-noindent (with-temp-buffer
+                            (insert region-string)
+                            (goto-char (point-min))
+                            (indent-rigidly (point) (point-max) (- (current-indentation)))
+                            (buffer-string)))
+         (trailing-newlines (if (string-match "\\(\\(?:\r?\n\\)+\\)\r?\n\\'" region-noindent)
+                                (match-string 1 region-noindent)
                               ""))
-         (text (concat (string-trim region) trailing-newlines))
+         (text (concat (string-trim-right region-noindent) trailing-newlines))
          (prompt (or (and (or (null my/linked-buffer) current-prefix-arg)
                           "Select a buffer to link: ")
                      (and (not (buffer-live-p my/linked-buffer))
@@ -5528,9 +5558,6 @@ if you want to send region to a REPL or terminal emulator."
         :i "C-d" #'comint-send-eof)
   (setq-default comint-scroll-show-maximum-output nil))
 #+end_src
-
-*** TODO [#A] Use evil/rectangular regions when sending text :feat:
-Take a look at Doom's ~+eval/region~ to see if that helps.
 
 *** TODO [#B] Configure comint to select previous input in an intelligent way :bug:
 Every time a newline is entered in a comint buffer, the line is treated as
