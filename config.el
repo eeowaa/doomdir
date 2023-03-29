@@ -2213,6 +2213,21 @@ See also: `ts-fold-summary--get'."
       (forward-line 1)
       (insert ";; => "))))
 
+(setq-hook! 'emacs-lisp-mode-hook
+  eldoc-idle-delay 0.1)
+
+(defadvice! my/show-function-docstring-a (fn sym &rest r)
+  "If SYM is a function, append its docstring."
+  :around #'elisp-get-fnsym-args-string
+  (concat
+   (apply fn sym r)
+   (let* ((doc (and (fboundp sym) (documentation sym 'raw)))
+          (oneline (and doc (substring doc 0 (string-match "\n" doc)))))
+     (and oneline
+          (stringp oneline)
+          (not (string= "" oneline))
+          (concat " | " (propertize oneline 'face 'italic))))))
+
 (pushnew! auto-mode-alist '("Cask\\'" . lisp-data-mode))
 
 (after! lsp-haskell

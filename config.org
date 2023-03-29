@@ -4386,6 +4386,10 @@ https://github.com/akermu/emacs-libvterm/issues/179
 Somebody worked around this by running GNU Screen in each ~vterm~ buffer:
 https://github.com/akermu/emacs-libvterm/issues/179#issuecomment-1045331359
 
+#+begin_src sh :tangle no
+sudo dnf -y install screen
+#+end_src
+
 #+begin_src emacs-lisp :tangle no
 (setq vterm-shell "screen")
 #+end_src
@@ -6624,7 +6628,7 @@ or [[https://github.com/elixir-lsp/elixir-ls/][elixir-ls]].
 #+end_quote
 
 ** elm [0/0] :ARCHIVE:
-** emacs-lisp [3/4]
+** emacs-lisp [4/4]
 #+begin_quote
 This module extends support for Emacs Lisp in Doom Emacs.
 #+end_quote
@@ -6659,14 +6663,37 @@ https://www.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_thread/eqrf69
       (insert ";; => "))))
 #+end_src
 
+*** DONE [#B] Show docstring for thing-at-point without delay
+I want documentation to update /nearly/ immediately -- basically when I've
+stopped moving my cursor. ~emacs-lisp-mode~ can readily handle a delay of even 0
+seconds, but it doesn't look very good to me.
+
+#+begin_src emacs-lisp :tangle yes
+(setq-hook! 'emacs-lisp-mode-hook
+  eldoc-idle-delay 0.1)
+#+end_src
+
+*** DONE [#B] Display function docstring along with arguments
+Reference: https://emacs.stackexchange.com/a/55914/21977
+
+#+begin_src emacs-lisp :tangle yes
+(defadvice! my/show-function-docstring-a (fn sym &rest r)
+  "If SYM is a function, append its docstring."
+  :around #'elisp-get-fnsym-args-string
+  (concat
+   (apply fn sym r)
+   (let* ((doc (and (fboundp sym) (documentation sym 'raw)))
+          (oneline (and doc (substring doc 0 (string-match "\n" doc)))))
+     (and oneline
+          (stringp oneline)
+          (not (string= "" oneline))
+          (concat " | " (propertize oneline 'face 'italic))))))
+#+end_src
+
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
 (pushnew! auto-mode-alist '("Cask\\'" . lisp-data-mode))
 #+end_src
-
-*** TODO [#A] Do not jump to in-buffer definitions when using =K= :bug:
-If I want to see the definition, I'll use =gd=. I want =K= to just show the
-documentation and do nothing else.
 
 ** erlang [0/0] :ARCHIVE:
 #+begin_quote

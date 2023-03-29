@@ -458,3 +458,20 @@ To get started on this, open =+evil-bindings.el= by searching for it with
     (markdown-toggle-markup-hiding +1)))
 #+end_src
 
+
+* KILL [#A] Do not jump to in-buffer definitions when using =K= :bug:
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-03-29 Wed 11:48
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :lang/emacs-lisp
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2023-03-29 Wed 11:47] \\
+  I am no longer seeing this problem.
+:END:
+If I want to see the definition, I'll use =gd=. I want =K= to just show the
+documentation and do nothing else.
+
