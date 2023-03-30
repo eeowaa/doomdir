@@ -2443,6 +2443,47 @@ block at point is a pre block (as opposed to a code block)."
   (put 'my/markdown--indirect-indentation 'permanent-local t)
   (put 'my/markdown--indirect-block-type 'permanent-local t))
 
+(setq-hook! 'markdown-mode-hook hs-allow-nesting nil)
+
+(after! markdown-mode
+  (let* ((start `(,markdown-regex-gfm-code-block-open 5))
+         (end markdown-regex-gfm-code-block-close)
+         (comment-start nil)
+         (forward-sexp-func (lambda (&rest _)
+                              (re-search-forward markdown-regex-gfm-code-block-close
+                                                 (point-max)
+                                                 'ignore)))
+         (adjust-beg-func nil)
+         (hs-spec `(,start ,end ,comment-start ,forward-sexp-func ,adjust-beg-func)))
+    (dolist (mode '(markdown-mode gfm-mode))
+      (add-to-list 'hs-special-modes-alist (cons mode hs-spec))))
+
+  (defadvice! my/markdown-looking-at-block-start-a ()
+    :before-while #'hs-looking-at-block-start-p
+    (or (not (eq major-mode 'markdown-mode))
+        (when-let ((bounds (markdown-code-block-at-point))
+                   (start (car bounds)))
+          (= (line-number-at-pos)
+             (line-number-at-pos start)))))
+
+  (defun my/markdown-find-block-start ()
+    (when-let ((bounds (markdown-code-block-at-point))
+               (start (car bounds)))
+      (goto-char start)))
+
+  (defadvice! my/markdown-find-block-start-a (&rest _)
+    :before-while #'hs-find-block-beginning
+    :after (if (modulep! :editor fold)
+               '(+fold/close +fold/open +fold/toggle)
+             '(hs-hide-block hs-show-block))
+    (or (not (eq major-mode 'markdown-mode))
+        (my/markdown-find-block-start)))
+
+  (when (modulep! :editor fold)
+    (defadvice! my/+fold-from-eol-a (&rest body)
+      :override #'+fold-from-eol
+      (macroexp-progn body))))
+
 ;; Prevent flycheck from being automatically enabled
 (if (or (not (boundp 'flycheck-global-modes))
         (not (eq 'not (car flycheck-global-modes))))
