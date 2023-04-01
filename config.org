@@ -8496,7 +8496,7 @@ More than a simple "Hello World":
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
 (pushnew! auto-mode-alist '("pylint" . conf-mode)
-                          '("/activate\\'" . shell-script-mode))
+                          '("/activate\\'" . sh-mode))
 #+end_src
 
 *** STRT [#B] Integrate Pipenv with projectile :bug:
@@ -8762,8 +8762,8 @@ and indicators in ~sh-mode~.
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
 (pushnew! auto-mode-alist
-          '("/\\.config/\\(shell\\|bash\\)/.+" . shell-script-mode)
-          '("\\.\\(env\\|cygport\\)\\'" . shell-script-mode))
+          '("/\\.config/\\(shell\\|bash\\)/.+" . sh-mode)
+          '("\\.\\(env\\|cygport\\)\\'" . sh-mode))
 #+end_src
 
 *** TODO [#B] Improve syntax highlighting for ZSH :tweak:
@@ -8793,6 +8793,7 @@ bar=`
 
 Reference:
 + ~edit-indirect-region~
+
 
 ** sml [0/0] :ARCHIVE:
 #+begin_quote
@@ -8995,7 +8996,7 @@ have listed some commented-out packages below that I would like to install.
 ;;(package! conventional-changelog)
 
 ;; System configuration
-;;(package! crontab-mode)
+;;(package! crontab-mode) ;; Beware of existing entry in `auto-mode-alist'
 ;;(package! daemons)
 ;;(package! etc-sudoers-mode)
 ;;(package! su)

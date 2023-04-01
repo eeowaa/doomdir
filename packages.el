@@ -141,7 +141,7 @@
 ;;(package! conventional-changelog)
 
 ;; System configuration
-;;(package! crontab-mode)
+;;(package! crontab-mode) ;; Beware of existing entry in `auto-mode-alist'
 ;;(package! daemons)
 ;;(package! etc-sudoers-mode)
 ;;(package! su)

@@ -2865,7 +2865,7 @@ This is a list of lists, not a list of cons cells.")
                `(,(concat (file-name-as-directory (getenv "HOME")) ".local/pipx/venvs") . 1)))
 
 (pushnew! auto-mode-alist '("pylint" . conf-mode)
-                          '("/activate\\'" . shell-script-mode))
+                          '("/activate\\'" . sh-mode))
 
 (after! dap-mode
   (setq dap-python-debugger 'debugpy))
@@ -2892,8 +2892,8 @@ This is a list of lists, not a list of cons cells.")
   lsp-diagnostics-provider :none)
 
 (pushnew! auto-mode-alist
-          '("/\\.config/\\(shell\\|bash\\)/.+" . shell-script-mode)
-          '("\\.\\(env\\|cygport\\)\\'" . shell-script-mode))
+          '("/\\.config/\\(shell\\|bash\\)/.+" . sh-mode)
+          '("\\.\\(env\\|cygport\\)\\'" . sh-mode))
 
 (after! lsp-yaml
   (let ((f lsp-yaml-schema-store-local-db))
