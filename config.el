@@ -2897,6 +2897,9 @@ This is a list of lists, not a list of cons cells.")
 
 (add-hook 'sh-mode-local-vars-hook #'outline-minor-mode)
 
+(add-to-list 'hs-special-modes-alist
+             '(sh-mode "{{{" "}}}" "#"))
+
 (after! lsp-yaml
   (let ((f lsp-yaml-schema-store-local-db))
     (unless (file-exists-p f)

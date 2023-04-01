@@ -8694,7 +8694,7 @@ This module provides an environment for hacking and having fun in scheme. It is
 powered by [[https://www.nongnu.org/geiser/geiser_1.html#introduction][geiser]].
 #+end_quote
 
-** sh [4/8]
+** sh [4/9]
 #+begin_quote
 This module adds support for shell scripting languages.
 #+end_quote
@@ -8774,6 +8774,40 @@ starting with three hash characters (point must be on the header comment).
 #+begin_src emacs-lisp :tangle yes
 (add-hook 'sh-mode-local-vars-hook #'outline-minor-mode)
 #+end_src
+
+*** STRT [#A] Enable ~hs-minor-mode~ in ~sh-mode~ using Vim fold markers :feat:
+I personally use Vim fold markers as a folding mechanism in shell scripts. The
+two most obvious methods to achieve that using Doom's =:editor fold= module are
+as follows:
+
+1. ~vimish-fold-marks~ in =vimish-fold=
+2. ~hs-special-modes-alist~ =hideshow=
+
+Doom already appears to be using the second method for ~vimrc-mode~, so I'll do
+the same thing for now:
+
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'hs-special-modes-alist
+             '(sh-mode "{{{" "}}}" "#"))
+#+end_src
+
+Note that this method does *not* allow nested fold markers, even when
+~hs-allow-nesting~ is non-nil. Additionally, I have yet to find a way to achieve
+folding with numbered fold markers such as ~{{{1~ and ~}}}1~. Ideas include:
+
+1. Advising functionality in =vimish-fold= or =hideshow= (like I did with
+   ~markdown-mode~ to support folding code blocks)
+
+2. Add a fourth argument to the ~sh-mode~ entry of ~hs-special-modes-alist~ to
+   define a custom ~hs-forward-sexp-func~ (like what Doom did for the
+   ~yaml-mode~ entry of ~hs-special-modes-alist~)
+
+3. Install =origami= and define a ~sh-mode~ entry for ~origami-parser-alist~
+   (however, I would like to avoid installing another package)
+
+The second option seems the most alluring at the moment. If I get that to work,
+I would probably want to refactor how I implemented code block folding for
+~markdown-mode~, as well.
 
 *** TODO [#B] Improve syntax highlighting for ZSH :tweak:
 For an example of bad syntax highlighting, open =~/.config/zsh/.zshrc=.
