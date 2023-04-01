@@ -3001,24 +3001,79 @@ shell scripts, so I created my own:
 $0
 #+end_src
 
-** fold [0/3]
+** fold [0/4]
 #+begin_quote
 This module marries hideshow, vimish-fold and outline-minor-mode to bring you
 marker, indent and syntax-based code folding for as many languages as possible.
 #+end_quote
 
-Emacs has a lot of different packages available for folding, for example:
+*** COMMENT Documentation
+Emacs has a lot of different packages available for folding. For example:
+
++ =vimish-fold=
+  - Used by =:editor fold=
+  - External package installed by Doom
+  - Define folds by region
+    + Create via =zf= (~evil-vimish-fold/create~)
+    + Expand via =zo=
+  - Can also fold via markers
+    + See ~vimish-fold-marks~
+
++ =ts-fold=
+  - Used by =:editor fold=
+  - External package (at least for Emacs < 29) installed by Doom
+  - Leverages =tree-sitter= parser to define foldable regions
+    + =ts-fold= must be instrumented separately from =tree-sitter=
+    + Just because a mode has a =tree-sitter= parser doesn't mean that it has a
+      corresponding =ts-fold= implementation
+  - Use this when available
 
 + =hideshow=
-+ =yafolding=
-+ =origami=
+  - Used by =:editor fold=
+  - Builtin package
+  - Fold between start/end regexps
+    + End regexp is technically optional
+    + For example, take a look at Doom's customization of the ~yaml-mode~ entry
+      for ~hs-special-modes-alist~, which uses ~+fold-hideshow-forward-block-by-indent-fn~
+      to find the end of the foldable region
+  - Regexps are defined per major mode
+    + Only one start/end pair of regexps available at a time
+    + Can possibly overcome this limitation via a custom
+      ~hs-forward-sexp-function~ that moves point to the end of a foldable block
+      based on the starting regexp that point is "looking at"
+
 + =outline-minor-mode=
-+ =vimish-fold=
+  - Used by =:editor fold=
+  - Builtin package
+  - Fold regions defined by header regexps
+    + Point must be on the header in order to fold the region
+    + Cannot define end regexps to bound the region
+  - Most limited folding available
 
-I'm not convinced that Doom utilizes Emacs folding to its full potential.
-*UPDATE*: =tree-sitter= and =ts-fold-mode= might help to improve the situation.
++ =origami=
+  - Not supported by =:editor fold= (must advise)
+  - External package
+  - Most flexible folding mechanism
+    + Define ad-hoc parser functions per major mode
+    + Comes with helper functions for defining start/end regexp pairs, which can
+      be used to define multiple types of foldable blocks per major mode
+  - Most flexible keybindings
+    + Supports most or all Vim keybindings for closing and expanding folds
+    + List of bindings available here: [[*Vim help text for folding]]
+  - Purportedly slow for large files
+    + Still need to verify this for myself
+    + Can mitigate by enabling for select modes (e.g. ~markdown-mode~) and
+      falling back to more lightweight/performant folding
 
-*** Vim help text for folding :noexport:
++ =yafolding=
+  - Not supported by =:editor fold= (must advise)
+  - External package
+  - Fold based on indentation
+    + =origami= falls back to indentation-based folding
+    + =hideshow= can utilize ~+fold-hideshow-forward-block-by-indent-fn~
+  - I see no reason to install this at the moment
+
+*** COMMENT Vim help text for folding
 This only contains the relevant commands and nothing Vim-internal.
 
 **** Creating and deleting folds
@@ -3133,7 +3188,7 @@ closing and opening enveloping folds:
 (setq hs-allow-nesting t)
 #+end_src
 
-*** TODO [#A] Enable fine-grained folding for JSON mode :bug:
+*** STRT [#A] Enable fine-grained folding for JSON mode :bug:
 Play around with folding in the following code block and just /try/ to suppress
 your annoyance:
 
@@ -3158,12 +3213,40 @@ your annoyance:
 }
 #+end_src
 
-My mind can't even comprehend how broken this is.
+My mind can't even comprehend how broken this is. *UPDATE*: Since adding the
+=+lsp= flag to the =:lang json= module, =json-mode= uses tree-sitter folding,
+which actually works pretty well.
 
 *** TODO [#A] Enable Vim fold markers :feat:
-References:
-+ https://www.reddit.com/r/emacs/comments/5ei7wa/awesome_vimlike_folding_for_evilmode_with_markers/
-+ https://emacs.stackexchange.com/questions/37363/vim-triple-braces-code-folding-in-emacs
+Reference: https://www.reddit.com/r/emacs/comments/5ei7wa/awesome_vimlike_folding_for_evilmode_with_markers/
+
++ =origami= is recommended
++ Vim keybindings are provided
+
+*** STRT [#C] Make the =vimish-fold= header fill the window :tweak:
+To test, fold an arbitrary region using =zf= (~evil-vimish-fold/create~).
+
+#+begin_src emacs-lisp :tangle no
+(setq vimish-fold-header-width nil)
+#+end_src
+
+Unfortunately, the above code block does not work well in the following
+situations:
+
+1. *When line numbers are displayed*
+   - This is because line numbers are part of the window body. From the elisp
+     manual section on [[info:elisp#Basic Windows][basic window concepts]]:
+     #+begin_quote
+     Note also, that line numbers (and their surrounding whitespace) as
+     displayed by ~display-line-numbers-mode~ do not count as decorations
+     either; they are part of the window’s body too.
+     #+end_quote
+   - Could calculate the width based on how many screen columns are taken up by
+     line numbers.
+
+2. *When the text scale is adjusted*
+   - Could probably add a hook or advice the text scaling functions (e.g.
+     ~text-scale-adjust~, bound to =C-x C-==).
 
 ** format [0/0] :ARCHIVE:
 #+begin_quote
