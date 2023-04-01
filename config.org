@@ -8694,7 +8694,7 @@ This module provides an environment for hacking and having fun in scheme. It is
 powered by [[https://www.nongnu.org/geiser/geiser_1.html#introduction][geiser]].
 #+end_quote
 
-** sh [3/7]
+** sh [4/8]
 #+begin_quote
 This module adds support for shell scripting languages.
 #+end_quote
@@ -8764,6 +8764,15 @@ and indicators in ~sh-mode~.
 (pushnew! auto-mode-alist
           '("/\\.config/\\(shell\\|bash\\)/.+" . sh-mode)
           '("\\.\\(env\\|cygport\\)\\'" . sh-mode))
+#+end_src
+
+*** DONE [#C] Enable ~outline-minor-mode~ in ~sh-mode~ :feat:
+~outline-regexp~ is set to ~"###"~ in ~sh-mode~, so by enabling
+~outline-minor-mode~, we can fold sections of code delimited by comments
+starting with three hash characters (point must be on the header comment).
+
+#+begin_src emacs-lisp :tangle yes
+(add-hook 'sh-mode-local-vars-hook #'outline-minor-mode)
 #+end_src
 
 *** TODO [#B] Improve syntax highlighting for ZSH :tweak:

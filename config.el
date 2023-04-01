@@ -2895,6 +2895,8 @@ This is a list of lists, not a list of cons cells.")
           '("/\\.config/\\(shell\\|bash\\)/.+" . sh-mode)
           '("\\.\\(env\\|cygport\\)\\'" . sh-mode))
 
+(add-hook 'sh-mode-local-vars-hook #'outline-minor-mode)
+
 (after! lsp-yaml
   (let ((f lsp-yaml-schema-store-local-db))
     (unless (file-exists-p f)
