@@ -7283,6 +7283,7 @@ Currently only includes code blocks."
 - [X] Editing in indirect buffers
 - [X] Automatic indentation/reindirection
 - [X] Headerline like org-babel
+- [X] Bind keys to jump to next/previous source block
 - [-] Adding unindented text to the kill ring
 - [-] Sending unindented text to a REPL
 
@@ -7387,6 +7388,38 @@ block at point is a pre block (as opposed to a code block)."
 
   (define-key markdown-mode-map
     [remap markdown-edit-code-block] #'my/markdown-edit-block)
+
+  (defun my/markdown-forward-code-block (&optional count)
+    "Move forward COUNT source blocks (default 1)."
+    (interactive "p")
+    (unless (zerop count)
+      (let ((re (format "\\(?:%s\\)\\|\\(?:%s\\)"
+                        markdown-regex-gfm-code-block-open
+                        markdown-regex-tilde-fence-begin))
+            target)
+        (save-excursion
+          (when-let ((bounds (markdown-code-block-at-point-p))
+                     (beg (car bounds))
+                     (end (cadr bounds)))
+            (goto-char (if (cl-plusp count) end beg)))
+          (re-search-forward re nil t (if (cl-plusp count) 1 -1))
+          (setq target (car-safe (markdown-code-block-at-point-p))))
+        (if target
+            (progn
+              (goto-char target)
+              (my/markdown-forward-code-block
+               (funcall (if (cl-plusp count) #'1- #'1+) count)))
+          (message "No further code blocks")))))
+
+  (defun my/markdown-backward-code-block (&optional count)
+    "Move backward COUNT source blocks (default 1)."
+    (interactive "p")
+    (my/markdown-forward-code-block (- count)))
+
+  (after! evil-markdown
+    (map! :map evil-markdown-mode-map
+          :nv "]c" #'my/markdown-forward-code-block
+          :nv "[c" #'my/markdown-backward-code-block))
 
   (defun my/markdown--edit-indirect-before-commit-function-h ()
     "Re-indent indirect buffer before commiting."
