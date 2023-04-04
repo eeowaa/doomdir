@@ -2998,8 +2998,66 @@ This is a list of lists, not a list of cons cells.")
   :after kubernetes-modes
   :when (modulep! :editor evil +everywhere))
 
+;; Open online documentation in `w3m'
 (setq +lookup-open-url-fn #'w3m-browse-url)
-(setq w3m-display-mode 'plain)
+
+;; Use DuckDuckGo as your home page
+(setq w3m-home-page "https://lite.duckduckgo.com/lite/")
+
+;; Do not use tabs
+(setq! w3m-display-mode 'plain)
+
+;; Use the header line to display the page title and location
+(setq! w3m-use-tab-line nil
+       w3m-use-header-line-title t
+       w3m-use-header-line t)
+
+;; Reverting the buffer reloads the page
+(setq-hook! 'w3m-mode-hook
+  revert-buffer-function (lambda (&rest _) (w3m-reload-this-page)))
+
+(defun my/w3m-form-at-point-p ()
+  (get-text-property (point) 'w3m-action))
+
+(defun my/w3m-edit-form-at-point ()
+  "Edit the form at point"
+  (interactive)
+  (if (my/w3m-form-at-point-p)
+      (w3m-view-this-url)
+    (message "No form at point")))
+
+(after! evil-collection-w3m
+  (evil-collection-define-key 'normal 'w3m-mode-map
+    "i" #'my/w3m-edit-form-at-point))
+
+(after! w3m
+  (require 'diff)
+  (require 'info)
+  (custom-set-faces!
+    ;; Links
+    '(w3m-anchor :inherit link)
+    '(w3m-anchor-arrived :inherit link-visited)
+    ;; Edited text
+    '(w3m-strike-through :inherit diff-removed)
+    '(w3m-insert :inherit diff-added)
+    ;; Header line
+    '(w3m-header-line-background :inherit header-line)
+    '(w3m-header-line-content :inherit info-header-xref)
+    '(w3m-header-line-title :inherit header-line)
+    ;; Images
+    '(w3m-image :inherit info-menu-star)
+    '(w3m-image-anchor :inherit info-index-match)))
+
+(after! w3m-form
+  (require 'custom)
+  (custom-set-faces!
+    ;; Form fields
+    '(w3m-form :inherit widget-field)
+    '(w3m-form-inactive :inherit widget-inactive)
+    ;; Form buttons
+    '(w3m-form-button :inherit custom-button)
+    '(w3m-form-button-mouse :inherit custom-button-mouse)
+    '(w3m-form-button-pressed :inherit custom-button-pressed)))
 
 (after! elfeed
   (add-hook! elfeed-search-mode #'elfeed-update))
