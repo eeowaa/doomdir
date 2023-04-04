@@ -3001,8 +3001,8 @@ This is a list of lists, not a list of cons cells.")
 ;; Open online documentation in `w3m'
 (setq +lookup-open-url-fn #'w3m-browse-url)
 
-;; Use DuckDuckGo as your home page
-(setq w3m-home-page "https://lite.duckduckgo.com/lite/")
+;; Use Google as your home page
+(setq w3m-home-page "https://www.google.com/")
 
 ;; Do not use tabs
 (setq! w3m-display-mode 'plain)
