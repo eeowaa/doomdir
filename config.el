@@ -754,9 +754,19 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
 (setq treemacs-show-cursor t)
 
+;; No need for the fringe indicator with `hl-line' mode and visible cursor
+(after! doom-themes-ext-treemacs
+  (with-eval-after-load 'treemacs
+    (setq treemacs-fringe-indicator-mode nil)))
+
 (after! treemacs
   (setq-hook! 'treemacs-mode-hook
     revert-buffer-function (lambda (&rest _) (treemacs-refresh))))
+
+(after! doom-themes-ext-treemacs
+  (with-eval-after-load 'treemacs
+    (remove-hook 'treemacs-mode-hook #'doom-themes-hide-fringes-maybe)
+    (advice-remove #'treemacs-select-window #'doom-themes-hide-fringes-maybe)))
 
 ;; REVIEW Consider detecting troublesome icons and automatically falling back to
 ;; the default icon for text files.
@@ -1699,26 +1709,6 @@ which causes problems even if there is no existing buffer."
 (setq +bitwarden-item-name-width 50
       +bitwarden-user-name-width 68
       +bitwarden-revision-date-width 24)
-
-(after! dap-mode
-  (defun my/refresh-window (&rest arg)
-    "Refresh the current window's display margins, fringes, and scroll bars."
-    (set-window-buffer nil (current-buffer)))
-  (add-hook! '(+dap-running-session-mode-hook
-               ;; NOTE Uncomment the following lines to get breakpoints to show
-               ;;      most of the time (slows things down a bit):
-               ;; dap-breakpoints-changed-hook
-               ;; dap-continue-hook
-               ;; dap-executed-hook
-               ;; dap-loaded-sources-changed-hook
-               ;; dap-position-changed-hook
-               ;; dap-session-changed-hook
-               ;; dap-session-created-hook
-               ;; dap-stack-frame-changed-hook
-               ;; dap-stopped-hook
-               ;; dap-terminated-hook
-               )
-               :append #'my/refresh-window))
 
 (map! :leader
       ;;; <leader> d --- debug

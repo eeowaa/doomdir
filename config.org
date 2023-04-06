@@ -2065,7 +2065,7 @@ loads, so tabs will appear in the ~ilist~ buffer until you manually run the
 Wait until you have a Maildir set up, then look at configuration options for
 ~display-time-mode~.
 
-** treemacs [11/16]
+** treemacs [12/16]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -2197,6 +2197,11 @@ following benefits of enabling the cursor in Treemacs:
 
 #+begin_src emacs-lisp :tangle yes
 (setq treemacs-show-cursor t)
+
+;; No need for the fringe indicator with `hl-line' mode and visible cursor
+(after! doom-themes-ext-treemacs
+  (with-eval-after-load 'treemacs
+    (setq treemacs-fringe-indicator-mode nil)))
 #+end_src
 
 *** DONE [#C] Configure revert-buffer :tweak:
@@ -2204,6 +2209,25 @@ following benefits of enabling the cursor in Treemacs:
 (after! treemacs
   (setq-hook! 'treemacs-mode-hook
     revert-buffer-function (lambda (&rest _) (treemacs-refresh))))
+#+end_src
+
+*** DONE [#C] Display truncation characters in the fringe :tweak:
+Fringes are not displayed in Treemacs. When the right fringe is not displayed,
+truncated lines end in ~$~. When running =C-l=, I can restore the fringes in
+Treemacs and truncated lines are indicated by an arrow in the right fringe.
+See also: [[info:emacs#Line Truncation][emacs#Line Truncation]]
+
+Basically, I want to display the right fringe in Treemacs. The left fringe is
+less important (only needed when scrolled to the right in order to show left
+truncation characters, or when ~treemacs-fringe-indicator-mode~ is enabled). I
+don't need ~treemacs-fringe-indicator-mode~ because ~hl-line-mode~ and
+~treemacs-show-cursor~ already provide good visual indicators.
+
+#+begin_src emacs-lisp :tangle yes
+(after! doom-themes-ext-treemacs
+  (with-eval-after-load 'treemacs
+    (remove-hook 'treemacs-mode-hook #'doom-themes-hide-fringes-maybe)
+    (advice-remove #'treemacs-select-window #'doom-themes-hide-fringes-maybe)))
 #+end_src
 
 *** STRT [#B] Display "+" and "-" icons in tty emacs :bug:
@@ -2235,6 +2259,9 @@ The workaround is as follows:
 1. =M-: my/treemacs-modify-icons RET= (from outside the Treemacs window)
 2. =Q= (from the Treemacs window)
 3. =SPC o p=
+
+*UPDATE*: The ~FIXME~ items in the following code block are likely caused by
+Doom theme extensions for Treemacs.
 
 #+begin_src emacs-lisp :tangle yes
 ;; REVIEW Consider detecting troublesome icons and automatically falling back to
@@ -2386,18 +2413,6 @@ would break =direnv=, which I heavily rely upon.
 Preferably, I would just automatically switch the project root in =treemacs=
 when switching worktrees using =magit=. Perhaps there is a hook that I could
 run, or advice if necessary.
-
-*** TODO [#C] Display truncation characters in the fringe :tweak:
-Fringes are not displayed in Treemacs. When the right fringe is not displayed,
-truncated lines end in ~$~. When running =C-l=, I can restore the fringes in
-Treemacs and truncated lines are indicated by an arrow in the right fringe.
-See also: [[info:emacs#Line Truncation][emacs#Line Truncation]]
-
-Basically, I want to display the right fringe in Treemacs. The left fringe is
-less important (only needed when scrolled to the right in order to show left
-truncation characters, or when ~treemacs-fringe-indicator-mode~ is enabled). I
-don't need ~treemacs-fringe-indicator-mode~ because ~hl-line-mode~ and
-~treemacs-show-cursor~ already provide good visual indicators.
 
 ** unicode [0/0] :ARCHIVE:
 #+begin_quote
@@ -4893,7 +4908,7 @@ displayed on the laptop I am currently using:
 I would prefer to make this dynamic.
 
 ** cloudformation [0/0] :eeowaa:ARCHIVE:
-** debugger [1/9]
+** debugger [1/8]
 References:
 + https://www.youtube.com/watch?v=0bilcQVSlbM
 + https://docs.doomemacs.org/latest/modules/tools/debugger/
@@ -4991,28 +5006,23 @@ features][untested features]]" below, which may be able to help with that.
 1. Currently, =dap-mode= only supports breakpoint icons in the fringe, not the
    margin, so indicators will not appear in TTY Emacs. Use the breakpoint window
    instead (~dap-ui-breakpoints~ or ~dap-ui-breakpoints-list~).
-2. If breakpoint icons are not showing up even in GUI Emacs, run
-   ~(set-window-buffer nil (current-buffer))~. See [[https://github.com/emacs-lsp/dap-mode/issues/374][this dap-mode bug]].
-   Essentially, this command just restores the buffer's saved settings for
-   display margins, fringe widths, and scroll bars. It is written in C and is
-   pretty fast, so it should be safe to use as a hook.
-3. If you delete a file containing breakpoints without first deleting the
+2. If you delete a file containing breakpoints without first deleting the
    breakpoints, you may not be able to open the breakpoints list. The only
    workaround I am aware of is to remove all breakpoints via
    ~dap-breakpoint-delete-all~.
-4. Unlike other debugging interfaces, =dap-mode= has no mechanism to temporarily
+3. Unlike other debugging interfaces, =dap-mode= has no mechanism to temporarily
    disable breakpoints while still keeping track of them. A workaround is to
    make the breakpoint conditional and set the condition to a language-specific
    expression that will always evaluate to false (e.g. ~false~, ~False~, ~0~)
    via ~dap-breakpoint-condition~.
-5. It can be somewhat unintuitive to determine where the program is stopped. In
+4. It can be somewhat unintuitive to determine where the program is stopped. In
    =dap-mode=, the best way I've found is through the "Debug Sessions" side
    window: just expand the tree for the current session until you see a process
    labeled "Breakpoint", "Step", or "Exception" (or possibly some other label),
    expand the process to view a call stack, and then press =RET= on the top
    entry (in *bold*, representing the current frame), which will take you to the
    line of code where execution stopped.
-6. In order to view breakpoint conditions, you need to use
+5. In order to view breakpoint conditions, you need to use
    ~dap-ui-breakpoints-list~ instead of the standard ~dap-ui-breakpoints~.
 
 ***** Expressions
@@ -5059,35 +5069,6 @@ brew install gdb
 # Install prerequisites for `tools/debugger` module
 sudo dnf -y install lldb gdb unzip
 nvm install node
-#+end_src
-
-*** LOOP [#A] Ensure that breakpoint icons do not vanish :bug:
-See "Known issues and workarounds" above. For now, I just run ~my/redraw~
-(=C-l=) if I want to display breakpoints.
-
-*UPDATE*: Might want to look into ~window-resize-pixelwise~ and
-~fit-window-to-buffer-horizontally~.
-
-#+begin_src emacs-lisp :tangle yes
-(after! dap-mode
-  (defun my/refresh-window (&rest arg)
-    "Refresh the current window's display margins, fringes, and scroll bars."
-    (set-window-buffer nil (current-buffer)))
-  (add-hook! '(+dap-running-session-mode-hook
-               ;; NOTE Uncomment the following lines to get breakpoints to show
-               ;;      most of the time (slows things down a bit):
-               ;; dap-breakpoints-changed-hook
-               ;; dap-continue-hook
-               ;; dap-executed-hook
-               ;; dap-loaded-sources-changed-hook
-               ;; dap-position-changed-hook
-               ;; dap-session-changed-hook
-               ;; dap-session-created-hook
-               ;; dap-stack-frame-changed-hook
-               ;; dap-stopped-hook
-               ;; dap-terminated-hook
-               )
-               :append #'my/refresh-window))
 #+end_src
 
 *** TODO [#A] Delete breakpoints when their file is deleted :bug:
