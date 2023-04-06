@@ -2506,6 +2506,9 @@ block at point is a pre block (as opposed to a code block)."
       :override #'+fold-from-eol
       (macroexp-progn body))))
 
+(after! markdown-mode
+  (add-to-list 'markdown-code-lang-modes '("http" . restclient-mode)))
+
 ;; Prevent flycheck from being automatically enabled
 (if (or (not (boundp 'flycheck-global-modes))
         (not (eq 'not (car flycheck-global-modes))))
