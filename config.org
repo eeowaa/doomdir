@@ -2065,7 +2065,7 @@ loads, so tabs will appear in the ~ilist~ buffer until you manually run the
 Wait until you have a Maildir set up, then look at configuration options for
 ~display-time-mode~.
 
-** treemacs [12/16]
+** treemacs [13/17]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -2112,9 +2112,8 @@ was enabled, so the file/directory labels were using the face specified by
 (see =SPC h F variable-pitch RET= to get information on the face). Basically,
 the face did not get resized.
 
-The only downside right now is that Treemacs only uses fixed-width fonts right
-now, which makes certain things harder to read. Overall, however, I think it
-looks better.
+The only downside is that Treemacs only uses fixed-width fonts now, which makes
+certain things harder to read. Overall, however, I think it looks better.
 
 See also:
 + [[help:doom-variable-pitch-font][doom-variable-pitch-font]]
@@ -2148,10 +2147,29 @@ This slows down startup a bit, but whatever (I'm not obsessed with startup):
 
 Reference: https://github.com/hlissner/doom-emacs/issues/4555
 
-*** DONE [#B] Do not collapse path strings
+*** DONE [#B] Do not collapse path strings :tweak:
 #+begin_src emacs-lisp :tangle yes
 (after! treemacs
   (setq treemacs-collapse-dirs 0))
+#+end_src
+
+*** DONE [#B] Do not read from popup frames :tweak:
+Certain operations in Treemacs (e.g. renaming files) will pop up a child frame
+in GUI Emacs to read a string. This frame is very small and has no borders, so
+if the frame loses focus, it can look like Emacs is frozen (the child frame does
+not close when it loses focus). There are two ways to fix this:
+
+1. Configure the child frame to close when it loses focus
+2. Always read from the minibuffer
+
+I will go with option 2 for the following reasons:
+
+- Consistent UI
+- Easier to implement
+- More flexible editing in the minibuffer vs. in the child frame
+
+#+begin_src emacs-lisp :tangle yes
+(setq treemacs-read-string-input 'from-minibuffer)
 #+end_src
 
 *** DONE [#C] Add keybindings to visit adjacent files
