@@ -2432,6 +2432,13 @@ Preferably, I would just automatically switch the project root in =treemacs=
 when switching worktrees using =magit=. Perhaps there is a hook that I could
 run, or advice if necessary.
 
+For the time being, I will just expose the =.git= directory in Treemacs so that
+I can at least manually navigate to the worktrees.
+
+#+begin_src emacs-lisp :tangle yes
+(setq treemacs-hide-dot-git-directory nil)
+#+end_src
+
 ** unicode [0/0] :ARCHIVE:
 #+begin_quote
 This module extends Doom's ability to display non-English unicode. It is

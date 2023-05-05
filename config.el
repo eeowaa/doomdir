@@ -880,6 +880,8 @@ Closes and re-opens Treemacs to apply the new theme."
     "Return the name of the current Treemacs theme."
     (treemacs-theme->name treemacs--current-theme)))
 
+(setq treemacs-hide-dot-git-directory nil)
+
 (after! diff-hl
   (unless (window-system) (diff-hl-margin-mode)))
 
