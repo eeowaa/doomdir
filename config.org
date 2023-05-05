@@ -5934,7 +5934,7 @@ EOF
 )
 #+end_src
 
-** lookup [3/6]
+** lookup [4/7]
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -5967,6 +5967,17 @@ sudo dnf -y install ripgrep sqlite-3
     (letf! ((#'pop-to-buffer #'display-buffer))
       (let (help-window-select)
         (apply fn args)))))
+#+end_src
+
+*** DONE [#B] Use completing-read for =dumb-jump= backend :tweak:bug:
+The last function called by ~+lookup/definition~ if all else fails is
+~+lookup-dumb-jump-backend-fn~, which uses =dumb-jump= to find a selection. By
+default, this will open a popup menu via ~popup-menu*~, which looks pretty awful
+in a GUI and currently sets the current frame's ~tab-bar-lines~ parameter to 0!
+Completing read is a better alternative:
+
+#+begin_src emacs-lisp :tangle yes
+(setq dumb-jump-selector 'completing-read)
 #+end_src
 
 *** STRT [#A] Automatically install missing docsets :feat:

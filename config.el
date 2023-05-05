@@ -1960,6 +1960,8 @@ if you want to send region to a REPL or terminal emulator."
       (let (help-window-select)
         (apply fn args)))))
 
+(setq dumb-jump-selector 'completing-read)
+
 (when (modulep! :tools lookup +docsets)
   (defun my/ensure-docsets ()
     (dolist (docset dash-docs-docsets)
