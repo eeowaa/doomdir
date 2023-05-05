@@ -2065,7 +2065,7 @@ loads, so tabs will appear in the ~ilist~ buffer until you manually run the
 Wait until you have a Maildir set up, then look at configuration options for
 ~display-time-mode~.
 
-** treemacs [13/17]
+** treemacs [12/18]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -2421,6 +2421,88 @@ but there are still some differences:
 3. Treemacs uses different fallback icons (e.g. for =config.org_archive=).
 
 That third difference is the most annoying in Treemacs.
+
+*** TODO [#A] Fix treemacs workspace integration :bug:
+This longstanding bug *impacts me worse than any other issue in my Emacs
+installation*, because it is the only bug that meets all of the following
+negative criteria:
+
+1. I regularly encounter the bug during normal Emacs usage.
+2. The bug breaks core functionality essential to my workflow.
+3. Restarting Emacs is the only way I know how to fix the bug.
+4. I don't know of any workarounds.
+
+**** Symptoms
++ Cannot remove projects from Treemacs via =C-c C-p d=
+  (~treemacs-remove-project-from-workspace~). For example:
+
+  #+begin_example
+  Remove project ox-ipynb from the current workspace? (y or n) y
+  treemacs-remove-project-from-workspace: Wrong type argument: arrayp, nil
+  #+end_example
+
++ Opening Treemacs via =SPC o p= (~+treemacs-toggle~) does not add the project
+  to the Treemacs side window of the current workspace. For example, from
+  =TODO.md= in the =~/Documents/src/life/bash-runbooks= workspace, the
+  ~"bash-runbooks"~ project is added to the Treemacs side window of another
+  workspace entirely.
+
++ Occasionally, the following string will be written to ~*Messages*~ buffer:
+
+  #+begin_example
+  Error running timer ‘treemacs--process-file-events’: (wrong-type-argument arrayp nil)
+  #+end_example
+
+**** Diagnostics
++ The symptoms seem to appear after opening a file outside of the project
+  corresponding to the current workspace, but that might not be the one and only
+  cause, if it even is a cause. =SPC p F= (~doom/find-file-in-other-project~)
+  is one way to attempt to reproduce the issue.
+
++ The ~treemacs-current-workspace~ function always returns the same data,
+  regardless of the workspace:
+
+  #+begin_src lisp-data
+  (treemacs-current-workspace) ;; =>
+  #s(treemacs-workspace "Perspective doom"
+                        (#s(treemacs-project "treemacs" "/home/eeowaa/.config/emacs/.local/straight/repos/treemacs" local-readable nil)
+                         #s(treemacs-project "bash-runbooks" "/home/eeowaa/Documents/src/life/bash-runbooks" local-readable nil)))
+  #+end_src
+
++ The ~+workspace-current-name~ function always returns the correct name. All it
+  does is call ~(safe-persp-name (+workspace-current))~, which is just
+  ~(safe-persp-name (get-current-persp))~.
+
++ The ~projectile-switch-project~ function (=SPC p p=) might -- but not
+  necessarily -- add a Treemacs projects to the current "stuck" workspace:
+
+  #+begin_src lisp-data
+  (treemacs-current-workspace) ;; =>
+  #s(treemacs-workspace "Perspective doom"
+                        (#s(treemacs-project "treemacs" "/home/eeowaa/.config/emacs/.local/straight/repos/treemacs" local-readable nil)
+                         #s(treemacs-project "bash-runbooks" "/home/eeowaa/Documents/src/life/bash-runbooks" local-readable nil)
+                         #s(treemacs-project "doom" "/home/eeowaa/Documents/src/life/stow-dotfiles/doom/.config/doom" local-readable nil)))
+  #+end_src
+
+**** Ideas
++ Did the ~treemacs-workspace~ definition (~cl-struct~ and/or ~eieio~ class?)
+  change the data type of the project list? It seems that arrays are expected,
+  but lists are used. Maybe =treemacs-projectile= and/or Doom are out of sync
+  with =treemacs=. Look for the following keywords in the =treemacs= package:
+  - ~defclass~
+  - ~cl-defstruct~
+  - ~cl-defmethod~
+  - ~gv-define-setter~
+
++ =treemacs-scope.el= (a part of =treemacs=) seems relevant:
+  - ~treemacs-current-scope-type~
+  - ~treemacs-persp-scope~ in =treemacs-persp.el=
+
++ What about the =treemacs-projectile= package?
+  ~treemacs--projectile-current-user-project-function~ is added to
+  ~treemacs--find-user-project-functions~. These functions are called by
+  ~treemacs--find-current-user-project~, which is used by both =treemacs= and
+  =treemacs-persp=.
 
 *** TODO [#B] Allow switching git worktrees :feat:
 My convention is to put alternate worktrees under =.git/worktree-paths=, which
