@@ -8166,7 +8166,7 @@ displayed at all.
 *** Dates and Times [0/0]
 *** Refiling and Archiving [0/1]
 **** STRT [#C] Display distinguishable name in refile targets :tweak:
-I've accomplished by goal, but I don't like seeing the entire file path.
+I've accomplished my goal, but I don't like seeing the entire file path.
 Instead, I would like to see the file-level Org tag (e.g. "doom" for this file).
 
 #+begin_src emacs-lisp :tangle yes
@@ -8202,8 +8202,9 @@ mkdir -p ~/org
       ;; Directories to search for agenda files
       my/org-directories `("work" "life" ,doom-user-dir)
       org-agenda-files (mapcar (lambda (f)
-                                 (if (file-name-absolute-p f) f
-                                   (expand-file-name f org-directory)))
+                                 (file-name-as-directory
+                                  (if (file-name-absolute-p f) f
+                                    (expand-file-name f org-directory))))
                                `("" ,@my/org-directories))
 
       ;; Only "todo.org" files hold agenda items

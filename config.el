@@ -2801,8 +2801,9 @@ just perform a complete cycle of `org-cycle'."
       ;; Directories to search for agenda files
       my/org-directories `("work" "life" ,doom-user-dir)
       org-agenda-files (mapcar (lambda (f)
-                                 (if (file-name-absolute-p f) f
-                                   (expand-file-name f org-directory)))
+                                 (file-name-as-directory
+                                  (if (file-name-absolute-p f) f
+                                    (expand-file-name f org-directory))))
                                `("" ,@my/org-directories))
 
       ;; Only "todo.org" files hold agenda items
