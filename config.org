@@ -2746,7 +2746,7 @@ for standard Emacs bindings (snippet from =+emacs-bindings.el=):
     "C-c p" #'projectile-command-map))
 #+end_src
 
-** zen [2/4]
+** zen [3/4]
 #+begin_quote
 This module provides two minor modes that make Emacs into a more comfortable
 writing or coding environment. Folks familiar with "distraction-free" or "zen"
@@ -2774,7 +2774,7 @@ centering text within a window.
 (setq-default visual-fill-column-fringes-outside-margins nil)
 #+end_src
 
-*** STRT [#C] Unclutter the interface in additional ways
+*** DONE [#C] Unclutter the interface in additional ways
 #+begin_src emacs-lisp :tangle yes
 (after! writeroom-mode
 
@@ -2782,7 +2782,7 @@ centering text within a window.
   (defvar my/zen--old-hl-line-mode nil)
   (defvar my/zen--old-column-highlight-mode nil)
   (defvar my/zen--old-display-fill-column-indicator-mode nil)
-  ;; (defvar my/zen--old-tab-bar-mode nil)
+  (defvar my/zen--old-tab-bar-mode nil)
   (defvar my/zen--old-tab-line-mode nil)
   (defvar my/zen--old-vi-tilde-fringe-mode nil)
   (defvar my/zen--old-diff-hl-mode nil)
@@ -2801,8 +2801,8 @@ centering text within a window.
                   (bound-and-true-p column-highlight-mode)
                   my/zen--old-display-fill-column-indicator-mode
                   (bound-and-true-p display-fill-column-indicator-mode)
-                  ;; my/zen--old-tab-bar-mode
-                  ;; (bound-and-true-p tab-bar-mode)
+                  my/zen--old-tab-bar-mode
+                  (bound-and-true-p tab-bar-mode)
                   my/zen--old-tab-line-mode
                   (bound-and-true-p tab-line-mode)
                   my/zen--old-vi-tilde-fringe-mode
@@ -2815,7 +2815,7 @@ centering text within a window.
             (hl-line-mode -1)
             (column-highlight-mode -1)
             (display-fill-column-indicator-mode -1)
-            ;; (tab-bar-mode -1)
+            (tab-bar-mode -1)
             (tab-line-mode -1)
             (vi-tilde-fringe-mode -1)
             (diff-hl-mode -1))
@@ -2825,7 +2825,7 @@ centering text within a window.
         (if my/zen--old-hl-line-mode (hl-line-mode +1))
         (if my/zen--old-column-highlight-mode (column-highlight-mode +1))
         (if my/zen--old-display-fill-column-indicator-mode (display-fill-column-indicator-mode +1))
-        ;; (if my/zen--old-tab-bar-mode (tab-bar-mode +1))
+        (if my/zen--old-tab-bar-mode (tab-bar-mode +1))
         (if my/zen--old-tab-line-mode (tab-line-mode +1))
         (if my/zen--old-vi-tilde-fringe-mode (vi-tilde-fringe-mode +1))
         (if my/zen--old-diff-hl-mode (diff-hl-mode +1))))))
