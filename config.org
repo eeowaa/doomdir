@@ -2222,13 +2222,6 @@ following benefits of enabling the cursor in Treemacs:
     (setq treemacs-fringe-indicator-mode nil)))
 #+end_src
 
-*** DONE [#C] Configure revert-buffer :tweak:
-#+begin_src emacs-lisp :tangle yes
-(after! treemacs
-  (setq-hook! 'treemacs-mode-hook
-    revert-buffer-function (lambda (&rest _) (treemacs-refresh))))
-#+end_src
-
 *** DONE [#C] Display truncation characters in the fringe :tweak:
 Fringes are not displayed in Treemacs. When the right fringe is not displayed,
 truncated lines end in ~$~. When running =C-l=, I can restore the fringes in
@@ -2246,6 +2239,19 @@ don't need ~treemacs-fringe-indicator-mode~ because ~hl-line-mode~ and
   (with-eval-after-load 'treemacs
     (remove-hook 'treemacs-mode-hook #'doom-themes-hide-fringes-maybe)
     (advice-remove #'treemacs-select-window #'doom-themes-hide-fringes-maybe)))
+#+end_src
+
+*** LOOP [#C] Configure revert-buffer :tweak:
+Until I have a permanent fix for Treemacs icons, I want to call
+~my/treemacs-modify-icons~ when refreshing the buffer.
+
+#+begin_src emacs-lisp :tangle yes
+(after! treemacs
+  (setq-hook! 'treemacs-mode-hook
+    revert-buffer-function
+    (lambda (&rest _)
+      (my/treemacs-modify-icons)
+      (treemacs-refresh))))
 #+end_src
 
 *** STRT [#B] Display "+" and "-" icons in tty emacs :bug:

@@ -761,14 +761,17 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   (with-eval-after-load 'treemacs
     (setq treemacs-fringe-indicator-mode nil)))
 
-(after! treemacs
-  (setq-hook! 'treemacs-mode-hook
-    revert-buffer-function (lambda (&rest _) (treemacs-refresh))))
-
 (after! doom-themes-ext-treemacs
   (with-eval-after-load 'treemacs
     (remove-hook 'treemacs-mode-hook #'doom-themes-hide-fringes-maybe)
     (advice-remove #'treemacs-select-window #'doom-themes-hide-fringes-maybe)))
+
+(after! treemacs
+  (setq-hook! 'treemacs-mode-hook
+    revert-buffer-function
+    (lambda (&rest _)
+      (my/treemacs-modify-icons)
+      (treemacs-refresh))))
 
 ;; REVIEW Consider detecting troublesome icons and automatically falling back to
 ;; the default icon for text files.
