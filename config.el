@@ -2671,7 +2671,9 @@ block at point is a pre block (as opposed to a code block)."
       (macroexp-progn body))))
 
 (after! markdown-mode
-  (add-to-list 'markdown-code-lang-modes '("http" . restclient-mode)))
+  (pushnew! markdown-code-lang-modes
+            '("http" . restclient-mode)
+            '("sh" . bash-mode)))
 
 ;; Prevent flycheck from being automatically enabled
 (if (or (not (boundp 'flycheck-global-modes))

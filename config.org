@@ -7812,7 +7812,9 @@ block at point is a pre block (as opposed to a code block)."
 *** STRT [#B] Associate language names in code block headers with major modes :tweak:
 #+begin_src emacs-lisp :tangle yes
 (after! markdown-mode
-  (add-to-list 'markdown-code-lang-modes '("http" . restclient-mode)))
+  (pushnew! markdown-code-lang-modes
+            '("http" . restclient-mode)
+            '("sh" . bash-mode)))
 #+end_src
 
 *** STRT [#C] Support reveal.js :feat:
