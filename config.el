@@ -60,6 +60,9 @@ See also: `(elisp) Prefix Command Arguments'."
           (delq! 'company-echo-metadata-frontend company-frontends)
         (cl-pushnew 'company-echo-metadata-frontend company-frontends)))))
 
+(after! company-box
+  (add-to-list 'company-box-frame-parameters '(tab-bar-lines-keep-state . t)))
+
 (setq company-idle-delay nil)
 
 (setq company-box-doc-delay 0.3) ;; This feels a bit smoother than no delay
@@ -70,9 +73,6 @@ See also: `(elisp) Prefix Command Arguments'."
       (defun +company-abort-h ()
         (when company-candidates
           (company-abort))))))
-
-(after! company-box
-  (add-to-list 'company-box-frame-parameters '(tab-bar-lines-keep-state . nil)))
 
 (defun my/toggle-window-dedicated ()
   "Control whether or not Emacs is allowed to display another

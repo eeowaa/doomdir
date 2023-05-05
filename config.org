@@ -413,6 +413,38 @@ we can still see documentation.
         (cl-pushnew 'company-echo-metadata-frontend company-frontends)))))
 #+end_src
 
+*** DONE [#A] Ensure that =tab-bar-mode= is disabled in =company-box= frames :bug:
+To replicate the bug:
+
+1. Start Emacs with ~tab-bar-mode~ enabled and ~tab-bar-show~ set to ~t~.
+2. Invoke completion to create the =company-box= child frame, as well as
+   potentially the =company-box-doc= child frame.
+3. Exit completion to hide the child frames.
+4. Disable ~tab-bar-mode~ and re-enable it.
+5. Invoke completion again to display the child frame(s).
+
+*The child frames will be displaying the tab bar.*
+
+The fix is to create the =company-box= child frames using the
+~tab-bar-lines-keep-state~ parameter, which is consulted by the ~tab-bar-mode~
+activation function. Frames with this parameter will not have their
+~tab-bar-lines~ frame parameter updated. Since =company-box= frames are created
+with ~tab-bar-lines~ set to 0, this is exactly what we want.
+
+#+begin_src emacs-lisp :tangle yes
+(after! company-box
+  (add-to-list 'company-box-frame-parameters '(tab-bar-lines-keep-state . t)))
+#+end_src
+
+If this ever comes back for some reason, a quick workaround (at least in Doom
+Emacs) is to delete the =company-box= child frames so that they will get created
+again with ~tab-bar-lines~ set to 0:
+
+#+begin_src emacs-lisp :tangle no
+(delete-frame (frame-local-getq company-box-frame))
+(delete-frame (frame-local-getq company-box-doc-frame))
+#+end_src
+
 *** DONE [#B] Never start completion automatically (require =C-SPC=)
 #+begin_src emacs-lisp :tangle yes
 (setq company-idle-delay nil)
@@ -477,27 +509,6 @@ Turns out, we need this for =company-box=, too, so let's add that:
         (when company-candidates
           (company-abort))))))
 #+end_src
-
-*** STRT [#A] Ensure that =tab-bar-mode= is disabled in =company-box= frames :hack:
-:LOGBOOK:
-- Note taken on [2023-01-31 Tue 20:56] \\
-  This is happening again for some reason.
-:END:
-Fixed in [[https://github.com/sebastiencs/company-box/commit/79abd77f3357279c2726b74f8b20df27b71aa867][this commit]] of company-box, which I apparently have. What gives?
-*UPDATE*: This might be an issue that appears in Emacs 28.2 (IIRC this error
-appeared after I updated from 28.1 to 28.2). The following appears to fix the
-issue and should probably be PRed to =company-box= after a trial period.
-
-#+begin_src emacs-lisp :tangle yes
-(after! company-box
-  (add-to-list 'company-box-frame-parameters '(tab-bar-lines-keep-state . nil)))
-#+end_src
-
-*UPDATE*: This problem reappears, but only after loading =org= *and* =lsp-mode=.
-I'm guessing that some window- or frame-handling code is causing the issue.
-
-*UPDATE*: The issue only appears after toggling running ~+zen/toggle~. See this
-todo item: [[*Do not allow the toggling of tab-bar-mode to affect company-box][Do not allow the toggling of tab-bar-mode to affect company-box]].
 
 *** STRT [#A] Ensure that =company-box-doc= popup frames and their content are fully visible :bug:
 There were two issues that I was experiencing:
