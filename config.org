@@ -4137,7 +4137,7 @@ to =eshell=, it forcefully clears the file on disk.
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [6/15]
+** vterm [6/16]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
@@ -4473,6 +4473,46 @@ _Some common problems:_
         (vterm-send-C-e))
       (evil-insert-state)))
   #+end_src
+
+*** TODO [#B] Retain column positions in command history :feat:
+Working with long, complex command lines can be annoying. Every time you want to
+make edits after evaluating the command line, you need to reposition the cursor
+back to where you were editing. Special considerations:
+
+1. Command lines execute asynchronously
+2. The length of the prompt can change after evaluating a command line
+3. Each command in the history was executed from a different column position
+
+That third point is the stickiest. Unfortunately, =vterm= does not store state
+about previous command lines, nor does it integrate with shell command history
+mechanisms. Searching the web, I could not find any column-preserving plugins
+for ZSH, my interactive shell of choice. Ultimately, associating a column
+position with each previously-executed command may be best implemented as a ZSH
+plugin, but I have no experience developing those.
+
+In any case, I want something that works in =vterm= independent of the
+underlying shell. For now, the most obvious solution (to me) is to create a
+minor mode for iterative command-line editing in =vterm= featuring.
+
+#+begin_src emacs-lisp :tangle no
+(after! vterm
+  ;; TODO Save and restore editing position of multi-line command line
+  (undefadvice! my/vterm-save-column-a ()
+    :before '(vterm-send-return vterm-send-C-m vterm-send-C-j)
+    (when (vterm--at-prompt-p)
+      (setq-local my/vterm-edit-column
+                  (- (point) (vterm--get-prompt-point))))
+  (undefadvice! my/vterm-restore-column-a ()
+    :after-while '(vterm-send-up vterm-send-C-p)
+    (when (vterm--at-prompt-p)
+      ;; (sit-for 0.1)
+      (goto-char (+ (vterm--get-prompt-point) (or my/vterm-edit-column 0)))))
+
+(defadvice! my/vterm-editing-position-a (key &optional shift meta ctrl accept-proc-output)
+  :around #'vterm-send-key
+  ;; TODO
+  (always))
+#+end_src
 
 *** TODO [#B] Let =C-x C-e= pass through in Evil insert state :feat:
 Ultimately, I would like for this to take the contents of the prompt and send it
