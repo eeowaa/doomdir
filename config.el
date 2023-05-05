@@ -2106,6 +2106,163 @@ This variable should be set by `my/lsp-ui-set-delay'.")
            :desc "Providers widget" "p" #'lsp-terraform-ls-providers
            :desc "Module calls widget" "m" #'lsp-terraform-ls-module-calls))))
 
+(after! terraform-mode
+  (defgroup my/terraform nil
+    "Extended functionality for Terraform."
+    :group 'languages
+    :prefix "my/terraform-")
+
+  (defcustom my/terraform-executable (executable-find "terraform")
+    "The `terraform' executable used by my private functions."
+    :type '(file :must-match t)
+    :group 'my/terraform)
+
+  ;; NOTE I could just use Emac's built-in `json' library, but I would rather
+  ;; use query syntax that I can also use outside of Emacs.
+  (defcustom my/terraform-jq-executable (executable-find "jq")
+    "The `jq' executable used to query Terraform state."
+    :type '(file :must-match t)
+    :group 'my/terraform)
+
+  (defcustom my/terraform-state-buffer-name "*tfstate*"
+    "The name of the buffer to show Terraform state query results."
+    :type 'string
+    :group 'my/terraform)
+
+  (defcustom my/terraform-state-file "terraform.tfstate"
+    "The Terraform state file corresponding to the current buffer."
+    :local t
+    :type 'file
+    :group 'my/terraform)
+
+  (defun my/terraform--ensure-state-file ()
+    "Ensure the existence of `my/terraform-state-file'.
+Prompts the user to download the state file if missing. Once the
+state file has been pulled, the expanded file name of the file is
+returned if it exists, otherwise nil."
+    (if (file-exists-p my/terraform-state-file)
+        (expand-file-name my/terraform-state-file)
+      (let ((read-answer-short t))
+        (pcase
+            (save-window-excursion
+              (read-answer
+               "Could not find Terraform state file. How to proceed? "
+               `(("specify" ?s "specify a path to an existing state file")
+                 ("pull" ?p ,(format "pull the state file to %s" my/terraform-state-file))
+                 ("specify-and-pull" ?P "pull the state file to another path")
+                 ("quit" ?q "abort operation"))))
+          ("specify"
+           (setq my/terraform-state-file (read-file-name "Terraform state file: " nil nil t)))
+          ("pull"
+           (my/terraform-state-pull))
+          ("specify-and-pull"
+           (setq my/terraform-state-file (read-file-name "Terraform state file: "))
+           (my/terraform-state-pull))
+          ("quit" nil)))
+      (when (file-exists-p my/terraform-state-file)
+        (expand-file-name my/terraform-state-file))))
+
+  ;; TODO Pull state asynchronously via `make-process'
+  (defun my/terraform-state-pull ()
+    "Populate `my/terraform-state-file' with Terraform state."
+    (interactive)
+    (when (or (not (file-exists-p my/terraform-state-file))
+              (yes-or-no-p (format "Overwrite existing file (%s)? " my/terraform-state-file)))
+      (if (zerop (call-process my/terraform-executable nil `(:file ,my/terraform-state-file) nil
+                               "state" "pull"))
+          (message "Pulled Terraform state to %s" (expand-file-name my/terraform-state-file))
+        (user-error "Failed to pull Terraform state"))))
+
+  ;; TODO Add support for resource addresses within Terraform modules
+  (defvar my/terraform--state-show-jq-filter "\
+.resources |
+map(select(
+    .mode == $mode and
+    .type == $type and
+    .name == $name
+))
+[0].instances |
+if (.[0] | has(\"index_key\")) then
+    map({
+        \"key\": .index_key,
+        \"value\": .attributes
+    }) |
+    from_entries
+else
+    .[0].attributes
+end")
+
+  (defun my/terraform--parse-address (address)
+    "Return a list describing a Terraform resource ADDRESS.
+The list has the form (MODE TYPE NAME), where MODE is either
+`data' or `managed', TYPE is the resource type, and NAME is the
+resource name."
+    (save-match-data
+      (unless (string-match "\\`\\(data\\.\\)?\\([^\\.]+\\)\\.\\([^\\.]+\\)\\'" address)
+        (user-error "Unrecognized Terraform resource address: %s" address))
+      (list (if (string= "data." (match-string-no-properties 1 address))
+                "data" "managed")
+            (match-string-no-properties 2 address)
+            (match-string-no-properties 3 address))))
+
+  ;; TODO Use `display-buffer' for greater display flexibility
+  (defun my/terraform-state-show (address)
+    "Display JSON respresentation of Terraform resource at ADDRESS.
+Terraform is assumed to be initialized in the default directory.
+Always queries a local state file for performance reasons."
+    (interactive
+     (list (read-string
+            "Resource address: "
+            (when (region-active-p)
+              (buffer-substring-no-properties (region-beginning) (region-end))))))
+    (cl-destructuring-bind (mode type name) (my/terraform--parse-address address)
+      (let* ((state-file (or (my/terraform--ensure-state-file)
+                             (user-error "File not found: %s"
+                                         (expand-file-name my/terraform-state-file))))
+             (buffer (get-buffer-create my/terraform-state-buffer-name))
+             (jq-args `("--arg" "mode" ,mode
+                        "--arg" "type" ,type
+                        "--arg" "name" ,name
+                        ,my/terraform--state-show-jq-filter)))
+        (with-current-buffer buffer
+          (erase-buffer)
+          (json-mode))
+        (when (apply #'call-process
+                     my/terraform-jq-executable state-file buffer nil jq-args)
+          (switch-to-buffer-other-window buffer)))))
+
+  (defun my/terraform-state-show-at-pos (&optional pos)
+    "Display JSON representation of Terraform resource at POS or point.
+Both resource and data blocks are considered to be resources."
+    (interactive)
+    (my/terraform-state-show (my/terraform-resource-address-at-pos pos)))
+
+  ;; FIXME Handle unquoted resource types and names
+  (defun my/terraform-resource-address-at-pos (&optional pos)
+    "Return the address of the Terraform resource at POS or point.
+Both resource and data blocks are considered to be resources,
+though addresses of data blocks are prefixed with \"data.\" while
+addresses of resource blocks have no prefix."
+    (save-excursion
+      (when pos (goto-char pos))
+      (goto-char (bol))
+      (save-match-data
+        (if-let ((re "^\\s-*\\(data\\|resource\\)[ \\t]+\"\\([^\"]+\\)\"[ \\t]+\"\\([^\"]+\\)\"")
+                 (found (or (looking-at re) (re-search-backward re nil t)))
+                 (mode (match-string-no-properties 1))
+                 (type (match-string-no-properties 2))
+                 (name (match-string-no-properties 3))
+                 (prefix (if (string= mode "data") "data." "")))
+            (format "%s%s.%s" prefix type name)
+          (user-error "No Terraform resource at position")))))
+
+  (map! :map terraform-mode-map
+            :localleader
+            (:prefix ("s" . "state")
+             :desc "Show instances at point" "." #'my/terraform-state-show-at-pos
+             :desc "Show instances of address" "a" #'my/terraform-state-show
+             :desc "Pull remote state" "p" #'my/terraform-state-pull)))
+
 (add-hook 'terraform-mode-local-vars-hook #'tree-sitter! 'append)
 
 ;; Missing from evil-textobj-tree-sitter.el:
