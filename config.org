@@ -5977,7 +5977,8 @@ in a GUI and currently sets the current frame's ~tab-bar-lines~ parameter to 0!
 Completing read is a better alternative:
 
 #+begin_src emacs-lisp :tangle yes
-(setq dumb-jump-selector 'completing-read)
+(after! dumb-jump
+  (setq dumb-jump-selector 'completing-read))
 #+end_src
 
 *** STRT [#A] Automatically install missing docsets :feat:
