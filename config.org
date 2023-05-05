@@ -378,7 +378,7 @@ completion.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-** company [4/8]
+** company [6/9]
 #+begin_quote
 This module provides code completion, powered by [[https://github.com/company-mode/company-mode][company-mode]]. It is required
 for code completion in many of Doom's :lang modules.
@@ -475,6 +475,19 @@ With my current workstation setup, a 0.3-second delay feels great.
 
 #+begin_src emacs-lisp :tangle yes
 (setq company-box-doc-delay 0.3) ;; This feels a bit smoother than no delay
+#+end_src
+
+*** DONE [#B] Redisplay visible =company-box-doc= frame when =company-box= frame moves :bug:
+This updates the documentation frame position both when scrolling with the mouse
+or when running =C-l= in a REPL.
+
+#+begin_src emacs-lisp :tangle yes
+(defadvice! my/move-company-box-doc-frame-a (company-box-frame)
+  :after #'company-box--update-frame-position
+  (when-let ((parent-frame (frame-parent company-box-frame))
+             (doc-frame (frame-local-getq company-box-doc-frame parent-frame))
+             (_ (frame-visible-p doc-frame)))
+    (company-box-doc--set-frame-position doc-frame)))
 #+end_src
 
 *** STRT [#C] Quit =company-box= when switching modes :bug:

@@ -67,6 +67,13 @@ See also: `(elisp) Prefix Command Arguments'."
 
 (setq company-box-doc-delay 0.3) ;; This feels a bit smoother than no delay
 
+(defadvice! my/move-company-box-doc-frame-a (company-box-frame)
+  :after #'company-box--update-frame-position
+  (when-let ((parent-frame (frame-parent company-box-frame))
+             (doc-frame (frame-local-getq company-box-doc-frame parent-frame))
+             (_ (frame-visible-p doc-frame)))
+    (company-box-doc--set-frame-position doc-frame)))
+
 (when (modulep! company +childframe)
   (after! company
     (add-hook! 'evil-normal-state-entry-hook
