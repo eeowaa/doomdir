@@ -1962,6 +1962,9 @@ not indicate which tabs abstration is being operated on.
         :nv "gT" #'+tabs:prev-window-tab)
        (:map magit-log-mode-map
         :nv "gt" #'+tabs:next-window-tab
+        :nv "gT" #'+tabs:prev-window-tab)
+       (:map magit-revision-mode-map
+        :nv "gt" #'+tabs:next-window-tab
         :nv "gT" #'+tabs:prev-window-tab)))
 
 ;; NOTE Bindings for `info-mode' are set by `evil-collection-info-setup', which

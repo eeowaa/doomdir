@@ -671,6 +671,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
         :nv "gT" #'+tabs:prev-window-tab)
        (:map magit-log-mode-map
         :nv "gt" #'+tabs:next-window-tab
+        :nv "gT" #'+tabs:prev-window-tab)
+       (:map magit-revision-mode-map
+        :nv "gt" #'+tabs:next-window-tab
         :nv "gT" #'+tabs:prev-window-tab)))
 
 ;; NOTE Bindings for `info-mode' are set by `evil-collection-info-setup', which
