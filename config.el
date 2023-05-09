@@ -2282,7 +2282,6 @@ resource name."
             (match-string-no-properties 2 address)
             (match-string-no-properties 3 address))))
 
-  ;; TODO Use `display-buffer' for greater display flexibility
   (defun my/terraform-state-show (address)
     "Display JSON respresentation of Terraform resource at ADDRESS.
 Terraform is assumed to be initialized in the default directory.
@@ -2307,7 +2306,7 @@ Always queries a local state file for performance reasons."
           (json-mode))
         (when (apply #'call-process
                      my/terraform-jq-executable state-file buffer nil jq-args)
-          (switch-to-buffer-other-window buffer)
+          (pop-to-buffer buffer)
           (goto-char (point-min))))))
 
   (defun my/terraform-state-show-at-pos (&optional pos)
@@ -2334,6 +2333,11 @@ addresses of resource blocks have no prefix."
                  (prefix (if (string= mode "data") "data." "")))
             (format "%s%s.%s" prefix type name)
           (user-error "No Terraform resource at position")))))
+
+  (when (modulep! :ui buffer-group)
+    (buffer-group-reuse-window-setup
+     (buffer-group-define tfstate
+       `(:names ("^\\*tfstate: ")))))
 
   (map! :map terraform-mode-map
             :localleader
