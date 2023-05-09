@@ -2200,8 +2200,9 @@ This variable should be set by `my/lsp-ui-set-delay'.")
     :type '(file :must-match t)
     :group 'my/terraform)
 
-  (defcustom my/terraform-state-buffer-name "*tfstate*"
-    "The name of the buffer to show Terraform state query results."
+  (defcustom my/terraform-state-buffer-name-format "*tfstate: %s*"
+    "Buffer name format string for Terraform state query results.
+Should include a single \"%s\" sequence to hold the resource address."
     :type 'string
     :group 'my/terraform)
 
@@ -2295,7 +2296,8 @@ Always queries a local state file for performance reasons."
       (let* ((state-file (or (my/terraform--ensure-state-file)
                              (user-error "File not found: %s"
                                          (expand-file-name my/terraform-state-file))))
-             (buffer (get-buffer-create my/terraform-state-buffer-name))
+             (buffer (get-buffer-create (format my/terraform-state-buffer-name-format
+                                                address)))
              (jq-args `("--arg" "mode" ,mode
                         "--arg" "type" ,type
                         "--arg" "name" ,name
@@ -2305,7 +2307,8 @@ Always queries a local state file for performance reasons."
           (json-mode))
         (when (apply #'call-process
                      my/terraform-jq-executable state-file buffer nil jq-args)
-          (switch-to-buffer-other-window buffer)))))
+          (switch-to-buffer-other-window buffer)
+          (goto-char (point-min))))))
 
   (defun my/terraform-state-show-at-pos (&optional pos)
     "Display JSON representation of Terraform resource at POS or point.
