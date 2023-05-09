@@ -1979,6 +1979,21 @@ if you want to send region to a REPL or terminal emulator."
         :i "C-d" #'comint-send-eof)
   (setq-default comint-scroll-show-maximum-output nil))
 
+(defadvice! my/+lookup-project-search-backend-fn-a (identifier)
+  :override #'+lookup-project-search-backend-fn
+  (when identifier ;; Replaced `unless' with `when'
+    (let ((query (rxt-quote-pcre identifier)))
+      (ignore-errors
+        (cond ((modulep! :completion ivy)
+               (+ivy-file-search :query query)
+               t)
+              ((modulep! :completion helm)
+               (+helm-file-search :query query)
+               t)
+              ((modulep! :completion vertico)
+               (+vertico-file-search :query query)
+               t))))))
+
 (setq eldoc-echo-area-use-multiline-p nil
       eldoc-echo-area-display-truncation-message nil)
 
@@ -2154,6 +2169,18 @@ This variable should be set by `my/lsp-ui-set-delay'.")
            :desc "terraform validate" "v" #'lsp-terraform-ls-validate
            :desc "Providers widget" "p" #'lsp-terraform-ls-providers
            :desc "Module calls widget" "m" #'lsp-terraform-ls-module-calls))))
+
+(after! terraform-mode
+  (add-hook! terraform-mode :append
+    (defun my/terraform-configure-lookup ()
+      (defadvice! my/terraform-lookup-references-a (fn &rest args)
+        :around #'+lookup/references
+        (if (eq major-mode 'terraform-mode)
+            (letf! (defadvice my/terraform-lookup-resource-at-point-a (args)
+                     :filter-args #'+lookup-project-search-backend-fn
+                     (list (my/terraform-resource-address-at-pos)))
+              (apply fn args))
+          (apply fn args))))))
 
 (after! terraform-mode
   (defgroup my/terraform nil
