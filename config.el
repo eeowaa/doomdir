@@ -1628,6 +1628,30 @@ which causes problems even if there is no existing buffer."
     :after-until #'flycheck-ephemeral-buffer-p
     (string-prefix-p "*Org Src" (buffer-name))))
 
+(after! flycheck-posframe
+  (setq flycheck-posframe-border-width 10
+        flycheck-posframe-position 'point-bottom-left-corner-upward))
+
+(after! flycheck
+  (defun my/flycheck-redisplay-h ()
+    (when flycheck-mode
+      (flycheck-display-error-at-point-soon)))
+  (add-hook! '(doom-switch-buffer-hook doom-switch-window-hook)
+             #'my/flycheck-redisplay-h))
+
+(after! flycheck-posframe
+  (defun my/flycheck-posframe-update-h (&rest _)
+    (when (flycheck-posframe-hidehandler _)
+      (posframe-hide flycheck-posframe-buffer)))
+  (add-hook! '(post-command-hook window-state-change-functions)
+             #'my/flycheck-posframe-update-h))
+
+(after! flycheck-posframe
+  (flycheck-posframe-configure-pretty-defaults)
+  (my/doom-use-face flycheck-posframe-info-face flycheck-error-list-info)
+  (my/doom-use-face flycheck-posframe-warning-face flycheck-error-list-warning)
+  (my/doom-use-face flycheck-posframe-error-face flycheck-error-list-error))
+
 (after! flycheck
   (defun my/flycheck-set-level (level)
     "Set the Flycheck error level"
@@ -1659,6 +1683,13 @@ which causes problems even if there is no existing buffer."
       ;; Refresh navigation between errors in the source buffer according to the
       ;; global value of `flycheck-navigation-minimum-level'
       (kill-local-variable 'flycheck-navigation-minimum-level))))
+
+(when (and (modulep! :tools lsp)
+           (not (modulep! :tools lsp +eglot)))
+  (setq lsp-ui-sideline-enable nil))
+
+(after! flycheck-posframe
+  (setq flycheck-posframe-position 'window-bottom-right-corner))
 
 (when (and (modulep! :checkers spell)
            (not (modulep! :checkers spell +flyspell)))
