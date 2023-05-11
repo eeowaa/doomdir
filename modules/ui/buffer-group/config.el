@@ -95,7 +95,11 @@
      (buffer-group-define org-prompt
        `(:names ("^\\*Org Note\\*"
                  "^ \\*Agenda Commands\\*")))
-     '((slot . 1))))
+     '((slot . 1)))
+    (buffer-group-side-window-setup
+     (buffer-group-define org-agenda
+       `(:names ("^\\*Org Agenda\\*")))
+     '((side . top))))
 
   (buffer-group-side-window-setup
    (buffer-group-define command-history
