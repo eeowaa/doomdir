@@ -9310,7 +9310,7 @@ This module provides an environment for hacking and having fun in scheme. It is
 powered by [[https://www.nongnu.org/geiser/geiser_1.html#introduction][geiser]].
 #+end_quote
 
-** sh [4/9]
+** sh [5/9]
 #+begin_quote
 This module adds support for shell scripting languages.
 #+end_quote
@@ -9391,6 +9391,39 @@ starting with three hash characters (point must be on the header comment).
 (add-hook 'sh-mode-local-vars-hook #'outline-minor-mode)
 #+end_src
 
+*** DONE [#C] Do not run ~lsp!~ in ZSH buffers :bug:
+There is no language server for ZSH, so there should be no attempt to activate
+LSP in ZSH buffers. The following message always appears when I open ZSH
+initialization files (e.g. =~/.config/zsh/.zshrc=) and when editing an
+interactive ZSH command line via =emacsclient=:
+
+#+begin_example
+LSP :: There are no language servers supporting current mode `sh-mode' registered with `lsp-mode'.
+This issue might be caused by:
+1. The language you are trying to use does not have built-in support in `lsp-mode'. You must install the required support manually. Examples of this are `lsp-java' or `lsp-metals'.
+2. The language server that you expect to run is not configured to run for major mode `sh-mode'. You may check that by checking the `:major-modes' that are passed to `lsp-register-client'.
+3. `lsp-mode' doesn't have any integration for the language behind `sh-mode'. Refer to https://emacs-lsp.github.io/lsp-mode/page/languages and https://langserver.org/ .
+4. You are over `tramp'. In this case follow https://emacs-lsp.github.io/lsp-mode/page/remote/.
+5. You have disabled the `lsp-mode' clients for that file. (Check `lsp-enabled-clients' and `lsp-disabled-clients').
+You can customize `lsp-warn-no-matched-clients' to disable this message.
+#+end_example
+
+The fix is to only activate LSP when the shell is Bourne or Bash:
+
+#+begin_src emacs-lisp :tangle yes
+(after! sh-script
+  (when (modulep! :lang sh +lsp)
+    (remove-hook 'sh-mode-local-vars-hook #'lsp!)
+    (add-hook 'sh-mode-local-vars-hook
+              (defun my/sh-mode-lsp-maybe ()
+                "Activate LSP in `sh-mode' if possible."
+                ;; Taken from `lsp-bash-check-sh-shell'
+                (and (memq major-mode '(sh-mode bash-ts-mode))
+                     (memq sh-shell '(sh bash))
+                     (lsp!)))
+              'append)))
+#+end_src
+
 *** STRT [#A] Enable ~hs-minor-mode~ in ~sh-mode~ using Vim fold markers :feat:
 I personally use Vim fold markers as a folding mechanism in shell scripts. The
 two most obvious methods to achieve that using Doom's =:editor fold= module are
@@ -9451,11 +9484,6 @@ indirect buffer if one is selected.
 
 *** TODO [#B] Improve syntax highlighting for ZSH :tweak:
 For an example of bad syntax highlighting, open =~/.config/zsh/.zshrc=.
-
-*** TODO [#C] Do not run ~lsp!~ in ZSH buffers :bug:
-There is no language server for ZSH, so there should be no attempt to activate
-LSP in ZSH buffers (an annoying error message always appears when I open ZSH
-initialization files like =~/.config/zsh/.zshrc=).
 
 ** sml [0/0] :ARCHIVE:
 #+begin_quote

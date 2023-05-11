@@ -3194,6 +3194,18 @@ This is a list of lists, not a list of cons cells.")
 
 (add-hook 'sh-mode-local-vars-hook #'outline-minor-mode)
 
+(after! sh-script
+  (when (modulep! :lang sh +lsp)
+    (remove-hook 'sh-mode-local-vars-hook #'lsp!)
+    (add-hook 'sh-mode-local-vars-hook
+              (defun my/sh-mode-lsp-maybe ()
+                "Activate LSP in `sh-mode' if possible."
+                ;; Taken from `lsp-bash-check-sh-shell'
+                (and (memq major-mode '(sh-mode bash-ts-mode))
+                     (memq sh-shell '(sh bash))
+                     (lsp!)))
+              'append)))
+
 (add-to-list 'hs-special-modes-alist
              '(sh-mode "{{{" "}}}" "#"))
 
