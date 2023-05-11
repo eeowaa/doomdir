@@ -1260,6 +1260,11 @@ deleting the final newline before inserting the \")))\"."
     ;; This is the (<section>) part
     "[ \t]*(\\(" Man-section-regexp "\\))")))
 
+(setq server-temp-file-regexp
+      (format "\\(?:%s\\)\\|\\(?:\\`%s\\(?:bash-fc\\.\\|zsh[a-zA-Z0-9]+\\.zsh\\'\\)\\)"
+              server-temp-file-regexp
+              (temporary-file-directory)))
+
 (setq confirm-kill-processes nil)
 
 (defalias 'ps 'list-processes)

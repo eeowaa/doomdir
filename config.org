@@ -3517,7 +3517,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [14/23]
+** Miscellany [15/24]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -3620,6 +3620,19 @@ This solves the problem for me and allows me to run =SPC f u=
             "^AWS_ACCESS_KEY_ID$"
             "^AWS_SECRET_ACCESS_KEY$"
             "^AWS_SESSION_TOKEN$"))
+#+end_src
+
+*** DONE [#B] Save shell command lines automatically with ~server-edit~
+When editing a command line in =emacsclient= after typing =C-x C-e= in an
+interactive shell, Emacs will prompt to save the file once you signal that you
+are finished. The problem is that Emacs doesn't know that these files are
+temporary. The following fixes the problem in both =bash= and =zsh=:
+
+#+begin_src emacs-lisp :tangle yes
+(setq server-temp-file-regexp
+      (format "\\(?:%s\\)\\|\\(?:\\`%s\\(?:bash-fc\\.\\|zsh[a-zA-Z0-9]+\\.zsh\\'\\)\\)"
+              server-temp-file-regexp
+              (temporary-file-directory)))
 #+end_src
 
 *** DONE [#C] Don't prompt about killing running processing when quitting
