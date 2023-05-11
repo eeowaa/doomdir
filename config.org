@@ -4280,7 +4280,16 @@ sudo dnf -y install libvterm cmake
 
 *** DONE [#B] Export editor variables to =vterm=
 #+begin_src emacs-lisp :tangle yes
-(add-hook! vterm-mode #'my/with-editor-export)
+(defvar my/with-editor-emacsclient-executable--vterm
+  (file-name-concat (getenv "HOME") ".local" "libexec" "emacs" "emacsclient-vterm"))
+
+(add-hook! vterm-mode
+  (defun my/with-editor-export--vterm ()
+    (if (file-executable-p my/with-editor-emacsclient-executable--vterm)
+        (let ((with-editor-emacsclient-executable
+               my/with-editor-emacsclient-executable--vterm))
+          (my/with-editor-export))
+      (my/with-editor-export))))
 #+end_src
 
 *** DONE [#B] Let =C-m= send =<return>=
@@ -4642,8 +4651,14 @@ to Emacs in an indirect buffer (server mode).
 
 #+begin_src emacs-lisp :tangle no
 (after! evil-collection-vterm
+  (defun my/vterm-edit-indirect ()
+    "Send `C-x C-e' to vterm."
+    (interactive)
+    (cl-assert (eq major-mode 'vterm-mode))
+    (vterm-send-key "x" nil nil t)
+    (vterm-send-key "e" nil nil t))
   (evil-collection-define-key 'insert 'vterm-mode-map
-    (kbd "C-x C-e") 'vterm--self-insert))
+    (kbd "C-x C-e") #'my/vterm-edit-indirect))
 #+end_src
 
 *** TODO [#C] Prevent ~git-graph~ cutoff :bug:

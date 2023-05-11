@@ -1457,7 +1457,16 @@ If the current frame has one window, restore the previous windows."
 
 (add-hook! eshell-mode #'my/with-editor-export)
 
-(add-hook! vterm-mode #'my/with-editor-export)
+(defvar my/with-editor-emacsclient-executable--vterm
+  (file-name-concat (getenv "HOME") ".local" "libexec" "emacs" "emacsclient-vterm"))
+
+(add-hook! vterm-mode
+  (defun my/with-editor-export--vterm ()
+    (if (file-executable-p my/with-editor-emacsclient-executable--vterm)
+        (let ((with-editor-emacsclient-executable
+               my/with-editor-emacsclient-executable--vterm))
+          (my/with-editor-export))
+      (my/with-editor-export))))
 
 (after! vterm
   (defalias 'vterm-send-C-m #'vterm-send-return))
