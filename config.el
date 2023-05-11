@@ -3170,6 +3170,8 @@ This is a list of lists, not a list of cons cells.")
 (add-to-list 'hs-special-modes-alist
              '(sh-mode "{{{" "}}}" "#"))
 
+(map! :v "C-c '" #'edit-indirect-region)
+
 (after! lsp-yaml
   (let ((f lsp-yaml-schema-store-local-db))
     (unless (file-exists-p f)

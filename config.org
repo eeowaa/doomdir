@@ -9392,15 +9392,7 @@ The second option seems the most alluring at the moment. If I get that to work,
 I would probably want to refactor how I implemented code block folding for
 ~markdown-mode~, as well.
 
-*** TODO [#B] Improve syntax highlighting for ZSH :tweak:
-For an example of bad syntax highlighting, open =~/.config/zsh/.zshrc=.
-
-*** TODO [#C] Do not run ~lsp!~ in ZSH buffers :bug:
-There is no language server for ZSH, so there should be no attempt to activate
-LSP in ZSH buffers (an annoying error message always appears when I open ZSH
-initialization files like =~/.config/zsh/.zshrc=).
-
-*** TODO [#C] Edit the current region in an indirect buffer :feat:
+*** STRT [#C] Edit the current region in an indirect buffer :feat:
 Shell scripts often include nested scripts in subshells, and it would be nice to
 have the =C-'= keybinding take you to an indirect buffer to edit the subshell.
 Some examples of such subshells are shown below:
@@ -9417,9 +9409,20 @@ bar=`
 `
 #+end_src
 
-Reference:
-+ ~edit-indirect-region~
+For now, I will just create an =evil= command to edit the current region in an
+indirect buffer if one is selected.
 
+#+begin_src emacs-lisp :tangle yes
+(map! :v "C-c '" #'edit-indirect-region)
+#+end_src
+
+*** TODO [#B] Improve syntax highlighting for ZSH :tweak:
+For an example of bad syntax highlighting, open =~/.config/zsh/.zshrc=.
+
+*** TODO [#C] Do not run ~lsp!~ in ZSH buffers :bug:
+There is no language server for ZSH, so there should be no attempt to activate
+LSP in ZSH buffers (an annoying error message always appears when I open ZSH
+initialization files like =~/.config/zsh/.zshrc=).
 
 ** sml [0/0] :ARCHIVE:
 #+begin_quote
