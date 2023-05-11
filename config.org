@@ -6614,6 +6614,7 @@ returned if it exists, otherwise nil."
       (when (file-exists-p my/terraform-state-file)
         (expand-file-name my/terraform-state-file))))
 
+  ;; TODO Show stderr when the command fails
   ;; TODO Pull state asynchronously via `make-process'
   (defun my/terraform-state-pull ()
     "Populate `my/terraform-state-file' with Terraform state."
