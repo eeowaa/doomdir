@@ -6691,6 +6691,23 @@ Both resource and data blocks are considered to be resources."
     (interactive)
     (my/terraform-state-show (my/terraform-resource-address-at-pos pos)))
 
+  ;; FIXME: Make this portable for Windows and WSL
+  (defun my/terraform-module-of-file (&optional file)
+    "Display the Terraform module path of FILE.
+FILE is an absolute or relative path to a filesystem entry. It
+defaults to the file visited by the current buffer, or to
+`default-directory' if the current buffer is not file-visiting."
+    (let* ((file (expand-file-name (or file buffer-file-name default-directory)))
+           (_ (or (file-exists-p file)
+                  (user-error "File does not exist: %s" file)))
+           (dir (directory-file-name (or (and (file-directory-p file) file)
+                                         (file-name-directory file))))
+           (root (or (projectile-project-root dir)
+                     (user-error "Unable to determine root path for file: %s" file)))
+           (path (file-relative-name dir root)))
+      (if (string= path ".") ""
+        (substring (string-replace "/" ".module." (concat "/" path)) 1))))
+
   ;; FIXME Handle unquoted resource types and names
   (defun my/terraform-resource-address-at-pos (&optional pos)
     "Return the address of the Terraform resource at POS or point.
