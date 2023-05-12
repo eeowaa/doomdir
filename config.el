@@ -1260,10 +1260,11 @@ deleting the final newline before inserting the \")))\"."
     ;; This is the (<section>) part
     "[ \t]*(\\(" Man-section-regexp "\\))")))
 
-(setq server-temp-file-regexp
-      (format "\\(?:%s\\)\\|\\(?:\\`%s\\(?:bash-fc\\.\\|zsh[a-zA-Z0-9]+\\.zsh\\'\\)\\)"
-              server-temp-file-regexp
-              (temporary-file-directory)))
+(after! server
+  (setq server-temp-file-regexp
+        (format "\\(?:%s\\)\\|\\(?:\\`%s\\(?:bash-fc\\.\\|zsh[a-zA-Z0-9]+\\.zsh\\'\\)\\)"
+                server-temp-file-regexp
+                (temporary-file-directory))))
 
 (setq confirm-kill-processes nil)
 
@@ -1491,6 +1492,38 @@ If the current frame has one window, restore the previous windows."
                         (safe-persp-name (get-current-persp))
                       "main")))))
     (apply fn args)))
+
+(after! vterm
+
+  (defun my/vterm--display-buffer-same-window (buffer)
+    "Display a buffer in the current window.
+This function works even if the current window is a side window."
+    (interactive)
+    (if-let* ((side (window-parameter nil 'window-side))
+              (slot (window-parameter nil 'window-slot)))
+        (display-buffer-in-side-window buffer `((side . ,side) (slot . ,slot)))
+      (display-buffer-same-window buffer nil)))
+
+  (defun my/vterm--dedicate-window-h ()
+    (set-window-dedicated-p (selected-window)
+                            (window-parameter nil 'my/vterm--window-dedicated)))
+
+  (add-hook 'server-switch-hook #'my/vterm--dedicate-window-h)
+
+  (defun my/vterm-edit-indirect ()
+    "Edit a command line by sending `C-x C-e' to vterm."
+    (interactive)
+    ;; We must undedicate the window so that `server-switch-buffer' will select it
+    (set-window-parameter nil 'my/vterm--window-dedicated (window-dedicated-p))
+    (set-window-dedicated-p (selected-window) nil)
+    (vterm-send-key "x" nil nil t)
+    (vterm-send-key "e" nil nil t))
+
+  (setq-hook! 'vterm-mode-hook
+    server-window #'my/vterm--display-buffer-same-window)
+
+  (map! :map vterm-mode-map
+        :i "C-x C-e" #'my/vterm-edit-indirect))
 
 (after! vterm
   (setq-hook! 'vterm-mode-hook

@@ -3629,10 +3629,11 @@ are finished. The problem is that Emacs doesn't know that these files are
 temporary. The following fixes the problem in both =bash= and =zsh=:
 
 #+begin_src emacs-lisp :tangle yes
-(setq server-temp-file-regexp
-      (format "\\(?:%s\\)\\|\\(?:\\`%s\\(?:bash-fc\\.\\|zsh[a-zA-Z0-9]+\\.zsh\\'\\)\\)"
-              server-temp-file-regexp
-              (temporary-file-directory)))
+(after! server
+  (setq server-temp-file-regexp
+        (format "\\(?:%s\\)\\|\\(?:\\`%s\\(?:bash-fc\\.\\|zsh[a-zA-Z0-9]+\\.zsh\\'\\)\\)"
+                server-temp-file-regexp
+                (temporary-file-directory))))
 #+end_src
 
 *** DONE [#C] Don't prompt about killing running processing when quitting
@@ -4272,7 +4273,7 @@ to =eshell=, it forcefully clears the file on disk.
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [6/16]
+** vterm [7/16]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
@@ -4347,6 +4348,44 @@ regardless of whether the buffer is a popup or not.
 #+begin_src emacs-lisp :tangle cli.el
 (after! doom-cli-env
   (add-to-list 'doom-env-deny "VTERM_BUFFER_NAME"))
+#+end_src
+
+*** DONE [#B] Let =C-x C-e= pass through in Evil insert state :feat:
+Ultimately, I would like for this to take the contents of the prompt and send it
+to Emacs in an indirect buffer (server mode).
+
+#+begin_src emacs-lisp :tangle yes
+(after! vterm
+
+  (defun my/vterm--display-buffer-same-window (buffer)
+    "Display a buffer in the current window.
+This function works even if the current window is a side window."
+    (interactive)
+    (if-let* ((side (window-parameter nil 'window-side))
+              (slot (window-parameter nil 'window-slot)))
+        (display-buffer-in-side-window buffer `((side . ,side) (slot . ,slot)))
+      (display-buffer-same-window buffer nil)))
+
+  (defun my/vterm--dedicate-window-h ()
+    (set-window-dedicated-p (selected-window)
+                            (window-parameter nil 'my/vterm--window-dedicated)))
+
+  (add-hook 'server-switch-hook #'my/vterm--dedicate-window-h)
+
+  (defun my/vterm-edit-indirect ()
+    "Edit a command line by sending `C-x C-e' to vterm."
+    (interactive)
+    ;; We must undedicate the window so that `server-switch-buffer' will select it
+    (set-window-parameter nil 'my/vterm--window-dedicated (window-dedicated-p))
+    (set-window-dedicated-p (selected-window) nil)
+    (vterm-send-key "x" nil nil t)
+    (vterm-send-key "e" nil nil t))
+
+  (setq-hook! 'vterm-mode-hook
+    server-window #'my/vterm--display-buffer-same-window)
+
+  (map! :map vterm-mode-map
+        :i "C-x C-e" #'my/vterm-edit-indirect))
 #+end_src
 
 *** DONE [#C] Configure revert-buffer :tweak:
@@ -4656,22 +4695,6 @@ minor mode for iterative command-line editing in =vterm= featuring.
   :around #'vterm-send-key
   ;; TODO
   (always))
-#+end_src
-
-*** TODO [#B] Let =C-x C-e= pass through in Evil insert state :feat:
-Ultimately, I would like for this to take the contents of the prompt and send it
-to Emacs in an indirect buffer (server mode).
-
-#+begin_src emacs-lisp :tangle no
-(after! evil-collection-vterm
-  (defun my/vterm-edit-indirect ()
-    "Send `C-x C-e' to vterm."
-    (interactive)
-    (cl-assert (eq major-mode 'vterm-mode))
-    (vterm-send-key "x" nil nil t)
-    (vterm-send-key "e" nil nil t))
-  (evil-collection-define-key 'insert 'vterm-mode-map
-    (kbd "C-x C-e") #'my/vterm-edit-indirect))
 #+end_src
 
 *** TODO [#C] Prevent ~git-graph~ cutoff :bug:
