@@ -30,8 +30,28 @@
 
   (when (modulep! :tools docker)
     ;; TODO Configure Transient windows
+    ;;
     ;; Currently, Transient buffers open in the window below the selected window. IIRC,
     ;; Doom sets this option in the Magit configuration. I don't know if I like that.
+    ;;
+    ;; Unfortunately, transient buffer contents often too large to be comfortably
+    ;; displayed in a side window; both vertical and horizontal space can be a problem.
+    ;;
+    ;; This is one scenario where a child frame centered in the middle of the selected
+    ;; frame could be a good solution. (Side note: this could potentially be extended to
+    ;; TUI Emacs through Tmux's popup system.)
+    ;;
+    ;; Take a look at the `transient-posframe' package. It seems a bit limited in that
+    ;; it does not accept a display-buffer alist (which is needed for suppressing the
+    ;; tab bar) and it does not automatically resize the frame. Resizing may be possible
+    ;; by calling `fit-frame-to-buffer' at the appropriate time, perhaps like how the
+    ;; `window-height' buffer display action alist parameter can be set to the
+    ;; `fit-window-to-buffer' function.
+    ;;
+    ;; See also:
+    ;; - `posframe--fit-frame-to-buffer'
+    ;; - `company-box-frame-parameters'
+    ;;
     (buffer-group-side-window-setup
      (buffer-group-define docker
        `(:names ("^\\*docker-\\(?:containers\\|images\\|networks\\|volumes\\)")
