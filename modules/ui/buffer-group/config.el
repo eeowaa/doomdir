@@ -146,20 +146,26 @@
      `(:names ("^\\*ielm\\*")
        :modes (inferior-emacs-lisp-mode))))
 
+  (buffer-group-define diff '(:names ()))
+
+  (when (modulep! :tools magit)
+    (buffer-group-property-pushnew
+     'diff :names "^\\magit-diff: "))
+
+  (when (modulep! :ui vc-gutter)
+    (buffer-group-property-pushnew
+     'diff :names "^\\*diff-hl\\*$"))
+
   (when (modulep! :emacs undo +tree)
     (after! undo-tree
       (buffer-group-side-window-setup
        (buffer-group-define undo-tree
          `(:names (,(concat "^" (regexp-quote undo-tree-visualizer-buffer-name)))))
        '((side . left) (slot . 1)))
-      (buffer-group-side-window-setup
-       (buffer-group-define undo-tree-diff
-         `(:names (,(concat "^" (regexp-quote undo-tree-diff-buffer-name))))))))
+      (buffer-group-property-pushnew
+       'diff :names (concat "^" (regexp-quote undo-tree-diff-buffer-name)))))
 
-  (when (modulep! :ui vc-gutter)
-    (buffer-group-side-window-setup
-     (buffer-group-define diff-hl
-       `(:names ("^\\*diff-hl\\*$"))))))
+  (buffer-group-side-window-setup 'diff))
 
 
 ;;
