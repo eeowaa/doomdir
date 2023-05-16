@@ -58,7 +58,9 @@ There are two potential approaches to handling left and right side windows:
 2. *Display the expanded minibuffer in a full-width bottom side window.* This
    would look the cleanest and would be enough space in the vast majority of use
    cases. Unfortunately, at first blush, it seems harder to implement. See the
-   references gathered below for more information.
+   references gathered below for more information. (On further inspection,
+   opening the minibuffer as a child frame by setting the ~minibuffer~ frame
+   parameter to ~child-frame~ seems like a simple way to implement this.)
 
 _Reference:_
 
@@ -115,7 +117,14 @@ _Reference:_
   + ~minibuffer~: "Whether this frame has its own minibuffer. The value `t'
     means yes, `nil' means no, `only' means this frame is just a minibuffer. If
     the value is a minibuffer window (in some other frame), the frame uses that
-    minibuffer."
+    minibuffer. (...) The special value `child-frame' means to make a
+    minibuffer-only child frame whose parent becomes the frame created."
+
+- [[info:elisp#Frame Interaction Parameters][Frame Interation Parameters]]
+  + ~minibuffer-exit~: "When this parameter is non-`nil', Emacs will by default
+    make this frame invisible whenever the minibuffer is exited. (...) This
+    parameter is useful to make a child frame disappear automatically (similar
+    to how Emacs deals with a window) when exiting the minibuffer."
 
 You may also want to reference the package (or configuration options) that
 implements minibuffer completion in a centered popup frame. Perform a web search

@@ -580,7 +580,7 @@ If N is omitted, default to the last position."
 
 (defcustom vimish-tab-exclude-names nil
   "List of buffer names regexps for which `vimish-tab' is not enabled.
-Buffers under any of these major modes will not show the tab line in
+Buffers matching any of these names will not show the tab line in
 their windows, even if `global-vimish-tab-mode' is enabled."
   :type 'list
   :group 'vimish-tab)

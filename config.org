@@ -6873,10 +6873,18 @@ Modules to improve integration into your OS, system, or devices.
 ;;; :os
 #+end_src
 
-** Miscellany [0/0] :ARCHIVE:
+** Miscellany [0/1]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
+
+*** TODO Eliminate display bugs on Wayland :bug:
+The ~inhibit-double-buffering~ frame parameter might need to be set on Wayland.
+See also:
+
+- ~default-frame-alist~
+- ~posframe-inhibit-double-buffering~
+- ~(string= "wayland" (getenv "XDG_SESSION_TYPE"))~
 
 ** macos [2/2]
 *** DONE [#A] Remap keys for macOS
