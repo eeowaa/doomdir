@@ -5566,7 +5566,7 @@ However, be wary of @purcell's comments on =direnv.el=:
   use the wrong environment. (This is probably quite rare in practice.)
 #+end_quote
 
-** docker [3/5]
+** docker [4/6]
 #+begin_quote
 This module allows you to manipulate Docker images, containers & more from
 Emacs.
@@ -5620,6 +5620,14 @@ npm install -g dockerfile-language-server-nodejs
          (:name "Scope" :width 6 :template "{{ json .Scope }}" :sort nil :format nil)
          (:name "Driver" :width 7 :template "{{ json .Driver }}" :sort nil :format nil)
          (:name "Name" :width 50 :template "{{ json .Name }}" :sort nil :format nil)))
+#+end_src
+
+*** DONE [#B] Give the ~docker~ command a better keybinding :tweak:
+#+begin_src emacs-lisp :tangle yes
+(map! :leader
+      (:prefix-map ("o" . "open")
+       "D" nil ;; remove the old keybinding
+       :desc "Container" "c" #'docker))
 #+end_src
 
 *** DONE [#C] Filename-mode associations

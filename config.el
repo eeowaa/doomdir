@@ -1888,6 +1888,11 @@ which causes problems even if there is no existing buffer."
          (:name "Driver" :width 7 :template "{{ json .Driver }}" :sort nil :format nil)
          (:name "Name" :width 50 :template "{{ json .Name }}" :sort nil :format nil)))
 
+(map! :leader
+      (:prefix-map ("o" . "open")
+       "D" nil ;; remove the old keybinding
+       :desc "Container" "c" #'docker))
+
 ;; Replace default association with a more generic one
 (delq! "/Dockerfile\\(?:\\.[^/\\]*\\)?\\'" auto-mode-alist #'assoc-string)
 (pushnew! auto-mode-alist
