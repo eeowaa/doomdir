@@ -4755,7 +4755,7 @@ buffers. For the time being, I'll just wait it out.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-** syntax [5/9]
+** syntax [6/10]
 *** DONE [#A] Disable flycheck in all Org source blocks :hack:
 References:
 + [[help:flycheck-may-enable-mode]]
@@ -4819,6 +4819,12 @@ errors should not be reported*.
   (my/doom-use-face flycheck-posframe-info-face flycheck-error-list-info)
   (my/doom-use-face flycheck-posframe-warning-face flycheck-error-list-warning)
   (my/doom-use-face flycheck-posframe-error-face flycheck-error-list-error))
+#+end_src
+
+*** DONE [#C] Raise error threshold for =flycheck= :tweak:
+#+begin_src emacs-lisp :tangle yes
+(after! flycheck
+  (setq flycheck-checker-error-threshold 500))
 #+end_src
 
 *** STRT [#A] Allow dynamic changing of error levels displayed :feat:

@@ -1707,6 +1707,9 @@ which causes problems even if there is no existing buffer."
   (my/doom-use-face flycheck-posframe-error-face flycheck-error-list-error))
 
 (after! flycheck
+  (setq flycheck-checker-error-threshold 500))
+
+(after! flycheck
   (defun my/flycheck-set-level (level)
     "Set the Flycheck error level"
     (interactive
