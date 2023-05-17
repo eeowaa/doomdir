@@ -107,7 +107,8 @@
      '((side . bottom) (slot . 1)))
     (buffer-group-side-window-setup
      (buffer-group-define magit-select
-       `(:modes (magit-log-select-mode)))))
+       `(:modes (magit-log-select-mode)))
+     '((side . bottom) (slot . 1))))
 
   (when (modulep! :lang org)
     ;; For more buffer names, search for `get-buffer-create' in the Org package.
