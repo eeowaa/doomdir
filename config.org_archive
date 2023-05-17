@@ -513,3 +513,47 @@ See "Known issues and workarounds" above. For now, I just run ~my/redraw~
                :append #'my/refresh-window))
 #+end_src
 
+
+* OKAY [#B] Configure fringes to enable perfectly-balanced windows :bug:
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-05-17 Wed 12:55
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :tools/magit
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: OKAY
+:ARCHIVE_ITAGS: doom
+:END:
+The following code block sets combined fringe width of =magit= windows equal to
+that of the frame default. Unfortunately, this doesn't seem to solve the problem
+of jagged window boundaries often seen after running ~balance-windows~ (=C-w ==)
+when committing changes:
+
+#+begin_src emacs-lisp :tangle no
+(defun my/total-fringe-width (&optional mode)
+  (let ((mode (or mode fringe-mode))
+        (default 8))
+    (cond
+     ((integerp mode)
+      (* 2 mode))
+     ((null mode)
+      (* 2 default))
+     ((consp mode)
+      (apply #'+ (mapcar (lambda (x) (or (and (wholenump x) x) default))
+                         (list (car mode) (cdr mode)))))
+     (t (error "Invalid mode: %S" mode)))))
+
+(let ((total-fringe-width (my/total-fringe-width)))
+  (unless (= total-fringe-width (my/total-fringe-width +magit-fringe-size))
+    (setq +magit-fringe-size (cons total-fringe-width 0))))
+#+end_src
+
+Use the ~window-fringes~ command in debug further. The problem could be that
+fringes appear inside of margins in some windows, and outside of margins in
+other windows.
+
+*UPDATE*: The issue seems to be that ~window-toggle-side-windows~ does not
+restore side window sizes appropriately. That function is called by
+~+buffer-group-side-windows-save-a~, which is ~:around~ advice for
+~balance-windows~. I have decided to replace that advice with a new function:
+~+buffer-group--balance-windows-a~.
+

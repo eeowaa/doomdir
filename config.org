@@ -773,7 +773,7 @@ See also: [[file:~/.config/emacs/.local/straight/repos/evil-collection/modes/vdi
 ;; `vdiff-magit-compare' to work similarly to my git-vimdiff shell script.
 #+end_src
 
-** buffer-group [3/5] :eeowaa:
+** buffer-group [4/5] :eeowaa:
 #+begin_quote
 Doom's way of handling windows (through =:ui popup=) is too magical for my
 liking and forces a specific way of doing things. I've never been able to get
@@ -912,7 +912,7 @@ Instead of that, let's try something a bit milder and see how it goes:
 (setq display-buffer-base-action '((display-buffer-same-window) . nil))
 #+end_src
 
-*** STRT [#B] Keep window dividers aligned :tweak:
+*** DONE [#B] Keep window dividers aligned :tweak:
 Sometimes, spliting a window will result in jagged window placement, just a few
 pixels off. This can cause issues with selecting windows when point is near a
 jagged border. Doom disabled this feature to prevent crashes... let's hope that
@@ -922,7 +922,8 @@ it doesn't cause any crashes for us.
 (setq window-resize-pixelwise t)
 #+end_src
 
-So far, this doesn't really seem to help much.
+So far, this doesn't really seem to help much. *UPDATE*: The missing piece was
+advising ~balance-windows~ to respect side windows.
 
 *** STRT [#B] Replace key bindings for =:ui popup= :tweak:
 #+begin_src emacs-lisp :tangle yes

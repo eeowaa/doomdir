@@ -4,7 +4,20 @@
 ;;; Core functions
 
 ;; Don't try to resize side windows
-(advice-add #'balance-windows :around #'+buffer-group-side-windows-save-a)
+(defadvice! +buffer-group--balance-windows-a (fn &rest args)
+  :around #'balance-windows
+  (let* ((frame (window-normalize-frame (car-safe args)))
+         (side-windows (+buffer-group-side-windows frame)))
+    (dolist (window side-windows)
+      (window-preserve-size window
+                            (memq (window-parameter window 'window-side)
+                                  '(left right))
+                            t))
+    (apply fn args)
+    (dolist (window side-windows)
+      (set-window-parameter window
+                            'window-preserved-size
+                            nil))))
 
 
 ;;
