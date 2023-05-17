@@ -77,7 +77,9 @@
   (when-let ((transient-childframe (my/transient-childframe))
              (transient-window (frame-selected-window transient-childframe))
              (transient-buffer (window-buffer transient-window)))
-    (when (or (memq this-command '(transient-suspend transient-quit-all))
+    (when (or (memq this-command '(transient-suspend
+                                   transient-quit-all
+                                   handle-switch-frame))
               (not transient--stack))
       (modify-frame-parameters transient-childframe ;; REVIEW
                                '((width . 0)
@@ -87,6 +89,13 @@
                                  (visibility)))
       (bury-buffer transient-buffer) ;; REVIEW
       (select-frame (frame-parameter transient-childframe 'parent-frame)))))
+
+(add-hook! 'transient-exit-hook
+  (defun my/transient-debug-exit-h ()
+    (when transient--debug
+      (message "transient-exit-hook: this-command: %S" this-command)
+      (message "transient-exit-hook: transient--stack: %S" transient--stack)
+      (message "transient-exit-hook: transient--exitp: %S" transient--exitp))))
 
 (defadvice! my/transient--show-reduce-flicker-a (fn &rest args)
   :around #'transient--show
@@ -150,6 +159,7 @@
     (auto-hide-function . make-frame-invisible)
 
     ;; Window Management
+    (no-accept-focus . t)
     (undecorated . t)))
 
 (defun my/transient-childframe--reposition ()
