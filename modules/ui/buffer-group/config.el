@@ -103,7 +103,7 @@
   (when (modulep! :tools magit)
     (buffer-group-side-window-setup
      (buffer-group-define magit-edit
-       `(:names ("^\\(?:COMMIT_EDITMSG\\|MERGE_MSG\\)")))
+       `(:names ("^\\(?:COMMIT_EDITMSG\\|MERGE_MSG\\|TAG_EDITMSG\\)")))
      '((side . bottom) (slot . 1)))
     (buffer-group-side-window-setup
      (buffer-group-define magit-select
