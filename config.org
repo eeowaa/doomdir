@@ -5989,7 +5989,8 @@ statements span multiple input lines.
 There are some cases where one just wants to evaluate some code in an
 interpreter associated with a REPL, but does not actually want to see the code
 being pasted into the REPL. Refer to ~send-region~ and ~+eval/buffer-or-region~
-for inspiration.
+for inspiration. (Note that REPL buffers do not need to be shown in order to
+receive text from ~my/send-region~.)
 
 ** gist [0/0] :ARCHIVE:
 ** kubernetes [1/1] :eeowaa:
@@ -6367,7 +6368,7 @@ Until I get things figured out, I am going to continue to use hash tables.
 (setq lsp-use-plists t)
 #+end_src
 
-** magit [4/5]
+** magit [4/7]
 *** STRT [#A] Install prerequisites :feat:
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -6417,6 +6418,14 @@ use Git Flow, but I do use worktrees, so this behavior is backwards for me.
        (:map magit-status-mode-map
         :nv "gz" #'magit-jump-to-stashes)))
 #+end_src
+
+*** TODO [#B] Add support for Azure DevOps :feat:
+- [ ] Define a ~forge-azure-repository~ class (reference =forge-bitbucket=)
+- [ ] Install and configure the =git-link= package, which supports ADO
+
+*** TODO [#C] Restore window config after aborting a commit :bug:
+Upon running =C-c C-k= in a commit buffer, the =magit-diff= side window does not
+close, even if the side window was popped up during the commit sequence.
 
 ** make [4/4]
 *** DONE [#A] Search for =GNUmakefile= files :hack:
