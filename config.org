@@ -260,7 +260,7 @@ sudo dnf -y install jq
 <<github_binary_release>>
 #+end_src
 
-** Elisp setup [2/2]
+** Elisp setup [3/3]
 *** DONE [#A] Add =$DOOMDIR/lisp= to ~load-path~
 References:
 + [[id:fb9fd833-7379-41f0-9cfe-d86baef3095e][Using/loading local packages]]
@@ -281,6 +281,13 @@ for autoload cookies or byte-compilation.
 ;; (require 'eeowaa-debug) NOTE: This is providing nothing of value right now
 (require 'eeowaa-project)
 (require 'eeowaa-refresh)
+
+(require 'transient-childframe)
+(when (modulep! :tools magit)
+  (after! magit
+    ;; Revert Doom's configuration
+    (setq transient-display-buffer-action
+          (my/transient-childframe--display-buffer-action))))
 #+end_src
 
 *** DONE [#B] Define helper constructs

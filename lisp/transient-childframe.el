@@ -1,6 +1,21 @@
 ;;; transient-childframe.el -*- lexical-binding: t; -*-
 
 
+;;; Transient
+
+(require 'transient)
+
+(setq transient-show-popup 0.5
+      transient-semantic-coloring t
+      transient-detect-key-conflicts t
+      transient-mode-line-format nil
+      transient-enable-popup-navigation nil)
+
+;; Use `SPC' to pop up the menu immediately (in addition to the default `C-t'
+;; key binding); otherwise wait for `transient-show-popup' seconds.
+(define-key transient-map (kbd "SPC") #'transient-show)
+
+
 ;;; Childframe
 
 (setq fit-frame-to-buffer t
@@ -60,7 +75,7 @@
     (display-buffer-in-child-frame buffer alist)))
 
 
-;;; Transient
+;;; Transient with childframe
 
 (defun my/transient-childframe ()
   "Return the child frame used by `transient'."
@@ -209,9 +224,8 @@ creating a frame.
             ;; REVIEW `quit-restore'
             (child-frame-parameters . ,parameters)))))
 
-(setq transient-mode-line-format nil
-      transient-enable-popup-navigation nil
-      transient-display-buffer-action (my/transient-childframe--display-buffer-action))
+(setq transient-display-buffer-action
+      (my/transient-childframe--display-buffer-action))
 
 
 ;;; Tests
@@ -219,3 +233,6 @@ creating a frame.
 ;; (my/display-buffer-in-child-frame
 ;;  (get-buffer doom-fallback-buffer-name)
 ;;  (my/transient-childframe--display-buffer-action))
+
+(provide 'transient-childframe)
+;;; transient-childframe.el ends here

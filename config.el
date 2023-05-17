@@ -4,6 +4,13 @@
 (require 'eeowaa-project)
 (require 'eeowaa-refresh)
 
+(require 'transient-childframe)
+(when (modulep! :tools magit)
+  (after! magit
+    ;; Revert Doom's configuration
+    (setq transient-display-buffer-action
+          (my/transient-childframe--display-buffer-action))))
+
 (defmacro my/doom-use-face (face other-face)
   "Force FACE to be the same as OTHER-FACE.
 Examples:
