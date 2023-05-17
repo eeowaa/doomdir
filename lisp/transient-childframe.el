@@ -5,7 +5,7 @@
 
 (require 'transient)
 
-(setq transient-show-popup 0.5
+(setq transient-show-popup nil
       transient-semantic-coloring t
       transient-detect-key-conflicts t
       transient-mode-line-format nil
