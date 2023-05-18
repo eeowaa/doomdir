@@ -4,12 +4,13 @@
 (require 'eeowaa-project)
 (require 'eeowaa-refresh)
 
-(require 'transient-childframe)
-(when (modulep! :tools magit)
-  (after! magit
-    ;; Revert Doom's configuration
-    (setq transient-display-buffer-action
-          (my/transient-childframe--display-buffer-action))))
+(when initial-window-system
+  (require 'transient-childframe)
+  (when (modulep! :tools magit)
+    (after! magit
+      ;; Revert Doom's configuration
+      (setq transient-display-buffer-action
+            (my/transient-childframe--display-buffer-action)))))
 
 (defmacro my/doom-use-face (face other-face)
   "Force FACE to be the same as OTHER-FACE.
@@ -906,6 +907,24 @@ Closes and re-opens Treemacs to apply the new theme."
 
 (after! diff-hl
   (unless (window-system) (diff-hl-margin-mode)))
+
+(defvar my/diff-hl-minor-modes '(not git-commit-mode)
+  "List of minor modes to prevent `diff-hl-mode' from activating.
+Similar to `diff-hl-global-modes', except for minor modes and
+works even when `global-diff-hl-mode' is disabled.")
+
+(defadvice! my/diff-hl-minor-modes-a (&optional arg)
+  :before-while #'diff-hl-mode
+  (cond
+   ;; Do not prevent turning off `diff-hl-mode'
+   ((or (and (eq arg 'toggle) diff-hl-mode)
+        (and (numberp arg) (< arg 1))) t)
+
+   ;; Decide whether we should turn it on based on active minor modes
+   ((eq my/diff-hl-minor-modes t) t)
+   ((eq (car-safe my/diff-hl-minor-modes) 'not)
+    (not (seq-intersection local-minor-modes (cdr my/diff-hl-minor-modes))))
+   (t (seq-intersection local-minor-modes my/diff-hl-minor-modes))))
 
 (after! ace-window
   (when initial-window-system
