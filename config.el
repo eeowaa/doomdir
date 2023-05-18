@@ -56,6 +56,8 @@ See also: `(elisp) Prefix Command Arguments'."
    ((integerp arg) (list 'numeric arg))
    (t (error "Unrecognized prefix argument format: %s" arg))))
 
+(setq default-input-method "latin-postfix")
+
 (unless initial-window-system
   (remove-hook 'company-mode 'company-box-mode))
 
@@ -107,7 +109,7 @@ buffer in current window."
 
 (setq extended-command-suggest-shorter nil)
 
-;; Author: tecosaur
+;; Mostly stolen from tecosaur's config
 (setq frame-title-format
       '(""
         (:eval
@@ -999,9 +1001,7 @@ Closes and re-opens Treemacs to apply the new theme."
   :after #'forward-page
   (recenter 0))
 
-(setq default-input-method "latin-postfix")
-
-(setq-default truncate-lines t)
+(remove-hook 'text-mode-hook #'visual-line-mode)
 
 (evil-define-command my/evil-quit-a (&optional force)
   "Mark the current buffer as \"Done\" when performing a server

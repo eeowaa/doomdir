@@ -557,3 +557,49 @@ restore side window sizes appropriately. That function is called by
 ~balance-windows~. I have decided to replace that advice with a new function:
 ~+buffer-group--balance-windows-a~.
 
+
+* DONE [#B] Replace =ivy= with =vertico=
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-05-17 Wed 16:48
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :completion/vertico
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: DONE
+:ARCHIVE_ITAGS: doom
+:END:
+- [X] Enable in =init.el=
+- [X] Refactor for =vertico=
+
+
+* OKAY [#A] Prevent Treemacs from scrolling seemingly at random :tweak:
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-05-17 Wed 17:56
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :ui/treemacs
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: OKAY
+:ARCHIVE_ITAGS: doom
+:END:
+I don't know why this is happening, but it is very annoying. To debug, I could
+start by setting a watchpoint on a variable that keeps track of the Treemacs
+buffer's vertical position (~eeowaa-watchpoint-set~).
+
+*UPDATE*: I'm guessing this behavior is from ~treemacs-follow-mode~, which is
+disabled by default at this point.
+
+
+* KILL [#A] Do not allow the toggling of tab-bar-mode to affect company-box
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-05-17 Wed 22:33
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :ui/zen
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2023-05-17 Wed 22:32] \\
+  This should no longer be a problem after recent config changes.
+:END:
+After running ~+zen/toggle~, popup frames from =company-box= display a tab bar.
+

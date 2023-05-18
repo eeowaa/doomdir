@@ -348,10 +348,15 @@ See also: `(elisp) Prefix Command Arguments'."
 ;;; :input
 #+end_src
 
-** Miscellany [0/0] :ARCHIVE:
+** Miscellany [1/1]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
+
+*** DONE [#C] Allow easy input of accented and special characters via =C-\= :tweak:
+#+begin_src emacs-lisp :tangle yes
+(setq default-input-method "latin-postfix")
+#+end_src
 
 ** chinese [0/0] :ARCHIVE:
 #+begin_quote
@@ -391,7 +396,7 @@ This module provides code completion, powered by [[https://github.com/company-mo
 for code completion in many of Doom's :lang modules.
 #+end_quote
 
-*** DONE [#A] Do not use =company-box= in TTY Emacs
+*** DONE [#A] Do not use =company-box= in TTY Emacs :bug:
 Tangle to =early-init.el=:
 #+begin_src emacs-lisp :tangle early-init.el
 (unless initial-window-system
@@ -452,7 +457,7 @@ again with ~tab-bar-lines~ set to 0:
 (delete-frame (frame-local-getq company-box-doc-frame))
 #+end_src
 
-*** DONE [#B] Never start completion automatically (require =C-SPC=)
+*** DONE [#B] Never start completion automatically (require =C-SPC=) :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setq company-idle-delay nil)
 #+end_src
@@ -591,7 +596,7 @@ sudo dnf -y install ripgrep
 (setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
 #+end_src
 
-** vertico [3/5]
+** vertico [2/4]
 #+begin_quote
 This module enhances the Emacs search and completion experience, and also
 provides a united interface for project search and replace, powered by [[https://github.com/BurntSushi/ripgrep/][ripgrep]].
@@ -610,11 +615,7 @@ brew install ripgrep
 sudo dnf -y install ripgrep
 #+end_src
 
-*** DONE [#B] Replace =ivy= with =vertico=
-- [X] Enable in =init.el=
-- [X] Refactor for =vertico=
-
-*** DONE [#B] Find a reference for the symbols in the completing-read buffer
+*** DONE [#B] Find a reference for the symbols in the completing-read buffer :doc:
 These symbols are described in the docstring for the function
 ~marginalia--symbol-class~.
 
@@ -626,8 +627,12 @@ source block is somehow causing this.
 *** TODO [#B] Fix bug with cursor color getting stuck when previewing themes :bug:
 When previewing themes with =consult=, sometimes the cursor color gets stuck
 (changing themes does not change the cursor color). When this happens, some
-themes become ugly or even unusable. *UPDATE*: Might want to look into the
-~cursor-color~ frame parameter.
+themes become ugly or even unusable.
+
+References:
+- [[*Tweak the style of the tab bar][Tweak the style of the tab bar]]
+- ~consult-theme~ and ~load-theme~ functions
+- ~cursor-color~ frame parameter
 
 * :ui
 #+begin_quote
@@ -660,7 +665,7 @@ Miscellaneous configuration without a corresponding module.
 (package! vdiff-magit)
 #+end_src
 
-*** DONE [#B] Dedicate windows
+*** DONE [#B] Dedicate windows :feat:
 #+begin_src emacs-lisp :tangle yes
 (defun my/toggle-window-dedicated ()
   "Control whether or not Emacs is allowed to display another
@@ -678,19 +683,19 @@ buffer in current window."
   "d" #'my/toggle-window-dedicated)
 #+end_src
 
-*** DONE [#C] Keep icons small by default
+*** DONE [#C] Keep icons small by default :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setq all-the-icons-scale-factor 1.0)
 #+end_src
 
-*** DONE [#C] Don't suggest abbreviations for long command names
+*** DONE [#C] Don't suggest abbreviations for long command names :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setq extended-command-suggest-shorter nil)
 #+end_src
 
-*** DONE [#C] Set the frame title
+*** DONE [#C] Set the frame title :tweak:
 #+begin_src emacs-lisp :tangle yes
-;; Author: tecosaur
+;; Mostly stolen from tecosaur's config
 (setq frame-title-format
       '(""
         (:eval
@@ -707,7 +712,7 @@ buffer in current window."
                        "  ●  %s") project-name))))))
 #+end_src
 
-*** DONE [#C] Start Emacs with a maximized frame
+*** DONE [#C] Start Emacs with a maximized frame :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setf (alist-get 'fullscreen initial-frame-alist) 'maximized)
 #+end_src
@@ -979,7 +984,7 @@ fi
 fc-cache -v
 #+end_src
 
-*** DONE [#A] Never hide the modeline
+*** DONE [#A] Never hide the modeline :tweak:bug:
 Without a modeline, the only way to see a clear distinction between the bottom
 of a window without a modeline and the top of another window is by using certain
 themes in GUI Emacs.
@@ -1025,7 +1030,7 @@ exchange of screen real estate.
               #'hide-mode-line-mode)
 #+end_src
 
-*** DONE [#C] Tweak the style of the tab bar
+*** DONE [#C] Tweak the style of the tab bar :tweak:
 The following advice needs to be defined before we set the initial theme in
 order for it to take effect.
 
@@ -1040,7 +1045,7 @@ order for it to take effect.
     (my/doom-use-face tab-bar mode-line-inactive)))
 #+end_src
 
-*** DONE [#C] Set the theme
+*** DONE [#C] Set the theme :tweak:
 There are literally only two custom themes (~doom-badger~ and ~doom-rouge~) that
 satisfy the following requirements /without modification/ when running in a
 256-color terminal:
@@ -1093,7 +1098,7 @@ Some other themes that I enjoy in GUI Emacs include:
 - ~doom-tomorrow-day~ (good light theme to go with Comic Mono font)
 - ~doom-plain~ and ~doom-plain-dark~ (good monochrome themes to focus on text)
 
-*** DONE [#C] Set the font
+*** DONE [#C] Set the font :tweak:
 At least on Linux, you can list available fonts like this:
 
 #+begin_src sh :tangle no :results verbatim
@@ -1176,7 +1181,7 @@ references that no decent human being has any business recognising.
 Displays and inserts emojis (ASCII, Github style, unicode).
 #+end_quote
 
-*** DONE [#A] Do not prompt to download emojis
+*** DONE [#A] Do not prompt to download emojis :bug:
 The prompt to download emojis happens during Doom startup and puts it in an
 unactionable, unrecoverable state. Obviously, I'd prefer to avoid that! Instead,
 I would like to simply download emojis if they are missing from the expected
@@ -1186,7 +1191,7 @@ location.
 (setq emojify-download-emojis-p t)
 #+end_src
 
-*** DONE [#C] Enable emojis (just for =SPC i e=)
+*** DONE [#C] Enable emojis (just for =SPC i e=) :doc:
 This is done in =doom/init.el=.
 
 ** hl-todo [1/1]
@@ -1195,7 +1200,7 @@ This module adds syntax highlighting for TODO/FIXME/NOTE tags in programming
 major-modes.
 #+end_quote
 
-*** DONE [#B] Add a few different tags to highlight in programming major-modes
+*** DONE [#B] Add a few different tags to highlight in programming major-modes :tweak:
 #+begin_src emacs-lisp :tangle yes
 (after! hl-todo
   (setq hl-todo-keyword-faces
@@ -1215,7 +1220,7 @@ start with.
 + [[doom-modules:ui/hydra/README.org][ui/pdf module documentation]]
 + [[doom:.local/straight/repos/hydra/README.md][hydra package README]]
 
-*** OKAY [#A] Write macros to help create hydras
+*** OKAY [#A] Write macros to help create hydras :feat:
 Room for improvement:
 
 1. Use ~(["key"] cmd "hint")~ instead of ~(my/hydra-key "key" cmd "hint")~ in
@@ -1276,7 +1281,7 @@ corresponding those arguments of this macro. For example:
                               'italic)))))
 #+end_src
 
-*** DONE [#A] Add a hydra for projectile run commands
+*** DONE [#A] Add a hydra for projectile run commands :feat:
 #+begin_src emacs-lisp :tangle yes
 (after! projectile
   (global-set-key (kbd "C-c r") 'hydra-run/body)
@@ -1303,7 +1308,7 @@ _p_ackage ---> ?p?
      (format "%s" projectile-project-package-cmd))))
 #+end_src
 
-*** DONE [#C] Add a hydra for games
+*** DONE [#C] Add a hydra for games :feat:module:
 #+begin_src emacs-lisp :tangle yes
 (global-set-key (kbd "C-c g") 'hydra-game/body)
 (defhydra hydra-game (:color blue :hint nil)
@@ -1343,7 +1348,7 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
   ("q" nil))
 #+end_src
 
-*** DONE [#C] Add a hydra for counsel-spotify
+*** DONE [#C] Add a hydra for counsel-spotify :feat:module:
 #+begin_src emacs-lisp :tangle yes
 (global-set-key (kbd "C-c s") 'hydra-spotify/body)
 (defhydra hydra-spotify (:color blue :hint nil)
@@ -1381,7 +1386,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   ("q" nil))
 #+end_src
 
-*** DONE [#C] Add a hydra for timeclock
+*** DONE [#C] Add a hydra for timeclock :feat:module:
 #+begin_src emacs-lisp :tangle yes
 (global-set-key (kbd "C-c c") 'hydra-timeclock/body)
 (defhydra hydra-timeclock (:color blue)
@@ -1400,6 +1405,14 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 - [X] Setting and unsetting entrypoints
 - [ ] Interface to =debug= (reference ~debugger-mode-map~)
 - [ ] Interface to =edebug= (reference ~edebug-mode-map~)
+- [ ] Trace function calls
+  + ~trace-function~
+  + ~trace-function-background~
+  + ~untrace-function~
+- [ ] Trace variable modifications
+  + ~add-variable-watcher~ with ~message~
+  + ~get-variable-watchers~
+  + ~remove-variable-watcher~
 
 #+begin_src emacs-lisp :tangle yes
 (global-set-key (kbd "C-c d") 'hydra-debug/body)
@@ -1764,7 +1777,7 @@ This module provides an Atom-inspired, minimalistic modeline for Doom Emacs,
 powered by [[https://github.com/seagle0128/doom-modeline][the doom-modeline package]] (where you can find screenshots).
 #+end_quote
 
-*** DONE [#C] Use 1-based column numbering in modeline
+*** DONE [#C] Use 1-based column numbering in modeline :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setq column-number-indicator-zero-based nil)
 #+end_src
@@ -1788,11 +1801,11 @@ certain operations. It highlights regions of text that the last operation (like
 yank) acted on.
 #+end_quote
 
-*** DONE [#C] Flash after specific jump operations
-*UPDATE*: The =:ui nav-flash= implements this in a more general-purpose fashion.
-It might be good to use that module instead. It might also solve a limitation in
-my current solution: the flash does not occur when jumping to a hidden buffer
-position (such as in a folded Org subtree).
+*** OKAY [#C] Flash after specific jump operations :feat:
+*UPDATE*: The =:ui nav-flash= module implements this in a more general-purpose
+fashion. It might be good to use that module instead. It might also solve a
+limitation in my current solution: the flash does not occur when jumping to a
+hidden buffer position (such as in a folded Org subtree).
 
 #+begin_src emacs-lisp :tangle yes
 (after! evil-goggles
@@ -2100,7 +2113,7 @@ loads, so tabs will appear in the ~ilist~ buffer until you manually run the
 Wait until you have a Maildir set up, then look at configuration options for
 ~display-time-mode~.
 
-** treemacs [12/18]
+** treemacs [12/17]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -2122,7 +2135,7 @@ brew install python3
 sudo dnf -y install python3
 #+end_src
 
-*** DONE [#A] Unpin treemacs packages
+*** DONE [#A] Unpin treemacs packages :bug:
 It seems like half of the problems I encounter with =treemacs= and
 =treemacs-lsp= are already solved upstream, so I'm going to roll the dice and
 unpin those packages:
@@ -2131,11 +2144,11 @@ unpin those packages:
 (unpin! (:ui treemacs))
 #+end_src
 
-*** DONE [#A] Allow resizable fonts
+*** DONE [#A] Allow resizable fonts :tweak:bug:
 Right now, =C--= (~text-scale-decrease~) and =C-== (~text-scale-increase~) are
 unmapped, but I can still use =C-x C--= or =C-x C-== to invoke
 ~text-scale-adjust~. However, before incorporating the following code snippet,
-only the icons get resized, not the text itself.
+only the icons got resized, not the text itself:
 
 #+begin_src emacs-lisp :tangle yes
 (setq doom-themes-treemacs-enable-variable-pitch nil)
@@ -2155,7 +2168,7 @@ See also:
 + [[doom:.local/straight/repos/themes/extensions/doom-themes-ext-treemacs.el][doom-themes-ext-treemacs.el]]
 + =M-x customize-group doom-themes-treemacs RET=
 
-*** DONE [#A] Remove "Invalid face reference" errors
+*** DONE [#A] Remove "Invalid face reference" errors :bug:
 This comes from incorrect parsing of ~git status --porcelain~, which only
 happens when ~treemacs-git-mode~ is operating in ~simple~ mode. By setting the
 Doom-specific ~+treemacs-git-mode~ variable to ~extended~, we use a ~python3~
@@ -2165,14 +2178,6 @@ script instead of ~git~ to determine the git status of each file in a project.
 #+begin_src emacs-lisp :tangle yes
 (setq +treemacs-git-mode 'extended)
 #+end_src
-
-*** OKAY [#A] Prevent Treemacs from scrolling seemingly at random
-I don't know why this is happening, but it is very annoying. To debug, I could
-start by setting a watchpoint on a variable that keeps track of the Treemacs
-buffer's vertical position (~eeowaa-watchpoint-set~).
-
-*UPDATE*: I'm guessing this behavior is from ~treemacs-follow-mode~, which is
-disabled by default at this point.
 
 *** DONE [#B] Fix ace-window keybindings :hack:
 This slows down startup a bit, but whatever (I'm not obsessed with startup):
@@ -2207,11 +2212,25 @@ I will go with option 2 for the following reasons:
 (setq treemacs-read-string-input 'from-minibuffer)
 #+end_src
 
-*** DONE [#C] Add keybindings to visit adjacent files
-I'd prefer my functions to use ~treemacs-peek~ instead of
-~treemacs-visit-node-no-split~, but for whatever reason, ~treemacs-peek~ does
-not work in the lisp functions.
+*** OKAY [#B] Display "+" and "-" icons in tty emacs :bug:
+:LOGBOOK:
+- Note taken on [2023-05-17 Wed 18:08] \\
+  This is working for me today.
+- Note taken on [2022-11-23 Wed 11:27] \\
+  This is an open issue with Doom Emacs. It is not so much of a nuisance that I
+  want to fix it myself, so for now, I'll just wait for a fix.
+:END:
+https://github.com/hlissner/emacs-doom-themes/issues/489
 
+Work has been done towards this in [[*Align all Treemacs icons][another task]] (I incidentally discovered a way
+to fix this while solving another problem). It might also be a decent idea to
+use the default Treemacs theme in TTY Emacs (the default theme might have better
+fallbacks).
+
+Better yet, =doom-themes-ext-treemacs= could be patched to use the fallback TUI
+icons from the default theme.
+
+*** DONE [#C] Add keybindings to visit adjacent files :feat:
 #+begin_src emacs-lisp :tangle yes
 (after! treemacs-evil
   (defun my/treemacs-visit-next ()
@@ -2229,7 +2248,7 @@ not work in the lisp functions.
     "K" #'my/treemacs-visit-previous))
 #+end_src
 
-*** DONE [#C] Allow selection of treemacs window via =ace-window=
+*** DONE [#C] Allow selection of treemacs window via =ace-window= :tweak:
 https://github.com/doomemacs/doomemacs/issues/1177#issuecomment-464936107
 #+begin_src emacs-lisp :tangle yes
 (after! (:and treemacs ace-window)
@@ -2288,22 +2307,6 @@ Until I have a permanent fix for Treemacs icons, I want to call
       (my/treemacs-modify-icons)
       (treemacs-refresh))))
 #+end_src
-
-*** STRT [#B] Display "+" and "-" icons in tty emacs :bug:
-:LOGBOOK:
-- Note taken on [2022-11-23 Wed 11:27] \\
-  This is an open issue with Doom Emacs. It is not so much of a nuisance that I
-  want to fix it myself, so for now, I'll just wait for a fix.
-:END:
-https://github.com/hlissner/emacs-doom-themes/issues/489
-
-Work has been done towards this in the [[*Align all Treemacs icons][following task]] (I incidentally discovered
-a way to fix this while solving another problem). It might also be a decent idea
-to use the default Treemacs theme in TTY Emacs (the default theme might have
-better fallbacks).
-
-Better yet, =doom-themes-ext-treemacs= could be patched to use the fallback TUI
-icons from the default theme.
 
 *** STRT [#B] Align all Treemacs icons :bug:
 Some files, like =config.org_archive=, do not have icons configured in
@@ -2569,8 +2572,8 @@ primarily useful for non-English Emacs users, for whom Doom's built-in unicode
 support in insufficient.
 #+end_quote
 
-** vc-gutter [2/3]
-*** DONE [#B] Enable =vc-gutter= in terminal Emacs
+** vc-gutter [3/3]
+*** DONE [#B] Enable =vc-gutter= in terminal Emacs :feat:
 TUI Emacs does not have a fringe; however, it does have a margin. Look to Doom
 module documentation for =:ui vc-gutter= and =:os tty= for details.
 
@@ -2579,7 +2582,7 @@ module documentation for =:ui vc-gutter= and =:os tty= for details.
   (unless (window-system) (diff-hl-margin-mode)))
 #+end_src
 
-*** DONE [#B] Enable toggling of vcs diff in the fringe
+*** OKAY [#B] Enable toggling of VCS diff in the fringe :bug:
 Unfortunately, when the =vc-gutter= module is enabled, I have found no way to
 persistently disable =git-gutter= in a buffer.
 
@@ -2587,7 +2590,7 @@ persistently disable =git-gutter= in a buffer.
 =git-gutter=), I have found that =M-x diff-hl-mode= does what I want. I just
 added a toggle keybinding for this.
 
-*** STRT [#C] Do not display vc-gutter in COMMIT_EDITMSG buffers :tweak:
+*** DONE [#C] Do not display =vc-gutter= in COMMIT_EDITMSG buffers :feat:
 This is mainly a nuisance in terminal Emacs, where an empty margin is created.
 
 Observations:
@@ -2621,7 +2624,7 @@ This module provides several methods for selecting windows without the use of
 the mouse or spatial navigation (e.g. =C-w {h,j,k,l}=).
 #+end_quote
 
-*** DONE [#B] Allow =ace-window= to operate across frames in graphical Emacs
+*** DONE [#B] Allow =ace-window= to operate across frames in graphical Emacs :tweak:
 By default, =ace-window= operates across all frames, but Doom's =window-select=
 module configures =ace-window= to only operate within the current frame.
 
@@ -2648,12 +2651,12 @@ Such frames are always considered visible, whether or not they are
 currently being displayed on the terminal.
 #+end_quote
 
-*** DONE [#B] Do not dim the buffer content during selection
+*** DONE [#B] Do not dim the buffer content during selection :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setq aw-background nil)
 #+end_src
 
-*** OKAY [#B] Show =ace-window= selection indicators in ~*info*~ buffers
+*** OKAY [#B] Show =ace-window= selection indicators in ~*info*~ buffers :bug:
 :LOGBOOK:
 - Note taken on [2023-01-22 Sun 16:55] \\
   This does not seem to be a problem for me anymore.
@@ -2666,7 +2669,7 @@ indicator.
 (setq aw-char-position 'left)
 #+end_src
 
-*** OKAY [#B] Make the selection character more visible
+*** OKAY [#B] Make the selection character more visible :tweak:
 :LOGBOOK:
 - Note taken on [2023-01-22 Sun 16:57] \\
   Right now, I'm happy with the default selection character face.
@@ -2732,7 +2735,7 @@ Note that although it is possible to move a tab behind the N-th one by using
 +N means in this context see [range].
 #+end_quote
 
-*** DONE [#A] Bind ~+workspace/swap-left~ and ~+workspace/swap-right~ to keys
+*** DONE [#A] Bind ~+workspace/swap-left~ and ~+workspace/swap-right~ to keys :feat:
 #+begin_src emacs-lisp :tangle yes
 (map! :leader
       (:when (modulep! :ui workspaces)
@@ -2741,7 +2744,7 @@ Note that although it is possible to move a tab behind the N-th one by using
         :desc "Move right" "L" #'+workspace/swap-right)))
 #+end_src
 
-*** DONE [#B] Give ~persp-keymap-prefix~ binding to =projectile=
+*** DONE [#B] Give ~persp-keymap-prefix~ binding to =projectile= :tweak:
 By default, =C-c p= is used as the prefix for ~persp-mode-map~, but I would
 prefer to save that prefix for =projectile= commands. I will do what Doom does
 for standard Emacs bindings (snippet from =+emacs-bindings.el=):
@@ -2757,7 +2760,7 @@ for standard Emacs bindings (snippet from =+emacs-bindings.el=):
     "C-c p" #'projectile-command-map))
 #+end_src
 
-** zen [3/4]
+** zen [3/3]
 #+begin_quote
 This module provides two minor modes that make Emacs into a more comfortable
 writing or coding environment. Folks familiar with "distraction-free" or "zen"
@@ -2765,7 +2768,7 @@ modes from other editors -- or [[https://github.com/rnkn/olivetti][olivetti]], [
 plugins) -- will feel right at home.
 #+end_quote
 
-*** DONE [#B] Create a minor mode to center text and do nothing else
+*** DONE [#B] Create a minor mode to center text and do nothing else :tweak:
 Options:
 1. Use ~centered-window-mode~
 2. Create a new minor mode utilizing ~visual-fill-column-mode~
@@ -2780,12 +2783,12 @@ centering text within a window.
               visual-fill-column-width 120)
 #+end_src
 
-*** DONE [#C] Keep the VC gutter close to the text in Zen mode
+*** DONE [#C] Keep the VC gutter close to the text in Zen mode :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setq-default visual-fill-column-fringes-outside-margins nil)
 #+end_src
 
-*** DONE [#C] Unclutter the interface in additional ways
+*** DONE [#C] Unclutter the interface in additional ways :feat:
 #+begin_src emacs-lisp :tangle yes
 (after! writeroom-mode
 
@@ -2842,9 +2845,6 @@ centering text within a window.
         (if my/zen--old-diff-hl-mode (diff-hl-mode +1))))))
 #+end_src
 
-*** TODO [#A] Do not allow the toggling of tab-bar-mode to affect company-box
-After running ~+zen/toggle~, popup frames from =company-box= display a tab bar.
-
 * :editor
 #+begin_quote
 Modules that affect and augment your ability to manipulate or insert text.
@@ -2855,12 +2855,12 @@ Modules that affect and augment your ability to manipulate or insert text.
 ;;; :editor
 #+end_src
 
-** Miscellany [2/4]
+** Miscellany [2/3]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-*** DONE [#A] Configure line-feed behavior
+*** DONE [#A] Configure line-feed behavior :feat:tweak:
 #+begin_src emacs-lisp :tangle yes
 ;; Display ^L characters as horizontal lines
 (use-package! page-break-lines
@@ -2880,11 +2880,6 @@ Miscellaneous configuration without a corresponding module.
   "Perform a line feed after jumping to a ^L character"
   :after #'forward-page
   (recenter 0))
-#+end_src
-
-*** DONE [#C] Allow easy input of accented and special characters via =C-\=
-#+begin_src emacs-lisp :tangle yes
-(setq default-input-method "latin-postfix")
 #+end_src
 
 *** STRT [#B] Truncate lines by default :tweak:
@@ -3133,7 +3128,7 @@ to exit Emacs state.
 This module adds file templates for blank files, powered by yasnippet.
 #+end_quote
 
-*** DONE [#A] Figure out how to override existing templates
+*** DONE [#A] Figure out how to override existing templates :doc:
 The function ~+file-templates-check-h~ determines if the current buffer is a
 candidate for file template expansion, so its source code is probably the best
 place to determine how this works.
@@ -3161,7 +3156,7 @@ From https://tecosaur.github.io/emacs-config/config.html#file-templates:
 (set-file-template! "/LICEN[CS]E$" :trigger '+file-templates/insert-license)
 #+end_src
 
-*** DONE [#B] Simplify the file template for =sh-mode=
+*** DONE [#B] Simplify the file template for =sh-mode= :tweak:
 Doom Emacs' builtin file template for =sh-mode= is not suitable for portable
 shell scripts, so I created my own:
 #+begin_src snippet :tangle snippets/sh-mode/__
@@ -3514,6 +3509,24 @@ lines in the buffer without modifying the buffer content.
 #+begin_src emacs-lisp :tangle yes
 (setq +word-wrap-extra-indent nil)
 #+end_src
+
+*** TODO [#C] Add paragraph formatting to ~+word-wrap-mode~ :feat:
+If easily possible, I would like to add a feature to Doom's ~+word-wrap-mode~ to
+visually join separate lines in a paragraph and visually wrap them, sort of like
+~fill-paragraph~. Perhaps there is an existing Emacs package that can do this.
+
+*UPDATE*: =visual-fill= might be able to do this. Its package description looks
+promising, at least:
+
+#+begin_quote
+This `visual-fill-mode' minor mode basically "unfills" paragraphs within
+jit-lock, hence without modifying the buffer.  Combined with the normal
+line-wrapping this performs a kind of "auto refill" which can be more or
+less sophisticated depending on the line-wrapping used.
+
+For best effect, combine it with `visual-line-mode' and
+`adaptive-wrap-prefix-mode'.
+#+end_quote
 
 * :emacs
 #+begin_quote

@@ -1,11 +1,14 @@
 #+STARTUP:  overview
 #+FILETAGS: :doom:
-* Inbox [0/4]
+* Inbox [0/5]
 :PROPERTIES:
 :CATEGORY: doom/inbox
 :END:
-** TODO Implement mechanism for editing terminal/REPL input in indirect buffers :feat:
+** STRT Implement mechanism for editing terminal/REPL input in indirect buffers :feat:
 Start with =vterm= and extend to other modes.
+
++ [X] =vterm=
++ [ ] =comint=
 
 ** TODO Save/restore buffer position before/after jumps :bug:
 _Replication steps:_
@@ -129,6 +132,10 @@ _Reference:_
 You may also want to reference the package (or configuration options) that
 implements minibuffer completion in a centered popup frame. Perform a web search
 to find your way.
+
+** TODO Implement functionality to pull packages locally without loading them :feat:
+One relatively easy way would be to instruct =package= to pull to a location
+outside of =load-path=.
 
 * Upstream [0/8]
 :PROPERTIES:
