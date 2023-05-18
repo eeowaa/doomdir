@@ -104,7 +104,7 @@
 ;;; Music playback
 ;;(package! bluesound)
 ;;(package! bongo)
-(package! counsel-spotify)
+;;(package! counsel-spotify)
 ;;(package! dionysos)
 ;;(package! lyrics)
 ;;(package! lyrics-fetcher)

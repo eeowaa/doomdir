@@ -1351,40 +1351,41 @@ _p_: Pong     _m_: Mpuz       ^ ^              ^ ^           _z_: Zone
 
 *** DONE [#C] Add a hydra for counsel-spotify :feat:module:
 #+begin_src emacs-lisp :tangle yes
-(global-set-key (kbd "C-c s") 'hydra-spotify/body)
-(defhydra hydra-spotify (:color blue :hint nil)
-  "
+(when (locate-library "counsel-spotify")
+  (global-set-key (kbd "C-c s") 'hydra-spotify/body)
+  (defhydra hydra-spotify (:color blue :hint nil)
+    "
 ^Playback control^   ^Collection^     ^Song^           ^Open Spotify^
 ^---^----------------^-^--------------^-^-------------------------------
 _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   _n_: Next          _a_: Artist      _A_: By artist   _w_: Web player
   _p_: Previous      _r_: Record      _R_: By record   _i_: Integrations
 "
-  ;; Playback Control
-  ("SPC" counsel-spotify-toggle-play-pause :color red)
-  ("n" counsel-spotify-next :color red)
-  ("p" counsel-spotify-previous :color red)
+    ;; Playback Control
+    ("SPC" counsel-spotify-toggle-play-pause :color red)
+    ("n" counsel-spotify-next :color red)
+    ("p" counsel-spotify-previous :color red)
 
-  ;; Collection
-  ("l" counsel-spotify-search-playlist)
-  ("a" counsel-spotify-search-artist)
-  ("r" counsel-spotify-search-album)
+    ;; Collection
+    ("l" counsel-spotify-search-playlist)
+    ("a" counsel-spotify-search-artist)
+    ("r" counsel-spotify-search-album)
 
-  ;; Song
-  ("s" counsel-spotify-search-track)
-  ("A" counsel-spotify-search-tracks-by-artist)
-  ("R" counsel-spotify-search-tracks-by-album)
+    ;; Song
+    ("s" counsel-spotify-search-track)
+    ("A" counsel-spotify-search-tracks-by-artist)
+    ("R" counsel-spotify-search-tracks-by-album)
 
-  ;; Open Spotify
-  ("o" (cond
-        (IS-MAC (call-process "open" nil nil nil "-a" "spotify"))
-        (IS-LINUX (call-process "xdg-open" nil nil nil "spotify"))
-        (t (user-error! "Unsupported operating system"))))
-  ("w" (browse-url "https://open.spotify.com"))
-  ("i" (browse-url "https://developer.spotify.com/my-applications"))
+    ;; Open Spotify
+    ("o" (cond
+            (IS-MAC (call-process "open" nil nil nil "-a" "spotify"))
+            (IS-LINUX (call-process "xdg-open" nil nil nil "spotify"))
+            (t (user-error! "Unsupported operating system"))))
+    ("w" (browse-url "https://open.spotify.com"))
+    ("i" (browse-url "https://developer.spotify.com/my-applications"))
 
-  ;; Other
-  ("q" nil))
+    ;; Other
+    ("q" nil)))
 #+end_src
 
 *** DONE [#C] Add a hydra for timeclock :feat:module:
@@ -9782,7 +9783,7 @@ have listed some commented-out packages below that I would like to install.
 ;;; Music playback
 ;;(package! bluesound)
 ;;(package! bongo)
-(package! counsel-spotify)
+;;(package! counsel-spotify)
 ;;(package! dionysos)
 ;;(package! lyrics)
 ;;(package! lyrics-fetcher)
