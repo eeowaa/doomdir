@@ -1,6 +1,6 @@
 #+STARTUP:  overview
 #+FILETAGS: :doom:
-* Inbox [0/5]
+* Inbox [0/7]
 :PROPERTIES:
 :CATEGORY: doom/inbox
 :END:
@@ -135,7 +135,11 @@ to find your way.
 
 ** TODO Implement functionality to pull packages locally without loading them :feat:
 One relatively easy way would be to instruct =package= to pull to a location
-outside of =load-path=.
+outside of =load-path=. However, in doing so, =straight= must not be affected.
+
+** TODO Replace ugly characters in TTY Emacs with prettier alternatives :tweak:
+- [ ] Line truncation characters (currently dollar signs)
+- [ ] VC diff characters
 
 * Upstream [0/8]
 :PROPERTIES:
@@ -270,7 +274,7 @@ keybindings.
   ;;   presentations or streaming.
   #+end_quote
 
-* Config [6/13]
+* Config [6/15]
 :PROPERTIES:
 :CATEGORY: doom/config
 :END:
@@ -388,6 +392,8 @@ doom info | sed -n \
 
 Which doesn't miss anything, and seems more idiomatic.
 
+** STRT [#A] Add tags to all literal config subtrees
+** TODO [#A] Create custom Doom modules according to ~:module:~ tags
 ** TODO [#A] Tangle =DOOMDIR/init.el= from =DOOMDIR/config.org=
 This doesn't seem too difficult. All I will need is a set of source blocks that
 tangle to =init.el=. There will need to be some boilerplate at the top and
