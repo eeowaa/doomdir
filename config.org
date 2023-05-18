@@ -4285,7 +4285,7 @@ Modules that offer terminal emulation.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-*** DONE Define a helper function to wrap calls to ~with-editor-export-editor~
+*** DONE Define a helper function to wrap calls to ~with-editor-export-editor~ :feat:
 #+begin_src emacs-lisp :tangle yes
 (defun my/with-editor-export ()
   "Run `with-editor-export-editor' for all envvars that I care about"
@@ -4311,7 +4311,7 @@ brew install fish
 sudo dnf -y install fish
 #+end_src
 
-*** DONE [#B] Define aliases
+*** DONE [#B] Define aliases :feat:
 #+begin_src emacs-lisp :tangle yes
 (set-eshell-alias!
   ;; C-x [0123]
@@ -4343,13 +4343,13 @@ sudo dnf -y install fish
   "f"   "cd $1 && ls")
 #+end_src
 
-*** DONE [#B] Do not scroll after every command
+*** DONE [#B] Do not scroll after every command :tweak:
 #+begin_src emacs-lisp :tangle yes
 (after! eshell
   (setq eshell-scroll-show-maximum-output nil))
 #+end_src
 
-*** DONE [#B] Make ^L simply scroll (not insert a bunch of blank lines
+*** DONE [#B] Make ^L simply scroll (not insert a bunch of blank lines :tweak:
 As long as the first element of ~recenter-positions~ is ~top~ (which is
 how I have things configured), the following works great.
 
@@ -4358,7 +4358,7 @@ how I have things configured), the following works great.
   (advice-add 'eshell/clear :override #'recenter-top-bottom))
 #+end_src
 
-*** DONE [#B] Export ~$EDITOR~ to =eshell=
+*** DONE [#B] Export ~$EDITOR~ to =eshell= :feat:
 *NOTE*: At one point, I was hesistant to do this (see quote), but I cannot
 figure out how to replicate the problem, nor can I prove that the problem
 doesn't exist. In any case, it works perfectly with =git=, and that's all I
@@ -4395,7 +4395,7 @@ brew install libvterm cmake
 sudo dnf -y install libvterm cmake
 #+end_src
 
-*** DONE [#B] Export editor variables to =vterm=
+*** DONE [#B] Export editor variables to =vterm= :feat:
 #+begin_src emacs-lisp :tangle yes
 (defvar my/with-editor-emacsclient-executable--vterm
   (file-name-concat (getenv "HOME") ".local" "libexec" "emacs" "emacsclient-vterm"))
@@ -4409,13 +4409,13 @@ sudo dnf -y install libvterm cmake
       (my/with-editor-export))))
 #+end_src
 
-*** DONE [#B] Let =C-m= send =<return>=
+*** DONE [#B] Let =C-m= send =<return>= :tweak:
 #+begin_src emacs-lisp :tangle yes
 (after! vterm
   (defalias 'vterm-send-C-m #'vterm-send-return))
 #+end_src
 
-*** DONE [#B] Let =C-h=, =C-u=, =C-j=, and =<M-backspace>= pass through in Evil insert state
+*** DONE [#B] Let =C-h=, =C-u=, =C-j=, and =<M-backspace>= pass through in Evil insert state :tweak:
 #+begin_src emacs-lisp :tangle yes
 (after! evil-collection-vterm
   (dolist (key '("C-h" "C-u" "C-j" "<M-backspace>"))
@@ -4423,7 +4423,7 @@ sudo dnf -y install libvterm cmake
       (kbd key) 'vterm--self-insert)))
 #+end_src
 
-*** DONE [#B] Rename ~vterm~ buffers according to the host and directory
+*** DONE [#B] Rename ~vterm~ buffers according to the host and directory :tweak:
 Some extra shell-side configuration is needed for this, which I have stuck in my
 =~/.environ.d/vterm.sh= file.
 
@@ -4500,7 +4500,7 @@ This function works even if the current window is a side window."
         "C-l" #'eeowaa-refresh-buffer-and-display))
 #+end_src
 
-*** STRT [#B] Define aliases
+*** STRT [#B] Define aliases :feat:
 :LOGBOOK:
 - Note taken on [2023-01-30 Mon 08:33] \\
   The aliases that open files should work even without given arguments (e.g. ~vim~
@@ -5032,7 +5032,7 @@ brew install aspell
 sudo dnf -y install aspell
 #+end_src
 
-*** DONE [#A] Prevent ~spell-fu-mode~ from being enabled by default
+*** DONE [#A] Prevent ~spell-fu-mode~ from being enabled by default :tweak:
 I like having the option, but I would prefer to enable it manually per buffer.
 
 #+begin_src emacs-lisp :tangle yes
@@ -5190,7 +5190,7 @@ sudo dnf -y install unzip java-latest-openjdk-headless
 )
 #+end_src
 
-*** DONE [#A] Specify JAR paths on Linux
+*** DONE [#A] Specify JAR paths on Linux :tweak:
 #+begin_src emacs-lisp :tangle yes
 (when IS-LINUX
   (let ((langtool-dir (concat (file-name-as-directory (getenv "HOME"))
@@ -5210,7 +5210,7 @@ sudo dnf -y install unzip java-latest-openjdk-headless
   #'writegood-mode)
 #+end_src
 
-*** TODO [#B] Add toggle bindings for =lang-tool= and/or =writegood-mode=
+*** TODO [#B] Add toggle bindings for =lang-tool= and/or =writegood-mode= :feat:
 * :tools
 #+begin_quote
 Small modules that give Emacs access to external tools & services.
@@ -5275,7 +5275,7 @@ ansible-galaxy collection install community.general
 #+end_src
 
 ** biblio [0/0] :ARCHIVE:
-** bitwarden [3/4]
+** bitwarden [3/4] :eeowaa:
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -5629,7 +5629,7 @@ For the sake of debugging, you might want to try the following function:
     (princ (concat var "\n"))))
 #+end_src
 
-*** TODO [#A] Understand how Emacs handles environment variables :tweak:
+*** TODO [#A] Understand how Emacs handles environment variables :doc:
 + [ ] Play around with the following Lisp Interaction buffer
   #+begin_src lisp-interaction :tangle no
   ;; Variables
@@ -5700,7 +5700,7 @@ sudo loginctl enable-linger `whoami`
 npm install -g dockerfile-language-server-nodejs
 #+end_src
 
-*** DONE [#B] Adjust column widths
+*** DONE [#B] Adjust column widths :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setq! docker-image-columns
        '((:name "Repository" :width 49 :template "{{ json .Repository }}" :sort nil :format nil)
@@ -5733,7 +5733,7 @@ npm install -g dockerfile-language-server-nodejs
        :desc "Container" "c" #'docker))
 #+end_src
 
-*** DONE [#C] Filename-mode associations
+*** DONE [#C] Filename-mode associations :tweak:
 #+begin_src emacs-lisp :tangle yes
 ;; Replace default association with a more generic one
 (delq! "/Dockerfile\\(?:\\.[^/\\]*\\)?\\'" auto-mode-alist #'assoc-string)
@@ -5843,13 +5843,13 @@ brew install editorconfig
 sudo dnf -y install editorconfig
 #+end_src
 
-*** TODO [#B] Tell flycheck for Markdown to respect editorconfig
+*** TODO [#B] Tell flycheck for Markdown to respect editorconfig :tweak:
 I would like to advise ~editorconfig-set-line-length~ to modify the line-length
 rule used by ~markdownlint~. I could also just get in the habit of adding
 project-specific =.mdlrc= config files or adding corresponding environment
 variables to a project's =.envrc= file.
 
-*** TODO [#B] Tell ~git-commit-mode~ buffers to ignore editorconfig
+*** TODO [#B] Tell ~git-commit-mode~ buffers to ignore editorconfig :tweak:
 I could also get in the habit of adding =COMMIT_EDITMSG= patterns to
 project-specific =.editorconfig= files. Refer to these conventions:
 https://stackoverflow.com/questions/2290016/git-commit-messages-50-72-formatting
