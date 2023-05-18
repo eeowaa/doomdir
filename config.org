@@ -2576,7 +2576,7 @@ primarily useful for non-English Emacs users, for whom Doom's built-in unicode
 support in insufficient.
 #+end_quote
 
-** vc-gutter [3/3]
+** vc-gutter [3/4]
 *** DONE [#B] Enable =vc-gutter= in terminal Emacs :feat:
 TUI Emacs does not have a fringe; however, it does have a margin. Look to Doom
 module documentation for =:ui vc-gutter= and =:os tty= for details.
@@ -2641,12 +2641,44 @@ works even when `global-diff-hl-mode' is disabled.")
    (t (seq-intersection local-minor-modes my/diff-hl-minor-modes))))
 #+end_src
 
+*** STRT [#C] Keep fringe bitmaps looking good when changing themes :bug:
+So far, only the Doom themes have /really/ good-looking fringe bitmaps for
+=diff-hl=. I have attempted to extend Doom's customizations to Prot's theme
+packages, but only for the dark themes (I find the narrow single-color fringe
+hard to see in the light themes, so the wonkiness actually helps). Also,
+=diff-hl-dired= remains untouched.
+
+#+begin_src emacs-lisp :tangle yes
+(when (and (modulep! :ui vc-gutter +pretty)
+           (modulep! :ui vc-gutter +diff-hl)
+           initial-window-system)
+
+  (add-hook! 'diff-hl-mode-hook
+    (defadvice! my/diff-hl-fringe-a (theme &rest _)
+      :after '(load-theme consult-theme)
+      (+vc-gutter-fix-diff-hl-faces-h)))
+
+  (after! ef-themes
+    (dolist (theme ef-themes-dark-themes)
+      (eval (macroexpand-1
+             `(custom-theme-set-faces! ',theme
+                `(diff-hl-insert :foreground ,(ef-themes-get-color-value 'bg-added-refine nil ',theme))
+                `(diff-hl-change :foreground ,(ef-themes-get-color-value 'bg-changed-refine nil ',theme))
+                `(diff-hl-delete :foreground ,(ef-themes-get-color-value 'bg-removed-refine nil ',theme)))))))
+
+  (with-eval-after-load 'modus-themes
+    (custom-theme-set-faces! 'modus-vivendi
+      `(diff-hl-insert :foreground ,(alist-get 'green-fringe-bg modus-themes-vivendi-colors))
+      `(diff-hl-change :foreground ,(alist-get 'yellow-fringe-bg modus-themes-vivendi-colors))
+      `(diff-hl-delete :foreground ,(alist-get 'red-fringe-bg modus-themes-vivendi-colors)))))
+#+end_src
+
 ** vi-tilde-fringe [0/0]
 #+begin_quote
 Displays a tilde(~) in the left fringe to indicate an empty line, similar to Vi.
 #+end_quote
 
-** window-select [4/6]
+** window-select [5/6]
 #+begin_quote
 This module provides several methods for selecting windows without the use of
 the mouse or spatial navigation (e.g. =C-w {h,j,k,l}=).
@@ -2709,16 +2741,24 @@ indicator.
     :weight bold :height 2.5 :box (:line-width 10 :color "red")))
 #+end_src
 
+*** DONE [#C] Make the selection character the default size in modus themes :tweak:
+The modus themes (~modus-vivendi~ and ~modus-operandi~) make the selection
+character slightly larger than the default face, which makes the window content
+shift slightly downward, which is quite annoying.
+
+#+begin_src emacs-lisp :tangle no
+(defadvice! my/aw-face-height-a (theme &rest _)
+  :after '(load-theme consult-theme)
+  (when (string-match-p "\\`modus-" (symbol-name theme))
+    (set-face-attribute 'aw-leading-char-face nil
+                        :height (face-attribute 'default :height))))
+#+end_src
+
 *** TODO [#B] Display window numbers in the mode line :feat:
 Take a look at ~doom-modeline-segment--window-number~ (currently unused in my
 config), which uses =ace-window= to display line numbers in the mode line. I
 could either make this permanent, or just temporarily display window numbers
 when I activate window selection functions.
-
-*** TODO [#C] Make the selection character the default size in modus themes :tweak:
-The modus themes (~modus-vivendi~ and ~modus-operandi~) make the selection
-character slightly larger than the default face, which makes the window content
-shift slightly downward, which is quite annoying.
 
 ** workspaces [2/2]
 #+begin_quote

@@ -929,6 +929,29 @@ works even when `global-diff-hl-mode' is disabled.")
     (not (seq-intersection local-minor-modes (cdr my/diff-hl-minor-modes))))
    (t (seq-intersection local-minor-modes my/diff-hl-minor-modes))))
 
+(when (and (modulep! :ui vc-gutter +pretty)
+           (modulep! :ui vc-gutter +diff-hl)
+           initial-window-system)
+
+  (add-hook! 'diff-hl-mode-hook
+    (defadvice! my/diff-hl-fringe-a (theme &rest _)
+      :after '(load-theme consult-theme)
+      (+vc-gutter-fix-diff-hl-faces-h)))
+
+  (after! ef-themes
+    (dolist (theme ef-themes-dark-themes)
+      (eval (macroexpand-1
+             `(custom-theme-set-faces! ',theme
+                `(diff-hl-insert :foreground ,(ef-themes-get-color-value 'bg-added-refine nil ',theme))
+                `(diff-hl-change :foreground ,(ef-themes-get-color-value 'bg-changed-refine nil ',theme))
+                `(diff-hl-delete :foreground ,(ef-themes-get-color-value 'bg-removed-refine nil ',theme)))))))
+
+  (with-eval-after-load 'modus-themes
+    (custom-theme-set-faces! 'modus-vivendi
+      `(diff-hl-insert :foreground ,(alist-get 'green-fringe-bg modus-themes-vivendi-colors))
+      `(diff-hl-change :foreground ,(alist-get 'yellow-fringe-bg modus-themes-vivendi-colors))
+      `(diff-hl-delete :foreground ,(alist-get 'red-fringe-bg modus-themes-vivendi-colors)))))
+
 (after! ace-window
   (when initial-window-system
     (setq aw-scope 'visible)))
