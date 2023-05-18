@@ -2622,7 +2622,7 @@ value of ~diff-hl-global-modes~. Unfortunately, it is a minor mode, so I need to
 hack around it:
 
 #+begin_src emacs-lisp :tangle yes
-(defvar my/diff-hl-minor-modes '(not git-commit-mode)
+(defvar my/diff-hl-minor-modes '(not git-commit-mode smerge-mode)
   "List of minor modes to prevent `diff-hl-mode' from activating.
 Similar to `diff-hl-global-modes', except for minor modes and
 works even when `global-diff-hl-mode' is disabled.")

@@ -911,7 +911,7 @@ Closes and re-opens Treemacs to apply the new theme."
 (after! diff-hl
   (unless (window-system) (diff-hl-margin-mode)))
 
-(defvar my/diff-hl-minor-modes '(not git-commit-mode)
+(defvar my/diff-hl-minor-modes '(not git-commit-mode smerge-mode)
   "List of minor modes to prevent `diff-hl-mode' from activating.
 Similar to `diff-hl-global-modes', except for minor modes and
 works even when `global-diff-hl-mode' is disabled.")
