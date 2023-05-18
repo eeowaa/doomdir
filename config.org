@@ -7923,7 +7923,9 @@ Currently only includes code blocks."
 
 *** DONE [#C] Filename-mode associations
 #+begin_src emacs-lisp :tangle yes
-(pushnew! auto-mode-alist '("\\.mdx\\'" . markdown-mode))
+(pushnew! auto-mode-alist
+          '("\\.mdx\\'" . markdown-mode)
+          '("/\\.markdownlintrc\\'" . json-mode))
 #+end_src
 
 *** DONE [#B] Remove Doom's =M-b= and =M-i= insert state bindings from Markdown

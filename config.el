@@ -2666,7 +2666,9 @@ Currently only includes code blocks."
   (evil-define-key '(visual operator) evil-markdown-mode-map
     "ie" #'my/evil-markdown-inner-element))
 
-(pushnew! auto-mode-alist '("\\.mdx\\'" . markdown-mode))
+(pushnew! auto-mode-alist
+          '("\\.mdx\\'" . markdown-mode)
+          '("/\\.markdownlintrc\\'" . json-mode))
 
 (after! evil-markdown
   (map! :map evil-markdown-mode-map
