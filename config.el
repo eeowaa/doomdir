@@ -1788,7 +1788,8 @@ which causes problems even if there is no existing buffer."
       ;; global value of `flycheck-navigation-minimum-level'
       (kill-local-variable 'flycheck-navigation-minimum-level))))
 
-(when (and (modulep! :tools lsp)
+(when (and initial-window-system
+           (modulep! :tools lsp)
            (not (modulep! :tools lsp +eglot)))
   (setq lsp-ui-sideline-enable nil))
 

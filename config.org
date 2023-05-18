@@ -4991,7 +4991,8 @@ Currently, mouseover of a =flycheck= error shows the message in the echo area
 instead of in a child frame, so I still have that to fix.
 
 #+begin_src emacs-lisp :tangle yes
-(when (and (modulep! :tools lsp)
+(when (and initial-window-system
+           (modulep! :tools lsp)
            (not (modulep! :tools lsp +eglot)))
   (setq lsp-ui-sideline-enable nil))
 #+end_src
