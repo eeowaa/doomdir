@@ -761,12 +761,14 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     "Open the next node in another window."
     (interactive)
     (treemacs-next-line 1)
-    (treemacs-visit-node-no-split 1))
+    (save-selected-window
+      (treemacs-visit-node-no-split 1)))
   (defun my/treemacs-visit-previous ()
     "Open the previous node in another window."
     (interactive)
     (treemacs-previous-line 1)
-    (treemacs-visit-node-no-split 1))
+    (save-selected-window
+      (treemacs-visit-node-no-split 1)))
   (define-key! evil-treemacs-state-map
     "J" #'my/treemacs-visit-next
     "K" #'my/treemacs-visit-previous))
