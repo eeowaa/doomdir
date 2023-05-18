@@ -2907,12 +2907,14 @@ Miscellaneous configuration without a corresponding module.
   (recenter 0))
 #+end_src
 
-*** STRT [#B] Truncate lines by default :tweak:
-This doesn't appear to be working...
-https://emacs.stackexchange.com/questions/51989/how-to-truncate-lines-by-default
+*** DONE [#B] Truncate lines by default :tweak:
+Doom already sets the default value of ~truncate-lines~ to ~t~ in
+=doom-editor.el=, but it also happens add ~visual-line-mode~ to
+~text-mode-hook~. For now, I would rather truncate lines in *all* modes,
+including text modes.
 
 #+begin_src emacs-lisp :tangle yes
-(setq-default truncate-lines t)
+(remove-hook 'text-mode-hook #'visual-line-mode)
 #+end_src
 
 *** TODO [#B] Use Doom's =so-long= configuration :bug:
@@ -3524,7 +3526,7 @@ deleting the final newline before inserting the \")))\"."
               :override #'my/projectile-skel-dir-locals))
 #+end_src
 
-** word-wrap [1/1]
+** word-wrap [2/3]
 #+begin_quote
 This module adds a minor-mode ~+word-wrap-mode~, which intelligently wraps long
 lines in the buffer without modifying the buffer content.
@@ -3534,6 +3536,18 @@ lines in the buffer without modifying the buffer content.
 #+begin_src emacs-lisp :tangle yes
 (setq +word-wrap-extra-indent nil)
 #+end_src
+
+*** DONE [#B] Do not activate ~+word-wrap-mode~ by default :tweak:
+The following code block is necessary in order to [[*Truncate lines by default][truncate lines by default]] when
+the =word-wrap= module is enabled:
+
+#+begin_src emacs-lisp :tangle yes
+(remove-hook 'text-mode-hook #'+word-wrap-mode)
+#+end_src
+
+Prefer ~+word-wrap-mode~ (=SPC t w=) over ~toggle-truncate-lines~ (=SPC t t=)
+when you want to disable line truncation, as the former also enables
+~adaptive-wrap-prefix-mode~ to align visually wrapped lines.
 
 *** TODO [#C] Add paragraph formatting to ~+word-wrap-mode~ :feat:
 If easily possible, I would like to add a feature to Doom's ~+word-wrap-mode~ to

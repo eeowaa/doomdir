@@ -1217,6 +1217,8 @@ deleting the final newline before inserting the \")))\"."
 
 (setq +word-wrap-extra-indent nil)
 
+(remove-hook 'text-mode-hook #'+word-wrap-mode)
+
 (setq disabled-command-function nil)
 
 (when (featurep 'native-compile)
