@@ -1198,6 +1198,29 @@ current buffer first unless the `force' argument is given."
 
 (setq hs-allow-nesting t)
 
+(defadvice! my/hideshow-suppress-error-a (fn &rest args)
+  :around #'+fold--ensure-hideshow-mode
+  (ignore-errors (apply fn args)))
+
+(defadvice! my/hideshow-skip-maybe-a (fn &rest args)
+  :around #'+fold/open-all
+  (if-let ((level (car-safe args))
+           (_ (integerp level)))
+      (letf! (defadvice my/outline-correct-sublevel-a (args)
+               :filter-args #'outline-hide-sublevels
+               (list level))
+        (apply fn args))
+    (letf! (defadvice my/hs-life-goes-on-a (fn &rest args)
+             :around #'hs-show-all
+             (hs-life-goes-on (apply fn args)))
+      (apply fn args))))
+
+(defadvice! my/outline-close-all-maybe-a (&optional level)
+  :after #'+fold/close-all
+  (when (fboundp 'outline-hide-sublevels)
+    (save-excursion
+      (outline-hide-sublevels (or level 1)))))
+
 (after! projectile
 
   (defun my/projectile-skel-variable-cons ()
@@ -1949,7 +1972,12 @@ which causes problems even if there is no existing buffer."
 (pushnew! auto-mode-alist
           '("/[^/\\]*\\<\\(Docker\\|Container\\)file\\>[^/\\]*$" . dockerfile-mode))
 
-(setq ein:output-area-inlined-images t)
+(after! editorconfig
+  (add-to-list 'editorconfig-exclude-regexps
+               "/\\(?:\\(?:COMMIT\\|TAG\\)_EDIT\\|MERGE_\\)MSG\\'"))
+
+(when initial-window-system
+  (setq ein:output-area-inlined-images t))
 
 ;; HACK The machinery provided by `ob-ein-languages' and `ob-ein--babelize-lang'
 ;; is insufficient for bash, so we do it by hand.
@@ -2104,6 +2132,24 @@ if you want to send region to a REPL or terminal emulator."
                (+vertico-file-search :query query)
                t))))))
 
+(defvar my/onlinep-dns-server "8.8.8.8") ;; Google DNS
+(defvar my/onlinep-timeout 0.1)
+(defun my/onlinep ()
+  "Return non-nil if a public internet connection is available.
+To make this determination, this function queries an external DNS
+server for the hostname of its own IP address."
+  (let ((dns-servers (list my/onlinep-dns-server))
+        (dns-timeout my/onlinep-timeout))
+    (dns-query my/onlinep-dns-server nil nil t)))
+
+(defvar my/lookup-dictionary-prefer-offline nil)
+(defadvice! my/lookup-dictionary-prefer-online-a (fn &rest args)
+  :around '(+lookup/dictionary-definition +lookup/synonyms)
+  (let ((+lookup-dictionary-prefer-offline
+         (or my/lookup-dictionary-prefer-offline
+             (not (my/onlinep)))))
+    (apply fn args)))
+
 (setq eldoc-echo-area-use-multiline-p nil
       eldoc-echo-area-display-truncation-message nil)
 
@@ -2121,6 +2167,17 @@ if you want to send region to a REPL or terminal emulator."
 
 (after! dumb-jump
   (setq dumb-jump-selector 'completing-read))
+
+(after! synosaurus-wordnet
+  (setq synosaurus-wordnet--options '("-synsv" "-synsn" "-synsa")))
+
+(after! wordnut
+  ;; HACK This modifies a `defconst'
+  (setq wordnut-cmd-options
+        (seq-remove (lambda (s) (string-match-p "r\\'" s))
+                    wordnut-cmd-options)))
+
+(add-hook 'wordnut-mode-hook #'outline-minor-mode)
 
 (when (modulep! :tools lookup +docsets)
   (defun my/ensure-docsets ()
@@ -2175,10 +2232,6 @@ This variable should be set by `my/lsp-ui-set-delay'.")
     (set var my/lsp-ui-delay)))
 
 (my/lsp-ui-set-delay my/lsp-ui-delay)
-
-;; Removed `doom-themes-hide-fringes-maybe', `doom-themes-hide-modeline', and
-;; `doom-themes-define-treemacs-fringe-indicator-bitmap'
-(setq treemacs-mode-hook '(doom-themes-setup-line-spacing doom-themes-setup-tab-width))
 
 (define-key! doom-leader-toggle-map
   "i" #'lsp-ui-imenu)

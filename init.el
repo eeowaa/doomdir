@@ -109,7 +109,7 @@
        (eval +overlay)     ; run code, run (also, repls)
        ;;gist              ; interacting with github gists
        (kubernetes +lsp +tree-sitter) ; XXX user module
-       (lookup +dictionary +docsets)
+       (lookup +dictionary +offline +docsets)
                          ; navigate your code and its documentation
        (lsp +peek)         ; M-x vscode
        (magit +forge)      ; a git porcelain for Emacs

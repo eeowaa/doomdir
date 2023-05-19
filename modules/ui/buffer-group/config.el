@@ -103,7 +103,7 @@
   (when (modulep! :tools magit)
     (buffer-group-side-window-setup
      (buffer-group-define magit-edit
-       `(:names ("^\\(?:COMMIT_EDITMSG\\|MERGE_MSG\\|TAG_EDITMSG\\)")))
+       `(:names ("^\\(?:\\(?:COMMIT\\|TAG\\)_EDIT\\|MERGE_\\)MSG")))
      '((side . bottom) (slot . 1)))
     (buffer-group-side-window-setup
      (buffer-group-define magit-select
@@ -186,7 +186,19 @@
       (buffer-group-property-pushnew
        'diff :names (concat "^" (regexp-quote undo-tree-diff-buffer-name)))))
 
-  (buffer-group-side-window-setup 'diff))
+  (buffer-group-side-window-setup 'diff)
+
+  (buffer-group-side-window-setup
+   (buffer-group-define dictionary
+     `(:names ("*Dictionary*")
+       :modes (dictionary-mode))))
+  (when (and (modulep! :tools lookup +dictionary)
+             (modulep! :tools lookup +offline))
+    (after! wordnut
+      (buffer-group-property-pushnew
+       'dictionary :names (concat "^" (regexp-quote wordnut-bufname) "$"))
+      (buffer-group-property-pushnew
+       'dictionary :modes 'wordnut-mode))))
 
 
 ;;

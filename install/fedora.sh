@@ -308,7 +308,7 @@ EOF
 )
 
 # Install prerequisites for `tools/lookup` module
-sudo dnf -y install ripgrep sqlite-3
+sudo dnf -y install ripgrep sqlite-3 wordnet
 
 # Install prerequisites for `tools/magit` module
 (cd ~/Documents/src/life/stow-dotfiles && make perl)

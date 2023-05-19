@@ -603,3 +603,114 @@ disabled by default at this point.
 :END:
 After running ~+zen/toggle~, popup frames from =company-box= display a tab bar.
 
+
+* KILL [#A] Do not delete fringes when the LSP Symbols buffer refreshes :bug:
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-05-19 Fri 14:20
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :tools/lsp
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2023-05-19 Fri 14:19] \\
+  This problem has been resolved elsewhere.
+:END:
+This is very similar to the problem I was seeing earlier with breakpoints
+disappearing in =dap-mode=, which -- like LSP Symbols -- uses Treemacs. In this
+case, the fringe disappears from the selected window after the LSP Symbols
+window refreshes. The fringe can be reactivated using =C-l= (bound to
+~my/redraw~, which evaluates ~(set-window-buffer nil (current-buffer))~ -- the
+code that restores fringes).
+
+The following works for LSP Symbols (not sure about =dap-mode=, as I haven't
+tested yet):
+
+#+begin_src emacs-lisp :tangle yes
+;; Removed `doom-themes-hide-fringes-maybe', `doom-themes-hide-modeline', and
+;; `doom-themes-define-treemacs-fringe-indicator-bitmap'
+(setq treemacs-mode-hook '(doom-themes-setup-line-spacing doom-themes-setup-tab-width))
+#+end_src
+
+*UPDATE*: Actually, the LSP Symbols functionality completely breaks if you run
+~my/treemacs-modify-icons~ *after* you already have the LSP Symbols window open.
+
+Also, ~treemacs-mode-hook~ gets reset to its original value at some point
+(either after ~my/treemacs-modify-icons~ or after opening LSP Symbols again.
+
+
+* KILL [#C] Make spelling corrections match recommendations :tweak:
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-05-19 Fri 14:29
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :checkers/spell
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2023-05-19 Fri 14:29] \\
+  This is no longer a problem for me.
+:END:
+The =company= backend that provides spelling recommendations (via =C-SPC=) must
+use a different dictionary than the =spell= module that highlights errors and
+provides corrections. For example, the word "fluctuant" is highlighted as a
+spelling error by the =spell= module but is a completion for "flu" (just type
+=C-SPC= in Evil insert state with the cursor positioned after the "u" in "flu").
+
+
+* KILL [#C] Add definitions to word completions :feat:
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-05-19 Fri 14:44
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :completion/company
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+What I really want to do is instrument ~+company/dict-or-keywords~.
+=company-keywords= is more for programming language keywords (see
+~company-keywords-alist~), so I want to supplement =company-dict=. However, it
+is not what I originally expected, and again seems more suited for programming
+languages. Here is the description from the =README.md= of =company-dict=:
+
+#+begin_src markdown
+This simple [company] backend emulates `ac-source-dictionary` and vim's
+dictionary omnicompletion (`C-x C-k`). It's much like `company-keywords`, but
+with lazy-loaded dictionary files, and support for annotations and
+documentation.
+
++ It is meant as an alternative to `company-keywords`.
++ A dictionary is a plaintext file named after the major-mode in which it should
+  be active.
++ The dictionary file `all` applies to all modes.
++ This file is a newline-delimited list of keywords.
++ Each keyword is tab-delimited in the following format: `[keyword] [[annotation] [documentation]]`
+  + e.g. `os.path.basename [function] Return the base name of pathname path`
+  + **NOTE:** the parser squashes multiple tab characters, so use as many tabs
+    as you'd like to organize your dictionary files.
+#+end_src
+
+Note that the only required field is ~keyword~, so all I need is a list of
+English words in a file named =text-mode= under ~company-dict-dir~. Luckily, on
+Linux, at least, we can just symlink =/usr/share/dict/words= to that location.
+
+#+begin_src emacs-lisp :tangle no
+(after! company-dict
+  (let ((words "/usr/share/dict/words")
+        (text-mode-dict (concat (file-name-as-directory company-dict-dir)
+                                "text-mode")))
+    (unless (file-symlink-p text-mode-dict)
+      (make-directory company-dict-dir t)
+      (make-symbolic-link words text-mode-dict t))))
+#+end_src
+
+*NOTE*: At this time, ~company-complete-common~ (=C-SPC=) is much more
+responsive than ~+company/dict-or-keywords~ (=C-x C-k=) in pulling in words. In
+some cases (like in =org= buffers) the latter doesn't even work.
+
+*UPDATE*: Turns out, =C-SPC= is actually invoking =company-ispell= instead of
+=company-dict=, the latter of which is very slow and unnecessary for what I was
+trying to accomplish here.
+

@@ -16,4 +16,5 @@
          (projectile-project-test-cmd . "doom doctor")
 
          ;; Run a new instance of Doom Emacs
-         (projectile-project-run-cmd . "doom run"))))
+         (projectile-project-run-cmd . "doom run")))
+ (auto-mode-alist . (("/dicts/[^\\.].+" . tsv-mode))))
