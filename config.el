@@ -1194,7 +1194,7 @@ current buffer first unless the `force' argument is given."
 
 (setq evil-auto-balance-windows nil)
 
-(pushnew! evil-emacs-state-modes 'noaa-mode 'vterm-mode)
+(pushnew! evil-emacs-state-modes 'noaa-mode)
 
 (setq hs-allow-nesting t)
 
@@ -2200,8 +2200,6 @@ server for the hostname of its own IP address."
       :select nil ;; NOTE I changed this from Doom's default of `t'
       :quit t)))
 
-(setq lsp-modeline-code-actions-segments nil)
-
 (map! :leader
       (:prefix-map ("c" . "code")
        :desc "Glance documentation" "g" #'lsp-ui-doc-glance
@@ -2240,6 +2238,8 @@ This variable should be set by `my/lsp-ui-set-delay'.")
   (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
     (cl-pushnew `((,(format "\\`%s t i\\'" prefix-re)) nil . "LSP Imenu")
                 which-key-replacement-alist)))
+
+(setq lsp-modeline-code-actions-segments nil)
 
 (setq magit-repository-directories
       '(("~/Documents/src" . 2)
@@ -2616,16 +2616,6 @@ See also: `ts-fold-summary--get'."
 (after! ws-butler
   (pushnew! ws-butler-global-exempt-modes 'tsv-mode))
 
-(defadvice! my/format-result-a (f &rest r)
-  "Prepend \";; =>\"."
-  :around #'eval-print-last-sexp
-  (let ((p (point)))
-    (apply f r)
-    (save-excursion
-      (goto-char p)
-      (forward-line 1)
-      (insert ";; => "))))
-
 (setq-hook! 'emacs-lisp-mode-hook
   eldoc-idle-delay 0.1)
 
@@ -2642,6 +2632,16 @@ See also: `ts-fold-summary--get'."
           (concat " | " (propertize oneline 'face 'italic))))))
 
 (pushnew! auto-mode-alist '("Cask\\'" . lisp-data-mode))
+
+(defadvice! my/format-result-a (f &rest r)
+  "Prepend \";; =>\"."
+  :around #'eval-print-last-sexp
+  (let ((p (point)))
+    (apply f r)
+    (save-excursion
+      (goto-char p)
+      (forward-line 1)
+      (insert ";; => "))))
 
 (after! lsp-haskell
   (setq lsp-haskell-formatting-provider "brittany"))
@@ -3312,13 +3312,13 @@ This is a list of lists, not a list of cons cells.")
   (setq fill-column 79)
   (display-fill-column-indicator-mode))
 
+(pushnew! auto-mode-alist '("pylint" . conf-mode)
+                          '("/activate\\'" . sh-mode))
+
 (after! projectile
   (add-to-list 'projectile-project-root-files "pyvenv.cfg")
   (add-to-list 'projectile-project-search-path
                `(,(concat (file-name-as-directory (getenv "HOME")) ".local/pipx/venvs") . 1)))
-
-(pushnew! auto-mode-alist '("pylint" . conf-mode)
-                          '("/activate\\'" . sh-mode))
 
 (after! dap-mode
   (setq dap-python-debugger 'debugpy))

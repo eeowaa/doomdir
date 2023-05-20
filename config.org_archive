@@ -5,7 +5,7 @@ Archived entries from file /home/sam/Documents/src/life/stow-dotfiles/doom/.conf
 
 
 
-* KILL [#C] Create a function to set frame transparency
+* KILL [#C] Create a function to set frame transparency :feat:
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-01-11 Wed 17:37
 :ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
@@ -27,7 +27,7 @@ https://www.emacswiki.org/emacs/TransparentEmacs
 #+end_src
 
 
-* KILL [#B] Fix size of NPM logo
+* KILL [#B] Fix size of NPM logo :bug:
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-01-11 Wed 17:38
 :ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
@@ -39,7 +39,7 @@ https://www.emacswiki.org/emacs/TransparentEmacs
 I am no longer seeing this issue as of [2021-01-11 Mon].
 
 
-* KILL [#C] Add an =ace-window= keybinding to close windows
+* KILL [#C] Add an =ace-window= keybinding to close windows :feat:
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-01-11 Wed 17:39
 :ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
@@ -61,7 +61,7 @@ a keybinding like =C-w C-w x <window>= that closes the window that I select
 /without/ moving the cursor.
 
 
-* KILL [#A] Uniquify buffer names using file paths
+* KILL [#A] Uniquify buffer names using file paths :tweak:
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-01-11 Wed 17:40
 :ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
@@ -78,7 +78,7 @@ buffer names, as it breaks =persp-mode= (what powers the =workspaces= module).
 Visit the source code of ~+workspaces-init-persp-mode-h~ for more detail.
 
 
-* KILL [#A] Fix ~evil-visual-block~ in =org= buffers
+* KILL [#A] Fix ~evil-visual-block~ in =org= buffers :bug:
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-01-11 Wed 17:40
 :ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
@@ -104,7 +104,7 @@ version of Emacs (I have ~HEAD~ of Emacs 28), or just wait until =evil=, =org=
 (or =evil-org=?) gets updated.
 
 
-* KILL [#C] Bind ~helpful-update~ to an Evil Normal state key
+* KILL [#C] Bind ~helpful-update~ to an Evil Normal state key :feat:
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-01-11 Wed 17:40
 :ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
@@ -126,7 +126,7 @@ Options to look at:
 + ~helpful-mode-map~
 
 
-* KILL [#C] Suppress warning for ~Package cl is deprecated~
+* KILL [#C] Suppress warning for ~Package cl is deprecated~ :bug:
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-01-11 Wed 17:40
 :ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
@@ -139,7 +139,7 @@ Like Henrik said, there is nothing we can do about this:
 https://github.com/hlissner/doom-emacs/issues/3372
 
 
-* KILL [#B] Fix ANSI escape codes
+* KILL [#B] Fix ANSI escape codes :bug:
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-01-11 Wed 17:42
 :ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
@@ -161,7 +161,7 @@ example from ~doom doctor~:
 #+end_example
 
 
-* KILL [#B] Fix terminal type
+* KILL [#B] Fix terminal type :bug:
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-01-11 Wed 17:42
 :ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
@@ -182,7 +182,7 @@ tput: unknown terminal "eterm-color"
 
 
 
-* KILL [#B] Disable flycheck in Emacs Lisp config files
+* KILL [#B] Disable flycheck in Emacs Lisp config files :tweak:
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-01-11 Wed 17:42
 :ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
@@ -241,7 +241,7 @@ I also ran the following, but I'm not sure if it made a difference:
 #+end_src
 
 
-* KILL [#A] Fix broken filename-mode association for =*.js= files
+* KILL [#A] Fix broken filename-mode association for =*.js= files :bug:
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-01-11 Wed 17:43
 :ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
@@ -260,7 +260,7 @@ When I open a =*.js= file, I get the following error:
 I need to manually run =M-x javascript-mode RET= in order to enable JavaScript mode.
 
 
-* KILL [#B] Favor ~rls~ over ~rust-analyzer~
+* KILL [#B] Favor ~rls~ over ~rust-analyzer~ :tweak:
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-01-11 Wed 17:44
 :ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
@@ -283,7 +283,7 @@ supports debugging for ~rls~ at the moment.
 #+end_src
 
 
-* KILL [#A] Fix error message I get when running =M-x =rss RET=
+* KILL [#A] Fix error message I get when running =M-x =rss RET= :bug:
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-01-11 Wed 17:45
 :ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
@@ -299,7 +299,7 @@ supports debugging for ~rls~ at the moment.
 : if: Symbol’s value as variable is void: string
 
 
-* KILL [#A] Disable tangle upon save
+* KILL [#A] Disable tangle upon save :tweak:
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-01-11 Wed 17:45
 :ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
@@ -379,7 +379,7 @@ Without INDEX, move to the end."
 #+end_src
 
 
-* KILL [#C] Bind ~+vc/gutter-hydra/body~ to another key
+* KILL [#C] Bind ~+vc/gutter-hydra/body~ to another key :bug:
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-01-26 Thu 00:15
 :ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
@@ -438,7 +438,7 @@ To get started on this, open =+evil-bindings.el= by searching for it with
 #+end_src
 
 
-* KILL [#C] Hide markup by default
+* KILL [#C] Hide markup by default :tweak:
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-03-24 Fri 13:44
 :ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
@@ -588,7 +588,7 @@ buffer's vertical position (~eeowaa-watchpoint-set~).
 disabled by default at this point.
 
 
-* KILL [#A] Do not allow the toggling of tab-bar-mode to affect company-box
+* KILL [#A] Do not allow the toggling of tab-bar-mode to affect company-box :bug:
 :PROPERTIES:
 :ARCHIVE_TIME: 2023-05-17 Wed 22:33
 :ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
@@ -713,4 +713,25 @@ some cases (like in =org= buffers) the latter doesn't even work.
 *UPDATE*: Turns out, =C-SPC= is actually invoking =company-ispell= instead of
 =company-dict=, the latter of which is very slow and unnecessary for what I was
 trying to accomplish here.
+
+
+* OKAY [#A] Fix the size of the popup buffer invoked by =M-x lsp= :bug:
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-05-19 Fri 20:44
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :tools/lsp
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: OKAY
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2022-12-02 Fri 11:42] \\
+  I have not seen this issue in a very long time, so I consider it OK for now.
+:END:
+/Note that ~lsp~ is invoked when you enter a buffer, as well/.
+
+When the frame is too small (e.g. its default size), the first few menu items in
+the popup window are cut off, and all you see are options to exclude the file
+from the LSP workspace. Unless you know about the other available options, LSP
+won't work for you. Unfortunately, resizing the frame does not help.
 
