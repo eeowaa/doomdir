@@ -2760,7 +2760,7 @@ config), which uses =ace-window= to display line numbers in the mode line. I
 could either make this permanent, or just temporarily display window numbers
 when I activate window selection functions.
 
-** workspaces [2/2]
+** workspaces [2/3]
 #+begin_quote
 This module adds support for workspaces, powered by persp_mode, as well as a API
 for manipulating them.
@@ -2827,6 +2827,14 @@ for standard Emacs bindings (snippet from =+emacs-bindings.el=):
   (define-key! projectile-mode-map
     "C-c p" #'projectile-command-map))
 #+end_src
+
+*** TODO [#B] Delete workspaces even if a childframe references once :bug:
+Sometimes I get the following message when attempting to delete a workspace via
+=SPC TAB d= and there is a hidden child frame for a Magit =transient= command:
+
+#+begin_quote
+doom | (user-error Can’t close workspace, it’s visible in another frame)
+#+end_quote
 
 ** zen [3/3]
 #+begin_quote
