@@ -4377,8 +4377,8 @@ sudo dnf -y install fish
   "4v" "view-file-other-window"
   "5v" "view-file-other-frame"
 
-  ;; eww-open-file
-  "w" "eww-open-file $1"
+  ;; w3m-find-file
+  "w3m"  "w3m-find-file"
 
   ;; shell commands
   "git" "git --no-pager -c color.ui=always -c interactive.singleKey=false $*"
@@ -4600,7 +4600,7 @@ ALIASES is a flat list of alias -> command pairs. e.g.
     "info" "info"
 
     ;; Define aliases for special Emacs functionality
-    "w"    "eww-open-file"
+    "w3m"  "w3m-find-file"
     "gg"   "magit-status"))
 #+end_src
 
