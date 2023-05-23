@@ -1,9 +1,26 @@
 #+STARTUP:  overview
 #+FILETAGS: :doom:
-* Inbox [0/7]
+* Inbox [1/6]
 :PROPERTIES:
 :CATEGORY: doom/inbox
 :END:
+** DONE Implement functionality to pull packages locally without loading them :doc:
+One relatively easy way would be to instruct =package= to pull to a location
+outside of =load-path=. However, in doing so, =straight= must not be affected.
+
+*UPDATE*: This is already the case. See =~/.config/emacs/lisp/doom-packages.el=,
+which sets the following variables:
+
+- package-user-dir :: ~(concat doom-local-dir "elpa/")~
+- package-enable-at-startup :: ~nil~
+
+Basically, packages downloaded through ~package-install~ are stored in
+=~/.config/emacs/.local/elpa= and are not loaded at startup. Examine ~load-path~
+and call ~find-library~ with ~completing-read~ to see what is going on.
+
+The next time you run =doom purge=, the =~/.config/emacs/.local/elpa= directory
+will be emptied.
+
 ** STRT Implement mechanism for editing terminal/REPL input in indirect buffers :feat:
 Start with =vterm= and extend to other modes.
 
@@ -132,10 +149,6 @@ _Reference:_
 You may also want to reference the package (or configuration options) that
 implements minibuffer completion in a centered popup frame. Perform a web search
 to find your way.
-
-** TODO Implement functionality to pull packages locally without loading them :feat:
-One relatively easy way would be to instruct =package= to pull to a location
-outside of =load-path=. However, in doing so, =straight= must not be affected.
 
 ** TODO Replace ugly characters in TTY Emacs with prettier alternatives :tweak:
 - [ ] Line truncation characters (currently dollar signs)
