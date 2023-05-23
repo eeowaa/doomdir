@@ -503,7 +503,7 @@ or when running =C-l= in a REPL.
     (company-box-doc--set-frame-position doc-frame)))
 #+end_src
 
-*** STRT [#C] Quit =company-box= when switching modes :bug:
+*** STRT [#C] Quit =company-box= when switching evil states :bug:
 :LOGBOOK:
 - Note taken on [2023-02-01 Wed 19:58] \\
   This stopped working all of a sudden. Might want to look into
@@ -535,6 +535,22 @@ Turns out, we need this for =company-box=, too, so let's add that:
         (when company-candidates
           (company-abort))))))
 #+end_src
+
+*NOTE*: Could the issue possibly be related to the fact that
+~company-box--make-frame~ sets ~after-make-frame-functions~ to ~nil~, removing
+~evil-init-esc~? Let's see if the following works:
+
+#+begin_src emacs-lisp :tangle no
+(defadvice! my/company-box--make-frame-evil-a (fn &rest args)
+  :around #'display-buffer-in-child-frame
+  (let ((after-make-frame-functions '(evil-init-esc)))
+    (apply fn args)))
+#+end_src
+
+Unfortunately, it doesn't seem to make a difference, even after deleting the
+=company-box= child frame via ~(delete-frame (company-box--get-frame))~ and
+trying again. However, I did notice something interesting: this problem only
+appears in some modes, such as ~emacs-lisp-mode~.
 
 *** STRT [#A] Ensure that =company-box-doc= popup frames and their content are fully visible :bug:
 There were two issues that I was experiencing:
