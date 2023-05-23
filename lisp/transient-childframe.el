@@ -26,7 +26,8 @@
   "A modified version of `display-buffer-in-child-frame'.
 - The `share-child-frame' parameter is properly compared.
 - Floating-point `top' and `left' frame parameters work as
-  advertised even if the frame is resized to fit the buffer."
+  advertised even if the frame is resized to fit the buffer.
+- Problematic frame creation hooks are ignored."
   (letf!
     ((defadvice my/display-buffer-in-child-frame-fix-a (buffer alist)
        :override #'display-buffer-in-child-frame
@@ -72,7 +73,9 @@
                     (window--display-buffer buffer window type alist))
              (unless (cdr (assq 'inhibit-switch-frame alist))
                (window--maybe-raise-frame frame)))))))
-    (display-buffer-in-child-frame buffer alist)))
+    (let (after-make-frame-functions
+          before-make-frame-hook)
+      (display-buffer-in-child-frame buffer alist))))
 
 
 ;;; Transient with childframe
