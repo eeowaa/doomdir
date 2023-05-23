@@ -806,7 +806,8 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
      . ("project"
         "Pipfile.lock"
         "Cargo.lock"
-        "Cargo.toml")))
+        "Cargo.toml"))
+    ("xlsx" . ("ods")))
   "Alist of file extension mappings for Treemacs icons.
 
 The `car' of each element is a file extension with a desirable
@@ -2190,16 +2191,6 @@ server for the hostname of its own IP address."
   (setq lsp-ui-doc-show-with-mouse t
         lsp-ui-doc-delay 0.5))
 
-(after! lsp-mode
-  (when (modulep! :ui popup)
-    (setq +popup--display-buffer-alist
-          (delq (assoc "^\\*lsp-\\(help\\|install\\)" +popup--display-buffer-alist)
-                +popup--display-buffer-alist))
-    (set-popup-rule! "^\\*lsp-\\(help\\|install\\)"
-      :size #'+popup-shrink-to-fit
-      :select nil ;; NOTE I changed this from Doom's default of `t'
-      :quit t)))
-
 (map! :leader
       (:prefix-map ("c" . "code")
        :desc "Glance documentation" "g" #'lsp-ui-doc-glance
@@ -2231,6 +2222,16 @@ This variable should be set by `my/lsp-ui-set-delay'.")
 
 (my/lsp-ui-set-delay my/lsp-ui-delay)
 
+(after! lsp-mode
+  (when (modulep! :ui popup)
+    (setq +popup--display-buffer-alist
+          (delq (assoc "^\\*lsp-\\(help\\|install\\)" +popup--display-buffer-alist)
+                +popup--display-buffer-alist))
+    (set-popup-rule! "^\\*lsp-\\(help\\|install\\)"
+      :size #'+popup-shrink-to-fit
+      :select nil ;; NOTE I changed this from Doom's default of `t'
+      :quit t)))
+
 (define-key! doom-leader-toggle-map
   "i" #'lsp-ui-imenu)
 
@@ -2238,6 +2239,8 @@ This variable should be set by `my/lsp-ui-set-delay'.")
   (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
     (cl-pushnew `((,(format "\\`%s t i\\'" prefix-re)) nil . "LSP Imenu")
                 which-key-replacement-alist)))
+
+(setq lsp-lens-enable nil)
 
 (setq lsp-modeline-code-actions-segments nil)
 

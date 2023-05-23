@@ -391,7 +391,7 @@ completion.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-** company [6/9]
+** company [6/10]
 #+begin_quote
 This module provides code completion, powered by [[https://github.com/company-mode/company-mode][company-mode]]. It is required
 for code completion in many of Doom's :lang modules.
@@ -560,6 +560,18 @@ even when point is at the bottom of the frame. See the following functions:
 
 - ~company-box--compute-frame-position~
 - ~company-box--update-frame-position~
+
+*** TODO [#A] Prevent backtrace windows from opening in =company-box= child frames :bug:
+Occasionally, ~company-complete-common~ (=C-SPC=) will produce error messages
+like this (originally produced in a buffer with =lsp= enabled):
+
+#+begin_quote
+Company: An error occurred in auto-begin
+Company: frontend company-box-frontend error "Company: backend (:separate company-capf company-yasnippet) error "Wrong type argument: integer-or-marker-p, nil" with args (match ...)" on command show
+#+end_quote
+
+Unfortunately, ~toggle-debug-on-error~ causes the debugger window to open in the
+child frame, which is not made visible.
 
 *** TODO [#A] Display doc buffer without =company-box= :feat:
 =C-h= is supposed to open a documentation buffer, but that doesn't work for me.
@@ -2340,7 +2352,8 @@ Doom theme extensions for Treemacs.
      . ("project"
         "Pipfile.lock"
         "Cargo.lock"
-        "Cargo.toml")))
+        "Cargo.toml"))
+    ("xlsx" . ("ods")))
   "Alist of file extension mappings for Treemacs icons.
 
 The `car' of each element is a file extension with a desirable
@@ -2672,6 +2685,11 @@ hard to see in the light themes, so the wonkiness actually helps). Also,
       `(diff-hl-change :foreground ,(alist-get 'yellow-fringe-bg modus-themes-vivendi-colors))
       `(diff-hl-delete :foreground ,(alist-get 'red-fringe-bg modus-themes-vivendi-colors)))))
 #+end_src
+
+*UPDATE*: I have removed the ~+pretty~ flag from the =:ui vc-gutter= module,
+because I find the half-width =diff-hl= fringes to /only/ look really nice in
+Doom themes. I could dig a bit deeper and only enable half-width fringes for
+Doom themes, but that's not something I'm currently interested in doing.
 
 ** vi-tilde-fringe [0/0]
 #+begin_quote
@@ -6362,7 +6380,7 @@ is currently only a problem on Emacs 28.
   (package! xref :pin "a82f459b37b31546bf274388baf8aca79e9c30d9"))
 #+end_src
 
-** lsp [2/10]
+** lsp [2/11]
 *** COMMENT Documentation
 + [[doom-modules:tools/lsp/README.org][tools/lsp module documentation]]
 + [[doom:.local/straight/repos/lsp-mode/README.md][lsp-mode package README]]
@@ -6390,24 +6408,6 @@ This is also possible via =SPC c l h g= (~lsp-ui-doc-glance~).
 (after! lsp-ui
   (setq lsp-ui-doc-show-with-mouse t
         lsp-ui-doc-delay 0.5))
-#+end_src
-
-*** TODO [#B] Shrink the LSP help window to its content size :tweak:
-The help window is invoked with =K= (~+lookup/documentation~). *UPDATE*: This
-was working well before, but I have since replaced =:ui popup= with my custom
-=:ui buffer-group= module. I need to refactor the following code to work with
-that instead.
-
-#+begin_src emacs-lisp :tangle yes
-(after! lsp-mode
-  (when (modulep! :ui popup)
-    (setq +popup--display-buffer-alist
-          (delq (assoc "^\\*lsp-\\(help\\|install\\)" +popup--display-buffer-alist)
-                +popup--display-buffer-alist))
-    (set-popup-rule! "^\\*lsp-\\(help\\|install\\)"
-      :size #'+popup-shrink-to-fit
-      :select nil ;; NOTE I changed this from Doom's default of `t'
-      :quit t)))
 #+end_src
 
 *** STRT [#B] Add alternate bindings for some LSP commands :tweak:
@@ -6460,6 +6460,24 @@ This variable should be set by `my/lsp-ui-set-delay'.")
 (my/lsp-ui-set-delay my/lsp-ui-delay)
 #+end_src
 
+*** TODO [#B] Shrink the LSP help window to its content size :tweak:
+The help window is invoked with =K= (~+lookup/documentation~). *UPDATE*: This
+was working well before, but I have since replaced =:ui popup= with my custom
+=:ui buffer-group= module. I need to refactor the following code to work with
+that instead.
+
+#+begin_src emacs-lisp :tangle yes
+(after! lsp-mode
+  (when (modulep! :ui popup)
+    (setq +popup--display-buffer-alist
+          (delq (assoc "^\\*lsp-\\(help\\|install\\)" +popup--display-buffer-alist)
+                +popup--display-buffer-alist))
+    (set-popup-rule! "^\\*lsp-\\(help\\|install\\)"
+      :size #'+popup-shrink-to-fit
+      :select nil ;; NOTE I changed this from Doom's default of `t'
+      :quit t)))
+#+end_src
+
 *** LOOP [#B] Automatically restart the LSP server when it crashes :tweak:
 This can result in infinite loops, so I've disabled it for now:
 
@@ -6496,6 +6514,9 @@ Resources:
 + [[help:lsp-doctor][lsp-doctor]]
 + [[doom:.local/straight/repos/lsp-mode/docs/page/performance.md][performance.md]]
 
+**** TODO Configure file watchers
+https://emacs-lsp.github.io/lsp-mode/page/file-watchers/
+
 **** LOOP Enable plist-based JSON deserialization
 From =performance.md=:
 
@@ -6520,6 +6541,11 @@ Until I get things figured out, I am going to continue to use hash tables.
 
 #+begin_src emacs-lisp :tangle no
 (setq lsp-use-plists t)
+#+end_src
+
+*** TODO [#B] Disable =lsp-lens= by default :tweak:
+#+begin_src emacs-lisp :tangle yes
+(setq lsp-lens-enable nil)
 #+end_src
 
 *** LOOP [#C] Do not display code actions in the modeline :bug:

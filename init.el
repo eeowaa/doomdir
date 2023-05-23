@@ -54,7 +54,7 @@
        tabs              ; XXX user module
        (treemacs +lsp)   ; a project drawer, like neotree but cooler
        ;;unicode           ; extended unicode support for various languages
-       (vc-gutter +pretty +diff-hl)
+       (vc-gutter +diff-hl)
                          ; vcs diff in the fringe
        vi-tilde-fringe   ; fringe tildes to mark beyond EOB
        window-select     ; visually switch windows
