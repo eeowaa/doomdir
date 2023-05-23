@@ -53,6 +53,8 @@
 
 (package! magit-gitflow :disable t)
 
+(package! rfc-mode)
+
 (unpin! tree-sitter-langs)
 
 ;;; :os

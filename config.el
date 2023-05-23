@@ -2317,6 +2317,12 @@ This variable should be set by `my/lsp-ui-set-delay'.")
        :desc "Make target"      "m" #'+make/run
        :desc "Make last target" "M" #'+make/run-last))
 
+(use-package! rfc-mode
+  :defer t
+  :config
+  (setq rfc-mode-directory
+        (concat doom-cache-dir "rfc")))
+
 ;; <https://emacs-lsp.github.io/lsp-mode/page/lsp-terraform-ls/>
 (when (modulep! :tools terraform +lsp)
   (setq
