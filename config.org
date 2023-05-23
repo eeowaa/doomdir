@@ -6248,7 +6248,7 @@ EOF
 )
 #+end_src
 
-** lookup [9/11]
+** lookup [8/11]
 *** DONE [#A] Install prerequisites
 **** OKAY macOS
 #+begin_src sh :tangle install/macos.sh
@@ -6358,19 +6358,6 @@ structure. I'm surprised they don't already:
 (add-hook 'wordnut-mode-hook #'outline-minor-mode)
 #+end_src
 
-*** STRT [#A] Automatically install missing docsets :feat:
-For whatever reason, this is not working (does not get called upon entering a
-mode derived from ~prog-mode~, even though ~prog-mode-hook~ does get updated).
-
-#+begin_src emacs-lisp :tangle yes
-(when (modulep! :tools lookup +docsets)
-  (defun my/ensure-docsets ()
-    (dolist (docset dash-docs-docsets)
-      (dash-docs-ensure-docset-installed (string-replace " " "_" docset))))
-  ;; REVIEW Ensure that `set-docsets!' is only called for modes derived from `prog-mode'
-  (add-hook! prog-mode #'my/ensure-docsets))
-#+end_src
-
 *** LOOP [#A] Fix the error "Given parent class xref-location is not a class" :bug:
 Upon [[https://github.com/hlissner/doom-emacs/issues/5658#issuecomment-946207769][Henrick's advice]], I've pinned =xref= to the last known working commit. This
 is currently only a problem on Emacs 28.
@@ -6379,6 +6366,45 @@ is currently only a problem on Emacs 28.
 (when EMACS28+
   (package! xref :pin "a82f459b37b31546bf274388baf8aca79e9c30d9"))
 #+end_src
+
+*** STRT [#A] Automatically install missing docsets :feat:
+For whatever reason, this is not working (does not get called upon entering a
+mode derived from ~prog-mode~, even though ~prog-mode-hook~ does get updated).
+
+*UPDATE*: Integration with [[https://zealdocs.org/][Zeal]] makes it easy to install and update docsets
+manually. I have decided to go this route.
+
+#+begin_src emacs-lisp :tangle no
+(when (modulep! :tools lookup +docsets)
+  (defun my/ensure-docsets ()
+    (dolist (docset dash-docs-docsets)
+      (dash-docs-ensure-docset-installed (string-replace " " "_" docset))))
+  ;; REVIEW Ensure that `set-docsets!' is only called for modes derived from `prog-mode'
+  (add-hook! prog-mode #'my/ensure-docsets))
+#+end_src
+
+*** STRT [#B] Use Zeal's Dash.app docsets when available :tweak:
+[[https://zealdocs.org/][Zeal]] is a nice GUI app for installing and browsing Dash.app docsets. I find it
+easier to use than the default mechanisms provided by Doom.
+
+#+begin_src emacs-lisp :tangle yes
+(when (modulep! :tools lookup +docsets)
+  (let ((zeal-docsets
+         (concat (file-name-as-directory (getenv "XDG_DATA_HOME"))
+                 "Zeal/Zeal/docsets/")))
+    (when (file-accessible-directory-p zeal-docsets)
+      (setq dash-docs-docsets-path zeal-docsets))))
+#+end_src
+
+Ideally, I would just use Doom-specific mechanisms for this, but I've found that
+it doesn't want to install user-contributed docsets. References:
+
++ ~dash-docs-docsets-path~
+  - =~/.config/emacs/.local/etc/docsets/=
++ ~dash-docs-docsets-url~
+  - https://github.com/kapeli/feeds
++ ~dash-docs-install-user-docset~
+  - https://github.com/roberth-k/dash-docset-terraform
 
 ** lsp [2/11]
 *** COMMENT Documentation
@@ -10148,6 +10174,9 @@ have listed some commented-out packages below that I would like to install.
 #+begin_src emacs-lisp :tangle yes
 ;; Open online documentation in `w3m'
 (setq +lookup-open-url-fn #'w3m-browse-url)
+
+(when (modulep! :tools lookup +docsets)
+  (setq dash-docs-browser-func #'w3m))
 
 ;; Use Google as your home page
 (setq w3m-home-page "https://www.google.com/")

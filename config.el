@@ -2181,11 +2181,11 @@ server for the hostname of its own IP address."
 (add-hook 'wordnut-mode-hook #'outline-minor-mode)
 
 (when (modulep! :tools lookup +docsets)
-  (defun my/ensure-docsets ()
-    (dolist (docset dash-docs-docsets)
-      (dash-docs-ensure-docset-installed (string-replace " " "_" docset))))
-  ;; REVIEW Ensure that `set-docsets!' is only called for modes derived from `prog-mode'
-  (add-hook! prog-mode #'my/ensure-docsets))
+  (let ((zeal-docsets
+         (concat (file-name-as-directory (getenv "XDG_DATA_HOME"))
+                 "Zeal/Zeal/docsets/")))
+    (when (file-accessible-directory-p zeal-docsets)
+      (setq dash-docs-docsets-path zeal-docsets))))
 
 (after! lsp-ui
   (setq lsp-ui-doc-show-with-mouse t
@@ -3444,6 +3444,9 @@ This is a list of lists, not a list of cons cells.")
 
 ;; Open online documentation in `w3m'
 (setq +lookup-open-url-fn #'w3m-browse-url)
+
+(when (modulep! :tools lookup +docsets)
+  (setq dash-docs-browser-func #'w3m))
 
 ;; Use Google as your home page
 (setq w3m-home-page "https://www.google.com/")
