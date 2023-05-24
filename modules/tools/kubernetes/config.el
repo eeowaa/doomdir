@@ -15,7 +15,12 @@
         (goto-char pos)
         (re-search-backward "^---" (point-min) 'ignore)
         (re-search-forward "^[[:space:]]*kind:[[:space:]]+\\(.+\\)" end t)))
-    (kubedoc--view-resource (match-string 1))))
+    (kubedoc--view-resource (match-string 1)))
+  :config
+  (defadvice! my/kubedoc-inhibit-view-mode-a (fn &rest args)
+    :around #'kubedoc-mode
+    (letf! ((#'view-mode #'ignore))
+      (apply fn args))))
 
 
 ;;; Kubernetes
