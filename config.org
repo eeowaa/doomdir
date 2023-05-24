@@ -6858,7 +6858,9 @@ sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
   :defer t
   :config
   (setq rfc-mode-directory
-        (concat doom-cache-dir "rfc")))
+        (concat doom-cache-dir "rfc"))
+  (when (fboundp 'page-break-lines-mode)
+    (add-hook 'rfc-mode-hook #'page-break-lines-mode)))
 #+end_src
 
 ** rgb [0/0] :ARCHIVE:

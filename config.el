@@ -2328,7 +2328,9 @@ This variable should be set by `my/lsp-ui-set-delay'.")
   :defer t
   :config
   (setq rfc-mode-directory
-        (concat doom-cache-dir "rfc")))
+        (concat doom-cache-dir "rfc"))
+  (when (fboundp 'page-break-lines-mode)
+    (add-hook 'rfc-mode-hook #'page-break-lines-mode)))
 
 ;; <https://emacs-lsp.github.io/lsp-mode/page/lsp-terraform-ls/>
 (when (modulep! :tools terraform +lsp)
