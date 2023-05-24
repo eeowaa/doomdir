@@ -1,10 +1,10 @@
 #+STARTUP:  overview
 #+FILETAGS: :doom:
-* Inbox [1/6]
+* Inbox [1/7]
 :PROPERTIES:
 :CATEGORY: doom/inbox
 :END:
-** DONE Implement functionality to pull packages locally without loading them :doc:
+** DONE [#A] Implement functionality to pull packages locally without loading them :doc:
 One relatively easy way would be to instruct =package= to pull to a location
 outside of =load-path=. However, in doing so, =straight= must not be affected.
 
@@ -21,13 +21,33 @@ and call ~find-library~ with ~completing-read~ to see what is going on.
 The next time you run =doom purge=, the =~/.config/emacs/.local/elpa= directory
 will be emptied.
 
-** STRT Implement mechanism for editing terminal/REPL input in indirect buffers :feat:
+** STRT [#B] Implement mechanism for editing terminal/REPL input in indirect buffers :feat:
 Start with =vterm= and extend to other modes.
 
 + [X] =vterm=
 + [ ] =comint=
 
-** TODO Save/restore buffer position before/after jumps :bug:
+** TODO [#A] Implement package locking :feat:
+Until Doom has implemented this, I need to do something about it. For some
+reason, ~straight-freeze-versions~ is not working for me, but I'd still like to
+implement a file like that. System Crafters has an [[https://systemcrafters.net/advanced-package-management/using-straight-el/#locking-package-versions][example]]:
+
+#+begin_src lisp-data
+(("dotcrafter.el" . "b88d1fa4b528f39f6c5e844e1240aaaab1036b1c")
+ ("el-get" . "ec135b5353867ce3564a675e99024944b834395d")
+ ("emacsmirror-mirror" . "dd06221ff3b997b8460eb6eefc92a8b07f844f95")
+ ("evil" . "f20d442ff006aa5a6dc48ac654906b48b95107fd")
+ ("gnu-elpa-mirror" . "bd355379a3143beb3514948685791096c3c5f750")
+ ("goto-chg" . "3ce1389fea12edde4e343bc7d54c8da97a1a6136")
+ ("melpa" . "9370b3c06f065ee50ed7e4ffcfd9d503b6e9563f")
+ ("straight.el" . "1e27b0590df77a5d478970ca58fd6606971692f5"))
+:beta
+#+end_src
+
+This could be implemented as a ~pre-commit~ hook to make sure that I always have
+versions locked. The problem will be integrating with Doom.
+
+** TODO [#B] Save/restore buffer position before/after jumps :bug:
 _Replication steps:_
 
 1. Open =config.org=.
@@ -50,10 +70,10 @@ _Actual behavior:_
 
 - Point is in the bottom fully-visible line of the window.
 
-** TODO Restore previous buffer position in =info= after ~Info-history-back~ :bug:
+** TODO [#B] Restore previous buffer position in =info= after ~Info-history-back~ :bug:
 I assume that this problem is closely related to the previous one.
 
-** TODO Temporarily replace bottom side window(s) with minibuffer :tweak:
+** TODO [#B] Temporarily replace bottom side window(s) with minibuffer :tweak:
 When the minibuffer window grows vertically (e.g. when displaying completion
 candidates), it temporarily covers a part of the frame used by existing windows.
 Hiding this content can sometimes hide important context that is useful when
@@ -150,7 +170,7 @@ You may also want to reference the package (or configuration options) that
 implements minibuffer completion in a centered popup frame. Perform a web search
 to find your way.
 
-** TODO Replace ugly characters in TTY Emacs with prettier alternatives :tweak:
+** TODO [#C] Replace ugly characters in TTY Emacs with prettier alternatives :tweak:
 - [ ] Line truncation characters (currently dollar signs)
 - [ ] VC diff characters
 

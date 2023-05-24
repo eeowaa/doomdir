@@ -12,6 +12,8 @@
       (setq transient-display-buffer-action
             (my/transient-childframe--display-buffer-action)))))
 
+(require 'xdg)
+
 (defmacro my/doom-use-face (face other-face)
   "Force FACE to be the same as OTHER-FACE.
 Examples:
@@ -90,6 +92,11 @@ See also: `(elisp) Prefix Command Arguments'."
       (defun +company-abort-h ()
         (when company-candidates
           (company-abort))))))
+
+(defadvice! my/consult-org-heading-hide-preview-a (fn &rest args)
+  :around #'consult-org-heading
+  (let (consult-preview-key)
+    (apply fn args)))
 
 (defun my/toggle-window-dedicated ()
   "Control whether or not Emacs is allowed to display another

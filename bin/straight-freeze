@@ -1,0 +1,17 @@
+#!/bin/sh
+lockfile=`git rev-parse --show-toplevel`/packages.lock
+[ -d "$DOOMDIR" ] || {
+    [ -d "$XDG_CONFIG_HOME" ] || XDG_CONFIG_HOME=$HOME/.config
+    DOOMDIR=$XDG_CONFIG_HOME/emacs
+}
+[ -d "$DOOMDIR/.local/straight/repos" ] || {
+    echo >&2 "Directory does not exist: $DOOMDIR/.local/straight/repos"
+    exit 1
+}
+cd "$DOOMDIR/.local/straight/repos"
+for repo in *; do
+    cd "$repo"
+    printf '\n ("%s" . "%s")' "$repo" "`git rev-parse HEAD`"
+    cd ..
+done | sed -e '1d' -e '2s/^ /(/' -e '$s/$/)/' >"$lockfile"
+echo >>"$lockfile"

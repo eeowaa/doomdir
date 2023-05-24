@@ -17,4 +17,5 @@
 
          ;; Run a new instance of Doom Emacs
          (projectile-project-run-cmd . "doom run")))
- (auto-mode-alist . (("/dicts/[^\\.].+" . tsv-mode))))
+ (auto-mode-alist . (("/dicts/[^\\.].+" . tsv-mode)
+                     ("/packages.lock" . lisp-data-mode))))

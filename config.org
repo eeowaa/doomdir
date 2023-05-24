@@ -260,7 +260,7 @@ sudo dnf -y install jq
 <<github_binary_release>>
 #+end_src
 
-** Elisp setup [3/3]
+** Elisp setup [4/4]
 *** DONE [#A] Add =$DOOMDIR/lisp= to ~load-path~
 References:
 + [[id:fb9fd833-7379-41f0-9cfe-d86baef3095e][Using/loading local packages]]
@@ -289,6 +289,11 @@ for autoload cookies or byte-compilation.
       ;; Revert Doom's configuration
       (setq transient-display-buffer-action
             (my/transient-childframe--display-buffer-action)))))
+#+end_src
+
+*** DONE [#B] Load libraries used by my config
+#+begin_src emacs-lisp :tangle yes
+(require 'xdg)
 #+end_src
 
 *** DONE [#B] Define helper constructs
@@ -625,7 +630,7 @@ sudo dnf -y install ripgrep
 (setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
 #+end_src
 
-** vertico [2/4]
+** vertico [3/4]
 #+begin_quote
 This module enhances the Emacs search and completion experience, and also
 provides a united interface for project search and replace, powered by [[https://github.com/BurntSushi/ripgrep/][ripgrep]].
@@ -648,10 +653,26 @@ sudo dnf -y install ripgrep
 These symbols are described in the docstring for the function
 ~marginalia--symbol-class~.
 
-*** TODO [#A] Prevent Emacs from freezing during ~consult-org-heading~ :bug:
+*** OKAY [#A] Prevent Emacs from freezing during ~consult-org-heading~ :bug:
 Lately, Emacs will occasionally freeze when searching for headlines in this
 buffer using =SPC m .=. I wonder if the recent addition of a ~jupyter-bash~
 source block is somehow causing this.
+
+*UPDATE*: The problem is with previewing the buffer position. The following
+advice removes the preview, which I am more than OK with to get the base
+functionality back:
+
+#+begin_src emacs-lisp :tangle yes
+(defadvice! my/consult-org-heading-hide-preview-a (fn &rest args)
+  :around #'consult-org-heading
+  (let (consult-preview-key)
+    (apply fn args)))
+#+end_src
+
+References:
+- https://github.com/doomemacs/doomemacs/issues/6478
+- https://github.com/minad/consult/issues/563
+- https://github.com/minad/consult/issues/726
 
 *** TODO [#B] Fix bug with cursor color getting stuck when previewing themes :bug:
 When previewing themes with =consult=, sometimes the cursor color gets stuck
@@ -5898,12 +5919,12 @@ npm install -g dockerfile-language-server-nodejs
 4. [ ] =with-editor= support to export =EDITOR= appropriately.
 
 *** TODO [#B] Enable prompt tracking from =vterm= buffers to Docker containers :feat:
-#+begin_src markdown
-And `vterm` supports _prompt tracking_. If this feature is enabled, Emacs knows
-where the prompt ends, you needn't customize `term-prompt-regexp` any more.
-Then you can use `vterm-next-prompt` and `vterm-previous-prompt`
-moving to end of next/previous prompt. The default keybinding is `C-c C-n` and `C-c C-p`.
-#+end_src
+#+begin_quote
+And ~vterm~ supports /prompt tracking/. If this feature is enabled, Emacs knows
+where the prompt ends, you needn't customize ~term-prompt-regexp~ any more. Then
+you can use ~vterm-next-prompt~ and ~vterm-previous-prompt~ moving to end of
+next/previous prompt. The default keybinding is =C-c C-n= and =C-c C-p=.
+#+end_quote
 
 ** editorconfig [2/3]
 #+begin_quote
@@ -9135,9 +9156,9 @@ jupyter-repl-associate-buffer: Cannot associate buffer to REPL.  Wrong ‘major-
 You can experiment with the following source block (note that =C-'= works as
 expected; there is only a problem when editing in the Org buffer):
 
-#+begin_src jupyter-bash :session doom-config :tangle no
-echo 'hello world'
-#+end_src
+: #+begin_src jupyter-bash :session doom-config :tangle no
+: echo 'hello world'
+: #+end_src
 
 To kill the session, kill the ~*jupyter-repl[bash nil]-doom-config*~ buffer that
 gets created. (This buffer is tied to =ob-jupyter= session and source blocks.)
