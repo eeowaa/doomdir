@@ -144,6 +144,28 @@ buffer in current window."
 
 (add-hook 'Info-selection-hook 'info-colors-fontify-node)
 
+(defvar my/show-trailing-whitespace t)
+(defvar my/trailing-whitespace-mode-alist
+  '(;; Trailing tabs are fine
+    (tsv-mode . "\\( +\\)$")
+    ;; Two trailing spaces are fine, but no other kind of trailing whitespace
+    (markdown-mode . "\\S-\\( \\| \\{3,\\}\\|\\s-*\t\\s-*\\)$")))
+
+(defun my/show-trailing-whitespace-maybe-h ()
+  (let* ((element (cl-some (lambda (e)
+                             (when (derived-mode-p (car-safe e)) e))
+                           my/trailing-whitespace-mode-alist))
+         (value (if (consp element)
+                    (cdr element)
+                  my/show-trailing-whitespace)))
+    (when value
+      (when (stringp value)
+        (setq-local whitespace-trailing-regexp value))
+      (cl-pushnew 'trailing whitespace-style))))
+
+(add-hook 'whitespace-mode-hook
+          #'my/show-trailing-whitespace-maybe-h)
+
 ;; Automatically highlight differences in hunks, down to the symbol.
 ;;
 ;; FIXME Highlighting for an added line spills over to the first character of
@@ -959,6 +981,52 @@ works even when `global-diff-hl-mode' is disabled.")
       `(diff-hl-insert :foreground ,(alist-get 'green-fringe-bg modus-themes-vivendi-colors))
       `(diff-hl-change :foreground ,(alist-get 'yellow-fringe-bg modus-themes-vivendi-colors))
       `(diff-hl-delete :foreground ,(alist-get 'red-fringe-bg modus-themes-vivendi-colors)))))
+
+(setq-hook! '(prog-mode-hook text-mode-hook conf-mode-hook)
+  indicate-empty-lines t)
+
+(defgroup vi-tilde-margin nil
+  "Vi tilde margin customizations."
+  :group 'emulations
+  :prefix 'vi-tilde-margin-)
+
+(defface vi-tilde-margin-face '((t (:inherit 'default)))
+  "Color for vi tilde displayed in the margin when line is empty."
+  :group 'vi-tilde-margin)
+
+(defcustom vi-tilde-margin-character ?~
+  "Character drawn in the margin."
+  :group 'vi-tilde-margin
+  :type 'character)
+
+(defcustom vi-tilde-excluded-modes nil
+  "Major modes where `global-vi-tilde-margin-mode' won't affect."
+  :group 'vi-tilde-margin
+  :type '(list symbol))
+
+(defvar-local vi-tilde-margin--old-width nil)
+(define-minor-mode vi-tilde-margin-mode
+  "Minor mode to display tildes in the margin past EOB."
+  :lighter " ~"
+  :group 'emulations
+  (if vi-tilde-margin-mode
+      (progn
+        (setq vi-tilde-margin--old-width left-margin-width)
+        (when (< left-margin-width 1)
+          (setq left-margin-width 1)
+          (set-window-buffer nil (current-buffer))))
+    (unless (= left-margin-width vi-tilde-margin--old-width)
+      (setq left-margin-width vi-tilde-margin--old-width)
+      (set-window-buffer nil (current-buffer)))))
+
+(defun vi-tilde-margin-mode--turn-on ()
+  (unless (or (minibufferp)
+              (memq major-mode vi-tilde-excluded-modes))
+    (vi-tilde-margin-mode +1)))
+
+(define-globalized-minor-mode global-vi-tilde-margin-mode vi-tilde-margin-mode
+  vi-tilde-margin-mode--turn-on
+  :group 'vi-tilde-margin)
 
 (after! ace-window
   (when initial-window-system

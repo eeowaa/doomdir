@@ -694,7 +694,7 @@ Aesthetic modules that affect the Emacs interface or user experience.
 ;;; :ui
 #+end_src
 
-** Miscellany [8/9]
+** Miscellany [9/10]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -767,14 +767,14 @@ buffer in current window."
 (setf (alist-get 'fullscreen initial-frame-alist) 'maximized)
 #+end_src
 
-*** DONE [#C] Configure =col-highlight= :tweak:
+*** DONE [#C] Configure =col-highlight= :tweak:module:
 #+begin_src emacs-lisp :tangle yes
 (after! col-highlight
   (require 'hl-line)
   (my/doom-use-face col-highlight hl-line))
 #+end_src
 
-*** DONE [#C] Configure =info-colors= :tweak:
+*** DONE [#C] Configure =info-colors= :tweak:module:
 Taken from tecosaur's configuration.
 
 #+begin_src emacs-lisp :tangle yes
@@ -784,7 +784,32 @@ Taken from tecosaur's configuration.
 (add-hook 'Info-selection-hook 'info-colors-fontify-node)
 #+end_src
 
-*** STRT [#B] Configure =vdiff= :feat:
+*** DONE [#C] Highlight trailing whitespace where appropriate :tweak:
+#+begin_src emacs-lisp :tangle yes
+(defvar my/show-trailing-whitespace t)
+(defvar my/trailing-whitespace-mode-alist
+  '(;; Trailing tabs are fine
+    (tsv-mode . "\\( +\\)$")
+    ;; Two trailing spaces are fine, but no other kind of trailing whitespace
+    (markdown-mode . "\\S-\\( \\| \\{3,\\}\\|\\s-*\t\\s-*\\)$")))
+
+(defun my/show-trailing-whitespace-maybe-h ()
+  (let* ((element (cl-some (lambda (e)
+                             (when (derived-mode-p (car-safe e)) e))
+                           my/trailing-whitespace-mode-alist))
+         (value (if (consp element)
+                    (cdr element)
+                  my/show-trailing-whitespace)))
+    (when value
+      (when (stringp value)
+        (setq-local whitespace-trailing-regexp value))
+      (cl-pushnew 'trailing whitespace-style))))
+
+(add-hook 'whitespace-mode-hook
+          #'my/show-trailing-whitespace-maybe-h)
+#+end_src
+
+*** STRT [#B] Configure =vdiff= :feat:module:
 See also: [[file:~/.config/emacs/.local/straight/repos/evil-collection/modes/vdiff/evil-collection-vdiff.el][evil-collection-vdiff]]
 
 #+begin_src emacs-lisp :tangle yes
