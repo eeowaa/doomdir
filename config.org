@@ -6971,6 +6971,7 @@ sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
 - [X] Use an appropriate directory
 - [X] Bind =evil= keys for ~rfc-mode-map~
 - [X] Enhance the display and navigation of pages
+- [X] Sort the completion candidates of ~rfc-mode-goto-section~ in order
 - [ ] Automatically create the directory at the appropriate time
 
 #+begin_src emacs-lisp :tangle yes
@@ -6997,6 +6998,15 @@ sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
         (forward-line))
       (rfc-mode-recenter)))
 
+  (when (modulep! :completion vertico)
+    (defadvice! +rfc--no-sort-a (args)
+      :filter-args #'rfc-mode-goto-section
+      (interactive
+       (lambda (spec)
+         (let ((vertico-sort-override-function #'identity))
+           (advice-eval-interactive-spec spec))))
+      args))
+
   :config
   (setq rfc-mode-directory
         (concat doom-cache-dir "rfc"))
@@ -7005,15 +7015,17 @@ sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
   (when (fboundp 'page-break-lines-mode)
     (add-hook 'rfc-mode-hook #'page-break-lines-mode))
 
+  (defalias 'rfc #'rfc-mode-browse)
   (map! :map rfc-mode-map
         :n "gm" #'rfc-mode-browse
         :n "[" #'rfc-mode-backward-page
         :n "]" #'rfc-mode-forward-page
         :n "C-k" #'rfc-mode-previous-section
         :n "C-j" #'rfc-mode-next-section
+        :n "C-i" #'forward-button
+        :n "C-M-i" #'backward-button
         (:localleader
-         :n "." #'rfc-mode-goto-section))
-  )
+         :n "." #'rfc-mode-goto-section)))
 #+end_src
 
 ** rgb [0/0] :ARCHIVE:

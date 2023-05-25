@@ -2380,6 +2380,15 @@ This variable should be set by `my/lsp-ui-set-delay'.")
         (forward-line))
       (rfc-mode-recenter)))
 
+  (when (modulep! :completion vertico)
+    (defadvice! +rfc--no-sort-a (args)
+      :filter-args #'rfc-mode-goto-section
+      (interactive
+       (lambda (spec)
+         (let ((vertico-sort-override-function #'identity))
+           (advice-eval-interactive-spec spec))))
+      args))
+
   :config
   (setq rfc-mode-directory
         (concat doom-cache-dir "rfc"))
@@ -2388,15 +2397,17 @@ This variable should be set by `my/lsp-ui-set-delay'.")
   (when (fboundp 'page-break-lines-mode)
     (add-hook 'rfc-mode-hook #'page-break-lines-mode))
 
+  (defalias 'rfc #'rfc-mode-browse)
   (map! :map rfc-mode-map
         :n "gm" #'rfc-mode-browse
         :n "[" #'rfc-mode-backward-page
         :n "]" #'rfc-mode-forward-page
         :n "C-k" #'rfc-mode-previous-section
         :n "C-j" #'rfc-mode-next-section
+        :n "C-i" #'forward-button
+        :n "C-M-i" #'backward-button
         (:localleader
-         :n "." #'rfc-mode-goto-section))
-  )
+         :n "." #'rfc-mode-goto-section)))
 
 ;; <https://emacs-lsp.github.io/lsp-mode/page/lsp-terraform-ls/>
 (when (modulep! :tools terraform +lsp)
