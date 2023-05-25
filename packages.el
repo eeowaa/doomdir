@@ -57,6 +57,8 @@
 
 (unpin! tree-sitter-langs)
 
+(package! x509-mode)
+
 ;;; :os
 
 ;;; :lang

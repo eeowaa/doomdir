@@ -2695,6 +2695,8 @@ See also: `ts-fold-summary--get'."
 
 (setq lsp-semantic-tokens-enable nil)
 
+(use-package! x509-mode :defer t)
+
 (when IS-MAC
   (setq ;; Comfortable keys that work most of the time
         mac-command-modifier 'control

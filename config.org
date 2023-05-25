@@ -6960,7 +6960,7 @@ sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
 ** prodigy [0/0] :ARCHIVE:
 ** rfc [1/3] :eeowaa:module:
 *** TODO Documentation
-- Use ~rfc-mode-browse~ to browse for and read an IETF RFC.
+- Use ~rfc~ to browse for and read an IETF RFC.
 
 *** DONE Packages
 #+begin_src emacs-lisp :tangle packages.el
@@ -7390,6 +7390,20 @@ support Tree-Sitter, I will just globally disable LSP semantic tokens:
 #+end_src
 
 ** upload [0/0] :ARCHIVE:
+** x509 [1/3] :eeowaa:module:
+*** TODO Documentation
+See upstream documentation: https://github.com/jobbflykt/x509-mode
+
+*** DONE Packages
+#+begin_src emacs-lisp :tangle packages.el
+(package! x509-mode)
+#+end_src
+
+*** TODO Configuration
+#+begin_src emacs-lisp :tangle yes
+(use-package! x509-mode :defer t)
+#+end_src
+
 * :os
 #+begin_quote
 Modules to improve integration into your OS, system, or devices.
