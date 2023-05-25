@@ -2359,11 +2359,44 @@ This variable should be set by `my/lsp-ui-set-delay'.")
 
 (use-package! rfc-mode
   :defer t
+  :init
+  (defadvice! +rfc--goto-top-a ()
+    :after #'rfc-mode-init
+    (goto-char (point-min))
+    (while (looking-at-p "^$")
+      (forward-line))
+    ;; HACK Avoid "rfc-mode-recenter: `recenter'ing a window that does not display current-buffer."
+    ;; <https://emacs.stackexchange.com/questions/77226/recentering-a-window-that-does-not-display-current-buffer>
+    ;; <https://lists.gnu.org/r/emacs-devel/2014-06/msg00094.html>
+    (if (eq (window-buffer) (current-buffer))
+        (rfc-mode-recenter)
+      (add-transient-hook! 'window-buffer-change-functions
+        (rfc-mode-recenter))))
+
+  (defadvice! +rfc--maybe-recenter-a (&rest _)
+    :after '(rfc-mode-backward-page rfc-mode-previous-section)
+    (when (bobp)
+      (while (looking-at-p "^$")
+        (forward-line))
+      (rfc-mode-recenter)))
+
   :config
   (setq rfc-mode-directory
         (concat doom-cache-dir "rfc"))
+
+  (add-hook 'rfc-mode-hook #'read-only-mode)
   (when (fboundp 'page-break-lines-mode)
-    (add-hook 'rfc-mode-hook #'page-break-lines-mode)))
+    (add-hook 'rfc-mode-hook #'page-break-lines-mode))
+
+  (map! :map rfc-mode-map
+        :n "gm" #'rfc-mode-browse
+        :n "[" #'rfc-mode-backward-page
+        :n "]" #'rfc-mode-forward-page
+        :n "C-k" #'rfc-mode-previous-section
+        :n "C-j" #'rfc-mode-next-section
+        (:localleader
+         :n "." #'rfc-mode-goto-section))
+  )
 
 ;; <https://emacs-lsp.github.io/lsp-mode/page/lsp-terraform-ls/>
 (when (modulep! :tools terraform +lsp)
