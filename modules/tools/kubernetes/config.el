@@ -16,12 +16,36 @@
         (re-search-backward "^---" (point-min) 'ignore)
         (re-search-forward "^[[:space:]]*kind:[[:space:]]+\\(.+\\)" end t)))
     (kubedoc--view-resource (match-string 1)))
+
+  (defun +kubernetes/kubedoc-yank-resource-path ()
+    "Yank the canonical path of the current resource in `kubedoc'."
+    (interactive)
+    (cl-assert (eq major-mode 'kubedoc-mode))
+    (kill-new
+     (substring-no-properties
+      (apply #'string-join
+             `(,(buffer-local-value 'kubedoc--buffer-path (current-buffer)) ".")))))
+
   :config
+  (defadvice! +kubernetes-kubedoc-up-message-a ()
+    :after-until '(kubedoc-up kubedoc-top)
+    (message "Already at a top-level resource."))
+
   (when (modulep! :editor evil)
-    (defadvice! my/kubedoc-inhibit-view-mode-a (fn &rest args)
+    (defadvice! +kubernetes-kubedoc-inhibit-view-mode-a (fn &rest args)
       :around #'kubedoc-mode
       (letf! ((#'view-mode #'ignore))
-        (apply fn args)))))
+        (apply fn args)))
+    (map! :map kubedoc-mode-map
+          :n "u"  #'kubedoc-up
+          :n "t"  #'kubedoc-top
+          :n "gm" #'kubedoc
+          (:localleader
+           :desc "Yank resource path" "y" #'+kubernetes/kubedoc-yank-resource-path))
+    (when (modulep! :completion vertico)
+      (map! :map kubedoc-mode-map
+            :localleader
+            :desc "Jump to field" "."  #'consult-imenu))))
 
 
 ;;; Kubernetes
