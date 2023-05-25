@@ -2220,12 +2220,13 @@ server for the hostname of its own IP address."
 
 (add-hook 'wordnut-mode-hook #'outline-minor-mode)
 
-(when (modulep! :tools lookup +docsets)
-  (let ((zeal-docsets
-         (concat (file-name-as-directory (getenv "XDG_DATA_HOME"))
-                 "Zeal/Zeal/docsets/")))
-    (when (file-accessible-directory-p zeal-docsets)
-      (setq dash-docs-docsets-path zeal-docsets))))
+(after! dash-docs
+  (when (modulep! :tools lookup +docsets)
+    (let ((zeal-docsets
+           (concat (file-name-as-directory (getenv "XDG_DATA_HOME"))
+                   "Zeal/Zeal/docsets/")))
+      (when (file-accessible-directory-p zeal-docsets)
+        (setq dash-docs-docsets-path zeal-docsets)))))
 
 (after! lsp-ui
   (setq lsp-ui-doc-show-with-mouse t
@@ -2696,6 +2697,7 @@ See also: `ts-fold-summary--get'."
 (setq lsp-semantic-tokens-enable nil)
 
 (use-package! x509-mode :defer t)
+;; (use-package! asn1-mode :defer t)
 
 (when IS-MAC
   (setq ;; Comfortable keys that work most of the time

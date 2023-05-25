@@ -6549,12 +6549,13 @@ manually. I have decided to go this route.
 easier to use than the default mechanisms provided by Doom.
 
 #+begin_src emacs-lisp :tangle yes
-(when (modulep! :tools lookup +docsets)
-  (let ((zeal-docsets
-         (concat (file-name-as-directory (getenv "XDG_DATA_HOME"))
-                 "Zeal/Zeal/docsets/")))
-    (when (file-accessible-directory-p zeal-docsets)
-      (setq dash-docs-docsets-path zeal-docsets))))
+(after! dash-docs
+  (when (modulep! :tools lookup +docsets)
+    (let ((zeal-docsets
+           (concat (file-name-as-directory (getenv "XDG_DATA_HOME"))
+                   "Zeal/Zeal/docsets/")))
+      (when (file-accessible-directory-p zeal-docsets)
+        (setq dash-docs-docsets-path zeal-docsets)))))
 #+end_src
 
 Ideally, I would just use Doom-specific mechanisms for this, but I've found that
@@ -7402,6 +7403,7 @@ See upstream documentation: https://github.com/jobbflykt/x509-mode
 *** TODO Configuration
 #+begin_src emacs-lisp :tangle yes
 (use-package! x509-mode :defer t)
+;; (use-package! asn1-mode :defer t)
 #+end_src
 
 * :os
