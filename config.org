@@ -2101,7 +2101,7 @@ not indicate which tabs abstration is being operated on.
   "gd" #'+tabs:new-lookup-definition-window-tab)
 
 ;; NOTE This overrides `+workspace/new'
-(map! :n "C-t" #'+tabs:new-blank-window-tab)
+(map! :n "C-t" #'+tabs:new-duplicate-window-tab)
 #+end_src
 
 *** DONE [#A] Bind =evil-ex= commands

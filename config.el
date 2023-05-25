@@ -741,7 +741,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   "gd" #'+tabs:new-lookup-definition-window-tab)
 
 ;; NOTE This overrides `+workspace/new'
-(map! :n "C-t" #'+tabs:new-blank-window-tab)
+(map! :n "C-t" #'+tabs:new-duplicate-window-tab)
 
 (after! evil-ex
   (evil-ex-define-cmd "tabnew"         #'+tabs:new-blank-window-tab)
