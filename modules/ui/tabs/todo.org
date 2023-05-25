@@ -62,6 +62,25 @@ course, this happens in many elisp packages.) I fixed this by refactoring
 =vimish-tab= to use the ~window-buffer-change-functions~ hook instead of
 ~buffer-list-update-hook~.
 
+** STRT Do not hide the tab-bar when =gd= present multiple definitions
+:LOGBOOK:
+- Note taken on [2023-05-24 Wed 21:41] \\
+  This has been fixed in my private config.
+:END:
+When ~+lookup/definition~ (bound to =gd=) presents multiple candidate
+definitions, the tab-bar gets hidden for some reason.
+
+_Replication steps:_
+
+1. =C-h C-f vterm--internal RET=
+2. =gd= on that ~defun~ name
+
+The tab-bar will be hidden.
+
+_Debugging ideas:_
+
+- Look at the ~elisp-def~ function definition
+
 ** TODO Update window tab names when renaming buffers
 ~rename-buffer~ should be advised to update the tab lists of all windows
 containing the buffer that was renamed. This should include *all* windows, not
@@ -164,20 +183,10 @@ parameters in the window tab's alist (accessible by ~vimish-tab-parameters~) and
 prefer those when restoring buffer position. Maybe I could have a separate
 ~window-parameters~ entry in each tab's alist and always restore those.
 
-** TODO Do not hide the tab-bar when =gd= present multiple definitions
-When ~+lookup/definition~ (bound to =gd=) presents multiple candidate
-definitions, the tab-bar gets hidden for some reason.
-
-_Replication steps:_
-
-1. =C-h C-f vterm--internal RET=
-2. =gd= on that ~defun~ name
-
-The tab-bar will be hidden.
-
-_Debugging ideas:_
-
-- Look at the ~elisp-def~ function definition
+*UPDATE*: This is handled in the C code. However, there are APIs for this:
+- [[info:elisp#Window Point][elisp#Window Point]]
+- [[info:elisp#Window Start and End][elisp#Window Start and End]]
+- [[info:elisp#Window Hooks][elisp#Window Hooks]]
 
 ** TODO Fix alignment of tab-bar status in TTY Emacs
 The status is not right-aligned in TTY Emacs, so I currently have it disabled in

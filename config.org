@@ -694,7 +694,7 @@ Aesthetic modules that affect the Emacs interface or user experience.
 ;;; :ui
 #+end_src
 
-** Miscellany [9/10]
+** Miscellany [12/13]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -803,10 +803,30 @@ Taken from tecosaur's configuration.
     (when value
       (when (stringp value)
         (setq-local whitespace-trailing-regexp value))
-      (cl-pushnew 'trailing whitespace-style))))
+      (cl-pushnew 'trailing whitespace-style)
+      (whitespace-turn-on))))
 
 (add-hook 'whitespace-mode-hook
           #'my/show-trailing-whitespace-maybe-h)
+#+end_src
+
+*** DONE [#C] Prevent translation of quote characters into curved quotes :tweak:
+The curved quotes do not copy/paste well and are not representative of the
+original text, even though they might look a little better. Let's disable them:
+
+#+begin_src emacs-lisp :tangle yes
+(setq text-quoting-style 'grave)
+#+end_src
+
+*** DONE [#C] Display raw bytes in hexadecimal instead of octal
+#+begin_src emacs-lisp :tangle yes
+(setq display-raw-bytes-as-hex t)
+#+end_src
+
+*** DONE [#C] Display line continuation characters in TTY Emacs
+#+begin_src emacs-lisp :tangle yes
+(unless initial-window-system
+  (setq-default wrap-prefix "↪ "))
 #+end_src
 
 *** STRT [#B] Configure =vdiff= :feat:module:
@@ -2753,10 +2773,84 @@ because I find the half-width =diff-hl= fringes to /only/ look really nice in
 Doom themes. I could dig a bit deeper and only enable half-width fringes for
 Doom themes, but that's not something I'm currently interested in doing.
 
-** vi-tilde-fringe [0/0]
+** vi-tilde-fringe [0/2]
 #+begin_quote
 Displays a tilde(~) in the left fringe to indicate an empty line, similar to Vi.
 #+end_quote
+
+*** STRT [#C] Replace =vi-tilde-fringe= with builtin functionality :tweak:
+Emacs has a nicer-looking bitmap for lines after the end of a file than what
+=vi-tilde-fringe= provides. Let's use the default functionality:
+
+#+begin_src emacs-lisp :tangle yes
+(setq-hook! '(prog-mode-hook text-mode-hook conf-mode-hook)
+  indicate-empty-lines t)
+#+end_src
+
+FWIW, the fringe bitmap is named ~empty-line~ (as can be seen in
+~fringe-bitmaps~), is defined as ~empty_line_bits~ in =fringe.c=, and is
+assigned to ~standard_bitmaps~ in =fringe.c=.
+
+*** STRT [#B] Create a =vi-tilde-margin= package :feat:module:
+To my knowledge, TTY Emacs does not ship with an easy way to indicate the end of
+buffer content. Let's see if I can fix that.
+
+*UPDATE*: Turns out, this might not be possible without some serious hackery.
+The problem is that margin content corresponds to buffer content, so how can we
+display something in the margin past the end of the buffer?
+
+References:
+- [[info:elisp#Display Margins][elisp#Display Margins]]
+- [[info:elisp#Text Properties][elisp#Text Properties]]
+- [[info:elisp#Display Property][elisp#Display Property]]
+- [[info:elisp#Overlay Properties][elisp#Overlay Properties]]
+- ~linum-update-window~
+- ~diff-hl-highlight-on-margin~
+
+#+begin_src emacs-lisp :tangle no
+(defgroup vi-tilde-margin nil
+  "Vi tilde margin customizations."
+  :group 'emulations
+  :prefix 'vi-tilde-margin-)
+
+(defface vi-tilde-margin-face '((t (:inherit 'default)))
+  "Color for vi tilde displayed in the margin when line is empty."
+  :group 'vi-tilde-margin)
+
+(defcustom vi-tilde-margin-string "~"
+  "String drawn in the margin."
+  :group 'vi-tilde-margin
+  :type 'string)
+
+(defcustom vi-tilde-excluded-modes nil
+  "Major modes where `global-vi-tilde-margin-mode' won't affect."
+  :group 'vi-tilde-margin
+  :type '(list symbol))
+
+(defvar-local vi-tilde-margin--old-width nil)
+(define-minor-mode vi-tilde-margin-mode
+  "Minor mode to display tildes in the margin past EOB."
+  :lighter " ~"
+  :group 'emulations
+  (if vi-tilde-margin-mode
+      (progn
+        (setq vi-tilde-margin--old-width left-margin-width)
+        (when (< left-margin-width 1)
+          (setq left-margin-width 1)
+          (set-window-buffer nil (current-buffer))))
+    (unless (= left-margin-width vi-tilde-margin--old-width)
+      (setq left-margin-width vi-tilde-margin--old-width)
+      (set-window-buffer nil (current-buffer)))))
+
+(defun vi-tilde-margin-mode--turn-on ()
+  (unless (or (minibufferp)
+              (memq major-mode vi-tilde-excluded-modes))
+    (vi-tilde-margin-mode +1)))
+
+(define-globalized-minor-mode global-vi-tilde-margin-mode vi-tilde-margin-mode
+  vi-tilde-margin-mode--turn-on
+  :group 'vi-tilde-margin)
+#+end_src
 
 ** window-select [5/6]
 #+begin_quote

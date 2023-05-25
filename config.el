@@ -161,10 +161,18 @@ buffer in current window."
     (when value
       (when (stringp value)
         (setq-local whitespace-trailing-regexp value))
-      (cl-pushnew 'trailing whitespace-style))))
+      (cl-pushnew 'trailing whitespace-style)
+      (whitespace-turn-on))))
 
 (add-hook 'whitespace-mode-hook
           #'my/show-trailing-whitespace-maybe-h)
+
+(setq text-quoting-style 'grave)
+
+(setq display-raw-bytes-as-hex t)
+
+(unless initial-window-system
+  (setq-default wrap-prefix "↪ "))
 
 ;; Automatically highlight differences in hunks, down to the symbol.
 ;;
@@ -984,49 +992,6 @@ works even when `global-diff-hl-mode' is disabled.")
 
 (setq-hook! '(prog-mode-hook text-mode-hook conf-mode-hook)
   indicate-empty-lines t)
-
-(defgroup vi-tilde-margin nil
-  "Vi tilde margin customizations."
-  :group 'emulations
-  :prefix 'vi-tilde-margin-)
-
-(defface vi-tilde-margin-face '((t (:inherit 'default)))
-  "Color for vi tilde displayed in the margin when line is empty."
-  :group 'vi-tilde-margin)
-
-(defcustom vi-tilde-margin-character ?~
-  "Character drawn in the margin."
-  :group 'vi-tilde-margin
-  :type 'character)
-
-(defcustom vi-tilde-excluded-modes nil
-  "Major modes where `global-vi-tilde-margin-mode' won't affect."
-  :group 'vi-tilde-margin
-  :type '(list symbol))
-
-(defvar-local vi-tilde-margin--old-width nil)
-(define-minor-mode vi-tilde-margin-mode
-  "Minor mode to display tildes in the margin past EOB."
-  :lighter " ~"
-  :group 'emulations
-  (if vi-tilde-margin-mode
-      (progn
-        (setq vi-tilde-margin--old-width left-margin-width)
-        (when (< left-margin-width 1)
-          (setq left-margin-width 1)
-          (set-window-buffer nil (current-buffer))))
-    (unless (= left-margin-width vi-tilde-margin--old-width)
-      (setq left-margin-width vi-tilde-margin--old-width)
-      (set-window-buffer nil (current-buffer)))))
-
-(defun vi-tilde-margin-mode--turn-on ()
-  (unless (or (minibufferp)
-              (memq major-mode vi-tilde-excluded-modes))
-    (vi-tilde-margin-mode +1)))
-
-(define-globalized-minor-mode global-vi-tilde-margin-mode vi-tilde-margin-mode
-  vi-tilde-margin-mode--turn-on
-  :group 'vi-tilde-margin)
 
 (after! ace-window
   (when initial-window-system
