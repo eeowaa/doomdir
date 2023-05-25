@@ -2363,6 +2363,50 @@ This variable should be set by `my/lsp-ui-set-delay'.")
               (apply fn args))
           (apply fn args))))))
 
+(after! company-keywords
+  (add-to-list
+   'company-keywords-alist
+   '(terraform-mode
+     ;; Numeric functions
+     "abs" "cell" "floor" "log" "max" "min" "parseint" "pow" "signum"
+
+     ;; String functions
+     "chomp" "endswith" "format" "formatlist" "indent" "join" "lower" "regex"
+     "regexall" "replace" "split" "startswith" "strrev" "substr" "title" "trim"
+     "trimprefix" "trimsuffix" "trimspace" "upper"
+
+     ;; Collection functions
+     "alltrue" "anytrue" "chunklist" "coalesce" "coalescelist" "compact" "concat"
+     "contains" "distinct" "element" "flatten" "index" "keys" "length" "list"
+     "lookup" "map" "matchkeys" "merge" "one" "range" "reverse" "setintersection"
+     "setproduct" "setsubtract" "setunion" "slice" "sort" "sum" "transpose"
+     "values" "zipmap"
+
+     ;; Encoding functions
+     "base64decode" "base64encode" "base64gzip" "csvdecode" "jsondecode"
+     "jsonencode" "textdecodebase64" "textencodebase64" "urlencode" "yamldecode"
+     "yamlencode"
+
+     ;; Filesystem functions
+     "abspath" "dirname" "pathexpand" "basename" "file" "fileexists" "fileset"
+     "filebase64" "templatefile"
+
+     ;; Date and Time functions
+     "formatdate" "timeadd" "timecmp" "timestamp"
+
+     ;; Hash and Crypto functions
+     "base64sha256" "base64sha512" "bcrypt" "filebase64sha256" "filebase64sha512"
+     "filemd5" "filesha1" "filesha256" "filesha512" "filemd5" "filesha1"
+     "filesha256" "filesha512" "md5" "rsadecrypt" "sha1" "sha256" "sha512" "uuid"
+     "uuidv5"
+
+     ;; IP Network functions
+     "cidrhost" "cidrnetmast" "cidrsubnet" "cidrsubnets"
+
+     ;; Type Conversion functions
+     "can" "nonsensitive" "sensitive" "tobool" "tolist" "tomap" "tonumber" "toset"
+     "tostring" "try" "type")))
+
 (after! terraform-mode
   (defgroup my/terraform nil
     "Extended functionality for Terraform."
