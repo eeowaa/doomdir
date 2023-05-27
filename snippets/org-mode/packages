@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# group: literate-config
+# name: doom-packages
+# key: packages
+# --
+#+begin_src emacs-lisp :tangle packages.el
+`%`$0
+#+end_src
