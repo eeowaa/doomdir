@@ -2371,6 +2371,8 @@ This variable should be set by `my/lsp-ui-set-delay'.")
 (use-package! rfc-mode
   :defer t
   :init
+  (defalias 'rfc #'rfc-mode-browse)
+
   (defadvice! +rfc--goto-top-a ()
     :after #'rfc-mode-init
     (goto-char (point-min))
@@ -2408,7 +2410,6 @@ This variable should be set by `my/lsp-ui-set-delay'.")
   (when (fboundp 'page-break-lines-mode)
     (add-hook 'rfc-mode-hook #'page-break-lines-mode))
 
-  (defalias 'rfc #'rfc-mode-browse)
   (map! :map rfc-mode-map
         :n "gm" #'rfc-mode-browse
         :n "[" #'rfc-mode-backward-page
@@ -2706,8 +2707,27 @@ See also: `ts-fold-summary--get'."
 
 (setq lsp-semantic-tokens-enable nil)
 
-(use-package! x509-mode :defer t)
-;; (use-package! asn1-mode :defer t)
+(add-to-list 'auto-mode-alist '("\\.cnf\\'" . conf-mode))
+
+(use-package! x509-mode
+  :defer t
+  :init
+  (add-to-list 'auto-mode-alist
+               '("\\.\\(?:pem\\|der\\|key\\|crt\\|cer\\|crl\\)\\'" . x509-mode))
+  :config
+  (map! :map x509-mode-map
+        :n "e" #'x509--edit-params
+        :n "q" #'x509-mode--kill-buffer
+        :n "t" #'x509--toggle-mode)
+
+  (map! :map x509-asn1-mode-map
+        :n "d" #'x509--asn1-offset-down
+        :n "e" #'x509--edit-params
+        :n "q" #'x509-mode--kill-buffer
+        :n "s" #'x509--asn1-strparse
+        :n "t" #'x509--toggle-mode
+        :n "u" #'x509--asn1-offset-up
+        :n "x" #'x509-asn1-toggle-hexl))
 
 (when IS-MAC
   (setq ;; Comfortable keys that work most of the time
