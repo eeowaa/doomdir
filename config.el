@@ -3142,6 +3142,7 @@ block at point is a pre block (as opposed to a code block)."
 
 (after! org
   (setcdr (assoc 'heading org-blank-before-new-entry) nil)
+
   (defun my/org-insert-heading-spacing ()
     "Surround an Org heading with appropriate whitespace.
 
@@ -3160,19 +3161,21 @@ Entry content
 
 * D
 "
-    ;; Delete all blank lines following the heading
-    (delete-blank-lines)
-    ;; Set spacing appropriately before the heading
-    (save-excursion
-      (forward-line -1)
-      ;; What immediately precedes the heading line?
-      (cond
-       ;; Another heading line (or same heading at beginning of buffer) => do nothing
-       ((org-at-heading-p) t)
-       ;; Blank line => squeeze consecutive blank lines
-       ((looking-at-p "[[:blank:]]*$") (delete-blank-lines))
-       ;; Non-blank non-heading line => insert a blank line before the heading
-       (t (forward-line 1) (newline)))))
+    (let ((inhibit-redisplay t))
+      ;; Delete all blank lines following the heading
+      (delete-blank-lines)
+      ;; Set spacing appropriately before the heading
+      (save-excursion
+        (forward-line -1)
+        ;; What immediately precedes the heading line?
+        (cond
+         ;; Another heading line (or same heading at beginning of buffer) => do nothing
+         ((org-at-heading-p) t)
+         ;; Blank line => squeeze consecutive blank lines
+         ((looking-at-p "[[:blank:]]*$") (delete-blank-lines))
+         ;; Non-blank non-heading line => insert a blank line before the heading
+         (t (forward-line 1) (newline))))))
+
   (defun my/org-insert-heading-visibility ()
     "Redisplay the previous Org heading.
 
@@ -3184,12 +3187,13 @@ just perform a complete cycle of `org-cycle'."
         ;; XXX Doom-specific
         (when evil-mode (evil-normal-state))
         (call-interactively #'org-cycle)
-        (call-interactively #'org-cycle)))
-    (redisplay))
+        (call-interactively #'org-cycle))))
+
   (defun my/org-insert-heading-evil-state ()
     "End up with the cursor in 'insert mode' at the end of the Org heading"
     ;; XXX Doom-specific
     (when evil-mode (evil-org-append-line 1)))
+
   (add-hook! 'org-insert-heading-hook #'my/org-insert-heading-spacing
                                       #'my/org-insert-heading-visibility
                                       #'my/org-insert-heading-evil-state))
