@@ -3140,6 +3140,10 @@ block at point is a pre block (as opposed to a code block)."
   (letf! ((#'org-indent-mode #'ignore))
     (apply f r)))
 
+(after! evil-org
+  (map! :map evil-org-mode-map
+        :i "C-j" #'+default/newline))
+
 (after! org
   (setcdr (assoc 'heading org-blank-before-new-entry) nil)
 

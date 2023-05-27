@@ -8773,7 +8773,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [27/54]
+** org [28/55]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -8801,7 +8801,7 @@ pipx inject jupyter ipykernel
 sudo dnf -y install zeromq-devel libstdc++-static
 #+end_src
 
-*** Document Structure [2/4]
+*** Document Structure [3/5]
 **** DONE [#A] Do not indent headlines :hack:
 #+begin_src emacs-lisp :tangle yes
 (after! org
@@ -8834,6 +8834,15 @@ This has been going on for so long that my workaround (to kill the buffer and
 reload the contents into a fresh buffer) has nearly become muscle memory, but I
 really shouldn't have to do this. *UPDATE*: I am not seeing this problem
 anymore.
+
+**** DONE [#B] Unbind =C-j= from ~org-down-element~ in Evil insert state
+I want =C-j= to simply insert a new line without electric/auto indentation.
+
+#+begin_src emacs-lisp :tangle yes
+(after! evil-org
+  (map! :map evil-org-mode-map
+        :i "C-j" #'+default/newline))
+#+end_src
 
 **** STRT [#A] Insert new headlines just how I like them :tweak:
 This is mostly done, but I do not want there to be a blank line after drawers or
