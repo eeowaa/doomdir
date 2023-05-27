@@ -4611,7 +4611,7 @@ to =eshell=, it forcefully clears the file on disk.
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [7/16]
+** vterm [8/17]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
@@ -4724,6 +4724,13 @@ This function works even if the current window is a side window."
 
   (map! :map vterm-mode-map
         :i "C-x C-e" #'my/vterm-edit-indirect))
+#+end_src
+
+*** DONE [#C] Use =C-s= as the ~evil-window-map~ leader key in Evil insert state :tweak:
+#+begin_src emacs-lisp :tangle yes
+(after! evil-collection-vterm
+  (map! :map vterm-mode-map
+        :i "C-s" evil-window-map))
 #+end_src
 
 *** DONE [#C] Configure revert-buffer :tweak:module:
@@ -6985,6 +6992,8 @@ sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
 (use-package! rfc-mode
   :defer t
   :init
+  (defalias 'rfc #'rfc-mode-browse)
+
   (defadvice! +rfc--goto-top-a ()
     :after #'rfc-mode-init
     (goto-char (point-min))
