@@ -144,10 +144,16 @@ buffer in current window."
 
 (add-hook 'Info-selection-hook 'info-colors-fontify-node)
 
+(my/doom-use-face whitespace-trailing flycheck-error)
+
 (defvar my/show-trailing-whitespace t)
 (defvar my/trailing-whitespace-mode-alist
-  '(;; Trailing tabs are fine
+  '((rfc-mode . nil)
+    (x509-asn1-mode . nil)
+
+    ;; Trailing tabs are fine
     (tsv-mode . "\\( +\\)$")
+
     ;; Two trailing spaces are fine, but no other kind of trailing whitespace
     (markdown-mode . "\\S-\\( \\| \\{3,\\}\\|\\s-*\t\\s-*\\)$")))
 
