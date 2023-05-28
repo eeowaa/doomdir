@@ -144,7 +144,9 @@ buffer in current window."
 
 (add-hook 'Info-selection-hook 'info-colors-fontify-node)
 
-(my/doom-use-face whitespace-trailing flycheck-error)
+(after! whitespace
+  (require 'flycheck)
+  (my/doom-use-face whitespace-trailing flycheck-error))
 
 (defvar my/show-trailing-whitespace t)
 (defvar my/trailing-whitespace-mode-alist
@@ -3701,7 +3703,10 @@ ALIGN should be a keyword :left or :right."
 (after! elfeed
   (setq elfeed-search-remain-on-entry t))
 
-(load! "custom" doom-user-dir t)
+(when (file-exists-p custom-file)
+  ;; Protect the file in case it contain sensitive information
+  (set-file-modes custom-file #o600)
+  (load custom-file))
 
 (add-hook! 'kill-emacs-query-functions
   (defun my/check-config-h ()

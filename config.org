@@ -786,7 +786,9 @@ Taken from tecosaur's configuration.
 
 *** DONE [#C] Highlight trailing whitespace where appropriate :tweak:
 #+begin_src emacs-lisp :tangle yes
-(my/doom-use-face whitespace-trailing flycheck-error)
+(after! whitespace
+  (require 'flycheck)
+  (my/doom-use-face whitespace-trailing flycheck-error))
 
 (defvar my/show-trailing-whitespace t)
 (defvar my/trailing-whitespace-mode-alist
@@ -8186,6 +8188,10 @@ sudo dnf -y install texlive-ulem
 #+end_src
 
 *** STRT [#B] Configure LaTeX preview in Org files :tweak:
+*NOTE*: Up until now, I've inadvertently been using ~dvisvgm~ instead of
+~dvipng~, because I had a customization in my =custom.el=. Let's see if the
+following makes a difference now.
+
 #+begin_src emacs-lisp :tangle no
 (setq org-preview-latex-default-process 'dvipng)
 #+end_src
@@ -10862,11 +10868,6 @@ Miscellaneous configuration without a corresponding module.
 (setq elfeed-feeds
       '("https://example.com/rss.xml"))
 
-;; Spotify (see https://developer.spotify.com/my-applications)
-;; Could also use `auth-source' library to retrieve the credentials
-(setq counsel-spotify-client-id "00000000000000000000000000000000"
-      counsel-spotify-client-secret "00000000000000000000000000000000")
-
 ;; IRC
 (set-irc-server! "irc.libera.chat"
   `(:tls t
@@ -10882,7 +10883,10 @@ Miscellaneous configuration without a corresponding module.
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
-(load! "custom" doom-user-dir t)
+(when (file-exists-p custom-file)
+  ;; Protect the file in case it contain sensitive information
+  (set-file-modes custom-file #o600)
+  (load custom-file))
 #+end_src
 
 *** DONE [#A] Detect invalid config before quitting Emacs :feat:
