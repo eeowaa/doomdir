@@ -206,6 +206,8 @@
 ;; Social
 ;;(package! mastadon)
 
+(package! gptel)
+
 (package! elfeed-goodies :disable t)
 
 ;;; :config
