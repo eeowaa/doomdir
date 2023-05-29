@@ -5754,6 +5754,16 @@ If the cdr of an entry is nil, the function specified by
   :group 'cli-help
   :type 'function)
 
+(defun cli-help-fontify-buffer ()
+  "Fontify the current CLI help text buffer."
+  (interactive)
+  (if-let ((program (car-safe (split-string cli-help--command-line)))
+           (fontifier (cdr (assoc program cli-help-fontifier-alist))))
+      (funcall fontifier)
+    (funcall cli-help-fontifier-function)))
+
+;;;; Faces
+
 (defface cli-help-usage
   '((t (:inherit outline-1)))
   "Face to use when fontifying usage strings."
@@ -5774,9 +5784,40 @@ If the cdr of an entry is nil, the function specified by
   "Face to use when fontifying punctuation."
   :group 'cli-help)
 
-(defvar cli-help-usage-re "^\\(\\(?:Usage:\\)\\(.*\\)$")
-(defvar cli-help-section-re "^\\s-*\\([a-zA-Z0-9].*:\\)\\s-*$")
-(defvar cli-help-flag-re "\\s-+\\(\\(?:+\\|--?\\)[^ ,=[]*\\)\\([,=[]*\\)")
+;;;; Buttons
+
+(defun cli-help--subcommand-button-action (button)
+  (cli-help-subcommand (button-label button)))
+
+(define-button-type 'cli-help-subcommand
+  'action #'cli-help--subcommand-button-action)
+
+(defvar-local cli-help--buttons nil)
+
+(defun cli-help--make-button (beg end)
+  (push (make-button beg end 'type 'cli-help-subcommand)
+        cli-help--buttons))
+
+(defun cli-help--button-description (button)
+  (save-excursion
+    (goto-char (button-start button))
+    (buffer-substring (point) (eol))))
+
+(defun cli-help--button-candidates ()
+  (reverse (mapcar #'cli-help--button-description cli-help--buttons)))
+
+(defun cli-help-select-button (button)
+  (interactive
+   `(,(let* ((description (completing-read "Select: "
+                                           (cli-help--button-candidates)))
+             (label (car (split-string description))))
+        (seq-find (lambda (button)
+                    (string= (button-label button) label))
+                  cli-help--buttons))))
+  (goto-char (button-start button))
+  (push-button))
+
+;;;; Utilities
 
 (defun cli-help--match-group-count ()
   "Helper function to return the number of regexp groups matched."
@@ -5793,6 +5834,12 @@ If the cdr of an entry is nil, the function specified by
   (when-let* ((beg (match-beginning n))
               (end (match-end n)))
     (put-text-property beg end property value)))
+
+;;;; Default fontifier
+
+(defvar cli-help-usage-re "^\\(\\(?:Usage:\\)\\(.*\\)$")
+(defvar cli-help-section-re "^\\s-*\\([a-zA-Z0-9].*:\\)\\s-*$")
+(defvar cli-help-flag-re "\\s-+\\(\\(?:+\\|--?\\)[^ ,=[]*\\)\\([,=[]*\\)")
 
 (defun cli-help-default-fontifier ()
   "Fontify buffer according to common help text conventions."
@@ -5814,10 +5861,7 @@ If the cdr of an entry is nil, the function specified by
             (goto-char (1+ (match-end 1))))))
         (forward-line)))))
 
-(defun cli-help--subcommand-button-action (button)
-  (cli-help-subcommand (button-label button)))
-(define-button-type 'cli-help-subcommand
-  'action #'cli-help--subcommand-button-action)
+;;;; Azure CLI fontifier
 
 (defun cli-help-azure-fontifier ()
   "Fontify buffer displaying Azure CLI help text."
@@ -5841,6 +5885,7 @@ If the cdr of an entry is nil, the function specified by
         (example-face 'cli-help-usage))
     (goto-char (point-min))
     (set-text-properties (point-min) (point-max) nil)
+    (setq cli-help--buttons nil)
     (cli-help--delete-blank-lines)
     (while (not (eobp))
       (cond
@@ -5858,7 +5903,7 @@ If the cdr of an entry is nil, the function specified by
             (forward-line)
             (when (looking-at subgroup-or-command-re)
               (cli-help--propertize-match 1 'font-lock-face header-face)
-              (make-button (match-beginning 1) (match-end 1) 'type 'cli-help-subcommand)
+              (cli-help--make-button (match-beginning 1) (match-end 1))
               (cli-help--propertize-match 2 'font-lock-face caution-face)
               (cli-help--propertize-match 3 'font-lock-face 'cli-help-punctuation)))))
        ((looking-at "^\\(?:Global \\)?Arguments$")
@@ -5904,14 +5949,6 @@ If the cdr of an entry is nil, the function specified by
                                      "\\|")))
     (outline-minor-mode))
   (redisplay))
-
-(defun cli-help-fontify-buffer ()
-  "Fontify the current CLI help text buffer."
-  (interactive)
-  (if-let ((program (car-safe (split-string cli-help--command-line)))
-           (fontifier (cdr (assoc program cli-help-fontifier-alist))))
-      (funcall fontifier)
-    (cli-help-default-fontifier)))
 
 ;;; Commands
 
@@ -5963,10 +6000,13 @@ CMDLINE defaults to the buffer-local value of `cli-help--command-line'."
 
 (defvar cli-help-mode-map
   (let ((map (make-sparse-keymap)))
+    ;; REVIEW Consider replacing with `button-mode'
     (define-key map (kbd "TAB") #'forward-button)
     (define-key map (kbd "<backtab>") #'backward-button)
     (define-key map (kbd "M-TAB") #'backward-button)
+
     (define-key map (kbd "u") #'cli-help-supercommand)
+    (define-key map (kbd "g") #'cli-help-select-button)
     map))
 
 (define-derived-mode cli-help-mode fundamental-mode "CLI-Help"
@@ -5975,10 +6015,10 @@ This mode is usually activated by the `cli-help' command."
   :group 'cli-help
   (setq buffer-read-only t))
 
+;; TODO Add a function to select another buffer in `cli-help--buffers'
 ;; TODO Integrate with `vterm' (preferably with a keybinding)
 ;; TODO Add `evil' bindings
 ;; TODO Start with `hl-line-mode' in `cli-help-mode'
-;; TODO Add `imenu' support
 #+end_src
 
 ** cloudformation [0/0] :eeowaa:ARCHIVE:
