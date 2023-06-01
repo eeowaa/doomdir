@@ -1,1 +1,46 @@
 * TODO Configure bitwarden as an ~auth-source~ backend
+https://www.masteringemacs.org/article/keeping-secrets-in-emacs-gnupg-auth-sources
+
+#+begin_src emacs-lisp
+(bitwarden-auth-source-enable)
+(auth-source-search :host "bitwarden-test-entry")
+;;=> ((:host "bitwarden-test-entry" :user "johndoe@example.com" :secret (lambda nil "password")))
+#+end_src
+
+#+begin_src emacs-lisp
+(defun my/auth-source-search (&rest backends)
+  "Interactively obtain an `auth-source' entry.
+When supplied interactively in the minibuffer, BACKENDS are
+separated by `crm-separator' (typically a comma). When the
+BACKENDS argument is nil, all `auth-sources' are searched."
+  (interactive
+   (let* ((index 0)
+          (indexed-sources
+           (mapcar (lambda (source)
+                     (let* ((index-string (number-to-string index))
+                            (prefix (propertize (concat index-string ":") 'invisible t)))
+                       (setq index (1+ index))
+                       (format "%s%s" prefix source)))
+                   auth-sources))
+          (indexed-selections
+           (completing-read-multiple "Select backends: "
+                                     indexed-sources nil t))
+          (selected-indices
+           (mapcar (lambda (selection)
+                     (string-to-number (car (split-string selection ":"))))
+                   indexed-selections)))
+     (mapcar (lambda (index)
+               (nth index auth-sources))
+             selected-indices)))
+  (unless backends
+    (setq backends auth-sources))
+
+  ;; TODO: Integrate with `auth-source-search-backends' (see the help text for
+  ;; `auth-source-search' for more information)
+  (message "%S" backends))
+#+end_src
+
+*UPDATE*: There is currently no package that provides a user-friendly interface
+to =auth-source= entries. Taking =bitwarden= as inspiration, it doesn't seem
+/too/ hard to implement a mode derived from ~tabulated-list-mode~ to browse
+passwords across auth sources. That would be a good pet project.
