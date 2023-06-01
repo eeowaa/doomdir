@@ -3344,6 +3344,7 @@ builtin game.
 (defadvice! my/ergonomic-info-bindings-a (&rest _)
   :after #'evil-collection-info-setup
   (evil-collection-define-key 'normal 'Info-mode-map
+    (kbd "C-t") nil ;; open this up for `vimish-tab'
     (kbd "C-i") 'Info-next-reference
     (kbd "M-,") 'Info-history-back
     (kbd "C-M-,") 'Info-history-forward))
@@ -10742,6 +10743,9 @@ with my own philosophy of using Emacs.
 
   (add-hook! gptel-mode #'my/gptel-modify-header-line-h
                         #'my/gptel-wrap-lines-h)
+
+  ;; Do not stream responses
+  (setq gptel-stream nil)
 
   (map! :map gptel-mode-map
         "C-c C-g" #'gptel-menu))
