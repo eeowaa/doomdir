@@ -7212,17 +7212,36 @@ returned if it exists, otherwise nil."
       (when (file-exists-p my/terraform-state-file)
         (expand-file-name my/terraform-state-file))))
 
-  ;; TODO Show stderr when the command fails
   ;; TODO Pull state asynchronously via `make-process'
   (defun my/terraform-state-pull ()
     "Populate `my/terraform-state-file' with Terraform state."
     (interactive)
     (when (or (not (file-exists-p my/terraform-state-file))
               (yes-or-no-p (format "Overwrite existing file (%s)? " my/terraform-state-file)))
-      (if (zerop (call-process my/terraform-executable nil `(:file ,my/terraform-state-file) nil
-                               "state" "pull"))
-          (message "Pulled Terraform state to %s" (expand-file-name my/terraform-state-file))
-        (user-error "Failed to pull Terraform state"))))
+      (let* ((program my/terraform-executable)
+             (args '("state" "pull"))
+             (stdout (expand-file-name my/terraform-state-file))
+             (stderr (make-temp-file "emacs-" nil ".stderr"))
+             (exit-code nil)
+             (success-msg (format "Pulled Terraform state to %s" stdout))
+             (error-msg (format "Failed to pull Terraform state to %s" stdout))
+             (warning-type 'my/terraform))
+        (unless (with-temp-buffer
+                  (when (zerop (setq exit-code
+                                     (apply #'call-process program nil (list t stderr) nil args)))
+                    (write-file stdout)
+                    (message success-msg)))
+          (with-temp-buffer
+            (insert (format "%s
+Command: %s
+Directory: %s
+Exit code: %d
+Standard error \"" error-msg (string-join (cons program args) " ") default-directory exit-code))
+            (insert-file-contents stderr)
+            (goto-char (point-max))
+            (insert "\"")
+            (display-warning warning-type (buffer-string) :error)))
+        (delete-file stderr))))
 
   ;; TODO Add support for resource addresses within Terraform modules
   (defvar my/terraform--state-show-jq-filter "\
