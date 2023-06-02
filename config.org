@@ -7243,37 +7243,61 @@ Standard error \"" error-msg (string-join (cons program args) " ") default-direc
             (display-warning warning-type (buffer-string) :error)))
         (delete-file stderr))))
 
-  ;; TODO Add support for resource addresses within Terraform modules
+  ;; TODO Add support for outputs
   (defvar my/terraform--state-show-jq-filter "\
 .resources |
 map(select(
     .mode == $mode and
     .type == $type and
     .name == $name
-))
-[0].instances |
-if (.[0] | has(\"index_key\")) then
-    map({
-        \"key\": .index_key,
-        \"value\": .attributes
-    }) |
-    from_entries
+)) |
+if $modpath == \"\" then
+    map(select(
+        has(\"module\") | not
+    ))[0]
+    .instances |
+    if (.[0] | has(\"index_key\")) then
+        map({
+            \"key\": .index_key,
+            \"value\": .attributes
+        }) |
+        from_entries
+    else
+        .[0].attributes
+    end
 else
-    .[0].attributes
+    map(
+        select(
+            has(\"module\") and
+            (.module | gsub(\"\\\\[.+?]\"; \"\")) == $modpath
+        ) |
+        .module as $m |
+        .instances |
+        if (.[0] | has(\"index_key\")) then {
+            \"key\": ($m + \".\" + .index_key),
+            \"value\": .attributes
+        } else {
+            \"key\": $m,
+            \"value\": .[0].attributes
+        } end
+    ) |
+    from_entries
 end")
 
   (defun my/terraform--parse-address (address)
     "Return a list describing a Terraform resource ADDRESS.
-The list has the form (MODE TYPE NAME), where MODE is either
-`data' or `managed', TYPE is the resource type, and NAME is the
-resource name."
+The list has the form (MODULE-PATH MODE TYPE NAME), where
+MODULE-PATH is the unkeyed module path, MODE is either `data' or
+`managed', TYPE is the resource type, and NAME is the resource
+name."
     (save-match-data
-      (unless (string-match "\\`\\(data\\.\\)?\\([^\\.]+\\)\\.\\([^\\.]+\\)\\'" address)
+      (unless (string-match "\\`\\(?:\\(module\\..+\\)\\.\\)?\\(data\\.\\)?\\([^\\.]+\\)\\.\\([^\\.]+\\)\\'" address)
         (user-error "Unrecognized Terraform resource address: %s" address))
-      (list (if (string= "data." (match-string-no-properties 1 address))
+      (list (or (match-string-no-properties 1 address) "")
+            (if (string= "data." (match-string-no-properties 2 address))
                 "data" "managed")
-            (match-string-no-properties 2 address)
-            (match-string-no-properties 3 address))))
+            (match-string-no-properties 3 address)
+            (match-string-no-properties 4 address))))
 
   (defun my/terraform-state-show (address)
     "Display JSON respresentation of Terraform resource at ADDRESS.
@@ -7284,13 +7308,14 @@ Always queries a local state file for performance reasons."
             "Resource address: "
             (when (region-active-p)
               (buffer-substring-no-properties (region-beginning) (region-end))))))
-    (cl-destructuring-bind (mode type name) (my/terraform--parse-address address)
+    (cl-destructuring-bind (module-path mode type name) (my/terraform--parse-address address)
       (let* ((state-file (or (my/terraform--ensure-state-file)
                              (user-error "File not found: %s"
                                          (expand-file-name my/terraform-state-file))))
              (buffer (get-buffer-create (format my/terraform-state-buffer-name-format
                                                 address)))
-             (jq-args `("--arg" "mode" ,mode
+             (jq-args `("--arg" "modpath" ,module-path
+                        "--arg" "mode" ,mode
                         "--arg" "type" ,type
                         "--arg" "name" ,name
                         ,my/terraform--state-show-jq-filter)))
@@ -7309,7 +7334,7 @@ Both resource and data blocks are considered to be resources."
     (my/terraform-state-show (my/terraform-resource-address-at-pos pos)))
 
   ;; FIXME: Make this portable for Windows and WSL
-  (defun my/terraform-module-of-file (&optional file)
+  (defun my/terraform-module-path-of-file (&optional file)
     "Display the Terraform module path of FILE.
 FILE is an absolute or relative path to a filesystem entry. It
 defaults to the file visited by the current buffer, or to
@@ -7340,8 +7365,10 @@ addresses of resource blocks have no prefix."
                  (mode (match-string-no-properties 1))
                  (type (match-string-no-properties 2))
                  (name (match-string-no-properties 3))
-                 (prefix (if (string= mode "data") "data." "")))
-            (format "%s%s.%s" prefix type name)
+                 (data-prefix (if (string= mode "data") "data." ""))
+                 (module-path (my/terraform-module-path-of-file))
+                 (module-path-prefix (if (string= module-path "") "" (concat module-path "."))))
+            (concat module-path-prefix data-prefix type "." name)
           (user-error "No Terraform resource at position")))))
 
   (when (modulep! :ui buffer-group)
