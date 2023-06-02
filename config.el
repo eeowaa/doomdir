@@ -2729,6 +2729,68 @@ addresses of resource blocks have no prefix."
              :desc "Show instances of address" "a" #'my/terraform-state-show
              :desc "Pull remote state" "p" #'my/terraform-state-pull)))
 
+(after! terraform-mode
+  (defvar my/terraform-shell "/bin/sh")
+  (defvar my/terraform-hcl-single-line-command "\
+sed -e 's/^ *//' \\
+    -e 's/ *#.*//' \\
+    -e 's/\\([^[{ ]\\) *,\\{0,1\\} *$/\\1,/' \\
+    -e '$s/,$//' |
+tr '\\n' ' ' |
+sed -e 's/ $/\\n/'"
+    "Shell command used to transform HCL to a single line.")
+
+  (defvar my/terraform-hcl-single-line-buffer "*HCL Single Line*"
+    "Buffer containing a backtrace of generated single-line HCL.")
+
+  (defun my/terraform-hcl-single-line (beg end &optional show-message)
+    "Return a single-line string corresponding to a region of HCL.
+Pass the resulting string to terraform console.
+
+With optional SHOW-MESSAGE, outputs the resulting string to the
+echo area, truncating to a single line.
+
+This function always appends the resulting string to the buffer
+`my/terraform-hcl-single-line-buffer', which can be used in
+debugging issues with the transformation command
+`my/terraform-hcl-single-line-command'."
+    (interactive "r")
+    (let ((hcl (my/region-string beg end))
+          (buffer (get-buffer-create my/terraform-hcl-single-line-buffer))
+          result)
+      (with-current-buffer buffer
+        (hcl-mode)
+        (goto-char (point-max))
+        (let ((start (point-marker)))
+          (insert hcl)
+          (call-process-region start (point) my/terraform-shell t t nil
+                               "-c" my/terraform-hcl-single-line-command)
+          (newline)
+          (setq result (buffer-substring-no-properties start (point-max)))))
+      (when show-message
+        (let ((truncate-partial-width-windows t)
+              ;; FIXME: The echo area still consumes multiple lines, even though
+              ;; the message gets truncated to a single line (there are blanks
+              ;; lines shown below the message).
+              (message-truncate-lines t)
+              (max-mini-window-height 1)
+              (resize-mini-windows t))
+          (message result)))
+      result))
+
+  (defun my/terraform-console-kill-ring-save (beg end)
+    "Save region of HCL to be evaluated in terraform console.
+Uses `my/terraform-hcl-single-line' to transform the HCL code to
+a single line."
+    (interactive "r")
+    (kill-new (my/terraform-hcl-single-line beg end))
+    (message "Single-line HCL yanked to kill-ring"))
+
+  (map! :map terraform-mode-map
+            :localleader
+            (:prefix ("c" . "console")
+             :desc "Yank single-line HCL" "y" #'my/terraform-console-kill-ring-save)))
+
 (add-hook 'terraform-mode-local-vars-hook #'tree-sitter! 'append)
 
 ;; Missing from evil-textobj-tree-sitter.el:
