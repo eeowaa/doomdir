@@ -3387,6 +3387,23 @@ with =C-w L=, =C-w H=, and the like).
 Maybe take a look at the ~even-window-sizes~ variable. *UPDATE*: This is working
 for me now, even when moving windows.
 
+*** LOOP [#B] Improve visual line navigation :bug:
+I would like to use the standard =gj= and =gk= Vim bindings to navigate between
+wrapped visual lines, but a lot of other modes wrap those bindings. An
+altnerative solution would be to enable ~evil-respect-visual-line-mode~ in
+=DOOMDIR/init.el=, but apparently there are problems with doing so. See this
+open issue in Doom Emacs: https://github.com/doomemacs/doomemacs/issues/2447
+
+A temporary workaround is to switch to Emacs state using =C-z= and then use
+=C-n= and =C-p= to navigate between visual lines. Once finished, use =C-z= again
+to exit Emacs state.
+
+*UPDATE*: I am trying this again.
+
+#+begin_src emacs-lisp :tangle early-init.el
+(setq evil-respect-visual-line-mode t)
+#+end_src
+
 *** STRT [#B] Associate evil states with major modes :tweak:
 #+begin_src emacs-lisp :tangle yes
 (pushnew! evil-emacs-state-modes 'noaa-mode)
@@ -3404,17 +3421,6 @@ Off the top of my head, I can think of the following use cases:
   state, not ~normal~ state. However, the major mode is just ~org-mode~, and
   there is no special minor mode; the only thing I have to key off of is the
   buffer name.
-
-*** TODO [#B] Improve visual line navigation :bug:
-I would like to use the standard =gj= and =gk= Vim bindings to navigate between
-wrapped visual lines, but a lot of other modes wrap those bindings. An
-altnerative solution would be to enable ~evil-respect-visual-line-mode~ in
-=DOOMDIR/init.el=, but apparently there are problems with doing so. See this
-open issue in Doom Emacs: https://github.com/doomemacs/doomemacs/issues/2447
-
-A temporary workaround is to switch to Emacs state using =C-z= and then use
-=C-n= and =C-p= to navigate between visual lines. Once finished, use =C-z= again
-to exit Emacs state.
 
 ** file-templates [2/2]
 #+begin_quote
