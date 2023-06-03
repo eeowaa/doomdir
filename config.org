@@ -717,22 +717,35 @@ Miscellaneous configuration without a corresponding module.
 (package! vdiff-magit)
 #+end_src
 
-*** DONE [#B] Dedicate windows :feat:
+*** DONE [#B] Create and bind window dedication functions :feat:
 #+begin_src emacs-lisp :tangle yes
-(defun my/toggle-window-dedicated ()
-  "Control whether or not Emacs is allowed to display another
-buffer in current window."
+(defun my/dedicate-window-temporarily ()
+  "Dedicate the selected window until `display-buffer' is called again."
   (interactive)
-  (message
-   (if (let (window (get-buffer-window (current-buffer)))
-         (set-window-dedicated-p window (not (window-dedicated-p window))))
-       "%s: Can't touch this!"
-     "%s is up for grabs.")
-   (current-buffer)))
+  (if-let ((window (selected-window))
+           (dedicated (window-dedicated-p window)))
+      (message "Window is already dedicated with flag `%s'" dedicated)
+    (set-window-dedicated-p window 'until-next-display-buffer)
+    (eval (macroexpand-1
+           `(add-transient-hook! #'display-buffer :after
+              (when (eq (window-dedicated-p ,window) 'until-next-display-buffer)
+                (set-window-dedicated-p ,window nil)))))
+    (message "Window is dedicated until the next `display-buffer'")))
+
+(defun my/toggle-window-dedicated ()
+  "Toggle the current window's `window-dedicated-p' flag.
+If the flag is already set, it is set to `nil', otherwise it is
+set to `t'. Use with caution in side windows and other windows
+with special dedication semantics."
+  (interactive)
+  (if (set-window-dedicated-p nil (not (window-dedicated-p)))
+      (prog1 t (message "Window is strongly dedicated"))
+    (prog1 nil (message "Window is no longer dedicated"))))
 
 (define-key! evil-window-map
   ;; replaces `+workspace/close-window-or-workspace'
-  "d" #'my/toggle-window-dedicated)
+  "d" #'my/dedicate-window-temporarily
+  "D" #'my/toggle-window-dedicated)
 #+end_src
 
 *** DONE [#C] Keep icons small by default :tweak:
