@@ -20,7 +20,7 @@
     ;; FIXME This (probably) now produces an error trace
     (throw 'exit `(,(concat
                      (file-name-as-directory
-                      (expand-file-name "bin" doom-private-dir))
+                      (expand-file-name "bin" doom-user-dir))
                      "doom-checkout-main")))))
 
 (after! doom-cli-env
