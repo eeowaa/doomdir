@@ -1,4 +1,5 @@
 #!/bin/sh
+## Like straight-freeze-versions, but in Doom's packages.el format
 lockfile=`git rev-parse --show-toplevel`/packages.lock
 [ -d "$DOOMDIR" ] || {
     [ -d "$XDG_CONFIG_HOME" ] || XDG_CONFIG_HOME=$HOME/.config
@@ -8,8 +9,8 @@ lockfile=`git rev-parse --show-toplevel`/packages.lock
     echo >&2 "Directory does not exist: $DOOMDIR/.local/straight/repos"
     exit 1
 }
+doom version | sed -n '1,3s/^/;; /p' >"$lockfile"
 cd "$DOOMDIR/.local/straight/repos"
 for repo in *; do
-    printf '\n ("%s" . "%s")' "$repo" "`git -C $repo rev-parse HEAD`"
-done | sed -e '1d' -e '2s/^ /(/' -e '$s/$/)/' >"$lockfile"
-echo >>"$lockfile"
+    printf '(package! %s :pin "%s")\n' "$repo" "`git -C $repo rev-parse HEAD`"
+done >>"$lockfile"
