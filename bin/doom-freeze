@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 ## Like straight-freeze-versions, but in Doom's packages.el format
 lockfile=`git rev-parse --show-toplevel`/packages.lock
 [ -d "$DOOMDIR" ] || {

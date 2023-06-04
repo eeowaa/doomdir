@@ -1,2 +1,5 @@
 # Local modifications
 /custom.el
+
+# Backup files
+*~

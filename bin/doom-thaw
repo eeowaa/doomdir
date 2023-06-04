@@ -1,0 +1,14 @@
+#!/bin/sh -e
+## Like straight-thaw-versions, but in Doom's packages.el format
+toplevel=`git rev-parse --show-toplevel`
+lockfile=$toplevel/packages.lock
+packages=$toplevel/packages.el
+savefile=$toplevel/packages.el~
+[ -f "$savefile" ] || {
+    mv "$packages" "$savefile"
+    cp "$lockfile" "$packages"
+    chmod a-w "$packages"
+}
+doom sync
+rm -f "$packages"
+mv "$savefile" "$packages"
