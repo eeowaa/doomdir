@@ -147,7 +147,7 @@ means that the executable could be installed anywhere).
 ** Trouble with tangling source blocks from =config.org=
 Are you having trouble tangling [[file:config.org][config.org]] via =C-c C-v C-t=
 (~org-babel-tangle~)? Have you recently updated Doom Emacs using ~doom upgrade~?
-Why don't you try =M-x pdf-tools-install= and try again? 😃
+If so, try running =M-x pdf-tools-install= before tangling =config.org= again.
 
 ** =doom doctor= reports stale =.elc= files
 If you see ~<package>/<file>.elc is out-of-date~ messages in the output of =doom

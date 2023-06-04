@@ -1,4 +1,5 @@
 ;;; cli-help.el -*- lexical-binding: t; -*-
+;; TODO: Configure for doom
 ;; TODO: Configure for openssl (including with no arguments)
 ;; TODO: Map command line regexps instead of program names (see top-level openssl, git)
 ;; TODO: Remove help flag from `cli-help--command-line'
