@@ -10,8 +10,6 @@ lockfile=`git rev-parse --show-toplevel`/packages.lock
 }
 cd "$DOOMDIR/.local/straight/repos"
 for repo in *; do
-    cd "$repo"
-    printf '\n ("%s" . "%s")' "$repo" "`git rev-parse HEAD`"
-    cd ..
+    printf '\n ("%s" . "%s")' "$repo" "`git -C $repo rev-parse HEAD`"
 done | sed -e '1d' -e '2s/^ /(/' -e '$s/$/)/' >"$lockfile"
 echo >>"$lockfile"
