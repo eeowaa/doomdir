@@ -3,9 +3,11 @@
 (require 'cli-help)
 
 (require 'eeowaa-common)
-;; (require 'eeowaa-debug) NOTE: This is providing nothing of value right now
-(require 'eeowaa-project)
 (require 'eeowaa-refresh)
+
+;; NOTE: These are providing nothing of value right now
+;; (require 'eeowaa-debug)
+;; (require 'eeowaa-project)
 
 (when initial-window-system
   (require 'transient-childframe)
