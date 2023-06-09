@@ -1,10 +1,15 @@
 ;;; cli-help.el -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
 ;; TODO: Configure for doom
 ;; TODO: Configure for openssl (including with no arguments)
 ;; TODO: Map command line regexps instead of program names (see top-level openssl, git)
 ;; TODO: Remove help flag from `cli-help--command-line'
 ;; TODO: Remove or colorize ANSI escape codes (see docker)
 ;; TODO: Add an alist for special modes (e.g. `man-mode' for git subcommands)
+
+;;; Code:
 
 (require 'subr-x)
 

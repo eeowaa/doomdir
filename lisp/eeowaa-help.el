@@ -1,4 +1,8 @@
 ;;; eeowaa-help.el -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; Code:
+
+(require 'doom-lib)
 
 (defun eeowaa-alternate-keys (key &optional insert)
   "Print message listing equivalent alternate key sequences for KEY.

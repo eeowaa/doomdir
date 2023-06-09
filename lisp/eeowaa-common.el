@@ -1,4 +1,6 @@
 ;;; eeowaa-common.el -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; Code:
 
 ;;
 ;;; User interaction
@@ -49,8 +51,12 @@ PROMPT defaults to \"Positive integer: \""
 ;;
 ;;; Networking
 
+(defvar dns-servers)
+(defvar dns-timeout)
+
 (defvar eeowaa-onlinep-dns-server "8.8.8.8") ;; Google DNS
 (defvar eeowaa-onlinep-timeout 0.1)
+
 (defun eeowaa-onlinep ()
   "Return non-nil if a public internet connection is available.
 To make this determination, this function queries an external DNS

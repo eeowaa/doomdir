@@ -1,4 +1,6 @@
 ;;; eeowaa-refresh.el -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; Code:
 
 (defvar-local eeowaa-refresh-force nil
   "Non-nil means to always call `revert-buffer' in `eeowaa-refresh-buffer'.")

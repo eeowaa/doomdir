@@ -1,4 +1,8 @@
 ;;; transient-childframe.el -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; Code:
+
+(require 'doom-lib)
 
 
 ;;; Transient
@@ -208,8 +212,7 @@ floating point values between 0.0 and 1.0, they are assigned to
 additional entries `left-ratio' and `top-ratio', to be used by
 advice to reposition the frame appropriately. This is required
 because Emacs converts `left' and `top' to integers after
-creating a frame.
-"
+creating a frame."
   (let* ((parameters (append my/transient-childframe-parameters
                              my/transient-childframe-default-parameters))
          (left (alist-get 'left parameters))

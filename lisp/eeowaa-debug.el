@@ -1,4 +1,8 @@
 ;;; eeowaa-debug.el -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; Code:
+
+(require 'cl-lib)
 
 ;;
 ;;; Watchpoints
@@ -8,10 +12,11 @@
 This variable should not be modified directly. For that, use
 `eeowaa-watchpoint-set' and `eeowaa-watchpoint-unset'.")
 
-(defun eeowaa-watchpoint--break (symbol newval operation where)
-  "Start the debugger when SYMBOL is about to be modified.
-See the help text for `add-variable-watcher' for an explanation
-of function arguments."
+(defun eeowaa-watchpoint--break (&rest _)
+  "Variable watch function to start the debugger.
+Assign this function to the WATCH-FUNCTION argument of
+`add-variable-watcher' to unconditionally start the debugger
+when a SYMBOL is about to be modified."
   (debug))
 
 (defun eeowaa-watchpoint-set (symbol)

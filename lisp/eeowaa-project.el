@@ -1,4 +1,6 @@
 ;;; eeowaa-project.el -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; Code:
 
 ;;
 ;;; Project configuration
@@ -43,10 +45,19 @@
 The `car' of each cell is a string containing a file path relative to the
 project root.
 
-The `cdr' is a string containing a path to a file whose contents should be
-copied. The file path should be absolute. You may specify `nil' instead of a
-file path to create an empty file."
-  :group 'eeowaa-project-init)
+The `cdr' is a string containing a path to a file whose contents
+should be copied. The file path should be absolute. You may
+specify nil instead of a file path to create an empty file."
+  :group 'eeowaa-project-init
+  :type '(alist :key-type string :value-type file))
+
+(defvar +workspaces-switch-project-function)
+(defvar +workspaces-on-switch-project-behavior)
+(declare-function magit-init "magit-status" (directory))
+(declare-function magit-status "magit-status" (&optional directory cache))
+(declare-function projectile-ignored-project-p "projectile" (project-root))
+(declare-function projectile-add-known-project "projectile" (project-root))
+(declare-function projectile-switch-project-by-name "projectile" (project-to-switch &optional arg))
 
 (defun eeowaa-project-init (directory)
   "Create and open a new project.
@@ -60,8 +71,7 @@ This function performs the following steps:
 2. Populate the directory according to `eeowaa-project-init-files-alist'.
 3. Register and open the project using the project management framework
    specified in `eeowaa-project-framework'.
-4. Initialize the VCS with respect to `eeowaa-project-vcs'.
-"
+4. Initialize the VCS with respect to `eeowaa-project-vcs'."
   (interactive (list (read-directory-name
                       "Project directory: "
                       (if current-prefix-arg
