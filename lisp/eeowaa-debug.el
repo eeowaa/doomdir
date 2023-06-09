@@ -22,13 +22,13 @@ when a SYMBOL is about to be modified."
 (defun eeowaa-watchpoint-set (symbol)
   "Set a watchpoint for SYMBOL."
   (interactive
-   `(,(completing-read "Symbol: "
-                       obarray
-                       ;; Ripped from `counsel--variable-p'
-                       (lambda (s)
-                         (or (and (boundp s)
-                                  (not (keywordp s)))
-                             (get s 'variable-documentation))))))
+   `(,(intern
+       (completing-read "Symbol: " obarray
+                        ;; Ripped from `counsel--variable-p'
+                        (lambda (s)
+                          (or (and (boundp s)
+                                   (not (keywordp s)))
+                              (get s 'variable-documentation)))))))
   (add-variable-watcher symbol #'eeowaa-watchpoint--break)
   (cl-pushnew symbol eeowaa-watchpoint--symbols)
   (message (format "Added watchpoint for `%s'" symbol)))
