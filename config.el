@@ -2,6 +2,7 @@
 
 (require 'cli-help)
 
+(require 'eeowaa-common)
 ;; (require 'eeowaa-debug) NOTE: This is providing nothing of value right now
 (require 'eeowaa-project)
 (require 'eeowaa-refresh)
@@ -27,39 +28,6 @@ Examples:
        ,@(mapcan (lambda (key) (list key nil))
                  (doom-plist-keys (face-attr-construct face)))
        :inherit ,other-face)))
-
-(defun my/parse-raw-prefix (arg)
-  "Parse raw prefix argument ARG passed to the parent function.
-Returns a list of (TYPE VALUE), where TYPE is a symbol and VALUE
-is an integer. Possible forms include:
-
-  (none 1)
-      No prefix argument was supplied.
-
-  (universal VALUE)
-      `C-u' was typed one or more times, without a following numeric value.
-      Evaluate `(log VALUE 4)' to determine how many times `C-u' was typed.
-
-  (negative -1)
-      `M--' or `C-u -' was typed, without following digits.
-
-  (numeric VALUE)
-      `C-u VALUE' or `M-VALUE' was typed, where VALUE is an integer.
-
-Example usage:
-
-  (defun my/test-function (arg)
-    (interactive \"P\") ;; raw prefix argument
-    (cl-destructuring-bind (type value) (my/parse-raw-prefix arg)
-      (message \"%s: %d\" type value)))
-
-See also: `(elisp) Prefix Command Arguments'."
-  (cond
-   ((null arg) (list 'none 1))
-   ((listp arg) (list 'universal (car arg)))
-   ((eq '- arg) (list 'negative -1))
-   ((integerp arg) (list 'numeric arg))
-   (t (error "Unrecognized prefix argument format: %s" arg))))
 
 (setq default-input-method "latin-postfix")
 
@@ -298,17 +266,6 @@ with special dedication semantics."
                   :variable-pitch "Comic Neue"
                   :default-size 24)))
 
-;; Helper function to read a positive integer from the minibuffer
-(defun my/read-positive-int (&optional prompt default)
-  "Read a positive integer from the minibuffer.
-PROMPT defaults to \"Positive integer: \""
-  (let ((number (read-number (or prompt "Positive integer: ") default)))
-    (if (and (integerp number) (> number 0))
-        number
-      (message "Please enter a positive integer.")
-      (sit-for 1)
-      (my/read-positive-int prompt))))
-
 ;; Define a fuction to change the fonts
 (defun my/select-font (font &optional size)
   "Change the current fonts to a collection in `my/fonts'.
@@ -325,7 +282,7 @@ When called interactively, reload the fonts in the current session."
          (default-size (plist-get p :default-size)))
     (unless size
       (setq size (if (interactive-p)
-                     (my/read-positive-int "Font size: " default-size)
+                     (eeowaa-read-positive-int "Font size: " default-size)
                    default-size)))
     (setq doom-font                (funcall f font size)
           doom-variable-pitch-font (funcall f variable-pitch-font size)
@@ -1454,7 +1411,7 @@ Without positive numeric prefix, refontify the active region if
 there is one. Otherwise, refontify the entire accessible portion
 of the current buffer."
   (interactive "P")
-  (cl-destructuring-bind (type value) (my/parse-raw-prefix arg)
+  (cl-destructuring-bind (type value) (eeowaa-parse-raw-prefix arg)
     (cond
      ((or (eq type 'universal) (and (eq type 'numeric) (cl-plusp value)))
       (font-lock-fontify-block value))
@@ -2201,22 +2158,12 @@ if you want to send region to a REPL or terminal emulator."
                (+vertico-file-search :query query)
                t))))))
 
-(defvar my/onlinep-dns-server "8.8.8.8") ;; Google DNS
-(defvar my/onlinep-timeout 0.1)
-(defun my/onlinep ()
-  "Return non-nil if a public internet connection is available.
-To make this determination, this function queries an external DNS
-server for the hostname of its own IP address."
-  (let ((dns-servers (list my/onlinep-dns-server))
-        (dns-timeout my/onlinep-timeout))
-    (dns-query my/onlinep-dns-server nil nil t)))
-
 (defvar my/lookup-dictionary-prefer-offline nil)
 (defadvice! my/lookup-dictionary-prefer-online-a (fn &rest args)
   :around '(+lookup/dictionary-definition +lookup/synonyms)
   (let ((+lookup-dictionary-prefer-offline
          (or my/lookup-dictionary-prefer-offline
-             (not (my/onlinep)))))
+             (not (eeowaa-onlinep)))))
     (apply fn args)))
 
 (setq eldoc-echo-area-use-multiline-p nil
@@ -3913,36 +3860,13 @@ ALIGN should be a keyword :left or :right."
 (setq which-key-idle-delay 0.5
       which-key-idle-secondary-delay 0.1)
 
-(defun my/alternate-keys (key &optional insert)
-  "Print message listing equivalent alternate key sequences for KEY.
-KEY is a pair (SEQ . RAW-SEQ) of key sequences, where
-RAW-SEQ is the untranslated form of the key sequence SEQ.
-If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
-While reading KEY interactively, this command temporarily enables
-menu items or tool-bar buttons that are disabled to allow getting help
-on them."
-  (interactive
-   ;; Ignore mouse movement events because it's too easy to miss the
-   ;; message while moving the mouse.
-   (list (car (help--read-key-sequence 'no-mouse-movement)) current-prefix-arg))
-  (where-is (cadr (help--analyze-key (car key) (cdr key))) insert))
-
-(defun my/find-command (key)
-  "Find the definition of the command bound to KEY."
-  (interactive
-   (letf! (defadvice my/find-command-prompt-a (args)
-            :filter-args #'read-key-sequence
-            (cons "Find function bound to the following key, mouse click, or menu item: "
-                  (cdr args)))
-     (list (car (help--read-key-sequence 'no-mouse-movement)))))
-  (find-function (cadr (help--analyze-key (car key) (cdr key)))))
-
+(require 'eeowaa-help)
 (define-key! help-map
-  "C-f" #'find-function     ;; replaces `view-emacs-FAQ' b/c I rarely use it
-  "C-l" #'find-library      ;; replaces `describe-language-environment'
+  "C-f" #'find-function         ;; replaces `view-emacs-FAQ' b/c I rarely use it
+  "C-l" #'find-library          ;; replaces `describe-language-environment'
   "C-v" #'find-variable
-  "C-w" #'my/alternate-keys ;; replaces `describe-no-warranty' b/c I never use it
-  "C-c" #'my/find-command)  ;; replaces `describe-coding-system' b/c I never use it
+  "C-w" #'eeowaa-alternate-keys ;; replaces `describe-no-warranty' b/c I never use it
+  "C-c" #'eeowaa-find-command)  ;; replaces `describe-coding-system' b/c I never use it
 
 (remove-hook 'text-mode-hook #'display-line-numbers-mode)
 
