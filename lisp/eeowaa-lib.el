@@ -1,6 +1,18 @@
-;;; eeowaa-common.el --- Generic helper constructs -*- lexical-binding: t; -*-
+;;; eeowaa-lib.el --- eeowaa's standard elisp library -*- lexical-binding: t; -*-
+
 ;;; Commentary:
+
+;; This is my collection of elisp helper constructs. Use them in the development
+;; of other elisp libraries or in your personal Emacs config.
+
+;;; Todo:
+
+;; - Remove dependency on `doom-lib'
+;; - Add more functions for working with faces
+
 ;;; Code:
+
+(require 'doom-lib)
 
 
 ;;; User interaction
@@ -49,6 +61,21 @@ PROMPT defaults to \"Positive integer: \""
       (eeowaa-read-positive-int prompt))))
 
 
+;;; Faces
+
+(defmacro eeowaa-use-face (face other-face)
+  "Force FACE to be the same as OTHER-FACE.
+Examples:
+
+  (eeowaa-use-face tab-bar-tab +workspace-tab-selected-face)
+  (eeowaa-use-face tab-bar-tab-inactive +workspace-tab-face)"
+  `(custom-set-faces!
+     '(,face
+       ,@(mapcan (lambda (key) (list key nil))
+                 (doom-plist-keys (face-attr-construct face)))
+       :inherit ,other-face)))
+
+
 ;;; Networking
 
 (defvar dns-servers)
@@ -66,5 +93,5 @@ server for the hostname of its own IP address."
     (dns-query eeowaa-onlinep-dns-server nil nil t)))
 
 
-(provide 'eeowaa-common)
-;;; eeowaa-common.el ends here
+(provide 'eeowaa-lib)
+;;; eeowaa-lib.el ends here

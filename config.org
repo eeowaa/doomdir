@@ -276,11 +276,15 @@ for autoload cookies or byte-compilation.
 (add-load-path! (concat doom-user-dir "lisp"))
 #+end_src
 
+*** DONE [#A] Load libraries used by my config
+#+begin_src emacs-lisp :tangle yes
+(require 'eeowaa-lib)
+(require 'xdg)
+#+end_src
+
 *** DONE [#A] Load my own local packages
 #+begin_src emacs-lisp :tangle yes
 (require 'cli-help)
-
-(require 'eeowaa-common)
 (require 'eeowaa-refresh)
 
 ;; NOTE: These are providing nothing of value right now
@@ -293,27 +297,7 @@ for autoload cookies or byte-compilation.
     (after! magit
       ;; Revert Doom's configuration
       (setq transient-display-buffer-action
-            (my/transient-childframe--display-buffer-action)))))
-#+end_src
-
-*** DONE [#B] Load libraries used by my config
-#+begin_src emacs-lisp :tangle yes
-(require 'xdg)
-#+end_src
-
-*** DONE [#B] Define helper constructs
-#+begin_src emacs-lisp :tangle yes
-(defmacro my/doom-use-face (face other-face)
-  "Force FACE to be the same as OTHER-FACE.
-Examples:
-
-  (my/doom-use-face tab-bar-tab +workspace-tab-selected-face)
-  (my/doom-use-face tab-bar-tab-inactive +workspace-tab-face)"
-  `(custom-set-faces!
-     '(,face
-       ,@(mapcan (lambda (key) (list key nil))
-                 (doom-plist-keys (face-attr-construct face)))
-       :inherit ,other-face)))
+            (tc-transient-childframe--display-buffer-action)))))
 #+end_src
 
 * :input
@@ -752,7 +736,7 @@ with special dedication semantics."
 #+begin_src emacs-lisp :tangle yes
 (after! col-highlight
   (require 'hl-line)
-  (my/doom-use-face col-highlight hl-line))
+  (eeowaa-use-face col-highlight hl-line))
 #+end_src
 
 *** DONE [#C] Configure =info-colors= :tweak:module:
@@ -769,7 +753,7 @@ Taken from tecosaur's configuration.
 #+begin_src emacs-lisp :tangle yes
 (after! whitespace
   (require 'flycheck)
-  (my/doom-use-face whitespace-trailing flycheck-error))
+  (eeowaa-use-face whitespace-trailing flycheck-error))
 
 (defvar my/show-trailing-whitespace t)
 (defvar my/trailing-whitespace-mode-alist
@@ -1027,7 +1011,7 @@ advising ~balance-windows~ to respect side windows.
 formats, such as org-mode, markdown, and LaTeX.
 #+end_quote
 
-** doom [5/5]
+** doom [5/6]
 #+begin_quote
 This module gives Doom its signature look: powered by the =doom-one= theme
 (inspired by Atom's One Dark theme) and =solaire-mode=.
@@ -1126,7 +1110,7 @@ order for it to take effect.
       (ef-themes-with-colors
         (custom-set-faces
          `(tab-bar ((,c :background ,bg-inactive :foreground ,fg-intense)))))
-    (my/doom-use-face tab-bar mode-line-inactive)))
+    (eeowaa-use-face tab-bar mode-line-inactive)))
 #+end_src
 
 *** DONE [#C] Set the theme :tweak:
@@ -1236,6 +1220,12 @@ When called interactively, reload the fonts in the current session."
 ;; Set the font
 (my/select-font "Iosevka Comfy Fixed")
 #+end_src
+
+*** TODO [#C] Set the Unicode font :tweak:
+The annoyance I would like to get rid of is that some Unicode glyphs (e.g. the
+copyright symbol ©) are not fixed width. Doom provides ~doom-unicode-font~ to
+set the Unicode font. Use the following as a reference:
+https://stackoverflow.com/questions/1938639/monospace-unicode-font
 
 ** doom-dashboard [0/0] :ARCHIVE:
 #+begin_quote
@@ -4089,7 +4079,7 @@ at least two advantages:
 (define-key! help-map "y" #'my/copy-last-message)
 #+end_src
 
-*** STRT [#B] Configure the timeclock :feat:
+*** STRT [#B] Configure the timeclock :feat:module:
 Improvements:
 + [ ] Sort report output by time spent on projects
 + [ ] Allow categorization of projects (for reporting purposes)
@@ -4176,7 +4166,7 @@ This is automatically set when switching workspaces.")
            (timeclock-in nil my/timeclock--current-project)))))
 #+end_src
 
-*** STRT [#C] Make =C-w o= behave like Vim's ZoomWin package :feat:
+*** STRT [#C] Make =C-w o= behave like Vim's ZoomWin package :feat:module:
 This is almost done. Things left to do:
 
 + [ ] Do *not* restore [[info:elisp#Side Windows][side windows]] while "zooming out" if those side windows
@@ -5133,9 +5123,9 @@ errors should not be reported*.
 #+begin_src emacs-lisp :tangle yes
 (after! flycheck-posframe
   (flycheck-posframe-configure-pretty-defaults)
-  (my/doom-use-face flycheck-posframe-info-face flycheck-error-list-info)
-  (my/doom-use-face flycheck-posframe-warning-face flycheck-error-list-warning)
-  (my/doom-use-face flycheck-posframe-error-face flycheck-error-list-error))
+  (eeowaa-use-face flycheck-posframe-info-face flycheck-error-list-info)
+  (eeowaa-use-face flycheck-posframe-warning-face flycheck-error-list-warning)
+  (eeowaa-use-face flycheck-posframe-error-face flycheck-error-list-error))
 #+end_src
 
 *** DONE [#C] Raise error threshold for =flycheck= :tweak:
@@ -5435,13 +5425,16 @@ Small modules that give Emacs access to external tools & services.
 ;;; :tools
 #+end_src
 
-** Miscellany [1/4]
+** Miscellany [0/4]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-*** DONE [#C] Configure =eeowaa-project= package
-#+begin_src emacs-lisp :tangle yes
+*** LOOP [#C] Configure =eeowaa-project= package
+For now, I am not loading =eeowaa-project=. See the commentary in the library
+header block for more information.
+
+#+begin_src emacs-lisp :tangle no
 (setq eeowaa-project-init-files-alist
       '(;; Git
         (".gitignore")
@@ -5457,8 +5450,8 @@ Miscellaneous configuration without a corresponding module.
         (".editorconfig")))
 #+end_src
 
-*** TODO [#C] Add templates for each file in =eeowaa-project= :feat:
-*** TODO [#C] Add support to =eeowaa-project= for language-specific files :feat:
+*** LOOP [#C] Add templates for each file in =eeowaa-project= :feat:
+*** LOOP [#C] Add support to =eeowaa-project= for language-specific files :feat:
 + =.gitignore= (steal from https://github.com/github/gitignore.git)
 + Packaging (e.g. =package.json=, =Dockerfile=)
 + Execution (e.g. =package.json=, =docker-compose.yml=)
@@ -5469,7 +5462,7 @@ Could add templates under =stow-dotfiles/<lang>/.local/etc/skel/= (this is what
 I'm currently doing with Python). I could also create subdirectories under
 =skel/= specific to certain project types.
 
-*** TODO [#C] Add support to =eeowaa-project= for environment-specific files :feat:
+*** LOOP [#C] Add support to =eeowaa-project= for environment-specific files :feat:
 + CI/CD (e.g. steal from https://github.com/Microsoft/azure-pipelines-yaml)
 + PR templates (e.g. =.azuredevops/pull_request_template.md=)
 
@@ -8646,6 +8639,9 @@ block at point is a pre block (as opposed to a code block)."
 #+end_src
 
 *** STRT [#B] Implement folding of code and pre blocks :feat:
+:PROPERTIES:
+:issue:    https://github.com/jrblevin/markdown-mode/issues/597
+:END:
 - [X] GFM blocks
 - [ ] Tilde blocks
 - [ ] Pre blocks
@@ -8758,6 +8754,11 @@ Once finished, remove the symlink of =slides.html= from the =reveal.js=
 directory. *NOTE*: This entire process is wrapped by the ~revealjs~ script
 generated in the literate prerequisite installation section.
 
+*** TODO [#A] Fix font-lock in Markdown buffers :bug:
+If GFM code blocks get too long, font lock no longer works. Additionally, when
+lines begin with hash symbols, font lock gets really confused. This is a major
+nuisance.
+
 *** LOOP [#B] Disable error reporting in markdown-mode buffers :tweak:
 :LOGBOOK:
 - Note taken on [2023-02-16 Thu 14:58] \\
@@ -8783,13 +8784,13 @@ Reference: [[*Disable error reporting in sh-mode buffers][Disable error reportin
   lsp-diagnostics-provider :none)
 #+end_src
 
-*** TODO [#B] Improve Markdown readability :tweak:
-:LOGBOOK:
-- Note taken on [2023-02-16 Thu 13:25] \\
-  This causes image-mode to break (it will not display images). You should make
-  an effort to replace =font-lock= hiding with native =markdown-mode= hiding.
-:END:
-+ https://emacs.stackexchange.com/questions/3753/prettify-symbols-mode-character-replacement-regex
+*** TODO [#B] Transform character sequences in Markdown buffers :tweak:
+*UPDATE*: My original solution causes =image-mode= to break (it will not display
+images). You should make an effort to replace =font-lock= hiding with native
+=markdown-mode= hiding or Doom's =:ui ligatures= module. References:
+
+- ~markdown-toggle-markup-hiding~
+- =~/.config/emacs/modules/ui/ligatures/README.org=
 
 | Before      | After |
 |-------------+-------|
@@ -8797,10 +8798,11 @@ Reference: [[*Disable error reporting in sh-mode buffers][Disable error reportin
 | \\(         | (     |
 | \\)         | )     |
 | \\-         | -     |
-| &copy       | ©    |
+| &copy       | ©     |
 | <a.*>.*</a> |       |
 
 #+begin_src emacs-lisp :tangle no
+;; https://emacs.stackexchange.com/questions/3753/prettify-symbols-mode-character-replacement-regex
 (pushnew! font-lock-extra-managed-props 'display)
 (font-lock-add-keywords
  'markdown-mode
@@ -8837,10 +8839,6 @@ yet opening an image file from the command line.
 
 *** TODO [#B] Live-preview Markdown buffers in an external browser :tweak:
 Live preview still happens in =eww= buffers.
-
-*** TODO [#C] Replace =font-lock= hiding with native =markdown-mode= hiding :tweak:
-+ Open link: [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::defun markdown-toggle-markup-hiding (&optional arg][markdown-toggle-markup-hiding]]
-+ Open link: [[file:~/.config/emacs/.local/straight/repos/markdown-mode/markdown-mode.el::;;; Markup Hiding =============================================================][Markup Hiding]]
 
 ** nim [0/0] :ARCHIVE:
 #+begin_quote

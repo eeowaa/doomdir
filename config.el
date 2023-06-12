@@ -1,8 +1,9 @@
 (add-load-path! (concat doom-user-dir "lisp"))
 
-(require 'cli-help)
+(require 'eeowaa-lib)
+(require 'xdg)
 
-(require 'eeowaa-common)
+(require 'cli-help)
 (require 'eeowaa-refresh)
 
 ;; NOTE: These are providing nothing of value right now
@@ -15,21 +16,7 @@
     (after! magit
       ;; Revert Doom's configuration
       (setq transient-display-buffer-action
-            (my/transient-childframe--display-buffer-action)))))
-
-(require 'xdg)
-
-(defmacro my/doom-use-face (face other-face)
-  "Force FACE to be the same as OTHER-FACE.
-Examples:
-
-  (my/doom-use-face tab-bar-tab +workspace-tab-selected-face)
-  (my/doom-use-face tab-bar-tab-inactive +workspace-tab-face)"
-  `(custom-set-faces!
-     '(,face
-       ,@(mapcan (lambda (key) (list key nil))
-                 (doom-plist-keys (face-attr-construct face)))
-       :inherit ,other-face)))
+            (tc-transient-childframe--display-buffer-action)))))
 
 (setq default-input-method "latin-postfix")
 
@@ -122,7 +109,7 @@ with special dedication semantics."
 
 (after! col-highlight
   (require 'hl-line)
-  (my/doom-use-face col-highlight hl-line))
+  (eeowaa-use-face col-highlight hl-line))
 
 (use-package! info-colors
   :commands (info-colors-fontify-node))
@@ -131,7 +118,7 @@ with special dedication semantics."
 
 (after! whitespace
   (require 'flycheck)
-  (my/doom-use-face whitespace-trailing flycheck-error))
+  (eeowaa-use-face whitespace-trailing flycheck-error))
 
 (defvar my/show-trailing-whitespace t)
 (defvar my/trailing-whitespace-mode-alist
@@ -239,7 +226,7 @@ with special dedication semantics."
       (ef-themes-with-colors
         (custom-set-faces
          `(tab-bar ((,c :background ,bg-inactive :foreground ,fg-intense)))))
-    (my/doom-use-face tab-bar mode-line-inactive)))
+    (eeowaa-use-face tab-bar mode-line-inactive)))
 
 (setq doom-theme
       (if initial-window-system
@@ -1800,9 +1787,9 @@ which causes problems even if there is no existing buffer."
 
 (after! flycheck-posframe
   (flycheck-posframe-configure-pretty-defaults)
-  (my/doom-use-face flycheck-posframe-info-face flycheck-error-list-info)
-  (my/doom-use-face flycheck-posframe-warning-face flycheck-error-list-warning)
-  (my/doom-use-face flycheck-posframe-error-face flycheck-error-list-error))
+  (eeowaa-use-face flycheck-posframe-info-face flycheck-error-list-info)
+  (eeowaa-use-face flycheck-posframe-warning-face flycheck-error-list-warning)
+  (eeowaa-use-face flycheck-posframe-error-face flycheck-error-list-error))
 
 (after! flycheck
   (setq flycheck-checker-error-threshold 500))
@@ -1891,20 +1878,6 @@ which causes problems even if there is no existing buffer."
                 latex-mode-hook
                 LaTeX-mode-hook)
   #'writegood-mode)
-
-(setq eeowaa-project-init-files-alist
-      '(;; Git
-        (".gitignore")
-        (".gitattributes")
-
-        ;; Documentation
-        ("README.md")
-        ("LICENSE")
-        ("todo.org")
-
-        ;; Dev tooling
-        (".envrc")
-        (".editorconfig")))
 
 (map! :leader
       (:prefix-map ("o" . "open")
