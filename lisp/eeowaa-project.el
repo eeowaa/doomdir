@@ -1,8 +1,39 @@
-;;; eeowaa-project.el -*- lexical-binding: t; -*-
+;;; eeowaa-project.el --- Project management facilities -*- lexical-binding: t; -*-
+
 ;;; Commentary:
+
+;; This library attempts to fill in the gaps left by `projectile' and Doom Emacs
+;; (specifically `doom-projects' and lib/projects.el). I originally created it
+;; to address the fact that while many facilities exist to manage and navigate
+;; existing projects, nothing that I had available to me allowed me to easily
+;; create a new project. See the `eeowaa-project-init' command for how I solved
+;; that problem.
+
+;; Going forward, I am not convinced that this is the best solution. For one,
+;; this library does not provide boilerplate templates for different kinds or
+;; projects or integrate well with them. See the `skeletor' package for that.
+;; Second, I would rather declare project templates in an editor-agnostic
+;; fashion under ~/.local/share ($XDG_DATA_HOME) or ~/.local/etc. `skeletor'
+;; should be able to integrate with such templates and be configured with the
+;; magic defined in this library.
+
+;;; Todo:
+
+;; - Experiment with `skeletor' and editor-agnostic project templates
+;; - If all goes well, configure `skeletor' with the magic in this library
+
 ;;; Code:
 
-;;
+(defvar +workspaces-switch-project-function)
+(defvar +workspaces-on-switch-project-behavior)
+
+(declare-function magit-init "magit-status" (directory))
+(declare-function magit-status "magit-status" (&optional directory cache))
+(declare-function projectile-ignored-project-p "projectile" (project-root))
+(declare-function projectile-add-known-project "projectile" (project-root))
+(declare-function projectile-switch-project-by-name "projectile" (project-to-switch &optional arg))
+
+
 ;;; Project configuration
 
 (defgroup eeowaa-project nil
@@ -32,7 +63,7 @@
   :type '(choice (const treemacs)
                  (const nil)))
 
-;;
+
 ;;; Project initialization
 
 (defgroup eeowaa-project-init nil
@@ -50,14 +81,6 @@ should be copied. The file path should be absolute. You may
 specify nil instead of a file path to create an empty file."
   :group 'eeowaa-project-init
   :type '(alist :key-type string :value-type file))
-
-(defvar +workspaces-switch-project-function)
-(defvar +workspaces-on-switch-project-behavior)
-(declare-function magit-init "magit-status" (directory))
-(declare-function magit-status "magit-status" (&optional directory cache))
-(declare-function projectile-ignored-project-p "projectile" (project-root))
-(declare-function projectile-add-known-project "projectile" (project-root))
-(declare-function projectile-switch-project-by-name "projectile" (project-to-switch &optional arg))
 
 (defun eeowaa-project-init (directory)
   "Create and open a new project.
@@ -130,7 +153,7 @@ This function performs the following steps:
     ;;                    eeowaa-project-browser))))
     ))
 
-;;
+
 ;;; Project diagnostics
 
 ;; TODO: Implement this section
@@ -162,5 +185,6 @@ This function performs the following steps:
 ;;         ;; TODO: Store results in a compilation buffer
 ;;         (projectile-run-command-in-root check)))))
 
+
 (provide 'eeowaa-project)
 ;;; eeowaa-project.el ends here

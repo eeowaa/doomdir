@@ -1,8 +1,21 @@
-;;; eeowaa-help.el -*- lexical-binding: t; -*-
+;;; eeowaa-help.el --- Enhanced Emacs introspection -*- lexical-binding: t; -*-
+
 ;;; Commentary:
+
+;; Emacs is famous for its self-documentation and introspective capabilities.
+;; However, a few improvements can make it even better.
+
+;;; Todo:
+
+;; - Remove dependency on `doom-lib'
+;; - Add keybindings from private config
+
 ;;; Code:
 
 (require 'doom-lib)
+
+
+;;; Commands
 
 (defun eeowaa-alternate-keys (key &optional insert)
   "Print message listing equivalent alternate key sequences for KEY.
@@ -28,5 +41,6 @@ on them."
      (list (car (help--read-key-sequence 'no-mouse-movement)))))
   (find-function (cadr (help--analyze-key (car key) (cdr key)))))
 
+
 (provide 'eeowaa-help)
 ;;; eeowaa-help.el ends here

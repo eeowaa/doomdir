@@ -1,10 +1,23 @@
-;;; eeowaa-debug.el -*- lexical-binding: t; -*-
+;;; eeowaa-debug.el --- Elisp debugging facilities -*- lexical-binding: t; -*-
+
 ;;; Commentary:
+
+;; Emacs has many built-in facilities for debugging elisp, but it comes without
+;; a domain-specific user interface that exposes all of the functionality in a
+;; unified fashion. This library seeks to fill that gap.
+
+;;; Todo:
+
+;; - Migrate `hydra-debug' from my private config
+;; - Remove redundant watchpoint functionality
+;; - Create helper functions to work with `edebug'
+;; - Expand this library to include `dap-mode' functionality
+
 ;;; Code:
 
 (require 'cl-lib)
 
-;;
+
 ;;; Watchpoints
 
 (defvar eeowaa-watchpoint--symbols nil
@@ -53,10 +66,6 @@ when a SYMBOL is about to be modified."
   (interactive)
   (princ eeowaa-watchpoint--symbols))
 
-;;
-;;; Edebug
-
-;; TODO: Create helper functions to work with edebug
-
+
 (provide 'eeowaa-debug)
 ;;; eeowaa-debug.el ends here

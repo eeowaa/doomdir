@@ -1,5 +1,40 @@
-;;; eeowaa-refresh.el -*- lexical-binding: t; -*-
+;;; eeowaa-refresh.el --- Refresh buffers and the display -*- lexical-binding: t; -*-
+
 ;;; Commentary:
+
+;; Sometimes, all you want to do is refresh the contents of the current buffer
+;; and update all display elements to match the current state of Emacs. This
+;; library provides the `eeowaa-refresh-buffer-and-display' command to do that.
+
+;; `eeowaa-refresh-buffer-and-display' works by calling `eeowaa-refresh-buffer',
+;; which calls `revert-buffer' for non-file buffers, so long as the buffer-local
+;; `revert-buffer-function' is set to a function. It then calls
+;; `eeowaa-refresh-display' unconditionally, which updates display elements
+;; outside of the buffer to represent the current state of Emacs.
+
+;; The aforementioned implementation of `eeowaa-refresh-buffer-and-display'
+;; allows it to be assigned to a global keybinding and used fairly mindlessly in
+;; the event of any display problem, without the risk of inadvertently reverting
+;; an unsaved buffer to older file content on disk. The `eeowaa-refresh-force'
+;; buffer-local variable can be used to override this behavior.
+
+;; Note that the usefulness of this library relies heavily on user
+;; configuration. Specifically, major modes for non-file buffers that do not set
+;; a buffer-local `revert-buffer-function' should have their mode hooks
+;; configured to do so (as appropriate, and sometimes largely to taste).
+
+;; Finally, if you are using this library to work around bugs in other packages,
+;; strongly consider the negative implications of doing so. Bugs that do not
+;; get attention do not get fixed. That said, part of the reason I wrote this
+;; package was to buy me some time in fixing bugs in another package of mine...
+;; Some of those bugs are still unsquashed :/
+
+;;; Todo:
+
+;; - Import obvious major-mode hook modifications from my private config
+;; - Remove references to `vimish-tab' before publishing, unless it is already
+;;   on MELPA by then
+
 ;;; Code:
 
 (defvar-local eeowaa-refresh-force nil
@@ -34,5 +69,6 @@ BUFFER-OR-NAME defaults to the current buffer."
     (eeowaa-refresh-buffer buffer-or-name))
   (eeowaa-refresh-display))
 
+
 (provide 'eeowaa-refresh)
 ;;; eeowaa-refresh.el ends here

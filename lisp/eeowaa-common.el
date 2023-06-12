@@ -1,8 +1,8 @@
-;;; eeowaa-common.el -*- lexical-binding: t; -*-
+;;; eeowaa-common.el --- Generic helper constructs -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;;; Code:
 
-;;
+
 ;;; User interaction
 
 (defun eeowaa-parse-raw-prefix (arg)
@@ -48,7 +48,7 @@ PROMPT defaults to \"Positive integer: \""
       (sit-for 1)
       (eeowaa-read-positive-int prompt))))
 
-;;
+
 ;;; Networking
 
 (defvar dns-servers)
@@ -65,5 +65,6 @@ server for the hostname of its own IP address."
         (dns-timeout eeowaa-onlinep-timeout))
     (dns-query eeowaa-onlinep-dns-server nil nil t)))
 
+
 (provide 'eeowaa-common)
 ;;; eeowaa-common.el ends here

@@ -1,13 +1,20 @@
-;;; cli-help.el -*- lexical-binding: t; -*-
+;;; cli-help.el --- Display CLI help text for commands -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 
-;; TODO: Configure for doom
-;; TODO: Configure for openssl (including with no arguments)
-;; TODO: Map command line regexps instead of program names (see top-level openssl, git)
-;; TODO: Remove help flag from `cli-help--command-line'
-;; TODO: Remove or colorize ANSI escape codes (see docker)
-;; TODO: Add an alist for special modes (e.g. `man-mode' for git subcommands)
+;; This library provides interactive utilities for displaying --help text of
+;; command line tools. Fontification, outlining, and navigation to/from
+;; sub-commands is currently supported. The default settings should produce at
+;; least halfway-decent results for the help text of most commands.
+
+;;; Todo:
+
+;; - Configure for doom
+;; - Configure for openssl (including with no arguments)
+;; - Map command line regexps instead of program names (see top-level openssl, git)
+;; - Remove help flag from `cli-help--command-line'
+;; - Remove or colorize ANSI escape codes (see docker)
+;; - Add an alist for special modes (e.g. `man-mode' for git subcommands)
 
 ;;; Code:
 
