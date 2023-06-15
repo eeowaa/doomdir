@@ -4698,8 +4698,8 @@ This function works even if the current window is a side window."
 *** DONE [#C] Use =C-s= as the ~evil-window-map~ leader key in Evil insert state :tweak:
 #+begin_src emacs-lisp :tangle yes
 (after! evil-collection-vterm
-  (map! :map vterm-mode-map
-        :i "C-s" evil-window-map))
+  (evil-collection-define-key 'insert 'vterm-mode-map
+    (kbd "C-s") 'evil-window-map))
 #+end_src
 
 *** DONE [#C] Configure revert-buffer :tweak:module:

@@ -1614,8 +1614,8 @@ This function works even if the current window is a side window."
         :i "C-x C-e" #'my/vterm-edit-indirect))
 
 (after! evil-collection-vterm
-  (map! :map vterm-mode-map
-        :i "C-s" evil-window-map))
+  (evil-collection-define-key 'insert 'vterm-mode-map
+    (kbd "C-s") 'evil-window-map))
 
 (after! vterm
   (setq-hook! 'vterm-mode-hook
