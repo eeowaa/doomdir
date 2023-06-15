@@ -42,31 +42,9 @@ module declarations in the ~doom!~ block, which is contained in =DOOMDIR=
 itself.
 
 ** Plugins
-In addition to all the packages installed by enabled modules in [[file:init.el][init.el]], the
-following packages are installed via ~package!~ forms in [[file:packages.el][packages.el]]:
-
-+ UI
-  + [[https://www.emacswiki.org/emacs/download/col-highlight.el][col-highlight]]
-  + [[https://github.com/purcell/page-break-lines][page-break-lines]]
-  + [[https://github.com/bmag/imenu-list][imenu-list]]
-+ Languages
-  + [[https://elpa.gnu.org/packages/sed-mode.html][sed-mode]]
-  + [[https://github.com/john2x/jenkinsfile-mode][jenkinsfile-mode]]
-  + [[https://github.com/ljos/jq-mode][jq-mode]]
-  + [[https://github.com/emacsorphanage/applescript-mode][applescript-mode]] (=:os macos=)
-  + [[http://github.com/stig/ob-applescript.el][ob-applescript]] (=:os macos=)
-+ Documentation
-  + [[https://depp.brause.cc/nov.el][nov]]
-  + [[https://github.com/sensorflo/adoc-mode/wiki][adoc-mode]]
-+ Kubernetes
-  + [[https://github.com/TxGVNN/emacs-k8s-mode][k8s-mode]]
-  + [[https://github.com/r0bobo/kubedoc.el/][kubedoc]]
-  + [[https://github.com/abrochard/kubel][kubel]]
-  + [[https://github.com/abrochard/kubel][kubel-evil]]
-+ Music
-  + [[https://github.com/Lautaro-Garcia/counsel-spotify][counsel-spotify]]
-+ Weather
-  + [[https://github.com/thomp/noaa][noaa]]
+In addition to all the packages installed by enabled modules in [[file:init.el][init.el]]
+(including custom modules in the [[file:modules][modules/]] directory), additional packages are
+installed via ~package!~ forms in [[file:packages.el][packages.el]].
 
 ** Hacks
 + Overridden function definitions via ~:override~ advice in [[file:config.el][config.el]].

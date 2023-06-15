@@ -92,13 +92,13 @@ the command buffer. Also use `quit-window' instead of `delete-window'."
 Org has a scorched-earth window management policy I'm not fond of. i.e. it
 kills all other windows just so it can monopolize the frame. No thanks. We can
 do better."
-    :around #'org-add-log-note
-    :around #'org-capture-place-template
-    :around #'org-export--dispatch-ui
-    :around #'org-agenda-get-restriction-and-command
-    :around #'org-goto-location
-    :around #'org-fast-tag-selection
-    :around #'org-fast-todo-selection
+    :around '(org-add-log-note
+              org-capture-place-template
+              org-export--dispatch-ui
+              org-agenda-get-restriction-and-command
+              org-goto-location
+              org-fast-tag-selection
+              org-fast-todo-selection)
     (letf! ((#'delete-other-windows #'ignore)
             (#'delete-window        #'ignore))
       (apply fn args)))
@@ -108,8 +108,8 @@ do better."
 Hides the mode-line in *Org tags* buffer so you can actually see its
 content and displays it in a side window without deleting all other windows.
 Ugh, such an ugly hack."
-      :around #'org-fast-tag-selection
-      :around #'org-fast-todo-selection
+      :around '(org-fast-tag-selection
+                org-fast-todo-selection)
       (letf! ((defun read-char-exclusive (&rest args)
                 (message nil)
                 (apply read-char-exclusive args))
@@ -142,7 +142,8 @@ If you switch workspaces or the src window is recreated..."
 ;; Use `display-buffer' to show diffs instead of splitting a window.
 (defadvice! +buffer-group--undo-tree-diff-display-buffer-a (&optional node)
   "Display an undo-tree diff buffer using `display-buffer'."
-  :override '(undo-tree-visualizer-show-diff undo-tree-visualizer-update-diff)
+  :override '(undo-tree-visualizer-show-diff
+              undo-tree-visualizer-update-diff)
   (setq undo-tree-visualizer-diff t)
   (let ((buff (with-current-buffer undo-tree-visualizer-parent-buffer
                 (undo-tree-diff node))))
@@ -157,7 +158,10 @@ If you switch workspaces or the src window is recreated..."
 ;; Users should be able to hop into side windows easily, but Elisp shouldn't.
 (defadvice! +buffer-group--ignore-window-parameters-a (fn &rest args)
   "Allow *interactive* window moving commands to traverse side windows."
-  :around '(windmove-up windmove-down windmove-left windmove-right)
+  :around '(windmove-up
+            windmove-down
+            windmove-left
+            windmove-right)
   (letf! (defun windmove-find-other-window (dir &optional arg window)
            (window-in-direction
             (pcase dir (`up 'above) (`down 'below) (_ dir))

@@ -85,8 +85,9 @@ specified buffer group(s) can be displayed in that window after that.
 One example where this functionality would be useful is for W3M. Each web page
 could have its own tab and exist in that window.
 
-* Configuration [1/5]
+* Configuration [2/6]
 ** DONE Define buffer groups in =config.el=
+** DONE Add =+hacks.el= file
 ** TODO Create display rules for temporary =org= buffers
 I would like for most (if not all) temporary =org= buffers to appear in a
 bottom-right side window.
@@ -98,7 +99,45 @@ bottom-right side window.
 
 ** TODO Define display rules when =+defaults= is given
 ** TODO Add =+all= flag to set ~switch-to-buffer-obey-display-actions~
-** TODO Add =+hacks.el= file
+** TODO Create a Doom "autodef" for configuring buffer groups
+*NOTE*: I should probably implement variadic forms of ~buffer-group-define~ and
+~buffer-group-property-pushnew~ before pursuing this todo item.
+
+Similar to ~set-popup-rule!~ and ~set-popup-rules!~, there should be an autodef
+for configuring buffer groups. This would replace forms like this:
+
+#+begin_src emacs-lisp
+(when (modulep! :ui buffer-group)
+  (buffer-group-reuse-window-setup
+   (buffer-group-define tfstate
+     `(:names ("^\\*tfstate: ")))))
+#+end_src
+
+...with forms like this:
+
+#+begin_src emacs-lisp
+(set-buffer-group! tfstate
+  :names "^\\*tfstate: "
+  :setup #'buffer-group-reuse-window-setup)
+#+end_src
+
+The exact syntax of the replacement form is TBD. Doom's =docs/contributing.org=
+has the following to say about autodefs:
+
+#+begin_quote
++ ~abc!~ :: A public Doom "autodef" function or macro. An autodef should always
+  be defined, even if its containing module is disabled (i.e. they will not
+  throw a void-function error). The purpose of this is to avoid peppering module
+  configs with conditionals or `after!` blocks before using their APIs. They
+  should noop if their module is disabled, and should be zero-cost in the case
+  their module is disabled.
+
+  Autodefs usually serve to configure Doom or a module. e.g. ~after!~,
+  ~set-company-backends!~, ~set-evil-initial-state!~
+#+end_quote
+
+See also: ~doom/help-autodefs~ (=SPC h u=).
+
 * Documentation [0/5]
 ** TODO Buffer name regexps vs. major modes
 Sometimes buffers are displayed before the major mode is set. In these cases,

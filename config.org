@@ -7076,7 +7076,7 @@ sudo dnf -y install terraform terraform-ls
           (apply fn args))))))
 #+end_src
 
-*** DONE [#B] Add completion keywords for Terraform
+*** DONE [#B] Add completion keywords for Terraform :feat:
 #+begin_src emacs-lisp :tangle yes
 (after! company-keywords
   (add-to-list
