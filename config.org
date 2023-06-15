@@ -5466,7 +5466,7 @@ I'm currently doing with Python). I could also create subdirectories under
 + CI/CD (e.g. steal from https://github.com/Microsoft/azure-pipelines-yaml)
 + PR templates (e.g. =.azuredevops/pull_request_template.md=)
 
-** ansible [1/1]
+** ansible [2/3]
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -5480,6 +5480,19 @@ brew install ansible
 pipx install ansible-core
 ansible-galaxy collection install community.general
 #+end_src
+
+*** DONE [#B] Use evil keybindings in Ansible documentation modes :tweak:
+#+begin_src emacs-lisp :tangle yes
+(after! ansible
+  (pushnew! evil-normal-state-modes 'ansible-doc-module-mode))
+#+end_src
+
+*** LOOP [#A] Ensure that ~+ansible-yaml-mode~ is enabled on all relevant YAML files :bug:
+I think that =projectile= is to blame here. Sometimes everything works as
+expected, sometimes not. I should formally define what my expectations are when
+working with projects and Doom workspaces and make sure that things are working
+that way. In the meantime, ~projectile-invalidate-cache~ (=SPC p i=) seems to
+fix things.
 
 ** biblio [0/0] :ARCHIVE:
 ** bitwarden [3/4] :eeowaa:

@@ -1879,6 +1879,9 @@ which causes problems even if there is no existing buffer."
                 LaTeX-mode-hook)
   #'writegood-mode)
 
+(after! ansible
+  (pushnew! evil-normal-state-modes 'ansible-doc-module-mode))
+
 (map! :leader
       (:prefix-map ("o" . "open")
        :desc "Bitwarden vault" "v" #'bitwarden-list-all))

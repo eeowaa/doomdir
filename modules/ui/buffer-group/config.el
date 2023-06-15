@@ -157,10 +157,12 @@
    (buffer-group-define reference
      `(:names ("^\\*info\\*"
                "^\\*\\(?:Wo\\)?Man "
-               "^\\*Kubernetes Docs ")
+               "^\\*Kubernetes Docs "
+               "^\\*ansible-doc ")
        :modes (Info-mode
                Man-mode woman-mode
-               kubedoc-mode))))
+               kubedoc-mode
+               ansible-doc-mode ansible-doc-module-mode))))
 
   (buffer-group-side-window-setup
    (buffer-group-define repl
