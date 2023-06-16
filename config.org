@@ -7195,7 +7195,8 @@ returned if it exists, otherwise nil."
              (exit-code nil)
              (success-msg (format "Pulled Terraform state to %s" stdout))
              (error-msg (format "Failed to pull Terraform state to %s" stdout))
-             (warning-type 'my/terraform))
+             (warning-type 'my/terraform)
+             (default-directory (or (projectile-project-root) default-directory)))
         (unless (with-temp-buffer
                   (when (zerop (setq exit-code
                                      (apply #'call-process program nil (list t stderr) nil args)))
