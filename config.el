@@ -2558,10 +2558,12 @@ else
         ) |
         .module as $m |
         .instances |
-        if (.[0] | has(\"index_key\")) then {
-            \"key\": ($m + \".\" + .index_key),
-            \"value\": .attributes
-        } else {
+        if (.[0] | has(\"index_key\")) then
+            map({
+                \"key\": ($m + \".\" + .index_key),
+                \"value\": .attributes
+            })[]
+        else {
             \"key\": $m,
             \"value\": .[0].attributes
         } end
