@@ -6736,7 +6736,7 @@ https://emacs-lsp.github.io/lsp-mode/page/main-features/#code-actions-on-modelin
 (setq lsp-modeline-code-actions-segments nil)
 #+end_src
 
-** magit [4/7]
+** magit [3/6]
 *** STRT [#A] Install prerequisites :feat:
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -6763,14 +6763,6 @@ cpan install App::Git::Autofixup
 #+begin_src emacs-lisp :tangle packages.el
 (package! transient :pin "c2bdf7e12c530eb85476d3aef317eb2941ab9440")
 (package! with-editor :pin "bbc60f68ac190f02da8a100b6fb67cf1c27c53ab")
-#+end_src
-
-*** DONE [#B] Remove gitflow configuration :tweak:
-Configuration for =magit-gitflow= shadows configuration for worktrees. I do not
-use Git Flow, but I do use worktrees, so this behavior is backwards for me.
-
-#+begin_src emacs-lisp :tangle packages.el
-(package! magit-gitflow :disable t)
 #+end_src
 
 *** DONE [#C] Configure list of repositories :tweak:
