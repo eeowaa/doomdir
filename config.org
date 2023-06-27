@@ -2902,7 +2902,7 @@ config), which uses =ace-window= to display line numbers in the mode line. I
 could either make this permanent, or just temporarily display window numbers
 when I activate window selection functions.
 
-** workspaces [3/3]
+** workspaces [4/4]
 #+begin_quote
 This module adds support for workspaces, powered by persp_mode, as well as a API
 for manipulating them.
@@ -2982,6 +2982,19 @@ doom | (user-error Can’t close workspace, it’s visible in another frame)
 I fixed the issue by modifying ~my/display-buffer-in-child-frame~ to be more
 like ~company-box--make-frame~ (setting ~after-make-frame-functions~ and
 ~before-make-frame-hook~ to ~nil~).
+
+*** DONE [#B] Do not continually add ~display-time-mode~ information to tab bar :bug:hack:
+With each new workspace that I open, another string containing the current date
+and load average is appended to the string returned by ~tab-bar-format-global~.
+This is the ~global-mode-string~, which as I write this, is currently set to
+~("" display-time-string battery-mode-line-string display-time-string display-time-string display-time-string display-time-string)~.
+
+This could be happening for one of two reasons that I can think of:
+1. New =persp= hooks in =:ui workspaces=
+2. Bumped =doom-modeline= package
+
+*UPDATE*: This was a problem in =doom-modeline=. I updated configuration in my
+custom =:ui tabs= module to fix the problem.
 
 ** zen [3/3]
 #+begin_quote

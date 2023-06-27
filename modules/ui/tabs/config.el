@@ -54,15 +54,17 @@ If INDEX is not a workspace index, return nil."
   :init
   (when initial-window-system
     (when (modulep! :ui modeline)
+      (remove-variable-watcher 'doom-modeline-time
+                               (car (get-variable-watchers 'doom-modeline-time)))
       (setq doom-modeline-display-misc-in-all-mode-lines nil
             doom-modeline-time nil
             doom-modeline-battery nil)
       (after! doom-modeline
         (advice-remove #'battery-update #'doom-modeline-update-battery-status)
         (remove-hook! '(display-battery-mode-hook doom-modeline-mode-hook)
-          #'doom-modeline-override-battery-modeline)
+          #'doom-modeline-override-battery)
         (remove-hook! '(display-time-mode-hook doom-modeline-mode-hook)
-          #'doom-modeline-override-display-time-modeline)
+          #'doom-modeline-override-time)
         (dolist (var '(doom-modeline-fn-alist doom-modeline-var-alist))
           (when-let* ((alist (eval var))
                       (element (or (assq 'battery alist)
