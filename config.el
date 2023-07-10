@@ -813,7 +813,35 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
         "Pipfile.lock"
         "Cargo.lock"
         "Cargo.toml"))
-    ("xlsx" . ("ods")))
+    ("xlsx" . ("ods"))
+
+    ;; TODO Match on file "vcs/dir-.+-closed\\.svg"
+    ("dir-closed"
+     . ("src-closed"
+        "test-closed"
+        "bin-closed"
+        "build-closed"
+        "git-closed"
+        "github-closed"
+        "public-closed"
+        "private-closed"
+        "temp-closed" "tmp-closed"
+        "readme-closed" "docs-closed"
+        "screenshots-closed" "icons-closed"))
+
+    ;; TODO Match on file "vcs/dir-.+-open\\.svg"
+    ("dir-open"
+     . ("src-open"
+        "test-open"
+        "bin-open"
+        "build-open"
+        "git-open"
+        "github-open"
+        "public-open"
+        "private-open"
+        "temp-open" "tmp-open"
+        "readme-open" "docs-open"
+        "screenshots-open" "icons-open")))
   "Alist of file extension mappings for Treemacs icons.
 
 The `car' of each element is a file extension with a desirable

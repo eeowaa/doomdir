@@ -2391,6 +2391,12 @@ The workaround is as follows:
 *UPDATE*: The ~FIXME~ items in the following code block are likely caused by
 Doom theme extensions for Treemacs.
 
+*UPDATE*: [[https://github.com/Alexander-Miller/treemacs/commit/f68a846f3ed593fa9ed081c45f0af9b1c67753a1][This Treemacs commit]] introduced directory-specific icons. Until Doom
+Themes overrides the directory icons of the ~Default~ Treemacs theme, I am
+disabling them, as they clash terribly with the ~doom-one~ Treemacs theme. (I'm
+not sure how, but the ~doom-one~ Treemacs theme inherits the ~Default~ Treemacs
+theme despite not being derived from that theme.)
+
 #+begin_src emacs-lisp :tangle yes
 ;; REVIEW Consider detecting troublesome icons and automatically falling back to
 ;; the default icon for text files.
@@ -2403,7 +2409,35 @@ Doom theme extensions for Treemacs.
         "Pipfile.lock"
         "Cargo.lock"
         "Cargo.toml"))
-    ("xlsx" . ("ods")))
+    ("xlsx" . ("ods"))
+
+    ;; TODO Match on file "vcs/dir-.+-closed\\.svg"
+    ("dir-closed"
+     . ("src-closed"
+        "test-closed"
+        "bin-closed"
+        "build-closed"
+        "git-closed"
+        "github-closed"
+        "public-closed"
+        "private-closed"
+        "temp-closed" "tmp-closed"
+        "readme-closed" "docs-closed"
+        "screenshots-closed" "icons-closed"))
+
+    ;; TODO Match on file "vcs/dir-.+-open\\.svg"
+    ("dir-open"
+     . ("src-open"
+        "test-open"
+        "bin-open"
+        "build-open"
+        "git-open"
+        "github-open"
+        "public-open"
+        "private-open"
+        "temp-open" "tmp-open"
+        "readme-open" "docs-open"
+        "screenshots-open" "icons-open")))
   "Alist of file extension mappings for Treemacs icons.
 
 The `car' of each element is a file extension with a desirable
