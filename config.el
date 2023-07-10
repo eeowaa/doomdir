@@ -1641,15 +1641,20 @@ This function works even if the current window is a side window."
   (map! :map vterm-mode-map
         :i "C-x C-e" #'my/vterm-edit-indirect))
 
-(after! evil-collection-vterm
-  (evil-collection-define-key 'insert 'vterm-mode-map
-    (kbd "C-s") 'evil-window-map))
-
 (after! vterm
   (setq-hook! 'vterm-mode-hook
     revert-buffer-function (lambda (&rest _) (vterm-clear)))
   (map! :map vterm-mode-map
         "C-l" #'eeowaa-refresh-buffer-and-display))
+
+(after! evil-collection-vterm
+  (dolist (state '(normal insert))
+    (evil-collection-define-key state 'vterm-mode-map
+      (kbd "M-:") #'eval-expression)))
+
+(after! evil-collection-vterm
+  (evil-collection-define-key 'insert 'vterm-mode-map
+    (kbd "C-s") 'evil-window-map))
 
 (after! vterm
 

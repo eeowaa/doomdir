@@ -4627,7 +4627,7 @@ to =eshell=, it forcefully clears the file on disk.
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [8/17]
+** vterm [8/18]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
@@ -4742,13 +4742,6 @@ This function works even if the current window is a side window."
         :i "C-x C-e" #'my/vterm-edit-indirect))
 #+end_src
 
-*** DONE [#C] Use =C-s= as the ~evil-window-map~ leader key in Evil insert state :tweak:
-#+begin_src emacs-lisp :tangle yes
-(after! evil-collection-vterm
-  (evil-collection-define-key 'insert 'vterm-mode-map
-    (kbd "C-s") 'evil-window-map))
-#+end_src
-
 *** DONE [#C] Configure revert-buffer :tweak:module:
 #+begin_src emacs-lisp :tangle yes
 (after! vterm
@@ -4756,6 +4749,24 @@ This function works even if the current window is a side window."
     revert-buffer-function (lambda (&rest _) (vterm-clear)))
   (map! :map vterm-mode-map
         "C-l" #'eeowaa-refresh-buffer-and-display))
+#+end_src
+
+*** DONE [#B] Let =M-:= pass through in Evil insert and normal state :feat:
+#+begin_src emacs-lisp :tangle yes
+(after! evil-collection-vterm
+  (dolist (state '(normal insert))
+    (evil-collection-define-key state 'vterm-mode-map
+      (kbd "M-:") #'eval-expression)))
+#+end_src
+
+*** STRT [#C] Use =C-s= as the ~evil-window-map~ leader key in Evil insert state :tweak:
+This doesn't work during startup, but if I manually run it after everything has
+loaded, it works.
+
+#+begin_src emacs-lisp :tangle yes
+(after! evil-collection-vterm
+  (evil-collection-define-key 'insert 'vterm-mode-map
+    (kbd "C-s") 'evil-window-map))
 #+end_src
 
 *** STRT [#B] Define aliases :feat:
