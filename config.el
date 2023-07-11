@@ -644,6 +644,37 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (setq +ligatures-in-modes '(org-mode)
       +ligatures-extras-in-modes '(org-mode))
 
+(if initial-window-system
+    ;; Just display an icon for file-visiting buffers
+    (setq doom-modeline-highlight-modified-buffer-name nil)
+
+  ;; Highlight the names of file-visiting buffers
+  (setq doom-modeline-highlight-modified-buffer-name t)
+  (defadvice! my/doom-modeline-ignore-modification-a (fn &rest args)
+    :around '(doom-modeline-segment--buffer-info
+              doom-modeline-segment--buffer-info-simple)
+    (letf! (defadvice my/doom-modeline-buffer-modification-a (&rest _)
+             :after-while #'buffer-modified-p
+             buffer-file-name)
+      (apply fn args))))
+
+;; NOTE `font-dest' is ripped straight from `nerd-icons-install-fonts'
+(require 'nerd-icons)
+(let ((font-dest (cond
+                  ((member system-type '(gnu gnu/linux gnu/kfreebsd))
+                   (concat (or (getenv "XDG_DATA_HOME")
+                               (concat (getenv "HOME") "/.local/share"))
+                           "/fonts/"
+                           nerd-icons-fonts-subdirectory))
+                  ((eq system-type 'darwin)
+                   (concat (getenv "HOME")
+                           "/Library/Fonts/"
+                           nerd-icons-fonts-subdirectory)))))
+  (unless (cl-every (lambda (font-name)
+                      (file-exists-p (concat font-dest font-name)))
+                    nerd-icons-font-names)
+    (nerd-icons-install-fonts t)))
+
 (setq column-number-indicator-zero-based nil)
 
 (after! evil-goggles
@@ -813,7 +844,35 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
         "Pipfile.lock"
         "Cargo.lock"
         "Cargo.toml"))
-    ("xlsx" . ("ods")))
+    ("xlsx" . ("ods"))
+
+    ;; TODO Match on file "vcs/dir-.+-closed\\.svg"
+    ("dir-closed"
+     . ("src-closed"
+        "test-closed"
+        "bin-closed"
+        "build-closed"
+        "git-closed"
+        "github-closed"
+        "public-closed"
+        "private-closed"
+        "temp-closed" "tmp-closed"
+        "readme-closed" "docs-closed"
+        "screenshots-closed" "icons-closed"))
+
+    ;; TODO Match on file "vcs/dir-.+-open\\.svg"
+    ("dir-open"
+     . ("src-open"
+        "test-open"
+        "bin-open"
+        "build-open"
+        "git-open"
+        "github-open"
+        "public-open"
+        "private-open"
+        "temp-open" "tmp-open"
+        "readme-open" "docs-open"
+        "screenshots-open" "icons-open")))
   "Alist of file extension mappings for Treemacs icons.
 
 The `car' of each element is a file extension with a desirable
@@ -1613,15 +1672,20 @@ This function works even if the current window is a side window."
   (map! :map vterm-mode-map
         :i "C-x C-e" #'my/vterm-edit-indirect))
 
-(after! evil-collection-vterm
-  (evil-collection-define-key 'insert 'vterm-mode-map
-    (kbd "C-s") 'evil-window-map))
-
 (after! vterm
   (setq-hook! 'vterm-mode-hook
     revert-buffer-function (lambda (&rest _) (vterm-clear)))
   (map! :map vterm-mode-map
         "C-l" #'eeowaa-refresh-buffer-and-display))
+
+(after! evil-collection-vterm
+  (dolist (state '(normal insert))
+    (evil-collection-define-key state 'vterm-mode-map
+      (kbd "M-:") #'eval-expression)))
+
+(after! evil-collection-vterm
+  (evil-collection-define-key 'insert 'vterm-mode-map
+    (kbd "C-s") 'evil-window-map))
 
 (after! vterm
 

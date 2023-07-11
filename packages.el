@@ -30,6 +30,8 @@
 (package! vdiff)
 (package! vdiff-magit)
 
+(unpin! doom-modeline)
+
 (unpin! (:ui treemacs))
 
 ;;; :editor
@@ -50,8 +52,6 @@
 
 (package! transient :pin "c2bdf7e12c530eb85476d3aef317eb2941ab9440")
 (package! with-editor :pin "bbc60f68ac190f02da8a100b6fb67cf1c27c53ab")
-
-(package! magit-gitflow :disable t)
 
 (package! rfc-mode)
 

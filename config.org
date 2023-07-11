@@ -1835,11 +1835,59 @@ This module adds a minimap to the right side of Emacs, similar to the feature
 found in many other editors.
 #+end_quote
 
-** modeline [1/1]
+** modeline [3/3]
 #+begin_quote
 This module provides an Atom-inspired, minimalistic modeline for Doom Emacs,
 powered by [[https://github.com/seagle0128/doom-modeline][the doom-modeline package]] (where you can find screenshots).
 #+end_quote
+
+*** DONE [#B] Do not display buffer modification info for non-file buffers :tweak:
+#+begin_src emacs-lisp :tangle yes
+(if initial-window-system
+    ;; Just display an icon for file-visiting buffers
+    (setq doom-modeline-highlight-modified-buffer-name nil)
+
+  ;; Highlight the names of file-visiting buffers
+  (setq doom-modeline-highlight-modified-buffer-name t)
+  (defadvice! my/doom-modeline-ignore-modification-a (fn &rest args)
+    :around '(doom-modeline-segment--buffer-info
+              doom-modeline-segment--buffer-info-simple)
+    (letf! (defadvice my/doom-modeline-buffer-modification-a (&rest _)
+             :after-while #'buffer-modified-p
+             buffer-file-name)
+      (apply fn args))))
+#+end_src
+
+*** DONE [#C] Unpin package :tweak:
+Unpinning =doom-modeline= gives us a more even and consisent modeline height
+between windows, among other things:
+
+#+begin_src emacs-lisp :tangle packages.el
+(unpin! doom-modeline)
+#+end_src
+
+However, =nerd-icons= is now required. Doom does not handle this very graceful
+and it may cause yet-to-be-discovered issues. For now, I will just install the
+icons if they are missing:
+
+#+begin_src emacs-lisp :tangle yes
+;; NOTE `font-dest' is ripped straight from `nerd-icons-install-fonts'
+(require 'nerd-icons)
+(let ((font-dest (cond
+                  ((member system-type '(gnu gnu/linux gnu/kfreebsd))
+                   (concat (or (getenv "XDG_DATA_HOME")
+                               (concat (getenv "HOME") "/.local/share"))
+                           "/fonts/"
+                           nerd-icons-fonts-subdirectory))
+                  ((eq system-type 'darwin)
+                   (concat (getenv "HOME")
+                           "/Library/Fonts/"
+                           nerd-icons-fonts-subdirectory)))))
+  (unless (cl-every (lambda (font-name)
+                      (file-exists-p (concat font-dest font-name)))
+                    nerd-icons-font-names)
+    (nerd-icons-install-fonts t)))
+#+end_src
 
 *** DONE [#C] Use 1-based column numbering in modeline :tweak:
 #+begin_src emacs-lisp :tangle yes
@@ -2391,6 +2439,12 @@ The workaround is as follows:
 *UPDATE*: The ~FIXME~ items in the following code block are likely caused by
 Doom theme extensions for Treemacs.
 
+*UPDATE*: [[https://github.com/Alexander-Miller/treemacs/commit/f68a846f3ed593fa9ed081c45f0af9b1c67753a1][This Treemacs commit]] introduced directory-specific icons. Until Doom
+Themes overrides the directory icons of the ~Default~ Treemacs theme, I am
+disabling them, as they clash terribly with the ~doom-one~ Treemacs theme. (I'm
+not sure how, but the ~doom-one~ Treemacs theme inherits the ~Default~ Treemacs
+theme despite not being derived from that theme.)
+
 #+begin_src emacs-lisp :tangle yes
 ;; REVIEW Consider detecting troublesome icons and automatically falling back to
 ;; the default icon for text files.
@@ -2403,7 +2457,35 @@ Doom theme extensions for Treemacs.
         "Pipfile.lock"
         "Cargo.lock"
         "Cargo.toml"))
-    ("xlsx" . ("ods")))
+    ("xlsx" . ("ods"))
+
+    ;; TODO Match on file "vcs/dir-.+-closed\\.svg"
+    ("dir-closed"
+     . ("src-closed"
+        "test-closed"
+        "bin-closed"
+        "build-closed"
+        "git-closed"
+        "github-closed"
+        "public-closed"
+        "private-closed"
+        "temp-closed" "tmp-closed"
+        "readme-closed" "docs-closed"
+        "screenshots-closed" "icons-closed"))
+
+    ;; TODO Match on file "vcs/dir-.+-open\\.svg"
+    ("dir-open"
+     . ("src-open"
+        "test-open"
+        "bin-open"
+        "build-open"
+        "git-open"
+        "github-open"
+        "public-open"
+        "private-open"
+        "temp-open" "tmp-open"
+        "readme-open" "docs-open"
+        "screenshots-open" "icons-open")))
   "Alist of file extension mappings for Treemacs icons.
 
 The `car' of each element is a file extension with a desirable
@@ -2902,7 +2984,7 @@ config), which uses =ace-window= to display line numbers in the mode line. I
 could either make this permanent, or just temporarily display window numbers
 when I activate window selection functions.
 
-** workspaces [3/3]
+** workspaces [4/4]
 #+begin_quote
 This module adds support for workspaces, powered by persp_mode, as well as a API
 for manipulating them.
@@ -2982,6 +3064,19 @@ doom | (user-error Can’t close workspace, it’s visible in another frame)
 I fixed the issue by modifying ~my/display-buffer-in-child-frame~ to be more
 like ~company-box--make-frame~ (setting ~after-make-frame-functions~ and
 ~before-make-frame-hook~ to ~nil~).
+
+*** DONE [#B] Do not continually add ~display-time-mode~ information to tab bar :bug:hack:
+With each new workspace that I open, another string containing the current date
+and load average is appended to the string returned by ~tab-bar-format-global~.
+This is the ~global-mode-string~, which as I write this, is currently set to
+~("" display-time-string battery-mode-line-string display-time-string display-time-string display-time-string display-time-string)~.
+
+This could be happening for one of two reasons that I can think of:
+1. New =persp= hooks in =:ui workspaces=
+2. Bumped =doom-modeline= package
+
+*UPDATE*: This was a problem in =doom-modeline=. I updated configuration in my
+custom =:ui tabs= module to fix the problem.
 
 ** zen [3/3]
 #+begin_quote
@@ -4580,7 +4675,7 @@ to =eshell=, it forcefully clears the file on disk.
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [8/17]
+** vterm [8/18]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
@@ -4695,13 +4790,6 @@ This function works even if the current window is a side window."
         :i "C-x C-e" #'my/vterm-edit-indirect))
 #+end_src
 
-*** DONE [#C] Use =C-s= as the ~evil-window-map~ leader key in Evil insert state :tweak:
-#+begin_src emacs-lisp :tangle yes
-(after! evil-collection-vterm
-  (evil-collection-define-key 'insert 'vterm-mode-map
-    (kbd "C-s") 'evil-window-map))
-#+end_src
-
 *** DONE [#C] Configure revert-buffer :tweak:module:
 #+begin_src emacs-lisp :tangle yes
 (after! vterm
@@ -4709,6 +4797,24 @@ This function works even if the current window is a side window."
     revert-buffer-function (lambda (&rest _) (vterm-clear)))
   (map! :map vterm-mode-map
         "C-l" #'eeowaa-refresh-buffer-and-display))
+#+end_src
+
+*** DONE [#B] Let =M-:= pass through in Evil insert and normal state :feat:
+#+begin_src emacs-lisp :tangle yes
+(after! evil-collection-vterm
+  (dolist (state '(normal insert))
+    (evil-collection-define-key state 'vterm-mode-map
+      (kbd "M-:") #'eval-expression)))
+#+end_src
+
+*** STRT [#C] Use =C-s= as the ~evil-window-map~ leader key in Evil insert state :tweak:
+This doesn't work during startup, but if I manually run it after everything has
+loaded, it works.
+
+#+begin_src emacs-lisp :tangle yes
+(after! evil-collection-vterm
+  (evil-collection-define-key 'insert 'vterm-mode-map
+    (kbd "C-s") 'evil-window-map))
 #+end_src
 
 *** STRT [#B] Define aliases :feat:
@@ -6736,7 +6842,7 @@ https://emacs-lsp.github.io/lsp-mode/page/main-features/#code-actions-on-modelin
 (setq lsp-modeline-code-actions-segments nil)
 #+end_src
 
-** magit [4/7]
+** magit [3/6]
 *** STRT [#A] Install prerequisites :feat:
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -6763,14 +6869,6 @@ cpan install App::Git::Autofixup
 #+begin_src emacs-lisp :tangle packages.el
 (package! transient :pin "c2bdf7e12c530eb85476d3aef317eb2941ab9440")
 (package! with-editor :pin "bbc60f68ac190f02da8a100b6fb67cf1c27c53ab")
-#+end_src
-
-*** DONE [#B] Remove gitflow configuration :tweak:
-Configuration for =magit-gitflow= shadows configuration for worktrees. I do not
-use Git Flow, but I do use worktrees, so this behavior is backwards for me.
-
-#+begin_src emacs-lisp :tangle packages.el
-(package! magit-gitflow :disable t)
 #+end_src
 
 *** DONE [#C] Configure list of repositories :tweak:

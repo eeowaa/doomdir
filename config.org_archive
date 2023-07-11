@@ -735,3 +735,24 @@ the popup window are cut off, and all you see are options to exclude the file
 from the LSP workspace. Unless you know about the other available options, LSP
 won't work for you. Unfortunately, resizing the frame does not help.
 
+
+* DONE [#B] Remove gitflow configuration :tweak:
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-06-21 Wed 16:05
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :tools/magit
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: DONE
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2023-06-21 Wed 16:05] \\
+  Doom just removed gitflow
+:END:
+Configuration for =magit-gitflow= shadows configuration for worktrees. I do not
+use Git Flow, but I do use worktrees, so this behavior is backwards for me.
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! magit-gitflow :disable t)
+#+end_src
+
