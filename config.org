@@ -1835,11 +1835,59 @@ This module adds a minimap to the right side of Emacs, similar to the feature
 found in many other editors.
 #+end_quote
 
-** modeline [1/1]
+** modeline [3/3]
 #+begin_quote
 This module provides an Atom-inspired, minimalistic modeline for Doom Emacs,
 powered by [[https://github.com/seagle0128/doom-modeline][the doom-modeline package]] (where you can find screenshots).
 #+end_quote
+
+*** DONE [#B] Do not display buffer modification info for non-file buffers :tweak:
+#+begin_src emacs-lisp :tangle yes
+(if initial-window-system
+    ;; Just display an icon for file-visiting buffers
+    (setq doom-modeline-highlight-modified-buffer-name nil)
+
+  ;; Highlight the names of file-visiting buffers
+  (setq doom-modeline-highlight-modified-buffer-name t)
+  (defadvice! my/doom-modeline-ignore-modification-a (fn &rest args)
+    :around '(doom-modeline-segment--buffer-info
+              doom-modeline-segment--buffer-info-simple)
+    (letf! (defadvice my/doom-modeline-buffer-modification-a (&rest _)
+             :after-while #'buffer-modified-p
+             buffer-file-name)
+      (apply fn args))))
+#+end_src
+
+*** DONE [#C] Unpin package :tweak:
+Unpinning =doom-modeline= gives us a more even and consisent modeline height
+between windows, among other things:
+
+#+begin_src emacs-lisp :tangle packages.el
+(unpin! doom-modeline)
+#+end_src
+
+However, =nerd-icons= is now required. Doom does not handle this very graceful
+and it may cause yet-to-be-discovered issues. For now, I will just install the
+icons if they are missing:
+
+#+begin_src emacs-lisp :tangle yes
+;; NOTE `font-dest' is ripped straight from `nerd-icons-install-fonts'
+(require 'nerd-icons)
+(let ((font-dest (cond
+                  ((member system-type '(gnu gnu/linux gnu/kfreebsd))
+                   (concat (or (getenv "XDG_DATA_HOME")
+                               (concat (getenv "HOME") "/.local/share"))
+                           "/fonts/"
+                           nerd-icons-fonts-subdirectory))
+                  ((eq system-type 'darwin)
+                   (concat (getenv "HOME")
+                           "/Library/Fonts/"
+                           nerd-icons-fonts-subdirectory)))))
+  (unless (cl-every (lambda (font-name)
+                      (file-exists-p (concat font-dest font-name)))
+                    nerd-icons-font-names)
+    (nerd-icons-install-fonts t)))
+#+end_src
 
 *** DONE [#C] Use 1-based column numbering in modeline :tweak:
 #+begin_src emacs-lisp :tangle yes

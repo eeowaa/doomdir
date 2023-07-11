@@ -30,6 +30,8 @@
 (package! vdiff)
 (package! vdiff-magit)
 
+(unpin! doom-modeline)
+
 (unpin! (:ui treemacs))
 
 ;;; :editor
