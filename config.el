@@ -764,6 +764,12 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (after! tab-bar
   (setq tab-bar-tab-face-function #'tab-bar-tab-face-default))
 
+(defadvice! my/ergonomic-eww-bindings-a (&rest _)
+  :after #'evil-collection-eww-setup
+  (evil-collection-define-key 'normal 'eww-mode-map
+    ;; open this up for `vimish-tab'
+    (kbd "gt") nil))
+
 (setq display-time-day-and-date t ;; show the DoW and date in addition to the time
       display-time-load-average-threshold 0) ;; always display the load average
 
@@ -1681,9 +1687,19 @@ This function works even if the current window is a side window."
 (after! evil-collection-vterm
   (dolist (state '(normal insert))
     (evil-collection-define-key state 'vterm-mode-map
+      (kbd "M-0") #'+workspace/switch-to-final
+      (kbd "M-1") #'+workspace/switch-to-0
+      (kbd "M-2") #'+workspace/switch-to-1
+      (kbd "M-3") #'+workspace/switch-to-2
+      (kbd "M-4") #'+workspace/switch-to-3
+      (kbd "M-5") #'+workspace/switch-to-4
+      (kbd "M-6") #'+workspace/switch-to-5
+      (kbd "M-7") #'+workspace/switch-to-6
+      (kbd "M-8") #'+workspace/switch-to-7
+      (kbd "M-9") #'+workspace/switch-to-8
       (kbd "M-:") #'eval-expression)))
 
-(after! evil-collection-vterm
+(after! (:and vterm evil-collection-vterm)
   (evil-collection-define-key 'insert 'vterm-mode-map
     (kbd "C-s") 'evil-window-map))
 
@@ -2308,6 +2324,7 @@ This variable should be set by `my/lsp-ui-set-delay'.")
 
 (map! (:after evil-collection-magit
        (:map magit-status-mode-map
+        :nv "C-t" nil ;; open this up for `vimish-tab'
         :nv "gz" #'magit-jump-to-stashes)))
 
 (defvar my/makefile-search-list '("GNUmakefile" "makefile" "Makefile")
