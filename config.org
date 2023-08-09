@@ -2632,6 +2632,9 @@ negative criteria:
 3. Restarting Emacs is the only way I know how to fix the bug.
 4. I don't know of any workarounds.
 
+*UPDATE*: The ~treemacs--consolidate-projects~ function appears to be a valid
+workaround, at least when a new Treemacs window completely fails to open.
+
 **** Symptoms
 + Cannot remove projects from Treemacs via =C-c C-p d=
   (~treemacs-remove-project-from-workspace~). For example:
@@ -2683,6 +2686,34 @@ negative criteria:
                          #s(treemacs-project "bash-runbooks" "/home/eeowaa/Documents/src/life/bash-runbooks" local-readable nil)
                          #s(treemacs-project "doom" "/home/eeowaa/Documents/src/life/stow-dotfiles/doom/.config/doom" local-readable nil)))
   #+end_src
+
++ After upgrading Doom Emacs to commit ~07fca78~ (with =treemacs= unpinned), I
+  frequenty encounter a problem that prevents me from opening Treemacs, but
+  *never* in the first Doom workspace that I explicitly open. Sometime later,
+  after editing a while, I open a new workspace with =SPC p p=
+  (~projectile-switch-project~), try to open Treemacs with =SPC o p=
+  (~+treemacs/toggle~), and get the following error:
+
+  #+begin_example
+  Debugger entered--Lisp error: (wrong-type-argument hash-table-p nil)
+    (treemacs-project->position #s(treemacs-project :name "<name>" :path "<path>" :path-status local-readable :is-disabled? nil))
+    (treemacs-find-file-node "<file>" #s(treemacs-project :name "<name>" :path "<path>" :path-status local-readable :is-disabled? nil))
+    (treemacs--follow)
+    (treemacs-select-window)
+    (treemacs-add-and-display-current-project)
+    (if (doom-project-p) (treemacs-add-and-display-current-project) (treemacs))
+    (let nil (if (doom-project-p) (treemacs-add-and-display-current-project) (treemacs)))
+    (if (eq val 'visible) (let nil (delete-window (treemacs-get-local-window))) (let nil (if (doom-project-p) (treemacs-add-and-display-current-project) (treemacs))))
+    (let* ((val (cond ((treemacs-get-local-window) 'visible) ((treemacs-get-local-buffer) 'exists) (t 'none)))) (if (eq val 'visible) (let nil (delete-window (treemacs-get-local-window))) (let nil (if (doom-project-p) (treemacs-add-and-display-current-project) (treemacs)))))
+    (+treemacs/toggle)
+    (funcall-interactively +treemacs/toggle)
+    (command-execute +treemacs/toggle)
+  #+end_example
+
+  The hash table referred to by ~(wrong-type-argument hash-table-p nil)~ is
+  ~treemacs-dom~, a buffer-local variable in each Treemacs window. For some
+  reason, it does not get set properly. Running ~treemacs--consolidate-projects~
+  fixes the problem, however.
 
 **** Ideas
 + Did the ~treemacs-workspace~ definition (~cl-struct~ and/or ~eieio~ class?)
