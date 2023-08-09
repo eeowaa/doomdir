@@ -2397,6 +2397,10 @@ following benefits of enabling the cursor in Treemacs:
 (after! doom-themes-ext-treemacs
   (with-eval-after-load 'treemacs
     (setq treemacs-fringe-indicator-mode nil)))
+
+;; Use a solid box cursor instead of an underline
+(setq-hook! 'treemacs-mode-hook
+  evil-treemacs-state-cursor 'box)
 #+end_src
 
 *** DONE [#C] Display truncation characters in the fringe :tweak:

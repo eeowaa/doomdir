@@ -827,6 +827,10 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   (with-eval-after-load 'treemacs
     (setq treemacs-fringe-indicator-mode nil)))
 
+;; Use a solid box cursor instead of an underline
+(setq-hook! 'treemacs-mode-hook
+  evil-treemacs-state-cursor 'box)
+
 (after! doom-themes-ext-treemacs
   (with-eval-after-load 'treemacs
     (remove-hook 'treemacs-mode-hook #'doom-themes-hide-fringes-maybe)
