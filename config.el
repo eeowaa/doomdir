@@ -837,11 +837,11 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     (advice-remove #'treemacs-select-window #'doom-themes-hide-fringes-maybe)))
 
 (after! treemacs
+  (defun my/treemacs-revert-buffer-function (&rest _)
+    (my/treemacs-modify-icons)
+    (treemacs-refresh))
   (setq-hook! 'treemacs-mode-hook
-    revert-buffer-function
-    (lambda (&rest _)
-      (my/treemacs-modify-icons)
-      (treemacs-refresh))))
+    revert-buffer-function #'my/treemacs-revert-buffer-function))
 
 ;; REVIEW Consider detecting troublesome icons and automatically falling back to
 ;; the default icon for text files.
@@ -981,6 +981,26 @@ Closes and re-opens Treemacs to apply the new theme."
   (defun my/treemacs-current-theme ()
     "Return the name of the current Treemacs theme."
     (treemacs-theme->name treemacs--current-theme)))
+
+(defun my/treemacs-workaround-fix ()
+  "Run this command if Treemacs fails to open"
+  (interactive)
+  (cl-assert (eq major-mode 'treemacs-mode))
+
+  ;; Workaround for utter brokenness
+  (treemacs--consolidate-projects)
+
+  ;; This is to facillitate a workaround for ugly icons
+  (setq revert-buffer-function #'my/treemacs-revert-buffer-function)
+
+  ;; Display the modeline in the expected format
+  (treemacs--setup-mode-line)
+
+  ;; Expand the root node at the top of the Treemacs buffer
+  (goto-char 0)
+  (treemacs-do-for-button-state
+   :on-root-node-closed (treemacs--expand-root-node btn)
+   :on-root-node-open (ignore btn)))
 
 (setq treemacs-hide-dot-git-directory nil)
 

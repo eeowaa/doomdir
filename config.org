@@ -2428,11 +2428,11 @@ Until I have a permanent fix for Treemacs icons, I want to call
 
 #+begin_src emacs-lisp :tangle yes
 (after! treemacs
+  (defun my/treemacs-revert-buffer-function (&rest _)
+    (my/treemacs-modify-icons)
+    (treemacs-refresh))
   (setq-hook! 'treemacs-mode-hook
-    revert-buffer-function
-    (lambda (&rest _)
-      (my/treemacs-modify-icons)
-      (treemacs-refresh))))
+    revert-buffer-function #'my/treemacs-revert-buffer-function))
 #+end_src
 
 *** STRT [#B] Align all Treemacs icons :bug:
@@ -2633,7 +2633,32 @@ negative criteria:
 4. I don't know of any workarounds.
 
 *UPDATE*: The ~treemacs--consolidate-projects~ function appears to be a valid
-workaround, at least when a new Treemacs window completely fails to open.
+workaround, at least when a new Treemacs window completely fails to open. On
+that note, when Treemacs fails to open, it often means that the ~treemacs-mode~
+function exited non-locally before running ~treemacs--setup-mode-line~, so
+~treemacs--setup-mode-line~ should be run in that case, as well.
+
+#+begin_src emacs-lisp :tangle yes
+(defun my/treemacs-workaround-fix ()
+  "Run this command if Treemacs fails to open"
+  (interactive)
+  (cl-assert (eq major-mode 'treemacs-mode))
+
+  ;; Workaround for utter brokenness
+  (treemacs--consolidate-projects)
+
+  ;; This is to facillitate a workaround for ugly icons
+  (setq revert-buffer-function #'my/treemacs-revert-buffer-function)
+
+  ;; Display the modeline in the expected format
+  (treemacs--setup-mode-line)
+
+  ;; Expand the root node at the top of the Treemacs buffer
+  (goto-char 0)
+  (treemacs-do-for-button-state
+   :on-root-node-closed (treemacs--expand-root-node btn)
+   :on-root-node-open (ignore btn)))
+#+end_src
 
 **** Symptoms
 + Cannot remove projects from Treemacs via =C-c C-p d=
