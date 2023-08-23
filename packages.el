@@ -33,7 +33,6 @@
 (unless (modulep! :ui doom)
   (package! anzu))
 
-(unpin! (:ui treemacs))
 (unpin! doom-modeline)
 
 ;;; :editor
