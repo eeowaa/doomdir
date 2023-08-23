@@ -30,9 +30,11 @@
 (package! vdiff)
 (package! vdiff-magit)
 
-(unpin! doom-modeline)
+(unless (modulep! :ui doom)
+  (package! anzu))
 
 (unpin! (:ui treemacs))
+(unpin! doom-modeline)
 
 ;;; :editor
 

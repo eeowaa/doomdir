@@ -131,7 +131,7 @@ $func: (recursively) delete? [y/N]: "
 # Install prerequisites for `completion/vertico` module
 sudo dnf -y install ripgrep
 
-# Install prerequisites for `ui/doom` module
+# Install prerequisites for `ui/Miscellany`
 sudo dnf -y install terminus-fonts
 
 ## Comic Mono

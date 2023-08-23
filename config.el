@@ -57,6 +57,13 @@
   (let (consult-preview-key)
     (apply fn args)))
 
+(after! (:and consult ef-themes)
+  (setq consult-themes '("\\`ef-"))
+  (defadvice! my/consult-theme-a (theme)
+    :override #'consult-theme
+    (unless (eq theme (car custom-enabled-themes))
+      (ef-themes--load-theme theme))))
+
 (defun my/dedicate-window-temporarily ()
   "Dedicate the selected window until `display-buffer' is called again."
   (interactive)
@@ -154,79 +161,14 @@ with special dedication semantics."
 (unless initial-window-system
   (setq-default wrap-prefix "↪ "))
 
-;; Automatically highlight differences in hunks, down to the symbol.
-;;
-;; FIXME Highlighting for an added line spills over to the first character of
-;; the other buffer.
-;;
-(setq vdiff-auto-refine t
-      vdiff-default-refinement-syntax-code "w_")
-
-(after! vdiff
-  ;; Do not highlight lines in `vdiff-mode'.
-  (add-hook! 'vdiff-mode-hook :append (hl-line-mode -1))
-
-  ;; Use `C-l' to immediately update the diff (otherwise, just wait
-  ;; `vdiff--after-change-refresh-delay' seconds).
-  (setq-hook! 'vdiff-mode-hook
-    revert-buffer-function (lambda (&rest _) (vdiff-refresh))
-    eeowaa-refresh-force t)
-
-  ;; Bind `vdiff-mode-prefix-map' to a convenient key.
-  ;;
-  ;; FIXME Use one of Doom's idiomatic key binding mechanisms for better
-  ;; integration with leader keys (e.g. M-SPC in insert state) and which-key.
-  ;;
-  (evil-define-key 'normal vdiff-mode-map (kbd "SPC v") vdiff-mode-prefix-map)
-  (evil-define-key 'normal vdiff-3way-mode-map (kbd "SPC v") vdiff-mode-prefix-map))
-
-;; TODO Bind `vdiff-magit' command to a transient key in magit. For the time
-;; being, just use `M-x vdiff-magit RET' to open the transient.
-(after! magit
-  (require 'vdiff-magit))
-
-;; TODO Integrate vdiff folding with `:editor fold'.
-
-;; TODO Integrate vdiff window configuration with `:ui workspaces' (reference
-;; how Doom configures `ediff' for this).
-
-;; TODO Configure `vdiff-3way-mode', `vdiff-magit-resolve', and
-;; `vdiff-magit-compare' to work similarly to my git-vimdiff shell script.
-
-(setq window-sides-vertical t)
-
-(setq switch-to-buffer-obey-display-actions t)
-
-(setq display-buffer-base-action '((display-buffer-same-window) . nil))
-
-(setq window-resize-pixelwise t)
-
-(map! "C-`"   #'window-toggle-side-windows)
-   ;; "C-~"   #'+popup/raise
-   ;; "C-x p" #'+popup/other
-
-;; `always' is just a no-op that returns `t'
-(defadvice! my/never-hide-modeline-a (&rest _)
-  "Never hide the modeline"
-  :around 'hide-mode-line-mode
-  #'always)
-
-(after! doom-themes-ext-treemacs
-  (defadvice! my/show-treemacs-modeline-a (&rest _)
-    "Show the treemacs modeline"
-    :around 'doom-themes-hide-modeline
-    #'always))
-
-(remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
-
-(defadvice! my/tab-bar-theme-a (theme &rest _)
-  "Tweak the style of the tab bar."
-  :after '(load-theme consult-theme)
-  (if (string-match-p "\\`ef-" (symbol-name theme))
-      (ef-themes-with-colors
-        (custom-set-faces
-         `(tab-bar ((,c :background ,bg-inactive :foreground ,fg-intense)))))
-    (eeowaa-use-face tab-bar mode-line-inactive)))
+(add-hook! 'doom-load-theme-hook
+  (defun my/tab-bar-theme-h ()
+    "Tweak the style of the tab bar."
+    (if (string-match-p "\\`ef-" (symbol-name doom-theme))
+        (ef-themes-with-colors
+          (custom-set-faces
+           `(tab-bar ((,c :background ,bg-inactive :foreground ,fg-intense)))))
+      (eeowaa-use-face tab-bar mode-line-inactive))))
 
 (setq doom-theme
       (if initial-window-system
@@ -280,6 +222,57 @@ When called interactively, reload the fonts in the current session."
 
 ;; Set the font
 (my/select-font "Iosevka Comfy Fixed")
+
+;; Automatically highlight differences in hunks, down to the symbol.
+;;
+;; FIXME Highlighting for an added line spills over to the first character of
+;; the other buffer.
+;;
+(setq vdiff-auto-refine t
+      vdiff-default-refinement-syntax-code "w_")
+
+(after! vdiff
+  ;; Do not highlight lines in `vdiff-mode'.
+  (add-hook! 'vdiff-mode-hook :append (hl-line-mode -1))
+
+  ;; Use `C-l' to immediately update the diff (otherwise, just wait
+  ;; `vdiff--after-change-refresh-delay' seconds).
+  (setq-hook! 'vdiff-mode-hook
+    revert-buffer-function (lambda (&rest _) (vdiff-refresh))
+    eeowaa-refresh-force t)
+
+  ;; Bind `vdiff-mode-prefix-map' to a convenient key.
+  ;;
+  ;; FIXME Use one of Doom's idiomatic key binding mechanisms for better
+  ;; integration with leader keys (e.g. M-SPC in insert state) and which-key.
+  ;;
+  (evil-define-key 'normal vdiff-mode-map (kbd "SPC v") vdiff-mode-prefix-map)
+  (evil-define-key 'normal vdiff-3way-mode-map (kbd "SPC v") vdiff-mode-prefix-map))
+
+;; TODO Bind `vdiff-magit' command to a transient key in magit. For the time
+;; being, just use `M-x vdiff-magit RET' to open the transient.
+(after! magit
+  (require 'vdiff-magit))
+
+;; TODO Integrate vdiff folding with `:editor fold'.
+
+;; TODO Integrate vdiff window configuration with `:ui workspaces' (reference
+;; how Doom configures `ediff' for this).
+
+;; TODO Configure `vdiff-3way-mode', `vdiff-magit-resolve', and
+;; `vdiff-magit-compare' to work similarly to my git-vimdiff shell script.
+
+(setq window-sides-vertical t)
+
+(setq switch-to-buffer-obey-display-actions t)
+
+(setq display-buffer-base-action '((display-buffer-same-window) . nil))
+
+(setq window-resize-pixelwise t)
+
+(map! "C-`"   #'window-toggle-side-windows)
+   ;; "C-~"   #'+popup/raise
+   ;; "C-x p" #'+popup/other
 
 (setq emojify-download-emojis-p t)
 
@@ -1025,29 +1018,6 @@ works even when `global-diff-hl-mode' is disabled.")
     (not (seq-intersection local-minor-modes (cdr my/diff-hl-minor-modes))))
    (t (seq-intersection local-minor-modes my/diff-hl-minor-modes))))
 
-(when (and (modulep! :ui vc-gutter +pretty)
-           (modulep! :ui vc-gutter +diff-hl)
-           initial-window-system)
-
-  (add-hook! 'diff-hl-mode-hook
-    (defadvice! my/diff-hl-fringe-a (theme &rest _)
-      :after '(load-theme consult-theme)
-      (+vc-gutter-fix-diff-hl-faces-h)))
-
-  (after! ef-themes
-    (dolist (theme ef-themes-dark-themes)
-      (eval (macroexpand-1
-             `(custom-theme-set-faces! ',theme
-                `(diff-hl-insert :foreground ,(ef-themes-get-color-value 'bg-added-refine nil ',theme))
-                `(diff-hl-change :foreground ,(ef-themes-get-color-value 'bg-changed-refine nil ',theme))
-                `(diff-hl-delete :foreground ,(ef-themes-get-color-value 'bg-removed-refine nil ',theme)))))))
-
-  (with-eval-after-load 'modus-themes
-    (custom-theme-set-faces! 'modus-vivendi
-      `(diff-hl-insert :foreground ,(alist-get 'green-fringe-bg modus-themes-vivendi-colors))
-      `(diff-hl-change :foreground ,(alist-get 'yellow-fringe-bg modus-themes-vivendi-colors))
-      `(diff-hl-delete :foreground ,(alist-get 'red-fringe-bg modus-themes-vivendi-colors)))))
-
 (setq-hook! '(prog-mode-hook text-mode-hook conf-mode-hook)
   indicate-empty-lines t)
 
@@ -1056,6 +1026,17 @@ works even when `global-diff-hl-mode' is disabled.")
     (setq aw-scope 'visible)))
 
 (setq aw-background nil)
+
+(defadvice! my/aw-face-height-a (&optional theme &rest _)
+  :after #'load-theme
+  (when (and (string-match-p "\\`\\(?:modus\\|ef\\)-"
+                             (symbol-name (or theme (car custom-enabled-themes))))
+             (facep 'aw-leading-char-face))
+    (set-face-attribute 'aw-leading-char-face nil
+                        :height (face-attribute 'default :height))))
+
+;; Modify the current theme after loading ace-window
+(after! ace-window (my/aw-face-height-a))
 
 (map! :leader
       (:when (modulep! :ui workspaces)

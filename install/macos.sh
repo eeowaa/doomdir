@@ -86,7 +86,7 @@ $func: (recursively) delete? [y/N]: "
 # Install prerequisites for `completion/vertico` module
 brew install ripgrep
 
-# Install prerequisites for `ui/doom` module
+# Install prerequisites for `ui/Miscellany`
 brew install font-terminus
 
 # TODO: Comic Mono
