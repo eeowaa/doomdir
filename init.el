@@ -76,7 +76,7 @@
        word-wrap         ; soft wrapping with language-aware indent
 
        :emacs
-       (dired +icons)    ; making dired pretty [functional]
+       (dired +icons +dirvish) ; making dired pretty [functional] XXX user module
        electric          ; smarter, keyword-based electric-indent
        (ibuffer +icons)  ; interactive buffer management
        ;; FIXME (find-file (doom-module-locate-path :emacs "undo" "README.org"))
