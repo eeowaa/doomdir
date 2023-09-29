@@ -2,9 +2,14 @@
 
 # Lock Emacs at version 28.2 using DNF
 target_version=28.2
-actual_version=`rpm -q --qf '%{version}' emacs`
 sudo dnf -y install 'dnf-command(versionlock)'
-sudo dnf versionlock add emacs-1:$target_version
+sudo ed /etc/dnf/plugins/versionlock.list <<EOF
+/^emacs-1:/d
+\$a
+emacs-1:$target_version-*
+.
+wq
+EOF
 [ "X$target_version" = "X$actual_version" ] || cat >&2 <<EOF
 WARNING: Incorrect Emacs version (using $actual_version, want $target_version)
 EOF

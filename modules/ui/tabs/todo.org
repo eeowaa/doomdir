@@ -33,7 +33,7 @@ Migrate evil bindings from Doom module config. Refer to =treemacs-evil=,
 =kubernetes-evil=, and =kubel-evil= for how to do this.
 
 ** TODO Add a keymap for non-=evil= users
-* Bugs [2/11]
+* Bugs [3/11]
 ** DONE Display window tabs when point is in an EIN notebook cell
 =tab-line= disables ~tab-line-mode~ for buffers whose name begins with a space.
 When ~pm-hide-implementation-buffers~ is enabled, =polymode= (used by =poly-ein=
@@ -62,7 +62,7 @@ course, this happens in many elisp packages.) I fixed this by refactoring
 =vimish-tab= to use the ~window-buffer-change-functions~ hook instead of
 ~buffer-list-update-hook~.
 
-** STRT Do not hide the tab-bar when =gd= present multiple definitions
+** DONE Do not hide the tab-bar when =gd= present multiple definitions
 :LOGBOOK:
 - Note taken on [2023-05-24 Wed 21:41] \\
   This has been fixed in my private config.
@@ -226,7 +226,7 @@ updated. Actually, all that ~tab-line-mode~ does is set the buffer-local
 ~tab-line-format~ variable to ~(:eval (tab-line-format))~, which is supposed to
 handle the rest. That's a lot hinging on proper mode line updates!
 
-* Features [2/15]
+* Features [2/16]
 ** DONE Bind =C-w C= (capital "C") to ~vimish-tab-close-window-function~
 Users should have a mechanism to close windows at will, even when there is more
 than one tab in that window.
@@ -248,6 +248,9 @@ This will require a new ~display-buffer~ function (see the previous item).
 The implementation of this would probably be similar to that of the previous
 item (might be able to share an underlying function).
 
+** TODO Add =ace-window= command to swap entire windows, not just tabs
+At present, ~ace-swap-window~ will just swap tabs.
+
 ** TODO Implement a command to select a tab in the current window using ~completing-read~
 To account for cases where there are multiple tabs displaying the same buffer, I
 should prepend the tab index to the buffer name. It would also be nice to show a
@@ -268,6 +271,7 @@ my private ~my/toggle-window-dedicated~ command (if ~vimish-tab-mode~ is
 enabled, call the toggle function provided by =vimish-tab=, otherwise toggle
 standard window dedication).
 
+** TODO Implement a mechanism to save/restore the tab list in a window
 ** TODO Implement standard Vim behavior for =gt=
 A numeric prefix argument should give the tab number, not how many times to
 repeat the command (like how =gT= works). There should be a user option to
