@@ -587,7 +587,7 @@ sudo dnf -y install ripgrep
 (setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
 #+end_src
 
-** vertico [4/4]
+** vertico [3/4]
 #+begin_quote
 This module enhances the Emacs search and completion experience, and also
 provides a united interface for project search and replace, powered by [[https://github.com/BurntSushi/ripgrep/][ripgrep]].
@@ -605,6 +605,10 @@ brew install ripgrep
 # Install prerequisites for `completion/vertico` module
 sudo dnf -y install ripgrep
 #+end_src
+
+*** DONE [#B] Find a reference for the symbols in the completing-read buffer :doc:
+These symbols are described in the docstring for the function
+~marginalia--symbol-class~.
 
 *** OKAY [#A] Prevent Emacs from freezing during ~consult-org-heading~ :bug:
 Lately, Emacs will occasionally freeze when searching for headlines in this
@@ -627,11 +631,7 @@ References:
 - https://github.com/minad/consult/issues/563
 - https://github.com/minad/consult/issues/726
 
-*** DONE [#B] Find a reference for the symbols in the completing-read buffer :doc:
-These symbols are described in the docstring for the function
-~marginalia--symbol-class~.
-
-*** DONE [#B] Fix bug with cursor color getting stuck when previewing themes :bug:
+*** TODO [#B] Fix bug with cursor color getting stuck when previewing themes :bug:
 When previewing themes with =consult=, sometimes the cursor color gets stuck
 (changing themes does not change the cursor color). When this happens, some
 themes become ugly or even unusable.
@@ -640,22 +640,6 @@ References:
 - [[*Tweak the style of the tab bar][Tweak the style of the tab bar]]
 - ~consult-theme~ and ~load-theme~ functions
 - ~cursor-color~ frame parameter
-
-*UPDATE*: The problem appears to be with the fact that ~enable-theme~ is
-sometimes called outside of ~load-theme~, which prevents ~doom-load-theme-hook~
-from running. Either ~doom--load-theme-a~ needs to be moved from ~load-theme~ to
-~enable-theme~, or we need to advise ~consult-theme~ to always run ~load-theme~.
-For now, the latter option seems better. To simplify things further, let's
-always use themes from the =ef-themes= package.
-
-#+begin_src emacs-lisp :tangle yes
-(after! (:and consult ef-themes)
-  (setq consult-themes '("\\`ef-"))
-  (defadvice! my/consult-theme-a (theme)
-    :override #'consult-theme
-    (unless (eq theme (car custom-enabled-themes))
-      (ef-themes--load-theme theme))))
-#+end_src
 
 * :ui
 #+begin_quote
@@ -667,7 +651,11 @@ Aesthetic modules that affect the Emacs interface or user experience.
 ;;; :ui
 #+end_src
 
+<<<<<<< HEAD
 ** Miscellany [16/19]
+=======
+** Miscellany [12/13]
+>>>>>>> parent of e628233 (Remove :ui doom module + use ef-themes exclusively)
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -686,41 +674,6 @@ Miscellaneous configuration without a corresponding module.
 ;; Vim-like diff
 (package! vdiff)
 (package! vdiff-magit)
-#+end_src
-
-*** OKAY [#A] Install prerequisites
-**** OKAY macOS
-#+begin_src sh :tangle install/macos.sh
-# Install prerequisites for `ui/Miscellany`
-brew install font-terminus
-
-# TODO: Comic Mono
-#+end_src
-
-**** DONE Fedora
-#+begin_src sh :tangle install/fedora.sh
-# Install prerequisites for `ui/Miscellany`
-sudo dnf -y install terminus-fonts
-
-## Comic Mono
-## <https://dtinth.github.io/comic-mono-font>
-## <https://docs.fedoraproject.org/en-US/quick-docs/fonts/#unpackaged>
-npm install -g comic-mono
-mkdir -p "$XDG_DATA_HOME/fonts"
-ln -s "`npm root -g`/comic-mono" "$XDG_DATA_HOME/fonts"
-
-## Iosevka Comfy
-if [ -e "$XDG_DATA_HOME/fonts/iosevka-comfy/.git" ]
-then
-    git -C "$XDG_DATA_HOME/fonts/iosevka-comfy" pull
-else
-    git clone --depth 1 \
-        'https://git.sr.ht/~protesilaos/iosevka-comfy' \
-        "$XDG_DATA_HOME/fonts/iosevka-comfy"
-fi
-
-## Update fonts
-fc-cache -v
 #+end_src
 
 *** DONE [#B] Create and bind window dedication functions :feat:
@@ -857,135 +810,6 @@ original text, even though they might look a little better. Let's disable them:
 (unless initial-window-system
   (setq-default wrap-prefix "↪ "))
 #+end_src
-
-*** DONE [#C] Tweak the style of the tab bar :tweak:
-The following hook needs to be defined before we set the initial theme in order
-for it to take effect.
-
-#+begin_src emacs-lisp :tangle yes
-(add-hook! 'doom-load-theme-hook
-  (defun my/tab-bar-theme-h ()
-    "Tweak the style of the tab bar."
-    (if (string-match-p "\\`ef-" (symbol-name doom-theme))
-        (ef-themes-with-colors
-          (custom-set-faces
-           `(tab-bar ((,c :background ,bg-inactive :foreground ,fg-intense)))))
-      (eeowaa-use-face tab-bar mode-line-inactive))))
-#+end_src
-
-*** DONE [#C] Set the theme :tweak:
-There are literally only two custom themes (~doom-badger~ and ~doom-rouge~) that
-satisfy the following requirements /without modification/ when running in a
-256-color terminal:
-
-1. Files and directories have different colors in Treemacs
-2. Buffers and modelines have noticeably different background colors even in
-   unselected windows
-3. The background color of the current selection in the completion framework is
-   never the same as the foreground color of any part of the selection
-
-For a 256-color terminal, ~doom-badger~ is OK, but I prefer ~doom-henna~.
-Unfortunately, it does not satisfy the 3rd requirement, so I made a patched copy
-of the theme called ~eeowaa-henna~ that fixes the problem. Note that I created a
-new theme instead of customizing ~doom-henna~ because I prefer ~doom-henna~ over
-~eeowaa-henna~ in GUI Emacs and like using it sometimes. *UPDATE*: The
-=ef-themes= package provides more themes that satisfy all three requirements in
-a 256-color terminal; I have migrated to ~ef-tritanopia-dark~ for now.
-
-As for GUI Emacs, I love ~doom-outrun-electric~ for its clear separation between
-windows and for its cool color palette. However, the background color of the
-selected item in Treemacs is nearly the same as the regular background color (a
-problem that [[https://www.reddit.com/r/DoomEmacs/comments/pfp39u/customizing_doomtheme/][others have experienced]]), so it is hard to tell what is currently
-selected. To fix the problem, I customized the theme to use the same background
-color as the face used for the current selection in the completion framework.
-Note that this fix also modifies the background color of highlighted lines in
-other windows that use =solaire-mode=. *UPDATE*: The =ef-themes= packages
-provides very nice-looking themes in a graphical environment, and are better
-than most Doom themes for displaying the =tab-line= and =tab-bar=; I have
-migrated to ~ef-bio~ for now.
-
-#+begin_src emacs-lisp :tangle yes
-(setq doom-theme
-      (if initial-window-system
-          'ef-bio
-        'ef-tritanopia-dark))
-
-(after! (:and solaire-mode (:or vertico ivy))
-  (let ((face (cond
-               ((facep 'vertico-current) 'vertico-current)
-               ((facep 'ivy-current-match) 'ivy-current-match)
-               (t (error "Could not determine face")))))
-    (custom-theme-set-faces! 'doom-outrun-electric
-      `(solaire-hl-line-face :background
-                             ,(face-attribute face :background)))))
-#+end_src
-
-Some other themes that I enjoy in GUI Emacs include:
-- ~doom-tokyo-night~ (good dark theme that is easy on the eyes and brain)
-- ~doom-gruvbox-light~ (good light theme for working in direct sunlight)
-- ~doom-tomorrow-day~ (good light theme to go with Comic Mono font)
-- ~doom-plain~ and ~doom-plain-dark~ (good monochrome themes to focus on text)
-
-*** DONE [#C] Set the font :tweak:
-At least on Linux, you can list available fonts like this:
-
-#+begin_src sh :tangle no :results verbatim
-fc-list | sed 's/[^:].*: //' | sort -u     # all fonts
-fc-list :spacing=mono family style | sort  # just monospace
-#+end_src
-
-Some of my favorite free and open-source fonts include:
-- ~Iosevka Comfy~ (good spacing)
-- ~Source Code Pro~ (well-rounded)
-- ~Terminus~ (crisp)
-- ~Comic Mono~ (fun)
-
-#+begin_src emacs-lisp :tangle yes
-;; Define fonts that I like
-(setq my/fonts '(("Iosevka Comfy Fixed" ;; Remove " Fixed" if you want ligatures
-                  :variable-pitch "Iosevka Comfy Duo"
-                  :serif "Iosevka Comfy Motion Fixed"
-                  :default-size 22)
-                 ("Source Code Pro"
-                  :default-size 22)
-                 ("Terminus"
-                  :default-size 30)
-                 ("Comic Mono"
-                  :variable-pitch "Comic Neue"
-                  :default-size 24)))
-
-;; Define a fuction to change the fonts
-(defun my/select-font (font &optional size)
-  "Change the current fonts to a collection in `my/fonts'.
-If SIZE is omitted, the default will be used.
-When called interactively, reload the fonts in the current session."
-  (interactive (list (completing-read "Font family: "
-                                      (mapcar #'car my/fonts) nil t)
-                     nil))
-  (let* ((f (lambda (x y) (and x y (font-spec :family x :size y))))
-         (p (or (alist-get font my/fonts nil nil #'string=)
-                (error "\"%s\" not found in `my/fonts'" font)))
-         (variable-pitch-font (plist-get p :variable-pitch))
-         (serif-font (plist-get p :serif))
-         (default-size (plist-get p :default-size)))
-    (unless size
-      (setq size (if (interactive-p)
-                     (eeowaa-read-positive-int "Font size: " default-size)
-                   default-size)))
-    (setq doom-font                (funcall f font size)
-          doom-variable-pitch-font (funcall f variable-pitch-font size)
-          doom-serif-font          (funcall f serif-font size)))
-  (and (interactive-p) (doom/reload-font)))
-
-;; Set the font
-(my/select-font "Iosevka Comfy Fixed")
-#+end_src
-
-*** TODO [#C] Set the Unicode font :tweak:
-The annoyance I would like to get rid of is that some Unicode glyphs (e.g. the
-copyright symbol ©) are not fixed width. Doom provides ~doom-unicode-font~ to
-set the Unicode font. Use the following as a reference:
-https://stackoverflow.com/questions/1938639/monospace-unicode-font
 
 *** STRT [#B] Configure =vdiff= :feat:module:
 See also: [[file:~/.config/emacs/.local/straight/repos/evil-collection/modes/vdiff/evil-collection-vdiff.el][evil-collection-vdiff]]
@@ -1196,11 +1020,46 @@ advising ~balance-windows~ to respect side windows.
 formats, such as org-mode, markdown, and LaTeX.
 #+end_quote
 
-** doom [5/6] :ARCHIVE:
+** doom [5/6]
 #+begin_quote
 This module gives Doom its signature look: powered by the =doom-one= theme
 (inspired by Atom's One Dark theme) and =solaire-mode=.
 #+end_quote
+
+*** OKAY [#A] Install prerequisites
+**** OKAY macOS
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `ui/doom` module
+brew install font-terminus
+
+# TODO: Comic Mono
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `ui/doom` module
+sudo dnf -y install terminus-fonts
+
+## Comic Mono
+## <https://dtinth.github.io/comic-mono-font>
+## <https://docs.fedoraproject.org/en-US/quick-docs/fonts/#unpackaged>
+npm install -g comic-mono
+mkdir -p "$XDG_DATA_HOME/fonts"
+ln -s "`npm root -g`/comic-mono" "$XDG_DATA_HOME/fonts"
+
+## Iosevka Comfy
+if [ -e "$XDG_DATA_HOME/fonts/iosevka-comfy/.git" ]
+then
+    git -C "$XDG_DATA_HOME/fonts/iosevka-comfy" pull
+else
+    git clone --depth 1 \
+        'https://git.sr.ht/~protesilaos/iosevka-comfy' \
+        "$XDG_DATA_HOME/fonts/iosevka-comfy"
+fi
+
+## Update fonts
+fc-cache -v
+#+end_src
 
 *** DONE [#A] Never hide the modeline :tweak:bug:
 Without a modeline, the only way to see a clear distinction between the bottom
@@ -1247,6 +1106,135 @@ exchange of screen real estate.
                 eshell-mode-hook)
               #'hide-mode-line-mode)
 #+end_src
+
+*** DONE [#C] Tweak the style of the tab bar :tweak:
+The following advice needs to be defined before we set the initial theme in
+order for it to take effect.
+
+#+begin_src emacs-lisp :tangle yes
+(defadvice! my/tab-bar-theme-a (theme &rest _)
+  "Tweak the style of the tab bar."
+  :after '(load-theme consult-theme)
+  (if (string-match-p "\\`ef-" (symbol-name theme))
+      (ef-themes-with-colors
+        (custom-set-faces
+         `(tab-bar ((,c :background ,bg-inactive :foreground ,fg-intense)))))
+    (eeowaa-use-face tab-bar mode-line-inactive)))
+#+end_src
+
+*** DONE [#C] Set the theme :tweak:
+There are literally only two custom themes (~doom-badger~ and ~doom-rouge~) that
+satisfy the following requirements /without modification/ when running in a
+256-color terminal:
+
+1. Files and directories have different colors in Treemacs
+2. Buffers and modelines have noticeably different background colors even in
+   unselected windows
+3. The background color of the current selection in the completion framework is
+   never the same as the foreground color of any part of the selection
+
+For a 256-color terminal, ~doom-badger~ is OK, but I prefer ~doom-henna~.
+Unfortunately, it does not satisfy the 3rd requirement, so I made a patched copy
+of the theme called ~eeowaa-henna~ that fixes the problem. Note that I created a
+new theme instead of customizing ~doom-henna~ because I prefer ~doom-henna~ over
+~eeowaa-henna~ in GUI Emacs and like using it sometimes. *UPDATE*: The
+=ef-themes= package provides more themes that satisfy all three requirements in
+a 256-color terminal; I have migrated to ~ef-tritanopia-dark~ for now.
+
+As for GUI Emacs, I love ~doom-outrun-electric~ for its clear separation between
+windows and for its cool color palette. However, the background color of the
+selected item in Treemacs is nearly the same as the regular background color (a
+problem that [[https://www.reddit.com/r/DoomEmacs/comments/pfp39u/customizing_doomtheme/][others have experienced]]), so it is hard to tell what is currently
+selected. To fix the problem, I customized the theme to use the same background
+color as the face used for the current selection in the completion framework.
+Note that this fix also modifies the background color of highlighted lines in
+other windows that use =solaire-mode=. *UPDATE*: The =ef-themes= packages
+provides very nice-looking themes in a graphical environment, and are better
+than most Doom themes for displaying the =tab-line= and =tab-bar=; I have
+migrated to ~ef-bio~ for now.
+
+#+begin_src emacs-lisp :tangle yes
+(setq doom-theme
+      (if initial-window-system
+          'ef-bio
+        'ef-tritanopia-dark))
+
+(after! (:and solaire-mode (:or vertico ivy))
+  (let ((face (cond
+               ((facep 'vertico-current) 'vertico-current)
+               ((facep 'ivy-current-match) 'ivy-current-match)
+               (t (error "Could not determine face")))))
+    (custom-theme-set-faces! 'doom-outrun-electric
+      `(solaire-hl-line-face :background
+                             ,(face-attribute face :background)))))
+#+end_src
+
+Some other themes that I enjoy in GUI Emacs include:
+- ~doom-tokyo-night~ (good dark theme that is easy on the eyes and brain)
+- ~doom-gruvbox-light~ (good light theme for working in direct sunlight)
+- ~doom-tomorrow-day~ (good light theme to go with Comic Mono font)
+- ~doom-plain~ and ~doom-plain-dark~ (good monochrome themes to focus on text)
+
+*** DONE [#C] Set the font :tweak:
+At least on Linux, you can list available fonts like this:
+
+#+begin_src sh :tangle no :results verbatim
+fc-list | sed 's/[^:].*: //' | sort -u     # all fonts
+fc-list :spacing=mono family style | sort  # just monospace
+#+end_src
+
+Some of my favorite free and open-source fonts include:
+- ~Iosevka Comfy~ (good spacing)
+- ~Source Code Pro~ (well-rounded)
+- ~Terminus~ (crisp)
+- ~Comic Mono~ (fun)
+
+#+begin_src emacs-lisp :tangle yes
+;; Define fonts that I like
+(setq my/fonts '(("Iosevka Comfy Fixed" ;; Remove " Fixed" if you want ligatures
+                  :variable-pitch "Iosevka Comfy Duo"
+                  :serif "Iosevka Comfy Motion Fixed"
+                  :default-size 22)
+                 ("Source Code Pro"
+                  :default-size 22)
+                 ("Terminus"
+                  :default-size 30)
+                 ("Comic Mono"
+                  :variable-pitch "Comic Neue"
+                  :default-size 24)))
+
+;; Define a fuction to change the fonts
+(defun my/select-font (font &optional size)
+  "Change the current fonts to a collection in `my/fonts'.
+If SIZE is omitted, the default will be used.
+When called interactively, reload the fonts in the current session."
+  (interactive (list (completing-read "Font family: "
+                                      (mapcar #'car my/fonts) nil t)
+                     nil))
+  (let* ((f (lambda (x y) (and x y (font-spec :family x :size y))))
+         (p (or (alist-get font my/fonts nil nil #'string=)
+                (error "\"%s\" not found in `my/fonts'" font)))
+         (variable-pitch-font (plist-get p :variable-pitch))
+         (serif-font (plist-get p :serif))
+         (default-size (plist-get p :default-size)))
+    (unless size
+      (setq size (if (interactive-p)
+                     (eeowaa-read-positive-int "Font size: " default-size)
+                   default-size)))
+    (setq doom-font                (funcall f font size)
+          doom-variable-pitch-font (funcall f variable-pitch-font size)
+          doom-serif-font          (funcall f serif-font size)))
+  (and (interactive-p) (doom/reload-font)))
+
+;; Set the font
+(my/select-font "Iosevka Comfy Fixed")
+#+end_src
+
+*** TODO [#C] Set the Unicode font :tweak:
+The annoyance I would like to get rid of is that some Unicode glyphs (e.g. the
+copyright symbol ©) are not fixed width. Doom provides ~doom-unicode-font~ to
+set the Unicode font. Use the following as a reference:
+https://stackoverflow.com/questions/1938639/monospace-unicode-font
 
 ** doom-dashboard [0/0] :ARCHIVE:
 #+begin_quote
@@ -1861,14 +1849,6 @@ found in many other editors.
 This module provides an Atom-inspired, minimalistic modeline for Doom Emacs,
 powered by [[https://github.com/seagle0128/doom-modeline][the doom-modeline package]] (where you can find screenshots).
 #+end_quote
-
-*** DONE [#A] Install packages
-=anzu= is installed by =:ui doom=, but I currently have that module disabled.
-
-#+begin_src emacs-lisp :tangle packages.el
-(unless (modulep! :ui doom)
-  (package! anzu))
-#+end_src
 
 *** DONE [#B] Do not display buffer modification info for non-file buffers :tweak:
 #+begin_src emacs-lisp :tangle yes
@@ -2884,6 +2864,43 @@ works even when `global-diff-hl-mode' is disabled.")
    (t (seq-intersection local-minor-modes my/diff-hl-minor-modes))))
 #+end_src
 
+*** STRT [#C] Keep fringe bitmaps looking good when changing themes :bug:
+So far, only the Doom themes have /really/ good-looking fringe bitmaps for
+=diff-hl=. I have attempted to extend Doom's customizations to Prot's theme
+packages, but only for the dark themes (I find the narrow single-color fringe
+hard to see in the light themes, so the wonkiness actually helps). Also,
+=diff-hl-dired= remains untouched.
+
+#+begin_src emacs-lisp :tangle yes
+(when (and (modulep! :ui vc-gutter +pretty)
+           (modulep! :ui vc-gutter +diff-hl)
+           initial-window-system)
+
+  (add-hook! 'diff-hl-mode-hook
+    (defadvice! my/diff-hl-fringe-a (theme &rest _)
+      :after '(load-theme consult-theme)
+      (+vc-gutter-fix-diff-hl-faces-h)))
+
+  (after! ef-themes
+    (dolist (theme ef-themes-dark-themes)
+      (eval (macroexpand-1
+             `(custom-theme-set-faces! ',theme
+                `(diff-hl-insert :foreground ,(ef-themes-get-color-value 'bg-added-refine nil ',theme))
+                `(diff-hl-change :foreground ,(ef-themes-get-color-value 'bg-changed-refine nil ',theme))
+                `(diff-hl-delete :foreground ,(ef-themes-get-color-value 'bg-removed-refine nil ',theme)))))))
+
+  (with-eval-after-load 'modus-themes
+    (custom-theme-set-faces! 'modus-vivendi
+      `(diff-hl-insert :foreground ,(alist-get 'green-fringe-bg modus-themes-vivendi-colors))
+      `(diff-hl-change :foreground ,(alist-get 'yellow-fringe-bg modus-themes-vivendi-colors))
+      `(diff-hl-delete :foreground ,(alist-get 'red-fringe-bg modus-themes-vivendi-colors)))))
+#+end_src
+
+*UPDATE*: I have removed the ~+pretty~ flag from the =:ui vc-gutter= module,
+because I find the half-width =diff-hl= fringes to /only/ look really nice in
+Doom themes. I could dig a bit deeper and only enable half-width fringes for
+Doom themes, but that's not something I'm currently interested in doing.
+
 ** vi-tilde-fringe [0/2]
 #+begin_quote
 Displays a tilde(~) in the left fringe to indicate an empty line, similar to Vi.
@@ -3026,22 +3043,17 @@ indicator.
     :weight bold :height 2.5 :box (:line-width 10 :color "red")))
 #+end_src
 
-*** DONE [#C] Make the selection character the default size in modus and ef themes :tweak:
-The modus and ef themes make the selection character slightly larger than the
-default face, which makes the window content shift slightly downward, which is
-quite annoying.
+*** DONE [#C] Make the selection character the default size in modus themes :tweak:
+The modus themes (~modus-vivendi~ and ~modus-operandi~) make the selection
+character slightly larger than the default face, which makes the window content
+shift slightly downward, which is quite annoying.
 
-#+begin_src emacs-lisp :tangle yes
-(defadvice! my/aw-face-height-a (&optional theme &rest _)
-  :after #'load-theme
-  (when (and (string-match-p "\\`\\(?:modus\\|ef\\)-"
-                             (symbol-name (or theme (car custom-enabled-themes))))
-             (facep 'aw-leading-char-face))
+#+begin_src emacs-lisp :tangle no
+(defadvice! my/aw-face-height-a (theme &rest _)
+  :after '(load-theme consult-theme)
+  (when (string-match-p "\\`modus-" (symbol-name theme))
     (set-face-attribute 'aw-leading-char-face nil
                         :height (face-attribute 'default :height))))
-
-;; Modify the current theme after loading ace-window
-(after! ace-window (my/aw-face-height-a))
 #+end_src
 
 *** TODO [#B] Display window numbers in the mode line :feat:
