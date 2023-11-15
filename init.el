@@ -52,7 +52,7 @@
        ophints           ; highlight the region an operation acts on
        ;;popup             ; tame sudden yet inevitable temporary windows
        tabs              ; XXX user module
-       ;;(treemacs +lsp)   ; a project drawer, like neotree but cooler
+       (treemacs +lsp)   ; a project drawer, like neotree but cooler
        ;;unicode           ; extended unicode support for various languages
        (vc-gutter +diff-hl)
                          ; vcs diff in the fringe

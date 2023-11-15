@@ -91,6 +91,9 @@ brew install font-terminus
 
 # TODO: Comic Mono
 
+# Install prerequisites for `ui/treemacs` module
+brew install python3
+
 # Install prerequisites for `emacs/dired` module
 brew install coreutils
 

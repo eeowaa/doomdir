@@ -159,6 +159,9 @@ fi
 ## Update fonts
 fc-cache -v
 
+# Install prerequisites for `ui/treemacs` module
+sudo dnf -y install python3
+
 # Install prerequisites for `emacs/dired` module
 sudo dnf -y install coreutils
 

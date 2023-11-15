@@ -782,6 +782,221 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   ;; Treemacs buffers are treated specially
   (cl-pushnew 'treemacs-mode vimish-tab-exclude-modes))
 
+(setq doom-themes-treemacs-enable-variable-pitch nil)
+
+(setq +treemacs-git-mode 'extended)
+
+(require 'ace-window)
+
+(after! treemacs
+  (setq treemacs-collapse-dirs 0))
+
+(setq treemacs-read-string-input 'from-minibuffer)
+
+(after! treemacs-evil
+  (defun my/treemacs-visit-next ()
+    "Open the next node in another window."
+    (interactive)
+    (treemacs-next-line 1)
+    (save-selected-window
+      (treemacs-visit-node-no-split 1)))
+  (defun my/treemacs-visit-previous ()
+    "Open the previous node in another window."
+    (interactive)
+    (treemacs-previous-line 1)
+    (save-selected-window
+      (treemacs-visit-node-no-split 1)))
+  (define-key! evil-treemacs-state-map
+    "J" #'my/treemacs-visit-next
+    "K" #'my/treemacs-visit-previous))
+
+(after! (:and treemacs ace-window)
+  (setq aw-ignored-buffers (delq 'treemacs-mode aw-ignored-buffers)))
+
+(setq treemacs-show-cursor t)
+
+;; No need for the fringe indicator with `hl-line' mode and visible cursor
+(after! doom-themes-ext-treemacs
+  (with-eval-after-load 'treemacs
+    (setq treemacs-fringe-indicator-mode nil)))
+
+;; Use a solid box cursor instead of an underline
+(setq-hook! 'treemacs-mode-hook
+  evil-treemacs-state-cursor 'box)
+
+(after! doom-themes-ext-treemacs
+  (with-eval-after-load 'treemacs
+    (remove-hook 'treemacs-mode-hook #'doom-themes-hide-fringes-maybe)
+    (advice-remove #'treemacs-select-window #'doom-themes-hide-fringes-maybe)))
+
+(after! treemacs
+  (defun my/treemacs-revert-buffer-function (&rest _)
+    (my/treemacs-modify-icons)
+    (treemacs-refresh))
+  (setq-hook! 'treemacs-mode-hook
+    revert-buffer-function #'my/treemacs-revert-buffer-function))
+
+;; REVIEW Consider detecting troublesome icons and automatically falling back to
+;; the default icon for text files.
+(defvar my/treemacs-icon-extension-alist
+  '(("org" . ("org_archive"))
+    ("sh" . ("bat"))
+    ("txt" . ("Pipfile"))
+    ("json" ;; "configuration" icon
+     . ("project"
+        "Pipfile.lock"
+        "Cargo.lock"
+        "Cargo.toml"))
+    ("xlsx" . ("ods"))
+
+    ;; TODO Match on file "vcs/dir-.+-closed\\.svg"
+    ("dir-closed"
+     . ("src-closed"
+        "test-closed"
+        "bin-closed"
+        "build-closed"
+        "git-closed"
+        "github-closed"
+        "public-closed"
+        "private-closed"
+        "temp-closed" "tmp-closed"
+        "readme-closed" "docs-closed"
+        "screenshots-closed" "icons-closed"))
+
+    ;; TODO Match on file "vcs/dir-.+-open\\.svg"
+    ("dir-open"
+     . ("src-open"
+        "test-open"
+        "bin-open"
+        "build-open"
+        "git-open"
+        "github-open"
+        "public-open"
+        "private-open"
+        "temp-open" "tmp-open"
+        "readme-open" "docs-open"
+        "screenshots-open" "icons-open")))
+  "Alist of file extension mappings for Treemacs icons.
+
+The `car' of each element is a file extension with a desirable
+Treemacs icon; the `cdr' is a list of file extensions that should
+use that same icon.
+
+If the `car' is a string, it is treated case-insensitively, as
+Treemacs defines string extensions as lowercase. See the
+`treemacs-icons' package for more info; for a quick reference,
+see how `treemacs-create-theme' is used to define the \"Default\"
+Treemacs theme.")
+
+(defvar my/treemacs-fallback-icon-alist
+  '((dir-closed . " +\t")
+    (dir-open . " -\t")
+    (root-closed . " +\t")
+    (root-open . " -\t"))
+  "Alist of file extension mappings for Treemacs TUI icons.
+
+The `car' of each element is a file extension or a symbol
+representing a special Treemacs entry (see documentation for the
+EXTENSIONS argument of `treemacs-create-icon' for more info).
+
+The `cdr' of each element is a string to use in place of an icon
+in TTY Emacs (or whenever Treemacs cannot render icons).")
+
+(defvar my/treemacs-fallback-icon-default "  \t"
+  "Default fallback string for TUI icons.
+
+This string is used as the TUI icon for all Treemacs entries not
+matched in `my/treemacs-icon-fallback-alist'.")
+
+(defun my/treemacs-fallback-icon (extension)
+  "Return the fallback icon corresponding to EXTENSION."
+  (when (stringp extension)
+    (setq extension (downcase extension)))
+  (or (alist-get extension my/treemacs-fallback-icon-alist)
+      my/treemacs-fallback-icon-default))
+
+(after! treemacs
+  (defun my/treemacs-modify-icons (&optional theme)
+    "Modify the icons for the Treemacs THEME (default current).
+The following variables are consulted when modifying the theme:
+
+  `my/treemacs-icon-extension-alist'
+  `my/treemacs-fallback-icon-alist'
+  `my/treemacs-fallback-icon-default'
+
+Call this function after `treemacs-create-theme' is called to
+ensure your customizations take hold."
+    (unless (treemacs-theme-p theme)
+      (setq theme (if (stringp theme)
+                      (treemacs--find-theme theme)
+                    treemacs--current-theme)))
+    (let ((gui-icons (treemacs-theme->gui-icons theme))
+          (tui-icons (treemacs-theme->tui-icons theme)))
+
+      ;; Modify GUI icons
+      (dolist (entry my/treemacs-icon-extension-alist)
+        (let* ((key (car entry))
+               (gui-icon (treemacs-get-icon-value (if (stringp key) (downcase key) key)))
+               (extension-list (cdr entry)))
+          (dolist (ext extension-list)
+            (ht-set! gui-icons (if (stringp ext) (downcase ext) ext) gui-icon))))
+
+      ;; Modify TUI icons
+      (treemacs--maphash tui-icons (extension _)
+        (ht-set! tui-icons extension (my/treemacs-fallback-icon extension)))))
+
+  ;; FIXME: This advice either causes errors or fails to run
+  (undefadvice! my/treemacs-modify-icons-a (theme &rest _)
+    :after #'treemacs-create-theme
+    :before #'treemacs-load-theme
+    (my/treemacs-modify-icons theme))
+
+  ;; FIXME: This doesn't work, either (this is easy to see when
+  ;; `doom-themes-treemacs-theme' is set to `doom-color', or when running in TTY
+  ;; Emacs). The only workaround I've found is to run `my/treemacs-modify-icons'
+  ;; manually after opening Treemacs, closing the Treemacs window via
+  ;; `treemacs-kill-buffer', and then opening Treemacs again.
+  (add-hook! 'doom-load-theme-hook :append #'my/treemacs-modify-icons)
+
+  ;; FIXME This function does not work when the Treemacs window is selected.
+  ;; Also, the Treemacs window is always selected after this function runs, and
+  ;; I'd rather keep the current window selected.
+  (defun my/treemacs-select-theme ()
+    "Select and load a new Treemacs theme.
+Closes and re-opens Treemacs to apply the new theme."
+    (interactive)
+    (call-interactively #'treemacs-load-theme)
+    (unless (eq (treemacs-current-visibility) 'none)
+      (treemacs-select-window)
+      (treemacs-kill-buffer)
+      (treemacs)))
+
+  (defun my/treemacs-current-theme ()
+    "Return the name of the current Treemacs theme."
+    (treemacs-theme->name treemacs--current-theme)))
+
+(defun my/treemacs-workaround-fix ()
+  "Run this command if Treemacs fails to open"
+  (interactive)
+  (cl-assert (eq major-mode 'treemacs-mode))
+
+  ;; Workaround for utter brokenness
+  (treemacs--consolidate-projects)
+
+  ;; This is to facillitate a workaround for ugly icons
+  (setq revert-buffer-function #'my/treemacs-revert-buffer-function)
+
+  ;; Display the modeline in the expected format
+  (treemacs--setup-mode-line)
+
+  ;; Expand the root node at the top of the Treemacs buffer
+  (goto-char 0)
+  (treemacs-do-for-button-state
+   :on-root-node-closed (treemacs--expand-root-node btn)
+   :on-root-node-open (ignore btn)))
+
+(setq treemacs-hide-dot-git-directory nil)
+
 (after! diff-hl
   (unless (window-system) (diff-hl-margin-mode)))
 
