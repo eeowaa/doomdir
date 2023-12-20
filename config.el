@@ -2305,6 +2305,12 @@ if you want to send region to a REPL or terminal emulator."
           (slot . 0)
           (window-width . ,treemacs-width))))
 
+(after! lsp-ui-imenu
+  (setq lsp-ui-imenu-window-fix-width nil)
+  (map! :map lsp-ui-imenu-mode-map
+        :nv "<" #'evil-window-increase-width
+        :nv ">" #'evil-window-decrease-width))
+
 (map! :leader
       (:prefix-map ("c" . "code")
        :desc "Glance documentation" "g" #'lsp-ui-doc-glance
@@ -2330,6 +2336,14 @@ This variable should be set by `my/lsp-ui-set-delay'.")
 
 (my/lsp-ui-set-delay my/lsp-ui-delay)
 
+(define-key! doom-leader-toggle-map
+  "i" #'lsp-ui-imenu)
+
+(after! which-key
+  (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
+    (cl-pushnew `((,(format "\\`%s t i\\'" prefix-re)) nil . "LSP Imenu")
+                which-key-replacement-alist)))
+
 (after! lsp-mode
   (when (modulep! :ui popup)
     (setq +popup--display-buffer-alist
@@ -2339,14 +2353,6 @@ This variable should be set by `my/lsp-ui-set-delay'.")
       :size #'+popup-shrink-to-fit
       :select nil ;; NOTE I changed this from Doom's default of `t'
       :quit t)))
-
-(define-key! doom-leader-toggle-map
-  "i" #'lsp-ui-imenu)
-
-(after! which-key
-  (let ((prefix-re (regexp-opt (list doom-leader-key doom-leader-alt-key))))
-    (cl-pushnew `((,(format "\\`%s t i\\'" prefix-re)) nil . "LSP Imenu")
-                which-key-replacement-alist)))
 
 (setq lsp-lens-enable nil)
 
