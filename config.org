@@ -3057,17 +3057,16 @@ indicator.
     :weight bold :height 2.5 :box (:line-width 10 :color "red")))
 #+end_src
 
-*** DONE [#C] Make the selection character the default size in modus themes :tweak:
-The modus themes (~modus-vivendi~ and ~modus-operandi~) make the selection
-character slightly larger than the default face, which makes the window content
-shift slightly downward, which is quite annoying.
+*** DONE [#C] Make the selection character the default size :tweak:
+Certain themes (such as those provided by =ef-themes= and =modus-themes=) make
+the selection character slightly larger than the default face, which makes the
+window content shift slightly downward, which is quite annoying.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
 (defadvice! my/aw-face-height-a (theme &rest _)
   :after '(load-theme consult-theme)
-  (when (string-match-p "\\`modus-" (symbol-name theme))
-    (set-face-attribute 'aw-leading-char-face nil
-                        :height (face-attribute 'default :height))))
+  (set-face-attribute 'aw-leading-char-face nil
+                      :height (face-attribute 'default :height)))
 #+end_src
 
 *** TODO [#B] Display window numbers in the mode line :feat:

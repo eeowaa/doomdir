@@ -1065,6 +1065,11 @@ works even when `global-diff-hl-mode' is disabled.")
 
 (setq aw-background nil)
 
+(defadvice! my/aw-face-height-a (theme &rest _)
+  :after '(load-theme consult-theme)
+  (set-face-attribute 'aw-leading-char-face nil
+                      :height (face-attribute 'default :height)))
+
 (map! :leader
       (:when (modulep! :ui workspaces)
        (:prefix-map ("TAB" . "workspace")
