@@ -1808,7 +1808,7 @@ I just need to test this functionality.
   ("SPC" hydra-table/body "Menu" :exit 1))
 #+end_src
 
-** ilist [2/2] :eeowaa:
+** ilist [3/3] :eeowaa:
 **** DONE [#A] Window configuration :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setq imenu-list-mode-line-format "  Ilist"
@@ -1821,6 +1821,15 @@ I just need to test this functionality.
 (after! imenu-list
   (setq-hook! 'imenu-list-major-mode-hook
     revert-buffer-function #'imenu-list-refresh))
+#+end_src
+
+**** DONE [#C] Scale down font in imenu-list-major-mode
+#+begin_src emacs-lisp :tangle yes
+(setq my/imenu-list-text-scale -1)
+(after! imenu-list
+  (defun my/imenu-list-text-scale-h ()
+    (text-scale-increase my/imenu-list-text-scale))
+  (add-hook 'imenu-list-major-mode-hook #'my/imenu-list-text-scale-h))
 #+end_src
 
 ** indent-guides [0/0] :ARCHIVE:
@@ -2243,7 +2252,7 @@ loads, so tabs will appear in the ~ilist~ buffer until you manually run the
 Wait until you have a Maildir set up, then look at configuration options for
 ~display-time-mode~.
 
-** treemacs [12/17]
+** treemacs [13/18]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -2429,6 +2438,11 @@ don't need ~treemacs-fringe-indicator-mode~ because ~hl-line-mode~ and
   (with-eval-after-load 'treemacs
     (remove-hook 'treemacs-mode-hook #'doom-themes-hide-fringes-maybe)
     (advice-remove #'treemacs-select-window #'doom-themes-hide-fringes-maybe)))
+#+end_src
+
+*** DONE [#C] Set the text scale to -1 :tweak:
+#+begin_src emacs-lisp :tangle yes
+(setq treemacs-text-scale -1)
 #+end_src
 
 *** LOOP [#C] Configure revert-buffer :tweak:module:
@@ -6750,7 +6764,7 @@ it doesn't want to install user-contributed docsets. References:
 + ~dash-docs-install-user-docset~
   - https://github.com/roberth-k/dash-docset-terraform
 
-** lsp [2/11]
+** lsp [3/12]
 *** COMMENT Documentation
 + [[doom-modules:tools/lsp/README.org][tools/lsp module documentation]]
 + [[doom:.local/straight/repos/lsp-mode/README.md][lsp-mode package README]]
@@ -6916,6 +6930,15 @@ Until I get things figured out, I am going to continue to use hash tables.
 *** TODO [#B] Disable =lsp-lens= by default :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setq lsp-lens-enable nil)
+#+end_src
+
+*** DONE [#C] Scale down text of LSP UI Imenu windows :tweak:
+#+begin_src emacs-lisp :tangle yes
+(setq my/lsp-ui-imenu-text-scale -1)
+(after! lsp-ui-imenu
+  (defun my/lsp-ui-imenu-text-scale-h ()
+    (text-scale-increase my/lsp-ui-imenu-text-scale))
+  (add-hook 'lsp-ui-imenu-mode-hook #'my/lsp-ui-imenu-text-scale-h))
 #+end_src
 
 *** LOOP [#C] Do not display code actions in the modeline :bug:
