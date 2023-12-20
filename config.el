@@ -2297,16 +2297,18 @@ if you want to send region to a REPL or terminal emulator."
   (setq lsp-ui-doc-show-with-mouse t
         lsp-ui-doc-delay 0.5))
 
+(after! (:and treemacs lsp-ui-imenu)
+  (setq lsp-ui-imenu-buffer-position 'right
+        lsp-ui-imenu-window-width treemacs-width
+        lsp-treemacs-symbols-position-params
+        `((side . right)
+          (slot . 0)
+          (window-width . ,treemacs-width))))
+
 (map! :leader
       (:prefix-map ("c" . "code")
        :desc "Glance documentation" "g" #'lsp-ui-doc-glance
        :desc "UI sideline symbols"  "u" #'lsp-ui-sideline-toggle-symbols-info))
-
-(after! treemacs
-  (setq lsp-treemacs-symbols-position-params
-        `((side . right)
-          (slot . 0)
-          (window-width . ,treemacs-width))))
 
 ;; TODO Convert to `defcustom' with a setter
 (defvar my/lsp-ui-delay 0.5

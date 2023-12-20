@@ -6794,6 +6794,17 @@ This is also possible via =SPC c l h g= (~lsp-ui-doc-glance~).
         lsp-ui-doc-delay 0.5))
 #+end_src
 
+*** DONE [#B] Display symbols in a right side window :tweak:
+#+begin_src emacs-lisp :tangle yes
+(after! (:and treemacs lsp-ui-imenu)
+  (setq lsp-ui-imenu-buffer-position 'right
+        lsp-ui-imenu-window-width treemacs-width
+        lsp-treemacs-symbols-position-params
+        `((side . right)
+          (slot . 0)
+          (window-width . ,treemacs-width))))
+#+end_src
+
 *** STRT [#B] Add alternate bindings for some LSP commands :tweak:
 Each LSP command requires 4 keystrokes to execute (=SPC c l <prefix> <cmd>=),
 which is fine for infrequently-used commands such as toggles, but unacceptable
@@ -6805,15 +6816,6 @@ already provides alternate mappings for some commands, but not everything.
       (:prefix-map ("c" . "code")
        :desc "Glance documentation" "g" #'lsp-ui-doc-glance
        :desc "UI sideline symbols"  "u" #'lsp-ui-sideline-toggle-symbols-info))
-#+end_src
-
-*** STRT [#B] Display symbols in a right side window :tweak:
-#+begin_src emacs-lisp :tangle yes
-(after! treemacs
-  (setq lsp-treemacs-symbols-position-params
-        `((side . right)
-          (slot . 0)
-          (window-width . ,treemacs-width))))
 #+end_src
 
 *** STRT [#B] Sync the timing of display updates :tweak:
