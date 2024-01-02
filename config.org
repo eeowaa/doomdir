@@ -100,7 +100,12 @@ EOF
 #+end_src
 
 *** DONE Fedora
-Reference: https://unix.stackexchange.com/a/657797
+Use =rpm -q --qf '%{name}-%{epoch}:%{version}.*\n' emacs= to see the current
+version of Emacs that you are using.
+
+Reference:
+- https://unix.stackexchange.com/a/657797
+- https://unix.stackexchange.com/a/606854/52229
 
 #+begin_src sh :tangle install/fedora.sh
 #!/bin/sh
@@ -111,7 +116,7 @@ sudo dnf -y install 'dnf-command(versionlock)'
 sudo ed /etc/dnf/plugins/versionlock.list <<EOF
 /^emacs-1:/d
 \$a
-emacs-1:$target_version-*
+emacs-1:$target_version.*
 .
 wq
 EOF

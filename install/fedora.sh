@@ -6,7 +6,7 @@ sudo dnf -y install 'dnf-command(versionlock)'
 sudo ed /etc/dnf/plugins/versionlock.list <<EOF
 /^emacs-1:/d
 \$a
-emacs-1:$target_version-*
+emacs-1:$target_version.*
 .
 wq
 EOF
