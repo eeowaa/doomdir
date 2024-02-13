@@ -20,6 +20,9 @@
 (package! col-highlight)
 (package! page-break-lines)
 
+;; Needed by `doom-themes-ext-treemacs'
+(package! all-the-icons)
+
 ;; Collection of themes by prot
 (package! ef-themes)
 
@@ -49,9 +52,6 @@
 
 ;; If this causes issues, try `(unpin! (:tools lsp))' instead
 (unpin! lsp-mode)
-
-(package! transient :pin "c2bdf7e12c530eb85476d3aef317eb2941ab9440")
-(package! with-editor :pin "bbc60f68ac190f02da8a100b6fb67cf1c27c53ab")
 
 (package! rfc-mode)
 

@@ -130,7 +130,7 @@ EOF
 :header-args: :noweb yes
 :END:
 #+name: github_binary_release
-#+begin_src sh :exports none
+#+begin_src sh :exports none :tangle no
 github_binary_release() {
     local func='github_binary_release'
     local repo= asset= prefix= root= binary=
@@ -656,11 +656,7 @@ Aesthetic modules that affect the Emacs interface or user experience.
 ;;; :ui
 #+end_src
 
-<<<<<<< HEAD
-** Miscellany [16/19]
-=======
 ** Miscellany [12/13]
->>>>>>> parent of e628233 (Remove :ui doom module + use ef-themes exclusively)
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -669,6 +665,9 @@ Miscellaneous configuration without a corresponding module.
 #+begin_src emacs-lisp :tangle packages.el
 (package! col-highlight)
 (package! page-break-lines)
+
+;; Needed by `doom-themes-ext-treemacs'
+(package! all-the-icons)
 
 ;; Collection of themes by prot
 (package! ef-themes)
@@ -2718,7 +2717,7 @@ function exited non-locally before running ~treemacs--setup-mode-line~, so
 + The ~treemacs-current-workspace~ function always returns the same data,
   regardless of the workspace:
 
-  #+begin_src lisp-data
+  #+begin_src lisp-data :tangle no
   (treemacs-current-workspace) ;; =>
   #s(treemacs-workspace "Perspective doom"
                         (#s(treemacs-project "treemacs" "/home/eeowaa/.config/emacs/.local/straight/repos/treemacs" local-readable nil)
@@ -2732,7 +2731,7 @@ function exited non-locally before running ~treemacs--setup-mode-line~, so
 + The ~projectile-switch-project~ function (=SPC p p=) might -- but not
   necessarily -- add a Treemacs projects to the current "stuck" workspace:
 
-  #+begin_src lisp-data
+  #+begin_src lisp-data :tangle no
   (treemacs-current-workspace) ;; =>
   #s(treemacs-workspace "Perspective doom"
                         (#s(treemacs-project "treemacs" "/home/eeowaa/.config/emacs/.local/straight/repos/treemacs" local-readable nil)
@@ -4435,53 +4434,6 @@ Compare with my old config and try to match it.
 I mostly want to do this to have an easier time tracking the local time of
 servers I have deployed around the world.
 
-*** HOLD [#A] Override builtin ~restart-emacs~ function :bug:
-:LOGBOOK:
-- Note taken on [2022-07-29 Fri 18:51] \\
-  This only matters in Emacs 29, which I am no longer using (I'm back at 28.1, the
-  latest stable version as of now).
-
-  Just a few days ago, Fedora started packaging Emacs 28.1, while before, they
-  were back at an older version that did not support native compilation. I was
-  using a COPR repo that supports native comp, which also happens to use the
-  development version of Emacs. A recent commit added the builtin ~restart-emacs~
-  function. Rather than fight with that, I'll fall back to Fedora's new package.
-:END:
-- Emacs 29 introduced the ~restart-emacs~ function
-  - ~emacs-version~ has the version string, but I believe that it was introduced
-    in a random commit not really associated with a specific version
-  - Probably need to check for the existence of a builtin ~restart-emacs~
-    function instead of checking the version string, and then work around it
-  - The function is defined in =/usr/share/emacs/29.0.50/lisp/files.el.gz=
-- Doom uses the ~restart-emacs~ function defined in the =restart-emacs= package
-  - The package is declared in a ~package!~ form in =~/.config/emacs/core/packages.el=
-  - The ~package!~ form sets up an autoload for ~restart-emacs~
-  - User-defined ~package!~ forms go in =~/.config/doom/packages.el=
-- Reference information about autoloads:
-  - ~autoload~ (also check the Info documentation)
-  - ~load-path~
-  - ~lisp-directory~ (=/usr/share/emacs/29.0.50/lisp=)
-- Can undefine a function using ~fmakunbound~
-- In =~/.config/emacs/core/core.el=, the following comment explains how Doom
-  starts up, which may be helpful in solving this problem:
-  #+begin_src emacs-lisp :eval no :tangle no
-  ;; The overall load order of Doom is as follows:
-  ;;
-  ;;   $EMACSDIR/early-init.el
-  ;;   $EMACSDIR/core/core.el
-  ;;   $DOOMDIR/init.el
-  ;;   {$DOOMDIR,~/.emacs.d}/modules/*/*/init.el
-  ;;   `doom-before-init-modules-hook'
-  ;;   {$DOOMDIR,~/.emacs.d}/modules/*/*/config.el
-  ;;   `doom-init-modules-hook'
-  ;;   $DOOMDIR/config.el
-  ;;   `doom-after-init-modules-hook'
-  ;;   `after-init-hook'
-  ;;   `emacs-startup-hook'
-  ;;   `doom-init-ui-hook'
-  ;;   `window-setup-hook'
-  #+end_src
-
 ** dired [2/3]
 #+begin_quote
 This module provides configuration for dired.
@@ -6177,7 +6129,7 @@ npm install -g dockerfile-language-server-nodejs
 1. [ ] Enable directory tracking
 
    From [[~/.config/emacs/.local/straight/repos/emacs-libvterm/README.md]]:
-   #+begin_src markdown
+   #+begin_src markdown :tangle no
    `vterm` supports _directory tracking_. If this feature is enabled, the default
    directory in Emacs and the current working directory in `vterm` are synced. As a
    result, interactive functions that ask for a path or a file (e.g., `dired` or
@@ -6285,7 +6237,7 @@ sudo dnf -y install editorconfig
 It is also a good idea to add the following entry to project-specific
 editorconfig files ([[https://stackoverflow.com/questions/2290016/git-commit-messages-50-72-formatting][reference]]):
 
-#+begin_src editorconfig-conf
+#+begin_src editorconfig-conf :tangle no
 [COMMIT_EDITMSG,TAG_EDITMSG,MERGE_MSG]
 max_line_length = 70
 #+end_src
@@ -6295,7 +6247,7 @@ I would like to advise ~editorconfig-set-line-length~ to modify the line-length
 rule used by ~markdownlint~. *UPDATE*: For now, I am just adding
 =.markdownlintrc= config files to project directories like this:
 
-#+begin_src json
+#+begin_src json :tangle no
 {
   "default": true,
   "MD007": { "indent": 4 }
@@ -6396,7 +6348,7 @@ jupyter kernelspec list
 In the following example, ~a34ef92b-1a76-41b3-a410-79bdac3f55e9~ would appear
 after the output block of the resulting IPYNB buffer:
 
-#+begin_src org :eval no
+#+begin_src org :eval no :tangle no
 ,#+NAME: a34ef92b-1a76-41b3-a410-79bdac3f55e9
 ,#+begin_src ein-bash
 echo "Hi, ${name}!"
@@ -6994,7 +6946,7 @@ cpan install App::Git::Autofixup
 - https://www.reddit.com/r/emacs/comments/1118o25/doom_emacs_error_running_hook_globalgitcommitmode/
 - https://github.com/magit/with-editor/commit/59867aebe16454be4d8c0c858f3b00b8a34f3f61
 
-#+begin_src emacs-lisp :tangle packages.el
+#+begin_src emacs-lisp :tangle no
 (package! transient :pin "c2bdf7e12c530eb85476d3aef317eb2941ab9440")
 (package! with-editor :pin "bbc60f68ac190f02da8a100b6fb67cf1c27c53ab")
 #+end_src
@@ -7083,7 +7035,7 @@ Beyond that, a couple of bugs in the recommended rule have been found and fixed
 in recent edits to that StackOverflow post (namely setting ~LC_ALL~ and
 modifying the ~awk~ regexps):
 
-#+begin_src diff
+#+begin_src diff :tangle no
 - @$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 + @LC_ALL=C $(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/(^|\n)# Files(\n|$$)/,/(^|\n)# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 #+end_src
@@ -9476,7 +9428,8 @@ widen the narrowed capture buffer and save the buffer over =~/org/todo.org=
 #+end_src
 
 **** STRT [#B] Set icons for agenda prefix :feat:
-#+begin_src emacs-lisp :tangle yes
+
+#+begin_src emacs-lisp :tangle no
 (setq org-agenda-category-icon-alist
       `(("/inbox\\'"           (,(all-the-icons-faicon     "inbox"      nil nil :height 1.00 :face 'all-the-icons-dred)))
         ;; work/*
@@ -9851,7 +9804,7 @@ as follows:
 
 1. Run the following commands:
 
-   #+begin_src :tangle no
+   #+begin_src sh :tangle no
    cd ~/.config/emacs/.local/straight/build-28.2/zmq
    make configure && make
    #+end_src
@@ -10488,7 +10441,7 @@ npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 Currently, I achieve this by adding the following text to an =.editorconfig=
 file in directory trees containing HTML files that I want to edit:
 
-#+begin_src editorconfig-conf
+#+begin_src editorconfig-conf :tangle no
 [*.html]
 indent_style = space
 indent_size = 2
@@ -11200,7 +11153,7 @@ for you to customize it yourself. It is best to load these last.
 ;;; :config
 #+end_src
 
-** Miscellany [6/6]
+** Miscellany [5/6]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -11316,7 +11269,7 @@ again.
                                    t "\\`[^.]")))))
 #+end_src
 
-*** DONE [#C] Add ergonomic keybindings for hard-to-reach keys :module:tweak:
+*** LOOP [#C] Add ergonomic keybindings for hard-to-reach keys :module:tweak:
 I do not like to put undue stress on my pinky fingers while typing, so I often
 like to use alternate key chords for the Enter, Backspace, and Tab keys (I have
 Control and Alt mapped to thumb keys on my keyboard).

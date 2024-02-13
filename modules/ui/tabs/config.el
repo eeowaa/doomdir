@@ -87,6 +87,7 @@ If INDEX is not a workspace index, return nil."
 
   (setq tab-bar-tabs-function #'+tabs-workspace-tabs-fn
         tab-bar-tab-face-function #'+tabs-workspace-tab-face-fn
+        tab-bar-auto-width nil
         tab-bar-tab-hints t
         tab-bar-new-button-show nil
         tab-bar-close-button-show nil
