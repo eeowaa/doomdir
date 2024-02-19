@@ -77,7 +77,7 @@
 (package! jenkinsfile-mode)
 
 ;; Applescript
-(when IS-MAC
+(when (featurep :system 'macos)
   (package! applescript-mode)
   (package! ob-applescript))
 

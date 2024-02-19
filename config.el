@@ -423,8 +423,8 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
     ;; Open Spotify
     ("o" (cond
-            (IS-MAC (call-process "open" nil nil nil "-a" "spotify"))
-            (IS-LINUX (call-process "xdg-open" nil nil nil "spotify"))
+            ((featurep :system 'macos) (call-process "open" nil nil nil "-a" "spotify"))
+            ((featurep :system 'linux) (call-process "xdg-open" nil nil nil "spotify"))
             (t (user-error! "Unsupported operating system"))))
     ("w" (browse-url "https://open.spotify.com"))
     ("i" (browse-url "https://developer.spotify.com/my-applications"))
@@ -1982,7 +1982,7 @@ which causes problems even if there is no existing buffer."
     (when (fboundp '+spell--create-word-dict-a)
       (advice-remove 'spell-fu--word-add-or-remove #'+spell--create-word-dict-a))))
 
-(when IS-LINUX
+(when (featurep :system 'linux)
   (let ((langtool-dir (concat (file-name-as-directory (getenv "HOME"))
                               ".local/src/doom/LanguageTool/")))
     (setq langtool-language-tool-jar (concat langtool-dir "languagetool-commandline.jar")
@@ -2915,7 +2915,7 @@ See also: `ts-fold-summary--get'."
         :n "u" #'x509--asn1-offset-up
         :n "x" #'x509-asn1-toggle-hexl))
 
-(when IS-MAC
+(when (featurep :system 'macos)
   (setq ;; Comfortable keys that work most of the time
         mac-command-modifier 'control
         mac-right-command-modifier 'meta
@@ -3395,7 +3395,7 @@ just perform a complete cycle of `org-cycle'."
   (setcdr (assoc 'file org-link-frame-setup) #'find-file-other-window))
 
 (setq org-man-command
-      (if (and (not IS-MAC) (executable-find "man"))
+      (if (and (not (featurep :system 'macos)) (executable-find "man"))
           #'man
         #'woman))
 

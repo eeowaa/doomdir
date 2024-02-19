@@ -1453,8 +1453,8 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
     ;; Open Spotify
     ("o" (cond
-            (IS-MAC (call-process "open" nil nil nil "-a" "spotify"))
-            (IS-LINUX (call-process "xdg-open" nil nil nil "spotify"))
+            ((featurep :system 'macos) (call-process "open" nil nil nil "-a" "spotify"))
+            ((featurep :system 'linux) (call-process "xdg-open" nil nil nil "spotify"))
             (t (user-error! "Unsupported operating system"))))
     ("w" (browse-url "https://open.spotify.com"))
     ("i" (browse-url "https://developer.spotify.com/my-applications"))
@@ -5560,7 +5560,7 @@ sudo dnf -y install unzip java-latest-openjdk-headless
 
 *** DONE [#A] Specify JAR paths on Linux :tweak:
 #+begin_src emacs-lisp :tangle yes
-(when IS-LINUX
+(when (featurep :system 'linux)
   (let ((langtool-dir (concat (file-name-as-directory (getenv "HOME"))
                               ".local/src/doom/LanguageTool/")))
     (setq langtool-language-tool-jar (concat langtool-dir "languagetool-commandline.jar")
@@ -7733,7 +7733,7 @@ See also:
 ** macos [2/2]
 *** DONE [#A] Remap keys for macOS :tweak:
 #+begin_src emacs-lisp :tangle yes
-(when IS-MAC
+(when (featurep :system 'macos)
   (setq ;; Comfortable keys that work most of the time
         mac-command-modifier 'control
         mac-right-command-modifier 'meta
@@ -7816,7 +7816,7 @@ Miscellaneous configuration without a corresponding module.
 (package! jenkinsfile-mode)
 
 ;; Applescript
-(when IS-MAC
+(when (featurep :system 'macos)
   (package! applescript-mode)
   (package! ob-applescript))
 
@@ -9216,7 +9216,7 @@ References:
 **** DONE [#C] Configure how links to man pages are opened :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setq org-man-command
-      (if (and (not IS-MAC) (executable-find "man"))
+      (if (and (not (featurep :system 'macos)) (executable-find "man"))
           #'man
         #'woman))
 #+end_src

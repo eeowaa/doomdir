@@ -414,8 +414,9 @@ sed -n \
     init.el
 #+end_src
 
-Which actually comes pretty close (it misses ~(:if IS-MAC macos)~ but otherwise
-gets everything). The better way would be to parse the output of ~doom info~:
+Which actually comes pretty close (it misses ~(:if (featurep :system 'macos) macos)~
+but otherwise gets everything). The better way would be to parse the output of
+~doom info~:
 
 #+begin_src sh :tangle no
 doom info | sed -n \
