@@ -71,6 +71,7 @@
 
 ;; Config
 (package! systemd)
+(package! nix-mode)
 
 ;; Builds
 (package! jenkinsfile-mode)
