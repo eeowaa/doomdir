@@ -558,6 +558,9 @@ pip3 install --user debugpy
 sudo dnf -y install racket
 raco pkg install --auto racket-langserver
 
+# Install prerequisites for `lang/rest` module
+sudo dnf -y install jq
+
 # Install prerequisites for `lang/rust` module
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
     | sh -s -- --no-modify-path --quiet -y

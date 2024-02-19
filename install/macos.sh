@@ -224,6 +224,9 @@ pip3 install --user debugpy
 # Install prerequisites for `lang/racket` module
 brew install --cask racket
 
+# Install prerequisites for `lang/rest` module
+brew install jq
+
 # Install prerequisites for `lang/sh` module
 brew install bash zsh fish powershell bashdb zshdb shellcheck
 npm install -g bash-language-server

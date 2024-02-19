@@ -68,7 +68,6 @@
 
 ;; Filtering
 (package! sed-mode)
-(package! jq-mode)
 
 ;; Config
 (package! systemd)

@@ -7807,7 +7807,6 @@ Miscellaneous configuration without a corresponding module.
 
 ;; Filtering
 (package! sed-mode)
-(package! jq-mode)
 
 ;; Config
 (package! systemd)
@@ -10114,10 +10113,23 @@ raco pkg install --auto racket-langserver
 This module adds a major mode and flycheck for Raku.
 #+end_quote
 
-** rest [0/0]
+** rest [1/1]
 #+begin_quote
 This module adds [[https://en.wikipedia.org/wiki/Representational_state_transfer][REST]] support.
 #+end_quote
+
+*** DONE [#A] Install prerequisites :feat:
+**** DONE macOS
+#+begin_src sh :tangle install/macos.sh
+# Install prerequisites for `lang/rest` module
+brew install jq
+#+end_src
+
+**** DONE Fedora
+#+begin_src sh :tangle install/fedora.sh
+# Install prerequisites for `lang/rest` module
+sudo dnf -y install jq
+#+end_src
 
 ** rst [0/0]
 ** ruby [0/0] :ARCHIVE:
