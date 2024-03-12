@@ -144,7 +144,7 @@ sudo dnf -y install terminus-fonts
 ## <https://docs.fedoraproject.org/en-US/quick-docs/fonts/#unpackaged>
 npm install -g comic-mono
 mkdir -p "$XDG_DATA_HOME/fonts"
-ln -s "`npm root -g`/comic-mono" "$XDG_DATA_HOME/fonts"
+ln -sf "`npm root -g`/comic-mono" "$XDG_DATA_HOME/fonts"
 
 ## Iosevka Comfy
 if [ -e "$XDG_DATA_HOME/fonts/iosevka-comfy/.git" ]
@@ -255,7 +255,7 @@ then
 else
     mkdir -p ~/.local/opt
     git clone https://github.com/cask/cask ~/.local/opt/cask
-    ln -s ~/.local/opt/cask/bin/cask ~/.local/bin
+    ln -sf ~/.local/opt/cask/bin/cask ~/.local/bin
 fi
 
 ## Install NodeJS
@@ -524,7 +524,7 @@ set -xe
 slides_path=$(realpath "$1")
 slides_file=$(basename "$1")
 cd ~/.local/src/utils/reveal.js
-ln -s "${slides_path}" .
+ln -sf "${slides_path}" .
 trap "rm '$PWD/${slides_file}'" EXIT
 npm start &
 sleep 2
@@ -570,7 +570,7 @@ rustup component add rustfmt-preview clippy-preview
 ## rust-analyzer
 rustup component add rust-src
 rustup +nightly component add rust-analyzer-preview
-ln -s ~/.rustup/toolchains/nightly-*/bin/rust-analyzer ~/.cargo/bin
+ln -sf ~/.rustup/toolchains/nightly-*/bin/rust-analyzer ~/.cargo/bin
 
 ## rls
 rustup component add rls rust-analysis rust-src
