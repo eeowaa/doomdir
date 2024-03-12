@@ -235,7 +235,7 @@ pipx install --include-deps jupyter
 pipx inject jupyter bash_kernel
 
 ## Run the installer script to install the kernel in the virtualenv
-. "$(pipx environment -v PIPX_LOCAL_VENVS)/jupyter/bin/activate"
+. "$(pipx environment -V PIPX_LOCAL_VENVS)/jupyter/bin/activate"
 python -m bash_kernel.install --sys-prefix
 deactivate
 
@@ -313,7 +313,7 @@ EOF
 )
 
 # Install prerequisites for `tools/lookup` module
-sudo dnf -y install ripgrep sqlite-3 wordnet
+sudo dnf -y install ripgrep sqlite wordnet
 
 # Install prerequisites for `tools/magit` module
 (cd ~/Documents/src/life/stow-dotfiles && make perl)
@@ -337,12 +337,12 @@ sudo dnf -y install gcc gdb
 sudo dnf -y install clang clang-tools-extra
 
 ## ccls
-sudo dnf -y install cmake clang clang-devel llvm-devel rapidjson
+sudo dnf -y install cmake clang clang-devel llvm-devel rapidjson-devel
 (
     set -e
     mkdir -p "$HOME/.local/src/doom" && cd "$HOME/.local/src/doom"
     if [ -d ccls ]
-    then git -C ccls pull -f
+    then git -C ccls fetch && git -C ccls reset --hard '@{u}'
     else git clone --depth=1 --recursive https://github.com/MaskRay/ccls
     fi
     cd ccls && rm -rf Release
@@ -424,6 +424,8 @@ curl --proto '=https' --tlsv1.2 -sSf -Lo "$HOME/.local/bin/ghcup" \
 chmod +x "$HOME/.local/bin/ghcup"
 
 ## Compiler
+rm -f ~/.ghcup/bin/ghc
+rm -f ~/.ghcup/bin/ghci
 ghcup install ghc
 (
     version=`
@@ -434,8 +436,8 @@ ghcup install ghc
         tail -1 | awk '{print $2}'
     `
     cd ~/.ghcup/bin
-    ln -sf ghc-$version ghc
-    ln -sf ghci-$version ghci
+    ln -s ghc-$version ghc
+    ln -s ghci-$version ghci
 )
 
 ## Language server
@@ -463,13 +465,13 @@ npm install -g typescript typescript-language-server eslint trepan-ni
     set -e
     mkdir -p "$HOME/.local/src/doom" && cd "$HOME/.local/src/doom"
     if [ -d vscode-node-debug2 ]
-    then git -C vscode-node-debug2 pull -f
+    then git -C vscode-node-debug2 fetch && git -C vscode-node-debug2 reset --hard '@{u}'
     else git clone --depth=1 --recursive https://github.com/microsoft/vscode-node-debug2
     fi
     cd vscode-node-debug2
     git clean -fd
     npm ci
-    npm run package
+    npm run package # FIXME: This has been breaking lately
     set -- *.vsix
     test $# -eq 1
     destdir=$XDG_CONFIG_HOME/emacs/.local/etc/dap-extension/vscode/ms-vscode.node-debug2
@@ -490,7 +492,7 @@ sudo dnf -y install texlive-ulem
 
 # Install prerequisites for `lang/lua` module
 github_binary_release \
-    --repo sumneko/lua-language-server \
+    --repo LuaLS/lua-language-server \
     --asset 'lua-language-server-.*-linux-x64.tar.gz' \
     --prefix "$HOME/.local/opt/lua-language-server" \
     --path . \
@@ -506,7 +508,7 @@ pipx install grip
     set -e
     mkdir -p "$HOME/.local/src/utils" && cd "$HOME/.local/src/utils"
     if [ -d reveal.js ]
-    then git -C reveal.js pull -f
+    then git -C reveal.js fetch && git -C reveal.js reset --hard '@{u}'
     else git clone --depth=1 https://github.com/hakimel/reveal.js.git
     fi
     cd reveal.js && npm install
@@ -534,7 +536,7 @@ EOF
 chmod +x ~/.local/bin/revealjs
 
 # Install prerequisites for `lang/org` module
-sudo dnf -y install ditaa gnuplot pandoc graphviz sqlite-3
+sudo dnf -y install ditaa gnuplot pandoc graphviz sqlite
 pipx install --include-deps jupyter
 pipx inject jupyter ipykernel
 sudo dnf -y install zeromq-devel libstdc++-static

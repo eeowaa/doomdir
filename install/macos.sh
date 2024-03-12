@@ -138,7 +138,7 @@ pipx install --include-deps jupyter
 pipx inject jupyter bash_kernel
 
 ## Run the installer script to install the kernel in the virtualenv
-. "$(pipx environment -v PIPX_LOCAL_VENVS)/jupyter/bin/activate"
+. "$(pipx environment -V PIPX_LOCAL_VENVS)/jupyter/bin/activate"
 python -m bash_kernel.install --sys-prefix
 deactivate
 
