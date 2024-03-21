@@ -3046,6 +3046,11 @@ See also: `ts-fold-summary--get'."
   (advice-add 'markdown-preview :around #'my/markdown-preview))
 
 (setq markdown-fontify-code-blocks-natively t)
+(defadvice! my/markdown-fontify-code-block-a (fn &rest args)
+  "Prevent `lsp!' and `tree-sitter!' from running during fontification."
+  :around #'markdown-fontify-code-block-natively
+  (let (sh-mode-local-vars-hook)
+    (apply fn args)))
 
 (after! markdown-mode
   (defun my/markdown-edit-code-block (f &rest r)

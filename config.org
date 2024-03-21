@@ -8578,6 +8578,11 @@ preview Markdown rendering in the system browser.
 *** DONE [#B] Fontify source blocks :feat:
 #+begin_src emacs-lisp :tangle yes
 (setq markdown-fontify-code-blocks-natively t)
+(defadvice! my/markdown-fontify-code-block-a (fn &rest args)
+  "Prevent `lsp!' and `tree-sitter!' from running during fontification."
+  :around #'markdown-fontify-code-block-natively
+  (let (sh-mode-local-vars-hook)
+    (apply fn args)))
 #+end_src
 
 *** DONE [#B] Show edit buffer in the current window :tweak:
