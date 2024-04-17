@@ -16,5 +16,5 @@ Linux)
     fedora) sh -x "$progdir/$distro".sh ;;
     *) unsupported ;;
     esac ;;
-*)  unsuported ;;
+*)  unsupported ;;
 esac
