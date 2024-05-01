@@ -647,6 +647,11 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     (text-scale-increase my/imenu-list-text-scale))
   (add-hook 'imenu-list-major-mode-hook #'my/imenu-list-text-scale-h))
 
+(remove-hook! '(prog-mode-hook
+                text-mode-hook
+                conf-mode-hook)
+  #'highlight-indent-guides-mode)
+
 (setq +ligatures-in-modes '(org-mode)
       +ligatures-extras-in-modes '(org-mode))
 

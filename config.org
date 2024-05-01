@@ -1836,7 +1836,14 @@ I just need to test this functionality.
   (add-hook 'imenu-list-major-mode-hook #'my/imenu-list-text-scale-h))
 #+end_src
 
-** indent-guides [0/0] :ARCHIVE:
+** indent-guides [1/1]
+*** DONE [#B] Disable =highlight-indent-guides-mode= by default :tweak:
+#+begin_src emacs-lisp :tangle yes
+(remove-hook! '(prog-mode-hook
+                text-mode-hook
+                conf-mode-hook)
+  #'highlight-indent-guides-mode)
+#+end_src
 ** ligatures [1/1]
 #+begin_quote
 This module enables ligatures and arbitrary symbol substitutions with
@@ -10523,6 +10530,15 @@ explicitly enable line numbers.
 #+begin_src emacs-lisp :tangle yes
 (setq-hook! 'yaml-mode-hook
   display-line-numbers t)
+#+end_src
+
+*** STRT [#C] Display indent guides in YAML mode :tweak:
+I am not a fan of how these look right now, but I like the concept.
+
+#+begin_src emacs-lisp :tangle no
+(when (modulep! :ui indent-guides)
+  (add-hook 'yaml-mode-local-vars-hook
+            #'highlight-indent-guides-mode))
 #+end_src
 
 *** TODO [#A] Fix output from LSP server :bug:
