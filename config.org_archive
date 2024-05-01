@@ -814,3 +814,23 @@ use Git Flow, but I do use worktrees, so this behavior is backwards for me.
   ;;   `window-setup-hook'
   #+end_src
 
+
+* DONE [#A] Use tree-sitter with YAML :feat:hack:
+:PROPERTIES:
+:ARCHIVE_TIME: 2024-05-01 Wed 11:53
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :lang/yaml
+:ARCHIVE_CATEGORY: doom/yaml
+:ARCHIVE_TODO: DONE
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2024-05-01 Wed 11:54] \\
+  Doom now provides a ~+tree-sitter~ flag for the =:lang yaml= module.
+:END:
+This currently requires [[*Unpin =tree-sitter-langs=][unpinning tree-sitter-langs]].
+
+#+begin_src emacs-lisp :tangle yes
+(add-hook 'yaml-mode-local-vars-hook #'tree-sitter! 'append)
+#+end_src
+

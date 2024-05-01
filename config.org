@@ -7623,10 +7623,10 @@ YAML, so I am going to unpin that package for now.
 #+end_src
 
 *** DONE [#A] Add tree-sitter syntax highlighting to terraform :feat:
-Although there is no ~+tree-sitter~ flag for =:tools treesitter=, there is
+Although there is no ~+tree-sitter~ flag for =:tools terraform=, there is
 support for HCL syntax [[https://github.com/emacs-tree-sitter/tree-sitter-langs/tree/master/repos][parsing]] and [[https://github.com/emacs-tree-sitter/tree-sitter-langs/tree/master/queries][highlighting]], so Terraform should use this.
-Also, ~tree-sitter-major-mode-language-alist~ already ~terraform-mode~ to ~hcl~
-syntax, so setup should be pretty easy. Refer to how other modules handle the
+Also, ~tree-sitter-major-mode-language-alist~ already sets ~terraform-mode~ to
+~hcl~, so setup should be pretty easy. Refer to how other modules handle the
 ~+tree-sitter~ flag to implement this yourself.
 
 #+begin_src emacs-lisp :tangle yes
@@ -10511,13 +10511,6 @@ saying that the implementation of ~lsp-yaml-download-schema-store-db~ is buggy.
       (lsp-yaml-download-schema-store-db))))
 #+end_src
 
-*** DONE [#A] Use tree-sitter with YAML :feat:hack:
-This currently requires [[*Unpin =tree-sitter-langs=][unpinning tree-sitter-langs]].
-
-#+begin_src emacs-lisp :tangle yes
-(add-hook 'yaml-mode-local-vars-hook #'tree-sitter! 'append)
-#+end_src
-
 *** DONE [#B] Allow YAML schemas to be decided in .dir-locals.el :tweak:
 #+begin_src emacs-lisp :tangle yes
 (put 'lsp-yaml-schemas 'safe-local-variable #'always)
@@ -10539,6 +10532,18 @@ I am not a fan of how these look right now, but I like the concept.
 (when (modulep! :ui indent-guides)
   (add-hook 'yaml-mode-local-vars-hook
             #'highlight-indent-guides-mode))
+#+end_src
+
+*** DONE [#B] Do not use tree-sitter to hightlight YAML :bug:tweak:
+For some reason, this looks really bad with =ef-themes=.
+
+#+begin_src emacs-lisp :tangle yes
+(when (modulep! :tools tree-sitter)
+  (if (or (not (boundp '+tree-sitter-hl-enabled-modes))
+          (not (eq 'not (car +tree-sitter-hl-enabled-modes))))
+      (setq +tree-sitter-hl-enabled-modes '(not yaml-mode))
+    (let ((modes (cdr +tree-sitter-hl-enabled-modes)))
+      (setcdr +tree-sitter-hl-enabled-modes (pushnew! modes 'yaml-mode)))))
 #+end_src
 
 *** TODO [#A] Fix output from LSP server :bug:

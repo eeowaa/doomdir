@@ -3726,12 +3726,17 @@ This is a list of lists, not a list of cons cells.")
       (mkdir (file-name-directory f) t)
       (lsp-yaml-download-schema-store-db))))
 
-(add-hook 'yaml-mode-local-vars-hook #'tree-sitter! 'append)
-
 (put 'lsp-yaml-schemas 'safe-local-variable #'always)
 
 (setq-hook! 'yaml-mode-hook
   display-line-numbers t)
+
+(when (modulep! :tools tree-sitter)
+  (if (or (not (boundp '+tree-sitter-hl-enabled-modes))
+          (not (eq 'not (car +tree-sitter-hl-enabled-modes))))
+      (setq +tree-sitter-hl-enabled-modes '(not yaml-mode))
+    (let ((modes (cdr +tree-sitter-hl-enabled-modes)))
+      (setcdr +tree-sitter-hl-enabled-modes (pushnew! modes 'yaml-mode)))))
 
 ;; REVIEW Compare `kubel' with `kubernetes-el'
 ;; - kubel is great for working with pods (listing, examining, modifying, logging, and interacting)
