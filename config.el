@@ -3707,6 +3707,8 @@ This is a list of lists, not a list of cons cells.")
                      (lsp!)))
               'append)))
 
+(eeowaa-add-to-exclusion-list +tree-sitter-hl-enabled-modes 'sh-mode)
+
 (add-to-list 'hs-special-modes-alist
              '(sh-mode "{{{" "}}}" "#"))
 

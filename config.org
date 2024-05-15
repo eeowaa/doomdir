@@ -10365,6 +10365,14 @@ The fix is to only activate LSP when the shell is Bourne or Bash:
               'append)))
 #+end_src
 
+*** DONE [#B] Do not use tree-sitter to hightlight sh-mode buffers :bug:tweak:
+Tree-sitter highlighting does not work well with =sh-mode= for whatever reason.
+This used to work just fine but broke after a recent upgrade.
+
+#+begin_src emacs-lisp :tangle yes
+(eeowaa-add-to-exclusion-list +tree-sitter-hl-enabled-modes 'sh-mode)
+#+end_src
+
 *** STRT [#A] Enable ~hs-minor-mode~ in ~sh-mode~ using Vim fold markers :feat:
 I personally use Vim fold markers as a folding mechanism in shell scripts. The
 two most obvious methods to achieve that using Doom's =:editor fold= module are
