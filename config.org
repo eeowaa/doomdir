@@ -10478,7 +10478,7 @@ However, this solution will not work for HTML buffers that are
 non-file-visiting. Review the =editorconfig= package to see how it interprets
 indentation parameters for =web-mode=, and do what it does.
 
-** yaml [5/6]
+** yaml [5/8]
 :PROPERTIES:
 :CATEGORY: doom/yaml
 :END:
@@ -10550,6 +10550,10 @@ For some reason, this looks really bad with =ef-themes=.
 The YAML LSP server is outputting a bunch of entity-encoded characters for some
 reason, which is completely unreadable. *UPDATE*: This is only the case with
 certain schemas.
+
+*** TODO [#C] Add custom text object queries :feat:
+- https://github.com/meain/evil-textobj-tree-sitter?tab=readme-ov-file#custom-textobjects
+- https://www.bearer.com/blog/tips-for-using-tree-sitter-queries
 
 ** zig [0/0] :ARCHIVE:
 #+begin_quote
