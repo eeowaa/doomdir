@@ -61,6 +61,18 @@ PROMPT defaults to \"Positive integer: \""
       (eeowaa-read-positive-int prompt))))
 
 
+;;; Lists
+
+(defmacro eeowaa-add-to-exclusion-list (list-var value)
+  "Add VALUE to cdr of LIST-VAR with car of not."
+  `(if (or (not (boundp ',list-var))
+           (not (eq 'not (car ,list-var))))
+       (setq ,list-var (list 'not ,value))
+     (let ((list-cdr (cdr ,list-var)))
+       (setcdr ,list-var (pushnew! list-cdr ,value))
+       ,list-var)))
+
+
 ;;; Faces
 
 (defmacro eeowaa-use-face (face other-face)

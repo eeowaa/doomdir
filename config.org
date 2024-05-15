@@ -8977,11 +8977,7 @@ Reference: [[*Disable error reporting in sh-mode buffers][Disable error reportin
 
 #+begin_src emacs-lisp :tangle yes
 ;; Prevent flycheck from being automatically enabled
-(if (or (not (boundp 'flycheck-global-modes))
-        (not (eq 'not (car flycheck-global-modes))))
-    (setq flycheck-global-modes '(not markdown-mode))
-  (let ((modes (cdr flycheck-global-modes)))
-    (setcdr flycheck-global-modes (pushnew! modes 'markdown-mode))))
+(eeowaa-add-to-exclusion-list flycheck-global-modes 'markdown-mode)
 
 ;; Prevent lsp diagnostics from being enabled
 (if (boundp 'lsp-diagnostics-disabled-modes)
@@ -10308,11 +10304,7 @@ and indicators in ~sh-mode~.
 
 #+begin_src emacs-lisp :tangle yes
 ;; Prevent flycheck from being automatically enabled
-(if (or (not (boundp 'flycheck-global-modes))
-        (not (eq 'not (car flycheck-global-modes))))
-    (setq flycheck-global-modes '(not sh-mode))
-  (let ((modes (cdr flycheck-global-modes)))
-    (setcdr flycheck-global-modes (pushnew! modes 'sh-mode))))
+(eeowaa-add-to-exclusion-list flycheck-global-modes 'sh-mode)
 
 ;; Prevent lsp diagnostics from being enabled
 (if (boundp 'lsp-diagnostics-disabled-modes)
@@ -10539,11 +10531,7 @@ For some reason, this looks really bad with =ef-themes=.
 
 #+begin_src emacs-lisp :tangle yes
 (when (modulep! :tools tree-sitter)
-  (if (or (not (boundp '+tree-sitter-hl-enabled-modes))
-          (not (eq 'not (car +tree-sitter-hl-enabled-modes))))
-      (setq +tree-sitter-hl-enabled-modes '(not yaml-mode))
-    (let ((modes (cdr +tree-sitter-hl-enabled-modes)))
-      (setcdr +tree-sitter-hl-enabled-modes (pushnew! modes 'yaml-mode)))))
+  (eeowaa-add-to-exclusion-list +tree-sitter-hl-enabled-modes 'yaml-mode))
 #+end_src
 
 *** TODO [#A] Fix output from LSP server :bug:

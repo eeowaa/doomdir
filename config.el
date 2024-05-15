@@ -3306,11 +3306,7 @@ block at point is a pre block (as opposed to a code block)."
             '("sh" . bash-mode)))
 
 ;; Prevent flycheck from being automatically enabled
-(if (or (not (boundp 'flycheck-global-modes))
-        (not (eq 'not (car flycheck-global-modes))))
-    (setq flycheck-global-modes '(not markdown-mode))
-  (let ((modes (cdr flycheck-global-modes)))
-    (setcdr flycheck-global-modes (pushnew! modes 'markdown-mode))))
+(eeowaa-add-to-exclusion-list flycheck-global-modes 'markdown-mode)
 
 ;; Prevent lsp diagnostics from being enabled
 (if (boundp 'lsp-diagnostics-disabled-modes)
@@ -3682,11 +3678,7 @@ This is a list of lists, not a list of cons cells.")
 (setq-default sh-shell-file "/bin/sh")
 
 ;; Prevent flycheck from being automatically enabled
-(if (or (not (boundp 'flycheck-global-modes))
-        (not (eq 'not (car flycheck-global-modes))))
-    (setq flycheck-global-modes '(not sh-mode))
-  (let ((modes (cdr flycheck-global-modes)))
-    (setcdr flycheck-global-modes (pushnew! modes 'sh-mode))))
+(eeowaa-add-to-exclusion-list flycheck-global-modes 'sh-mode)
 
 ;; Prevent lsp diagnostics from being enabled
 (if (boundp 'lsp-diagnostics-disabled-modes)
@@ -3732,11 +3724,7 @@ This is a list of lists, not a list of cons cells.")
   display-line-numbers t)
 
 (when (modulep! :tools tree-sitter)
-  (if (or (not (boundp '+tree-sitter-hl-enabled-modes))
-          (not (eq 'not (car +tree-sitter-hl-enabled-modes))))
-      (setq +tree-sitter-hl-enabled-modes '(not yaml-mode))
-    (let ((modes (cdr +tree-sitter-hl-enabled-modes)))
-      (setcdr +tree-sitter-hl-enabled-modes (pushnew! modes 'yaml-mode)))))
+  (eeowaa-add-to-exclusion-list +tree-sitter-hl-enabled-modes 'yaml-mode))
 
 ;; REVIEW Compare `kubel' with `kubernetes-el'
 ;; - kubel is great for working with pods (listing, examining, modifying, logging, and interacting)
