@@ -1,0 +1,25 @@
+#+title: Emacs Project Management
+
+This document describes my vision for Emacs project management.
+
+1. Every buffer corresponds to a project.
+2. Buffers visiting local files (as opposed to remote files via =tramp=)
+   correspond to the git repo/worktree of the file, a parent directory
+   containing a specific indicator file, or a designated top-level directory
+   (e.g. home or root); =projectile= already does something like this.
+3. Other buffers correspond either to the project of a related buffer (e.g. an
+   error list for a file) or to the project of their =tab-bar= tab.
+4. There is a default fallback project for each buffer in case nothing matches.
+5. Every =tab-bar= tab corresponds to a single project.
+6. Buffers from foreign projects can be displayed in the current tab, but the
+   buffer's project is clearly displayed in the mode line (can do this for every
+   window or just windows displaying foreign buffers).
+7. Every project-specific function (usually defined in =project.el= or
+   =projectile=, but not always) maps to either the buffer-local project or the
+   tab-local project (could generalize this to allow for extension, like
+   providing a function to ask the user to specify the project scope or to even
+   select a project using ~completing-read~).
+8. If the functionality is missing, the project-lookup function of =project.el=
+   or =projectile= is advised to perform lookup based on the value of a variable.
+9. The value of said variable is part of the mapping described two bullet points
+   above.
