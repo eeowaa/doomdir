@@ -117,8 +117,8 @@ with special dedication semantics."
 (add-hook 'Info-selection-hook 'info-colors-fontify-node)
 
 (after! whitespace
-  (require 'flycheck)
-  (eeowaa-use-face whitespace-trailing flycheck-error))
+  (require 'flycheck))
+  ; (eeowaa-use-face whitespace-trailing flycheck-error))
 
 (defvar my/show-trailing-whitespace t)
 (defvar my/trailing-whitespace-mode-alist
@@ -280,6 +280,8 @@ When called interactively, reload the fonts in the current session."
 
 ;; Set the font
 (my/select-font "Iosevka Comfy Fixed")
+
+;; (add-hook 'doom-load-theme-hook #'doom-themes-treemacs-config)
 
 (setq emojify-download-emojis-p t)
 
@@ -800,14 +802,50 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   ;; Treemacs buffers are treated specially
   (cl-pushnew 'treemacs-mode vimish-tab-exclude-modes))
 
+;; Little tweaks after upgrading to Emacs 29.2 and the newest Doom
+;; (setq treemacs-no-png-images t
+;;       treemacs-indentation-string " ┃")
+;; (after! treemacs
+;;   (treemacs-indent-guide-mode))
+;; TODO: `treemacs-sorting' (sort by file extension, etc.)
+(setq treemacs-user-mode-line-format " Treemacs")
+(setq treemacs-indentation 3)
+
+;; XXX: Run this before opening icons
+;; FIXME: Some icons (LICENSE, packages.lock, *.service) are 3 characters wide instead of 2
+;; REVIEW: `treemacs-resize-icons', `treemacs--icon-size'
+(defun my/treemacs-fix-nerd-icons ()
+  (interactive)
+  (dolist (item nerd-icons-extension-icon-alist)
+    (let* ((extension (car item))
+           (func (cadr item))
+           (args (append (list (cadr (cdr item))) '(:v-adjust -0.05 :height 1.0) (cdr (cddr item))))
+           (icon (apply func args)))
+      (let* ((icon-pair (cons (format "%s%s" icon treemacs-nerd-icons-tab) (format "%s%s" icon treemacs-nerd-icons-tab)))
+             (gui-icons (treemacs-theme->gui-icons treemacs--current-theme))
+             (tui-icons (treemacs-theme->tui-icons treemacs--current-theme))
+             (gui-icon  (car icon-pair))
+             (tui-icon  (cdr icon-pair)))
+        (ht-set! gui-icons extension gui-icon)
+        (ht-set! tui-icons extension tui-icon))))
+
+  (treemacs-create-icon :icon (format "%s%s" (nerd-icons-faicon "nf-fa-folder_open"  :face 'treemacs-nerd-icons-file-face) treemacs-nerd-icons-tab)
+                        :extensions (dir-open)
+                        :fallback 'same-as-icon)
+
+  (treemacs-create-icon :icon (format "%s%s" (nerd-icons-faicon "nf-fa-folder"  :face 'treemacs-nerd-icons-file-face) treemacs-nerd-icons-tab)
+                        :extensions (dir-closed)
+                        :fallback 'same-as-icon)
+
+  (treemacs-create-icon :icon (format "%s%s" (nerd-icons-faicon "nf-fa-file_o" :face 'treemacs-nerd-icons-file-face) treemacs-nerd-icons-tab)
+                        :extensions (fallback)
+                        :fallback 'same-as-icon))
+
 (setq doom-themes-treemacs-enable-variable-pitch nil)
 
 (setq +treemacs-git-mode 'extended)
 
 (require 'ace-window)
-
-(after! treemacs
-  (setq treemacs-collapse-dirs 0))
 
 (setq treemacs-read-string-input 'from-minibuffer)
 
@@ -834,9 +872,11 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (setq treemacs-show-cursor t)
 
 ;; No need for the fringe indicator with `hl-line' mode and visible cursor
-(after! doom-themes-ext-treemacs
-  (with-eval-after-load 'treemacs
-    (setq treemacs-fringe-indicator-mode nil)))
+;; (after! doom-themes-ext-treemacs
+;;   (with-eval-after-load 'treemacs
+;;     (setq treemacs-fringe-indicator-mode nil)))
+(with-eval-after-load 'treemacs
+  (setq treemacs-fringe-indicator-mode nil))
 
 ;; Use a solid box cursor instead of an underline
 (setq-hook! 'treemacs-mode-hook
@@ -859,15 +899,28 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 ;; REVIEW Consider detecting troublesome icons and automatically falling back to
 ;; the default icon for text files.
 (defvar my/treemacs-icon-extension-alist
-  '(("org" . ("org_archive"))
-    ("sh" . ("bat"))
-    ("txt" . ("Pipfile"))
-    ("json" ;; "configuration" icon
-     . ("project"
-        "Pipfile.lock"
-        "Cargo.lock"
-        "Cargo.toml"))
-    ("xlsx" . ("ods"))
+  '(
+   ;("org" . ("org_archive"))
+   ;("sh" . ("bat"))
+   ;("txt" . ("Pipfile"))
+   ;("json" ;; "configuration" icon
+   ; . ("project"
+   ;    "Pipfile.lock"
+   ;    "Cargo.lock"
+   ;    "Cargo.toml"
+   ;    ;; systemd units
+   ;    "service"
+   ;    "socket"
+   ;    "device"
+   ;    "mount"
+   ;    "automount"
+   ;    "swap"
+   ;    "target"
+   ;    "path"
+   ;    "timer"
+   ;    "slice"
+   ;    "scope"))
+   ;("xlsx" . ("ods"))
 
     ;; TODO Match on file "vcs/dir-.+-closed\\.svg"
     ("dir-closed"
@@ -994,6 +1047,10 @@ Closes and re-opens Treemacs to apply the new theme."
   (defun my/treemacs-current-theme ()
     "Return the name of the current Treemacs theme."
     (treemacs-theme->name treemacs--current-theme)))
+
+;; I think I actually prefer the `doom-atom' theme -- it's less distracting
+;; (setq doom-themes-treemacs-theme "doom-colors")
+(setq doom-themes-treemacs-theme "nerd-icons")
 
 (defun my/treemacs-workaround-fix ()
   "Run this command if Treemacs fails to open"
@@ -1908,10 +1965,10 @@ which causes problems even if there is no existing buffer."
              #'my/flycheck-posframe-update-h))
 
 (after! flycheck-posframe
-  (flycheck-posframe-configure-pretty-defaults)
-  (eeowaa-use-face flycheck-posframe-info-face flycheck-error-list-info)
-  (eeowaa-use-face flycheck-posframe-warning-face flycheck-error-list-warning)
-  (eeowaa-use-face flycheck-posframe-error-face flycheck-error-list-error))
+  (flycheck-posframe-configure-pretty-defaults))
+  ; (eeowaa-use-face flycheck-posframe-info-face flycheck-error-list-info)
+  ; (eeowaa-use-face flycheck-posframe-warning-face flycheck-error-list-warning)
+  ; (eeowaa-use-face flycheck-posframe-error-face flycheck-error-list-error))
 
 (after! flycheck
   (setq flycheck-checker-error-threshold 500))
@@ -3088,14 +3145,16 @@ Currently only includes code blocks."
   (evil-define-key '(visual operator) evil-markdown-mode-map
     "ie" #'my/evil-markdown-inner-element))
 
-(pushnew! auto-mode-alist
-          '("\\.mdx\\'" . markdown-mode)
-          '("/\\.markdownlintrc\\'" . json-mode))
-
 (after! evil-markdown
   (map! :map evil-markdown-mode-map
         :i "M-b" nil
         :i "M-i" nil))
+
+(pushnew! auto-mode-alist
+          '("\\.mdx\\'" . markdown-mode)
+          '("/\\.markdownlintrc\\'" . json-mode))
+
+(setq! markdown-header-scaling t)
 
 (after! markdown-mode
   (defun my/markdown-pre-block-bounds ()
@@ -3623,6 +3682,8 @@ This is a list of lists, not a list of cons cells.")
 (after! ob
   (pushnew! org-src-lang-modes
             '("dot" . graphviz-dot)))
+
+(require 'org-mouse)
 
 (setq org-ditaa-jar-path
       (cond

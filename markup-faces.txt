@@ -1,0 +1,38 @@
+markup-anchor-face
+markup-attribute-face
+markup-big-face
+markup-bold-face markdown-bold-face
+markup-code-face markdown-code-face
+markup-command-face
+markup-comment-face markdown-comment-face
+markup-complex-replacement-face
+markup-emphasis-face
+markup-error-face
+markup-gen-face
+markup-internal-reference-face
+markup-italic-face markdown-italic-face
+markup-list-face markdown-list-face
+markup-meta-face
+markup-meta-hide-face
+markup-passthrough-face
+markup-preprocessor-face
+markup-reference-face
+markup-replacement-face
+markup-secondary-text-face
+markup-small-face
+markup-strong-face
+markup-subscript-face
+markup-superscript-face
+markup-table-cell-face 
+markup-table-face markdown-table-face
+markup-table-row-face markdown-table-face
+markup-title-0-face markdown-header-face-1
+markup-title-1-face markdown-header-face-2
+markup-title-2-face markdown-header-face-3
+markup-title-3-face markdown-header-face-4
+markup-title-4-face markdown-header-face-5
+markup-title-5-face markdown-header-face-6
+markup-typewriter-face
+markup-underline-face
+markup-value-face
+markup-verbatim-face

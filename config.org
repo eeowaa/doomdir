@@ -765,8 +765,8 @@ Taken from tecosaur's configuration.
 *** DONE [#C] Highlight trailing whitespace where appropriate :tweak:
 #+begin_src emacs-lisp :tangle yes
 (after! whitespace
-  (require 'flycheck)
-  (eeowaa-use-face whitespace-trailing flycheck-error))
+  (require 'flycheck))
+  ; (eeowaa-use-face whitespace-trailing flycheck-error))
 
 (defvar my/show-trailing-whitespace t)
 (defvar my/trailing-whitespace-mode-alist
@@ -1024,7 +1024,7 @@ advising ~balance-windows~ to respect side windows.
 formats, such as org-mode, markdown, and LaTeX.
 #+end_quote
 
-** doom [5/6]
+** doom [5/7]
 #+begin_quote
 This module gives Doom its signature look: powered by the =doom-one= theme
 (inspired by Atom's One Dark theme) and =solaire-mode=.
@@ -1232,6 +1232,11 @@ When called interactively, reload the fonts in the current session."
 
 ;; Set the font
 (my/select-font "Iosevka Comfy Fixed")
+#+end_src
+
+*** TODO [#C] Make Treemacs look good again
+#+begin_src emacs-lisp :tangle yes
+;; (add-hook 'doom-load-theme-hook #'doom-themes-treemacs-config)
 #+end_src
 
 *** TODO [#C] Set the Unicode font :tweak:
@@ -2263,7 +2268,7 @@ loads, so tabs will appear in the ~ilist~ buffer until you manually run the
 Wait until you have a Maildir set up, then look at configuration options for
 ~display-time-mode~.
 
-** treemacs [13/18]
+** treemacs [13/19]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -2271,6 +2276,47 @@ system outlines of your projects in a simple tree layout allowing quick
 navigation and exploration, while also possessing basic file management
 utilities.
 #+end_quote
+
+#+begin_src emacs-lisp :tangle yes
+;; Little tweaks after upgrading to Emacs 29.2 and the newest Doom
+;; (setq treemacs-no-png-images t
+;;       treemacs-indentation-string " ┃")
+;; (after! treemacs
+;;   (treemacs-indent-guide-mode))
+;; TODO: `treemacs-sorting' (sort by file extension, etc.)
+(setq treemacs-user-mode-line-format " Treemacs")
+(setq treemacs-indentation 3)
+
+;; XXX: Run this before opening icons
+;; FIXME: Some icons (LICENSE, packages.lock, *.service) are 3 characters wide instead of 2
+;; REVIEW: `treemacs-resize-icons', `treemacs--icon-size'
+(defun my/treemacs-fix-nerd-icons ()
+  (interactive)
+  (dolist (item nerd-icons-extension-icon-alist)
+    (let* ((extension (car item))
+           (func (cadr item))
+           (args (append (list (cadr (cdr item))) '(:v-adjust -0.05 :height 1.0) (cdr (cddr item))))
+           (icon (apply func args)))
+      (let* ((icon-pair (cons (format "%s%s" icon treemacs-nerd-icons-tab) (format "%s%s" icon treemacs-nerd-icons-tab)))
+             (gui-icons (treemacs-theme->gui-icons treemacs--current-theme))
+             (tui-icons (treemacs-theme->tui-icons treemacs--current-theme))
+             (gui-icon  (car icon-pair))
+             (tui-icon  (cdr icon-pair)))
+        (ht-set! gui-icons extension gui-icon)
+        (ht-set! tui-icons extension tui-icon))))
+
+  (treemacs-create-icon :icon (format "%s%s" (nerd-icons-faicon "nf-fa-folder_open"  :face 'treemacs-nerd-icons-file-face) treemacs-nerd-icons-tab)
+                        :extensions (dir-open)
+                        :fallback 'same-as-icon)
+
+  (treemacs-create-icon :icon (format "%s%s" (nerd-icons-faicon "nf-fa-folder"  :face 'treemacs-nerd-icons-file-face) treemacs-nerd-icons-tab)
+                        :extensions (dir-closed)
+                        :fallback 'same-as-icon)
+
+  (treemacs-create-icon :icon (format "%s%s" (nerd-icons-faicon "nf-fa-file_o" :face 'treemacs-nerd-icons-file-face) treemacs-nerd-icons-tab)
+                        :extensions (fallback)
+                        :fallback 'same-as-icon))
+#+end_src
 
 *** DONE [#A] Install prerequisites
 **** DONE macOS
@@ -2338,7 +2384,9 @@ This slows down startup a bit, but whatever (I'm not obsessed with startup):
 Reference: https://github.com/hlissner/doom-emacs/issues/4555
 
 *** DONE [#B] Do not collapse path strings :tweak:
-#+begin_src emacs-lisp :tangle yes
+Doom sets ~treemacs-collapse-dirs~ to 3, and I'm OK with that for now.
+
+#+begin_src emacs-lisp :tangle no
 (after! treemacs
   (setq treemacs-collapse-dirs 0))
 #+end_src
@@ -2423,9 +2471,11 @@ following benefits of enabling the cursor in Treemacs:
 (setq treemacs-show-cursor t)
 
 ;; No need for the fringe indicator with `hl-line' mode and visible cursor
-(after! doom-themes-ext-treemacs
-  (with-eval-after-load 'treemacs
-    (setq treemacs-fringe-indicator-mode nil)))
+;; (after! doom-themes-ext-treemacs
+;;   (with-eval-after-load 'treemacs
+;;     (setq treemacs-fringe-indicator-mode nil)))
+(with-eval-after-load 'treemacs
+  (setq treemacs-fringe-indicator-mode nil))
 
 ;; Use a solid box cursor instead of an underline
 (setq-hook! 'treemacs-mode-hook
@@ -2496,15 +2546,28 @@ theme despite not being derived from that theme.)
 ;; REVIEW Consider detecting troublesome icons and automatically falling back to
 ;; the default icon for text files.
 (defvar my/treemacs-icon-extension-alist
-  '(("org" . ("org_archive"))
-    ("sh" . ("bat"))
-    ("txt" . ("Pipfile"))
-    ("json" ;; "configuration" icon
-     . ("project"
-        "Pipfile.lock"
-        "Cargo.lock"
-        "Cargo.toml"))
-    ("xlsx" . ("ods"))
+  '(
+   ;("org" . ("org_archive"))
+   ;("sh" . ("bat"))
+   ;("txt" . ("Pipfile"))
+   ;("json" ;; "configuration" icon
+   ; . ("project"
+   ;    "Pipfile.lock"
+   ;    "Cargo.lock"
+   ;    "Cargo.toml"
+   ;    ;; systemd units
+   ;    "service"
+   ;    "socket"
+   ;    "device"
+   ;    "mount"
+   ;    "automount"
+   ;    "swap"
+   ;    "target"
+   ;    "path"
+   ;    "timer"
+   ;    "slice"
+   ;    "scope"))
+   ;("xlsx" . ("ods"))
 
     ;; TODO Match on file "vcs/dir-.+-closed\\.svg"
     ("dir-closed"
@@ -2642,9 +2705,10 @@ I think there are at least two ways to achieve this:
 
 Attempting the first option:
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
 ;; I think I actually prefer the `doom-atom' theme -- it's less distracting
-(setq doom-themes-treemacs-theme "doom-colors")
+;; (setq doom-themes-treemacs-theme "doom-colors")
+(setq doom-themes-treemacs-theme "nerd-icons")
 #+end_src
 
 *UPDATE*: This does bring the Treemacs icon set closer to the Dired icon set,
@@ -5293,10 +5357,10 @@ errors should not be reported*.
 *** DONE [#C] Configure =flycheck-posframe= messages :tweak:
 #+begin_src emacs-lisp :tangle yes
 (after! flycheck-posframe
-  (flycheck-posframe-configure-pretty-defaults)
-  (eeowaa-use-face flycheck-posframe-info-face flycheck-error-list-info)
-  (eeowaa-use-face flycheck-posframe-warning-face flycheck-error-list-warning)
-  (eeowaa-use-face flycheck-posframe-error-face flycheck-error-list-error))
+  (flycheck-posframe-configure-pretty-defaults))
+  ; (eeowaa-use-face flycheck-posframe-info-face flycheck-error-list-info)
+  ; (eeowaa-use-face flycheck-posframe-warning-face flycheck-error-list-warning)
+  ; (eeowaa-use-face flycheck-posframe-error-face flycheck-error-list-error))
 #+end_src
 
 *** DONE [#C] Raise error threshold for =flycheck= :tweak:
@@ -8515,7 +8579,7 @@ github_binary_release \
                 "main.lua")))
 #+end_src
 
-** markdown [9/17]
+** markdown [10/18]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
@@ -8659,6 +8723,14 @@ Currently only includes code blocks."
     "ie" #'my/evil-markdown-inner-element))
 #+end_src
 
+*** DONE [#B] Remove Doom's =M-b= and =M-i= insert state bindings from Markdown :tweak:
+#+begin_src emacs-lisp :tangle yes
+(after! evil-markdown
+  (map! :map evil-markdown-mode-map
+        :i "M-b" nil
+        :i "M-i" nil))
+#+end_src
+
 *** DONE [#C] Filename-mode associations :feat:
 #+begin_src emacs-lisp :tangle yes
 (pushnew! auto-mode-alist
@@ -8666,12 +8738,9 @@ Currently only includes code blocks."
           '("/\\.markdownlintrc\\'" . json-mode))
 #+end_src
 
-*** DONE [#B] Remove Doom's =M-b= and =M-i= insert state bindings from Markdown :tweak:
+*** DONE [#C] Scale Markdown headers :tweak:
 #+begin_src emacs-lisp :tangle yes
-(after! evil-markdown
-  (map! :map evil-markdown-mode-map
-        :i "M-b" nil
-        :i "M-i" nil))
+(setq! markdown-header-scaling t)
 #+end_src
 
 *** STRT [#B] Extend editing capabilities of code and pre blocks :feat:hack:
@@ -9060,7 +9129,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [28/55]
+** org [0/2]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -9881,9 +9950,16 @@ of the time.
             '("dot" . graphviz-dot)))
 #+end_src
 
-*** Miscellaneous [0/1]
+*** Miscellaneous [1/2]
 **** TODO [#C] Use Org speed keys :feat:
 Just apply your old configuration.
+
+**** DONE [#C] Improve mouse support :feat:
+I mostly want the ability to toggle checkboxes in lists with the mouse.
+
+#+begin_src emacs-lisp :tangle yes
+(require 'org-mouse)
+#+end_src
 
 *** Contrib [1/2]
 **** DONE [#C] Add ~ditaa~ JAR path :feat:
@@ -10255,7 +10331,7 @@ This module provides an environment for hacking and having fun in scheme. It is
 powered by [[https://www.nongnu.org/geiser/geiser_1.html#introduction][geiser]].
 #+end_quote
 
-** sh [5/9]
+** sh [5/10]
 #+begin_quote
 This module adds support for shell scripting languages.
 #+end_quote
