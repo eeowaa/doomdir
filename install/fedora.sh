@@ -226,17 +226,13 @@ nvm install node
 sudo dnf -y install direnv
 
 # Install prerequisites for `tools/docker` module
-sudo dnf -y install shadow-utils fuse-overlayfs iptables
-sudo systemctl disable --now docker.service docker.socket
-dockerd-rootless-setuptool.sh install
-curl -fsSLo- https://get.docker.com/rootless | sh
-cat >"$HOME/.profile.d/docker-rootless.sh" <<\EOF
-export PATH=$HOME/bin:$PATH
-export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
-EOF
-. "$HOME/.profile.d/docker-rootless.sh"
-systemctl --user start docker.service
-sudo loginctl enable-linger `whoami`
+which dockerd-rootless-setuptool.sh >/dev/null 2>&1 || {
+    sudo systemctl disable --now docker.service docker.socket
+    curl --proto '=https' --tlsv1.2 -fsSLo- https://get.docker.com | sudo sh -s
+    dockerd-rootless-setuptool.sh install
+    sudo loginctl enable-linger `whoami`
+    systemctl --user start docker.service
+}
 npm install -g dockerfile-language-server-nodejs
 
 # Install prerequisites for `tools/editorconfig` module
