@@ -3024,7 +3024,7 @@ See also: `ts-fold-summary--get'."
 
 ;; Modified from commit ad6a3d0f3 of lang/csharp/config.el
 (use-package! sharper
-  :when (modulep! +dotnet)
+  :when (modulep! :lang csharp +dotnet)
   :general ("C-c n" #'sharper-main-transient)
   :config
   (map! (:map sharper--solution-management-mode-map
