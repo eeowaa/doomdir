@@ -2089,8 +2089,8 @@ which causes problems even if there is no existing buffer."
         :desc "Down stack frame"    "d" #'dap-down-stack-frame)
        (:prefix ("b" . "breakpoints")
         :desc "Toggle"              "b" #'dap-breakpoint-toggle
-        :desc "Delete"              "d" #'dap-breakpoint-add
-        :desc "Add"                 "a" #'dap-breakpoint-delete
+        :desc "Delete"              "d" #'dap-breakpoint-delete
+        :desc "Add"                 "a" #'dap-breakpoint-add
         :desc "Set condition"       "c" #'dap-breakpoint-condition
         :desc "Set hit count"       "h" #'dap-breakpoint-hit-condition
         :desc "Set log message"     "l" #'dap-breakpoint-log-message)
