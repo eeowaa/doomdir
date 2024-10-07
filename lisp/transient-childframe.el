@@ -53,8 +53,7 @@
   advertised even if the frame is resized to fit the buffer.
 - Problematic frame creation hooks are ignored."
   (letf!
-    ((defadvice tc-display-buffer-in-child-frame-fix-a (buffer alist)
-       :override #'display-buffer-in-child-frame
+    ((defun tc-display-buffer-in-child-frame-fix-a (buffer alist)
        (let* ((parameters (append (alist-get 'child-frame-parameters alist)
                                   `((parent-frame . ,(selected-frame)))))
               (parent (or (alist-get 'parent-frame parameters)
@@ -79,8 +78,7 @@
              (setq frame (make-frame parameters))
              (setq window (frame-selected-window frame))
              (setq type 'frame))) ;; REVIEW
-         (letf! ((defadvice tc-respect-frame-offset-a (args)
-                   :filter-args #'modify-frame-parameters
+         (letf! ((defun tc-respect-frame-offset-a (args)
                    (let* ((parameters (alist-get 'child-frame-parameters alist))
                           (left (alist-get 'left-ratio parameters))
                           (top (alist-get 'top-ratio parameters)))
@@ -88,7 +86,9 @@
                        (setf (alist-get 'left (cadr args)) left))
                      (when (and top (floatp top) (<= 0.0 top 1.0))
                        (setf (alist-get 'top (cadr args)) top))
-                     args)))
+                     args))
+                 (defadvice #'modify-frame-parameters :filter-args
+                            #'tc-respect-frame-offset-a))
            (prog1 (let ((window-resize-pixelwise t)
                         (frame-resize-pixelwise t)
                         (frame-inhibit-implied-resize t)
@@ -96,7 +96,9 @@
                         window-size-fixed)
                     (window--display-buffer buffer window type alist))
              (unless (cdr (assq 'inhibit-switch-frame alist))
-               (window--maybe-raise-frame frame)))))))
+               (window--maybe-raise-frame frame))))))
+     (defadvice #'display-buffer-in-child-frame :override
+                #'tc-display-buffer-in-child-frame-fix-a))
     (let (after-make-frame-functions
           before-make-frame-hook)
       (display-buffer-in-child-frame buffer alist))))
