@@ -1,18 +1,33 @@
 #!/bin/sh
 
-# Lock Emacs at version 28.2 using DNF
-target_version=28.2
+# Prevent Emacs 29.4 from being installed
+# <https://github.com/doomemacs/doomemacs/issues/7915>
 sudo dnf -y install 'dnf-command(versionlock)'
-sudo ed /etc/dnf/plugins/versionlock.list <<EOF
-/^emacs-1:/d
-\$a
-emacs-1:$target_version.*
-.
-wq
-EOF
-[ "X$target_version" = "X$actual_version" ] || cat >&2 <<EOF
+sudo dnf versionlock exclude --raw 'emacs-1:29.4-*'
+
+# Install the newest release of the desired <name>-<epoch>:<version> RPM and
+# prevent upgrades (even to a newer <name>-<epoch>:<version>-<release>) to avoid
+# ever having to run 'doom upgrade' unexpectedly after upgrading system packages
+# NOTE: "epoch" is an RPM construct and is required for proper version comparison
+target="1:29.2"
+sudo dnf versionlock delete emacs
+rpm -q emacs >/dev/null || {
+    sudo dnf -y install "emacs-$target" || :
+} || {
+    current=`rpm -q --qf '%{epoch}:%{version}' emacs`
+    case `rpm -E "%{lua:print(rpm.vercmp('$current', '$target'))}"` in
+     0) ;;
+    -1) sudo dnf -y upgrade "emacs-$target" ;;
+     1) sudo dnf -y downgrade "emacs-$target" ;;
+    esac
+}
+current=`rpm -q --qf '%{epoch}:%{version}' emacs`
+if [ "X$target" = "X$current" ]
+then sudo dnf versionlock add emacs
+else cat >&2 <<EOF
 WARNING: Incorrect Emacs version (using $actual_version, want $target_version)
 EOF
+fi
 
 # Obtain Emacs source code corresponding to installed RPM
 (
