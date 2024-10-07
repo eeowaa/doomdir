@@ -666,9 +666,10 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   (defadvice! my/doom-modeline-ignore-modification-a (fn &rest args)
     :around '(doom-modeline-segment--buffer-info
               doom-modeline-segment--buffer-info-simple)
-    (letf! (defadvice my/doom-modeline-buffer-modification-a (&rest _)
-             :after-while #'buffer-modified-p
-             buffer-file-name)
+    (letf! ((defun my/doom-modeline-buffer-modification-a (&rest _)
+              buffer-file-name)
+            (defadvice #'buffer-modified-p :after-while
+                       #'my/doom-modeline-buffer-modification-a))
       (apply fn args))))
 
 ;; NOTE `font-dest' is ripped straight from `nerd-icons-install-fonts'
@@ -1381,13 +1382,15 @@ current buffer first unless the `force' argument is given."
   :around #'+fold/open-all
   (if-let ((level (car-safe args))
            (_ (integerp level)))
-      (letf! (defadvice my/outline-correct-sublevel-a (args)
-               :filter-args #'outline-hide-sublevels
-               (list level))
+      (letf! ((defun my/outline-correct-sublevel-a (args)
+                (list level))
+              (defadvice #'outline-hide-sublevels :filter-args
+                         #'my/outline-correct-sublevel-a))
         (apply fn args))
-    (letf! (defadvice my/hs-life-goes-on-a (fn &rest args)
-             :around #'hs-show-all
-             (hs-life-goes-on (apply fn args)))
+    (letf! ((defun my/hs-life-goes-on-a (fn &rest args)
+              (hs-life-goes-on (apply fn args)))
+            (defadvice #'hs-show-all :around
+                       #'my/hs-life-goes-on-a))
       (apply fn args))))
 
 (defadvice! my/outline-close-all-maybe-a (&optional level)
@@ -2494,10 +2497,11 @@ This variable should be set by `my/lsp-ui-set-delay'.")
 (after! makefile-executor
   (defadvice! my/with-completing-read-lenient-a (fn &rest args)
     :around #'makefile-executor-execute-project-target
-    (letf! (defadvice my/completing-read-lenient-a (args)
-             :filter-args #'completing-read
-             (setf (nth 3 args) nil)
-             args)
+    (letf! ((defun my/completing-read-lenient-a (args)
+              (setf (nth 3 args) nil)
+              args)
+            (defadvice #'completing-read :filter-args
+                       #'my/completing-read-lenient-a))
       (apply fn args))))
 
 (map! :leader
@@ -2583,9 +2587,10 @@ This variable should be set by `my/lsp-ui-set-delay'.")
       (defadvice! my/terraform-lookup-references-a (fn &rest args)
         :around #'+lookup/references
         (if (eq major-mode 'terraform-mode)
-            (letf! (defadvice my/terraform-lookup-resource-at-point-a (args)
-                     :filter-args #'+lookup-project-search-backend-fn
-                     (list (my/terraform-resource-address-at-pos)))
+            (letf! ((defun my/terraform-lookup-resource-at-point-a (args)
+                      (list (my/terraform-resource-address-at-pos)))
+                    (defadvice #'+lookup-project-search-backend-fn :filter-args
+                               #'my/terraform-lookup-resource-at-point-a))
               (apply fn args))
           (apply fn args))))))
 
@@ -3667,11 +3672,12 @@ This is a list of lists, not a list of cons cells.")
 (after! zmq
   (defadvice! my/fix-zmq-build-a (fn &rest args)
     :around #'zmq-load
-    (letf! (defadvice my/zmq-compile-a (command)
-             :filter-args #'compile
-             (let ((configure (concat command " configure"))
-                   (make command))
-               (format "sh -c \"%s && %s" configure make)))
+    (letf! ((defun my/zmq-compile-a (command)
+              (let ((configure (concat command " configure"))
+                    (make command))
+                (format "sh -c \"%s && %s" configure make)))
+            (defadvice #'compile :filter-args
+                       #'my/zmq-compile-a))
       (funcall fn args))))
 
 (after! projectile
