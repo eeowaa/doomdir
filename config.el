@@ -649,10 +649,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     (text-scale-increase my/imenu-list-text-scale))
   (add-hook 'imenu-list-major-mode-hook #'my/imenu-list-text-scale-h))
 
-(remove-hook! '(prog-mode-hook
-                text-mode-hook
-                conf-mode-hook)
-  #'highlight-indent-guides-mode)
+(add-hook! '+indent-guides-inhibit-functions #'always)
 
 (setq +ligatures-in-modes '(org-mode)
       +ligatures-extras-in-modes '(org-mode))
@@ -4006,8 +4003,13 @@ ALIGN should be a keyword :left or :right."
 ;; Map C-? to DEL
 (define-key key-translation-map (kbd "C-?") (kbd "DEL"))
 
-;; Map C-i to TAB and provide an alternative mapping for `better-jumper-jump-forward'
-(define-key key-translation-map (kbd "C-i") (kbd "TAB"))
+;; Doom wants to distinguish C-i and C-m from TAB and RET, respectively, but I
+;; do not. The following lines undo modifications to `input-decode-map' made in
+;; doom-keybinds.el, found within `doom-core-dir'.
+(define-key input-decode-map (kbd "TAB") nil t)
+(define-key input-decode-map (kbd "RET") nil t)
+
+;; Provide an alternative mapping for `better-jumper-jump-forward'
 (global-set-key (kbd "C-M-,") #'better-jumper-jump-forward)
 
 (remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
