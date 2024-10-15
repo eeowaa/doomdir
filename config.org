@@ -1859,10 +1859,7 @@ I just need to test this functionality.
 ** indent-guides [1/1]
 *** DONE [#B] Disable =highlight-indent-guides-mode= by default :tweak:
 #+begin_src emacs-lisp :tangle yes
-(remove-hook! '(prog-mode-hook
-                text-mode-hook
-                conf-mode-hook)
-  #'highlight-indent-guides-mode)
+(add-hook! '+indent-guides-inhibit-functions #'always)
 #+end_src
 ** ligatures [1/1]
 #+begin_quote
@@ -3710,7 +3707,7 @@ Emacs has a lot of different packages available for folding. For example:
     + =ts-fold= must be instrumented separately from =tree-sitter=
     + Just because a mode has a =tree-sitter= parser doesn't mean that it has a
       corresponding =ts-fold= implementation
-  - Use this when available
+  - *Use this when available*
 
 + =hideshow=
   - Used by =:editor fold=
@@ -11450,8 +11447,13 @@ References:
 ;; Map C-? to DEL
 (define-key key-translation-map (kbd "C-?") (kbd "DEL"))
 
-;; Map C-i to TAB and provide an alternative mapping for `better-jumper-jump-forward'
-(define-key key-translation-map (kbd "C-i") (kbd "TAB"))
+;; Doom wants to distinguish C-i and C-m from TAB and RET, respectively, but I
+;; do not. The following lines undo modifications to `input-decode-map' made in
+;; doom-keybinds.el, found within `doom-core-dir'.
+(define-key input-decode-map (kbd "TAB") nil t)
+(define-key input-decode-map (kbd "RET") nil t)
+
+;; Provide an alternative mapping for `better-jumper-jump-forward'
 (global-set-key (kbd "C-M-,") #'better-jumper-jump-forward)
 #+end_src
 
