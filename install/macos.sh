@@ -103,6 +103,10 @@ brew install fish
 # Install prerequisites for `term/vterm` module
 brew install libvterm cmake
 
+## Soft line wrapping
+## <https://github.com/akermu/emacs-libvterm/issues/179#issuecomment-1045331359>
+brew install screen
+
 # Install prerequisites for `checkers/spell` module
 brew install aspell
 

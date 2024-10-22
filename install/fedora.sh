@@ -186,6 +186,10 @@ sudo dnf -y install fish
 # Install prerequisites for `term/vterm` module
 sudo dnf -y install libvterm cmake
 
+## Soft line wrapping
+## <https://github.com/akermu/emacs-libvterm/issues/179#issuecomment-1045331359>
+sudo dnf -y install screen
+
 # Install prerequisites for `checkers/spell` module
 sudo dnf -y install aspell
 
