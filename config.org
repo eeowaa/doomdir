@@ -298,7 +298,7 @@ for autoload cookies or byte-compilation.
 #+end_quote
 
 #+begin_src emacs-lisp :tangle yes
-(add-load-path! (concat doom-user-dir "lisp"))
+(add-load-path! (expand-file-name "lisp" doom-user-dir))
 #+end_src
 
 *** DONE [#A] Load libraries used by my config
@@ -4390,7 +4390,7 @@ The format of the report is determined by `my/timeclock-report-format'."
         (timeclock-generate-report t)
       (timeclock-generate-report)
       (insert "\n\n")
-      (call-process (concat doom-user-dir "bin/timeclock-report")
+      (call-process (expand-file-name "bin/timeclock-report" doom-user-dir)
                     timeclock-file
                     (current-buffer)
                     t))))
