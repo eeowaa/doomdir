@@ -1940,6 +1940,8 @@ which causes problems even if there is no existing buffer."
       (vterm-send-C-e))
     (evil-insert-state)))
 
+(setq vterm-copy-mode-remove-fake-newlines t)
+
 (after! flycheck
   (defadvice! my/org-src-a (&rest _)
     "Consider Org Src buffers as ephemeral (do not enable flycheck)."

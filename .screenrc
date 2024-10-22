@@ -1,0 +1,24 @@
+# Reference: screen(1), info (screen)
+
+# Trace the sourcing of shell dotfiles (for debugging purposes).
+# setenv DEBUG 1
+
+# Wrap text (this is the main reason to use GNU Screen within vterm).
+defwrap on
+
+# Disable interactive commands to avoid keybinding conflicts with Emacs.
+# escape ''
+escape ^Qq
+
+# Prevent "[screen 0: zsh]" from being prefixed to vterm buffer names.
+# hardstatus alwayslastline
+hardstatus alwaysignore
+
+# Allow Emacs to control scrollback. Note termcap(5) codes should be used
+# instead of terminfo(5) codes, and defines should be separated by colons
+# instead of commas. Empty values are specified with "@".
+terminfo * ti@:te@
+
+# The terminal output buffer size is 4096 bytes and vterm should be fast enough
+# to read it all at once
+defobuflimit 4096

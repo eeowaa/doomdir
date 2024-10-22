@@ -4809,7 +4809,7 @@ to =eshell=, it forcefully clears the file on disk.
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [8/18]
+** vterm [9/17]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
@@ -4820,12 +4820,20 @@ alpha and requires a component be compiled (=vterm-module.so=).
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `term/vterm` module
 brew install libvterm cmake
+
+## Soft line wrapping
+## <https://github.com/akermu/emacs-libvterm/issues/179#issuecomment-1045331359>
+brew install screen
 #+end_src
 
 **** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `term/vterm` module
 sudo dnf -y install libvterm cmake
+
+## Soft line wrapping
+## <https://github.com/akermu/emacs-libvterm/issues/179#issuecomment-1045331359>
+sudo dnf -y install screen
 #+end_src
 
 *** DONE [#B] Export editor variables to =vterm= :feat:
@@ -4951,10 +4959,7 @@ This function works even if the current window is a side window."
       (kbd "M-:") #'eval-expression)))
 #+end_src
 
-*** STRT [#C] Use =C-s= as the ~evil-window-map~ leader key in Evil insert state :tweak:
-This doesn't work during startup, but if I manually run it after everything has
-loaded, it works.
-
+*** DONE [#C] Use =C-s= as the ~evil-window-map~ leader key in Evil insert state :tweak:
 #+begin_src emacs-lisp :tangle yes
 (after! (:and vterm evil-collection-vterm)
   (evil-collection-define-key 'insert 'vterm-mode-map
@@ -4977,7 +4982,7 @@ These depend on the existence of a ~vterm_cmd~ function. See the =README.md= for
   ;; directory in which to read aliases
   (defun my/vterm--write-user-emacs-directory (tmpfile)
     "Write the string evaluation of `user-emacs-directory' to TMPFILE."
-    (f-write user-emacs-directory 'utf-8 tmpfile))
+    (f-write (concat user-emacs-directory "\n") 'utf-8 tmpfile))
   (pushnew! vterm-eval-cmds '("my/vterm--write-user-emacs-directory"
                               my/vterm--write-user-emacs-directory))
 
@@ -5261,45 +5266,103 @@ minor mode for iterative command-line editing in =vterm= featuring.
   (always))
 #+end_src
 
-*** TODO [#C] Prevent ~git-graph~ cutoff :bug:
-The last character ("o" in this case) gets hidden:
-#+begin_example
-$ git graph
-,* 65a8a6b6da9176bea78eb78c604120714207bcc5 Initial commit  eeowaa   3 weeks ag
-#+end_example
-
-I say "hidden" instead of "truncated" because if you kill the line and yank it
-into another buffer, you can see the "o". *Note that this is only a problem in
-GUI Emacs, not terminal Emacs. Also, this is only a problem in popup buffers.*
-
-*** TODO [#C] Get shell integration working while running ~tmux~ :feat:
-Just try running ~tmux~ from a =vterm= buffer and you'll see the problem.
-
-*** WAIT [#C] Enable soft line wrapping :tweak:
+*** STRT [#C] Enable soft line wrapping :tweak:
 =term= has the ~term-suppress-hard-newline~ option, which is supposed to
 soft-wrap lines. (In practice, I haven't gotten this to work.) =vterm=, however,
 does not have such an option. There is an open issue for this:
 https://github.com/akermu/emacs-libvterm/issues/179
 
-Somebody worked around this by running GNU Screen in each ~vterm~ buffer:
-https://github.com/akermu/emacs-libvterm/issues/179#issuecomment-1045331359
+It's been nearly 5 years since that GitHub issue was opened, and it still has
+not been fixed. However, somebody worked around this by running GNU Screen in
+each =vterm= buffer: https://github.com/akermu/emacs-libvterm/issues/179#issuecomment-1045331359
 
-#+begin_src sh :tangle no
-sudo dnf -y install screen
-#+end_src
+I have created an ad-hoc =.screenrc= file to use specifically with =vterm=.
+Here's how to use it:
 
 #+begin_src emacs-lisp :tangle no
-(setq vterm-shell "screen")
+(setq vterm-shell (format "screen -c %s"
+                          (expand-file-name ".screenrc" doom-user-dir)))
 #+end_src
 
-#+begin_src screen :tangle no
-# ~/.screenrc
-termcapinfo xterm* ti@:te@
+Unfortunately, after using this configuration for a while, I discovered a number
+of challenging problems I've yet to solve (see subsections). For now, the
+following configuration is a good middle ground, causing =C-c C-t=
+(~vterm-copy-mode~) to wrap lines:
+
+#+begin_src emacs-lisp :tangle yes
+(setq vterm-copy-mode-remove-fake-newlines t)
 #+end_src
 
-I would be OK with doing this, but I wouldn't be surprised if I ran into shell
-integration issues just like I have when attempting to run ~tmux~ in ~vterm~
-buffers. For the time being, I'll just wait it out.
+**** Challenge 1: Terminal scrollback
+Clearing the screen via =C-l= or ~clear~ causes all text displayed in the window
+to be completely removed from the buffer. This is true even when =.screenrc=
+contains ~terminfo * ti@:te@~, as that only prevents removal of text that has
+/already/ scrolled past the first display line.
+
+After poring over the Info manual for =screen= and man pages for =screen=,
+=terminfo=, =termcap=, and =clear=, I've can think of two possible solutions.
+
+1. Allow =screen= to control scrollback, sending the ~copy~ command to =screen=
+   when calling ~vterm-copy-mode~ from Emacs. I could automatically enter and
+   exit ~vterm-copy-mode~ when switching Evil states (as I've [[Allow scrolling back while output is being written][previous attempted]])
+   and modify ~vterm-copy-mode-hook~ to automatically enter and exit scrollback
+   mode in =screen=. While in scrollback mode, a small subset of normal Vim
+   motions would need to be sent to =vterm= instead of Emacs (as if Evil insert
+   state was active) which will be interpreted by =screen= to navigate the
+   scrollback buffer. This solution has at least two drawbacks:
+
+   - It's complex.
+   - It breaks =vterm= prompt detection. The only potential workaround I can
+     think of involves replacing shell integration with regexp-based detection,
+     which itself would require complex workarounds to allow searching through
+     the =screen= scrollback buffer.
+
+2. Configure specific ~terminfo~ capabilities in =.screenrc= to control
+   screen-clearing through custom Elisp. According to the man page for =clear=,
+   the relevant ~terminfo~ codes are ~clear~ and ~E3~; translated to ~termcap~
+   (as required by =screen=), the codes are ~cl~ and presumably ~E3~. By
+   assigning well-formed escape sequences to those codes (or at least to ~cl~),
+   we can use Elisp to copy the region from the top of the window to before the
+   current prompt, paste it before the minimum window position in the buffer,
+   and finally clear the screen as normal. See also:
+
+   - ~vterm_printf~ and ~vterm_cmd~ definitions in =~/.environ.d/vterm.sh=
+   - ~infocmp -1C | grep cl~ command output from within =screen=
+   - /THE VIRTUAL TERMINAL/ section of the =screen= man page
+   - /Recognized Capabilities/ section of the =user_caps= man page
+
+**** Challenge 2: Multiple windows of the same buffer
+GNU Screen automatically resizes to fit the size of the display. However, if the
+same =vterm= buffer running GNU Screen is displayed in multiple Emacs windows,
+and those windows have different geometry, then GNU Screen will only fit one of
+those two windows.
+
+The only solution I can think of to this problem is to prevent ~display-buffer~
+from displaying a =vterm= (or =term= or =eat=) buffer in multiple windows, if
+the buffer displays a running GNU Screen session. Here is what can be done:
+
+1. Assign buffer-local variables to such buffers that describe the GNU Screen
+   session and the "display" (as understood by GNU Screen).
+2. Create a new action function for ~display-buffer~ that causes window splits
+   in a GNU Screen buffer to create a copy of the current buffer (appending a
+   number like ~<N>~), setting buffer-local variables as appropriate.
+3. Ensure point 2 is applied to all relevant contexts besides window splits.
+
+**** Challenge 3: Refreshing the display
+GNU Screen has a command called ~redisplay~
+
+When resizing such windows in Emacs, GNU Screen will only resize to fit the
+window once you start typing. However, every time the window geometry changes,
+the ~redisplay~ command should be sent to GNU Screen; additionally, it would
+be helpful to do this automatically when entering Evil insert state.
+
+An alternate approach may involve the terminal capability ~WS~ that is specific
+to GNU Screen (see the =screen= man page):
+
+#+begin_example
+WS   (str)   Resize  display. This capability has the desired width and height as argu‐
+             ments. SunView(tm) example: '\E[8;%d;%dt'.
+#+end_example
 
 * :checkers
 ** Headers :SCAFFOLDING:
