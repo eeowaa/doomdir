@@ -1,4 +1,4 @@
-(add-load-path! (concat doom-user-dir "lisp"))
+(add-load-path! (expand-file-name "lisp" doom-user-dir))
 
 (require 'eeowaa-lib)
 (require 'xdg)
@@ -1808,7 +1808,7 @@ This function works even if the current window is a side window."
   ;; directory in which to read aliases
   (defun my/vterm--write-user-emacs-directory (tmpfile)
     "Write the string evaluation of `user-emacs-directory' to TMPFILE."
-    (f-write user-emacs-directory 'utf-8 tmpfile))
+    (f-write (concat user-emacs-directory "\n") 'utf-8 tmpfile))
   (pushnew! vterm-eval-cmds '("my/vterm--write-user-emacs-directory"
                               my/vterm--write-user-emacs-directory))
 
