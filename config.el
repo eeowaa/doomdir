@@ -2819,6 +2819,7 @@ Both resource and data blocks are considered to be resources."
     (my/terraform-state-show (my/terraform-resource-address-at-pos pos)))
 
   ;; FIXME: Make this portable for Windows and WSL
+  ;; FIXME: Handle more modules paths than just "/modules/<name>" and "/<name>"
   (defun my/terraform-module-path-of-file (&optional file)
     "Display the Terraform module path of FILE.
 FILE is an absolute or relative path to a filesystem entry. It
@@ -2833,7 +2834,8 @@ defaults to the file visited by the current buffer, or to
                      (user-error "Unable to determine root path for file: %s" file)))
            (path (file-relative-name dir root)))
       (if (string= path ".") ""
-        (substring (string-replace "/" ".module." (concat "/" path)) 1))))
+        (substring (string-replace "/" ".module." (string-replace "/modules/" "/" (concat "/" path)))
+                   1))))
 
   ;; FIXME Handle unquoted resource types and names
   (defun my/terraform-resource-address-at-pos (&optional pos)
