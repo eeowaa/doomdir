@@ -164,7 +164,7 @@ github_binary_release() {
         }
     done
     local url=`
-        curl -s https://api.github.com/repos/$repo/releases/latest | jq -r \
+        curl -fsSLo- https://api.github.com/repos/$repo/releases/latest | jq -r \
         '.assets[] | select(.name | test("^'"$asset"'$")) | .browser_download_url'
     `
     [ "X$url" = X ] && {
@@ -185,7 +185,7 @@ $func: (recursively) delete? [y/N]: "
         esac
     }
     mkdir -p "$prefix" "$HOME/.local/bin"
-    curl -Lo- "$url" | tar -C "$prefix" -xzf -
+    curl -fsSLo- "$url" | tar -C "$prefix" -xzf -
     [ -x "$canonical_path/$binary" ] || {
         echo >&2 "ERROR: $func: not an executable file: $canonical_path/$binary"
         return 1
@@ -197,10 +197,10 @@ $func: (recursively) delete? [y/N]: "
 *** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install Homebrew to install system packages
-curl -Lo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
+curl -fsSLo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
 
 # Install NVM to install Node.js packages
-curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
+curl -fsSLo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
     | env PROFILE=/dev/null bash
 
 # Function to install a binary asset from the latest release of a GitHub repo
@@ -259,7 +259,7 @@ brew install jq
 sudo dnf -y install openssh-askpass
 
 # Install NVM to install Node.js packages
-curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
+curl -fsSLo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
     | env PROFILE=/dev/null bash
 
 # Install pipx to install Python packages
@@ -5552,7 +5552,7 @@ sudo dnf -y install unzip java-latest-openjdk-headless
 
     # Download stable release of LanguageTool
     rm -f LanguageTool-stable.zip
-    curl -o LanguageTool-stable.zip \
+    curl -fsSLo LanguageTool-stable.zip \
          -l https://languagetool.org/download/LanguageTool-stable.zip
 
     # Unzip the tool and determine the release number
@@ -6080,7 +6080,7 @@ npm install -g dockerfile-language-server-nodejs
 sudo dnf -y install shadow-utils fuse-overlayfs iptables
 sudo systemctl disable --now docker.service docker.socket
 dockerd-rootless-setuptool.sh install
-curl -fsSL https://get.docker.com/rootless | sh
+curl -fsSLo- https://get.docker.com/rootless | sh
 cat >"$HOME/.profile.d/docker-rootless.sh" <<\EOF
 export PATH=$HOME/bin:$PATH
 export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
@@ -6510,8 +6510,8 @@ manifests and Helm charts.
 # Install prerequisites for `tools/Kubernetes` module
 
 ## Helm language server
-curl -L https://github.com/mrjosh/helm-ls/releases/download/master/helm_ls_linux_amd64 \
-    --output ~/.local/bin/helm_ls
+curl -fsSLo ~/.local/bin/helm_ls \
+    https://github.com/mrjosh/helm-ls/releases/download/master/helm_ls_linux_amd64
 
 ## Install Cask
 if [ -d ~/.local/opt/cask ]
@@ -8050,7 +8050,7 @@ used instead of ~:config~ to specify the keybinding.
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/data` module
 curl --create-dirs \
-    -o ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
+    -fsSLo ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
     https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.20.0/org.eclipse.lemminx-0.20.0-uber.jar
 #+end_src
 
@@ -8058,7 +8058,7 @@ curl --create-dirs \
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `lang/data` module
 curl --create-dirs \
-    -o ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
+    -fsSLo ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
     https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.20.0/org.eclipse.lemminx-0.20.0-uber.jar
 #+end_src
 
@@ -8215,7 +8215,7 @@ Reference the installation code block for Fedora.
 (cd ~/Documents/src/life/stow-dotfiles && make go)
 brew install go gopls golangci-lint
 # FIXME (see https://github.com/rocky/ssa-interp)
-# curl -Lo- https://raw.githubusercontent.com/rocky/ssa-interp/HEAD/gub-installer | bash
+# curl -fsSLo- https://raw.githubusercontent.com/rocky/ssa-interp/HEAD/gub-installer | bash
 go get -v -u github.com/motemen/gore/cmd/gore
 go get -v -u github.com/stamblerre/gocode
 go get -v -u golang.org/x/tools/cmd/godoc
@@ -8246,7 +8246,7 @@ go install github.com/fatih/gomodifytags@latest
 
 ## Linting
 asset=`
-    curl -s https://api.github.com/repos/golangci/golangci-lint/releases/latest | jq -r \
+    curl -fsSLo- https://api.github.com/repos/golangci/golangci-lint/releases/latest | jq -r \
     '.assets[] | select(.name | endswith("-linux-amd64.tar.gz")) | .name'
 `
 github_binary_release \
@@ -8279,7 +8279,7 @@ appear to have support through Fedora's official ~dnf~ repos.
 
 ## Meta package manager
 ## TODO: Verify GPG signatures (https://www.haskell.org/ghcup/install/#manual-install)
-curl --proto '=https' --tlsv1.2 -sSf -Lo "$HOME/.local/bin/ghcup" \
+curl --proto '=https' --tlsv1.2 -fsSLo "$HOME/.local/bin/ghcup" \
     https://downloads.haskell.org/~ghcup/x86_64-linux-ghcup
 chmod +x "$HOME/.local/bin/ghcup"
 
@@ -10179,7 +10179,7 @@ References:
 
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `lang/rust` module
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+curl --proto '=https' --tlsv1.2 -fsSLo- https://sh.rustup.rs \
     | sh -s -- --no-modify-path --quiet -y
 cargo install cargo-check
 rustup component add rustfmt-preview clippy-preview
@@ -10287,7 +10287,7 @@ npm install -g bash-language-server
 # version=5.0-1.1.2
 # [ -d "$HOME/.local/src/bashdb/bashdb-$version" ] || {
 #     url=https://sourceforge.net/projects/bashdb/files/bashdb/"$version"/bashdb-"$version".tar.gz/download
-#     curl -Lo- "$url" | tar -C "$HOME/.local/src/bashdb" -xzf -
+#     curl -fsSLo- "$url" | tar -C "$HOME/.local/src/bashdb" -xzf -
 # }
 
 ## TODO zshdb

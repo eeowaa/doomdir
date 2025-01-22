@@ -13,10 +13,10 @@ package updates may upgrade Emacs, resulting in:
 EOF
 
 # Install Homebrew to install system packages
-curl -Lo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
+curl -fsSLo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
 
 # Install NVM to install Node.js packages
-curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
+curl -fsSLo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
     | env PROFILE=/dev/null bash
 
 # Function to install a binary asset from the latest release of a GitHub repo
@@ -54,7 +54,7 @@ github_binary_release() {
         }
     done
     local url=`
-        curl -s https://api.github.com/repos/$repo/releases/latest | jq -r \
+        curl -fsSLo- https://api.github.com/repos/$repo/releases/latest | jq -r \
         '.assets[] | select(.name | test("^'"$asset"'$")) | .browser_download_url'
     `
     [ "X$url" = X ] && {
@@ -75,7 +75,7 @@ $func: (recursively) delete? [y/N]: "
         esac
     }
     mkdir -p "$prefix" "$HOME/.local/bin"
-    curl -Lo- "$url" | tar -C "$prefix" -xzf -
+    curl -fsSLo- "$url" | tar -C "$prefix" -xzf -
     [ -x "$canonical_path/$binary" ] || {
         echo >&2 "ERROR: $func: not an executable file: $canonical_path/$binary"
         return 1
@@ -172,14 +172,14 @@ brew install ccls gdb glslang
 
 # Install prerequisites for `lang/data` module
 curl --create-dirs \
-    -o ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
+    -fsSLo ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
     https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.20.0/org.eclipse.lemminx-0.20.0-uber.jar
 
 # Install prerequisites for `lang/go` module
 (cd ~/Documents/src/life/stow-dotfiles && make go)
 brew install go gopls golangci-lint
 # FIXME (see https://github.com/rocky/ssa-interp)
-# curl -Lo- https://raw.githubusercontent.com/rocky/ssa-interp/HEAD/gub-installer | bash
+# curl -fsSLo- https://raw.githubusercontent.com/rocky/ssa-interp/HEAD/gub-installer | bash
 go get -v -u github.com/motemen/gore/cmd/gore
 go get -v -u github.com/stamblerre/gocode
 go get -v -u golang.org/x/tools/cmd/godoc
