@@ -5539,7 +5539,7 @@ lines up with the error indicators in the right fringe.
 This workaround does not address all issues that can happen when resizing and
 moving windows, but it's good enough in most cases.
 
-** spell [5/5]
+** spell [4/4]
 #+begin_quote
 This modules provides spellchecking powered by =aspell=, =hunspell= or =enchant=.
 #+end_quote
@@ -5557,13 +5557,21 @@ brew install aspell
 sudo dnf -y install aspell
 #+end_src
 
-*** DONE [#A] Prevent ~spell-fu-mode~ from being enabled by default :tweak:
+*** DONE [#A] Prevent spell checking from being enabled by default :tweak:
 I like having the option, but I would prefer to enable it manually per buffer.
 
 #+begin_src emacs-lisp :tangle yes
-(when (and (modulep! :checkers spell)
-           (not (modulep! :checkers spell +flyspell)))
-  (remove-hook 'text-mode-hook 'spell-fu-mode))
+(when (modulep! :checkers spell)
+  (if (modulep! :checkers spell +flyspell)
+      (remove-hook! '(org-mode-hook
+                      markdown-mode-hook
+                      TeX-mode-hook
+                      rst-mode-hook
+                      mu4e-compose-mode-hook
+                      message-mode-hook
+                      git-commit-mode-hook)
+                    #'flyspell-mode)
+    (remove-hook 'text-mode-hook 'spell-fu-mode)))
 #+end_src
 
 **** COMMENT My initial stab at this
@@ -5615,7 +5623,9 @@ Regardless, I just want to fix the issue. A manual workaround is to execute
 second time to disable it. For now, I'll just always require it:
 
 #+begin_src emacs-lisp :tangle yes
-(require 'spell-fu)
+(when (and (modulep! :checkers spell)
+           (not (modulep! :checkers spell +flyspell)))
+  (require 'spell-fu))
 #+end_src
 
 *** DONE [#B] Fix ~+spell/add-word~ :bug:

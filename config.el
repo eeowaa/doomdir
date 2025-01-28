@@ -2015,11 +2015,21 @@ which causes problems even if there is no existing buffer."
 (after! flycheck-posframe
   (setq flycheck-posframe-position 'window-bottom-right-corner))
 
+(when (modulep! :checkers spell)
+  (if (modulep! :checkers spell +flyspell)
+      (remove-hook! '(org-mode-hook
+                      markdown-mode-hook
+                      TeX-mode-hook
+                      rst-mode-hook
+                      mu4e-compose-mode-hook
+                      message-mode-hook
+                      git-commit-mode-hook)
+                    #'flyspell-mode)
+    (remove-hook 'text-mode-hook 'spell-fu-mode)))
+
 (when (and (modulep! :checkers spell)
            (not (modulep! :checkers spell +flyspell)))
-  (remove-hook 'text-mode-hook 'spell-fu-mode))
-
-(require 'spell-fu)
+  (require 'spell-fu))
 
 (when (and (modulep! :checkers spell)
            (not (modulep! :checkers spell +flyspell)))
