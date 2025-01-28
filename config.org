@@ -3973,7 +3973,7 @@ This module integrates code formatters into Emacs.
 This module adds [[https://github.com/noctuid/lispyville][lispy]] key functionality in Lisp languages.
 #+end_quote
 
-** multiple-cursors [0/0] :ARCHIVE:
+** multiple-cursors [0/0]
 ** objed [0/0] :ARCHIVE:
 #+begin_quote
 This modules adds [[https://github.com/clemera/objed][objed]], a global minor-mode for navigating and manipulating
