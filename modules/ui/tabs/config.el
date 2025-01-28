@@ -51,6 +51,17 @@ If INDEX is not a workspace index, return nil."
         (elt (+workspace-list-names) (1- index))
       (+workspace-current-name)))
 
+  (defun +tabs--display-battery-mode (&optional arg)
+    "Wrapper for `display-battery-mode' that works without battery power.
+If the machine has no battery, `display-battery-mode' is always disabled."
+    (require 'battery)
+    (if (and battery-status-function
+             (not (string-match-p
+                   "\\`\\(?:N/A\\|unknown\\)\\'"
+                   (battery-format "%B" (funcall battery-status-function)))))
+        (display-battery-mode arg)
+      (display-battery-mode -1)))
+
   :init
   (when initial-window-system
     (when (modulep! :ui modeline)
@@ -74,7 +85,7 @@ If INDEX is not a workspace index, return nil."
       (defun +tabs--tab-bar-mode-h ()
         (let ((toggle (if tab-bar-mode +1 -1)))
           (display-time-mode toggle)
-          (display-battery-mode toggle)))))
+          (+tabs--display-battery-mode toggle)))))
 
   :custom
   (tab-bar-tab-name-function #'+workspace-current-name)
@@ -83,7 +94,7 @@ If INDEX is not a workspace index, return nil."
   :config
   (when initial-window-system
     (display-time-mode +1)
-    (display-battery-mode +1))
+    (+tabs--display-battery-mode +1))
 
   (setq tab-bar-tabs-function #'+tabs-workspace-tabs-fn
         tab-bar-tab-face-function #'+tabs-workspace-tab-face-fn
