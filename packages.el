@@ -57,6 +57,10 @@
 
 (unpin! tree-sitter-langs)
 
+(package! tree-sitter-indent
+  :recipe (:host github
+           :repo "emacsattic/tree-sitter-indent"))
+
 (package! x509-mode)
 
 ;;; :os
@@ -124,7 +128,8 @@
 ;;(package! dilbert)
 
 ;;; Weather
-(package! noaa)
+(package! noaa
+  :recipe (:host github :repo "emacsmirror/noaa"))
 ;;(package! aqi)
 
 ;;; Clocks and timers
@@ -132,7 +137,8 @@
 ;;(package! countdown)
 
 ;;; Ebooks
-(package! nov)
+(package! nov
+  :recipe (:host github :repo "emacsmirror/nov"))
 ;;(package! sicp)
 
 ;;; Browsing

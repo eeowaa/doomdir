@@ -7751,7 +7751,7 @@ a single line."
 #+end_src
 
 ** tmux [0/0] :ARCHIVE:
-** tree-sitter [4/5]
+** tree-sitter [5/6]
 *** DONE [#A] Unpin =tree-sitter-langs= :feat:
 Unfortunately, the font-locking provided by =yaml-mode= does not properly
 fontify multiline quoted strings within string literals. My hope is that
@@ -7762,6 +7762,16 @@ YAML, so I am going to unpin that package for now.
 
 #+begin_src emacs-lisp :tangle packages.el
 (unpin! tree-sitter-langs)
+#+end_src
+
+*** DONE [#A] Use a different recipe for =tree-sitter-indent= :hack:
+My firewall is blocking the URL for the =tree-sitter-indent= package as defined
+in the MELPA recipe. The ~emacsattic~ GitHub repo is used instead.
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! tree-sitter-indent
+  :recipe (:host github
+           :repo "emacsattic/tree-sitter-indent"))
 #+end_src
 
 *** DONE [#A] Add tree-sitter syntax highlighting to terraform :feat:
@@ -10788,7 +10798,8 @@ have listed some commented-out packages below that I would like to install.
 ;;(package! dilbert)
 
 ;;; Weather
-(package! noaa)
+(package! noaa
+  :recipe (:host github :repo "emacsmirror/noaa"))
 ;;(package! aqi)
 
 ;;; Clocks and timers
@@ -10796,7 +10807,8 @@ have listed some commented-out packages below that I would like to install.
 ;;(package! countdown)
 
 ;;; Ebooks
-(package! nov)
+(package! nov
+  :recipe (:host github :repo "emacsmirror/nov"))
 ;;(package! sicp)
 
 ;;; Browsing
