@@ -671,7 +671,7 @@ Aesthetic modules that affect the Emacs interface or user experience.
 ;;; :ui
 #+end_src
 
-** Miscellany [12/13]
+** Miscellany [13/14]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -829,6 +829,20 @@ original text, even though they might look a little better. Let's disable them:
 (unless initial-window-system
   (setq-default wrap-prefix "↪ "))
 #+end_src
+
+*** DONE [#C] Replace =vi-tilde-fringe= with builtin functionality :tweak:
+Doom unconditionally disables end-of-buffer indicators in the fringe. I actually
+like how Emacs does this, so I've re-enabled the default functionality (and have
+disabled the =vi-tilde-fringe= module).
+
+#+begin_src emacs-lisp :tangle yes
+(setq-hook! '(prog-mode-hook text-mode-hook conf-mode-hook)
+  indicate-empty-lines t)
+#+end_src
+
+FWIW, the fringe bitmap is named ~empty-line~ (as can be seen in
+~fringe-bitmaps~), is defined as ~empty_line_bits~ in =fringe.c=, and is
+assigned to ~standard_bitmaps~ in =fringe.c=.
 
 *** STRT [#B] Configure =vdiff= :feat:module:
 See also: [[file:~/.config/emacs/.local/straight/repos/evil-collection/modes/vdiff/evil-collection-vdiff.el][evil-collection-vdiff]]
@@ -3003,23 +3017,10 @@ because I find the half-width =diff-hl= fringes to /only/ look really nice in
 Doom themes. I could dig a bit deeper and only enable half-width fringes for
 Doom themes, but that's not something I'm currently interested in doing.
 
-** vi-tilde-fringe [0/2]
+** vi-tilde-fringe [0/1] :ARCHIVE:
 #+begin_quote
 Displays a tilde(~) in the left fringe to indicate an empty line, similar to Vi.
 #+end_quote
-
-*** STRT [#C] Replace =vi-tilde-fringe= with builtin functionality :tweak:
-Emacs has a nicer-looking bitmap for lines after the end of a file than what
-=vi-tilde-fringe= provides. Let's use the default functionality:
-
-#+begin_src emacs-lisp :tangle yes
-(setq-hook! '(prog-mode-hook text-mode-hook conf-mode-hook)
-  indicate-empty-lines t)
-#+end_src
-
-FWIW, the fringe bitmap is named ~empty-line~ (as can be seen in
-~fringe-bitmaps~), is defined as ~empty_line_bits~ in =fringe.c=, and is
-assigned to ~standard_bitmaps~ in =fringe.c=.
 
 *** STRT [#B] Create a =vi-tilde-margin= package :feat:module:
 To my knowledge, TTY Emacs does not ship with an easy way to indicate the end of

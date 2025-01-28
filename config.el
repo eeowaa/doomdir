@@ -154,6 +154,9 @@ with special dedication semantics."
 (unless initial-window-system
   (setq-default wrap-prefix "↪ "))
 
+(setq-hook! '(prog-mode-hook text-mode-hook conf-mode-hook)
+  indicate-empty-lines t)
+
 ;; Automatically highlight differences in hunks, down to the symbol.
 ;;
 ;; FIXME Highlighting for an added line spills over to the first character of
@@ -1115,9 +1118,6 @@ works even when `global-diff-hl-mode' is disabled.")
       `(diff-hl-insert :foreground ,(alist-get 'green-fringe-bg modus-themes-vivendi-colors))
       `(diff-hl-change :foreground ,(alist-get 'yellow-fringe-bg modus-themes-vivendi-colors))
       `(diff-hl-delete :foreground ,(alist-get 'red-fringe-bg modus-themes-vivendi-colors)))))
-
-(setq-hook! '(prog-mode-hook text-mode-hook conf-mode-hook)
-  indicate-empty-lines t)
 
 (after! ace-window
   (when initial-window-system
