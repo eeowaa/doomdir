@@ -8678,7 +8678,7 @@ github_binary_release \
                 "main.lua")))
 #+end_src
 
-** markdown [10/18]
+** markdown [11/18]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
@@ -8828,6 +8828,30 @@ Currently only includes code blocks."
   (map! :map evil-markdown-mode-map
         :i "M-b" nil
         :i "M-i" nil))
+#+end_src
+
+*** DONE [#B] Disable error reporting in markdown-mode buffers :tweak:
+:LOGBOOK:
+- Note taken on [2023-02-16 Thu 14:58] \\
+  Flycheck gets enabled anyway.
+:END:
+Reference: [[*Disable error reporting in sh-mode buffers][Disable error reporting in sh-mode buffers]]
+
+#+begin_src emacs-lisp :tangle yes
+(dolist (mode '(markdown-mode markdown-view-mode
+                gfm-mode gfm-view-mode))
+  ;; Prevent flycheck from being automatically enabled
+  (eeowaa-add-to-exclusion-list flycheck-global-modes mode)
+
+  ;; Prevent lsp diagnostics from being enabled
+  (if (boundp 'lsp-diagnostics-disabled-modes)
+      (pushnew! lsp-diagnostics-disabled-modes mode)
+    (setq lsp-diagnostics-disabled-modes (list mode))))
+
+;; Don't bother checking for an LSP diagnostics provider in markdown-mode
+;; and its derived modes (markdown-view-mode, gfm-mode, and gfm-view-mode)
+(setq-hook! 'markdown-mode-hook
+  lsp-diagnostics-provider :none)
 #+end_src
 
 *** DONE [#C] Filename-mode associations :feat:
@@ -9135,27 +9159,6 @@ generated in the literate prerequisite installation section.
 If GFM code blocks get too long, font lock no longer works. Additionally, when
 lines begin with hash symbols, font lock gets really confused. This is a major
 nuisance.
-
-*** LOOP [#B] Disable error reporting in markdown-mode buffers :tweak:
-:LOGBOOK:
-- Note taken on [2023-02-16 Thu 14:58] \\
-  Flycheck gets enabled anyway.
-:END:
-Reference: [[*Disable error reporting in sh-mode buffers][Disable error reporting in sh-mode buffers]]
-
-#+begin_src emacs-lisp :tangle yes
-;; Prevent flycheck from being automatically enabled
-(eeowaa-add-to-exclusion-list flycheck-global-modes 'markdown-mode)
-
-;; Prevent lsp diagnostics from being enabled
-(if (boundp 'lsp-diagnostics-disabled-modes)
-    (pushnew! lsp-diagnostics-disabled-modes 'markdown-mode)
-  (setq lsp-diagnostics-disabled-modes '(markdown-mode)))
-
-;; Don't bother checking for an LSP diagnostics provider in markdown-mode
-(setq-hook! 'markdown-mode-hook
-  lsp-diagnostics-provider :none)
-#+end_src
 
 *** TODO [#B] Transform character sequences in Markdown buffers :tweak:
 *UPDATE*: My original solution causes =image-mode= to break (it will not display

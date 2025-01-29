@@ -3166,6 +3166,21 @@ Currently only includes code blocks."
         :i "M-b" nil
         :i "M-i" nil))
 
+(dolist (mode '(markdown-mode markdown-view-mode
+                gfm-mode gfm-view-mode))
+  ;; Prevent flycheck from being automatically enabled
+  (eeowaa-add-to-exclusion-list flycheck-global-modes mode)
+
+  ;; Prevent lsp diagnostics from being enabled
+  (if (boundp 'lsp-diagnostics-disabled-modes)
+      (pushnew! lsp-diagnostics-disabled-modes mode)
+    (setq lsp-diagnostics-disabled-modes (list mode))))
+
+;; Don't bother checking for an LSP diagnostics provider in markdown-mode
+;; and its derived modes (markdown-view-mode, gfm-mode, and gfm-view-mode)
+(setq-hook! 'markdown-mode-hook
+  lsp-diagnostics-provider :none)
+
 (pushnew! auto-mode-alist
           '("\\.mdx\\'" . markdown-mode)
           '("/\\.markdownlintrc\\'" . json-mode))
@@ -3379,18 +3394,6 @@ block at point is a pre block (as opposed to a code block)."
   (pushnew! markdown-code-lang-modes
             '("http" . restclient-mode)
             '("sh" . bash-mode)))
-
-;; Prevent flycheck from being automatically enabled
-(eeowaa-add-to-exclusion-list flycheck-global-modes 'markdown-mode)
-
-;; Prevent lsp diagnostics from being enabled
-(if (boundp 'lsp-diagnostics-disabled-modes)
-    (pushnew! lsp-diagnostics-disabled-modes 'markdown-mode)
-  (setq lsp-diagnostics-disabled-modes '(markdown-mode)))
-
-;; Don't bother checking for an LSP diagnostics provider in markdown-mode
-(setq-hook! 'markdown-mode-hook
-  lsp-diagnostics-provider :none)
 
 (after! org
   (setq org-hide-leading-stars nil
