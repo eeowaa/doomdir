@@ -4130,6 +4130,14 @@ and uses visual instead."
       (cl-pushnew `((,(format "\\`%s f o\\'" prefix-re)) nil . "Find other file")
                   which-key-replacement-alist))))
 
+(defadvice! my/select-frame-by-name-a (fn &rest args)
+  :around #'select-frame-by-name
+  (interactive)
+  (let ((frame-count (length (visible-frame-list))))
+    (cond ((> frame-count 2) (call-interactively fn))
+          ((= frame-count 2) (other-frame 1))
+          (t (message "Fewer than 2 visible frames")))))
+
 (defun my/toggle-sentence-end-double-space ()
   "Toggle 1 or 2 spaces at the end of sentences."
   (interactive)

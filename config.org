@@ -11576,7 +11576,7 @@ This can be done with ~#+INCLUDE~ directives. Doing so might make tangling
 faster, but currently I don't have any problems with performance. If and when I
 start to notice a problem, I'll revisit this item.
 
-** default [10/11]
+** default [11/12]
 #+begin_quote
 This module provides a set of reasonable defaults.
 #+end_quote
@@ -11760,6 +11760,20 @@ and uses visual instead."
 - Disable the =:ui popup= module and try to replicate the issue (if you can't,
   then the problem probably resides in Doom and not Emacs)
 - Try experimenting with ~which-key-side-window-*-height~ variables
+
+*** DONE [#B] Improve interactive frame selection :feat:
+~select-frame-by-name~ (bound to =SPC o F=) always prompts for a frame name,
+even when there are only two frames. Let's fix that.
+
+#+begin_src emacs-lisp :tangle yes
+(defadvice! my/select-frame-by-name-a (fn &rest args)
+  :around #'select-frame-by-name
+  (interactive)
+  (let ((frame-count (length (visible-frame-list))))
+    (cond ((> frame-count 2) (call-interactively fn))
+          ((= frame-count 2) (other-frame 1))
+          (t (message "Fewer than 2 visible frames")))))
+#+end_src
 
 *** STRT [#B] Add additional toggle keybindings :tweak:module:
 #+begin_src emacs-lisp :tangle yes
