@@ -3185,7 +3185,17 @@ Currently only includes code blocks."
           '("\\.mdx\\'" . markdown-mode)
           '("/\\.markdownlintrc\\'" . json-mode))
 
-(setq! markdown-header-scaling t)
+(setq markdown-fontify-whole-heading-line nil
+      markdown-header-scaling t)
+
+;; Setting `markdown-header-scaling' (even using Customize) is not enough.
+;; We must call `markdown-update-header-faces' within buffers, too.
+(defun my/markdown--update-display-h ()
+  "Apply desired styling to a markdown buffer."
+  (markdown-update-header-faces markdown-header-scaling))
+(add-hook 'markdown-mode-hook
+          #'my/markdown--update-display-h
+          nil 'local)
 
 (after! markdown-mode
   (defun my/markdown-pre-block-bounds ()
