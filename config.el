@@ -117,8 +117,8 @@ with special dedication semantics."
 (add-hook 'Info-selection-hook 'info-colors-fontify-node)
 
 (after! whitespace
-  (require 'flycheck))
-  ; (eeowaa-use-face whitespace-trailing flycheck-error))
+  (require 'flycheck)
+  (eval (macroexpand '(eeowaa-use-face whitespace-trailing flycheck-error))))
 
 (defvar my/show-trailing-whitespace t)
 (defvar my/trailing-whitespace-mode-alist
@@ -132,17 +132,19 @@ with special dedication semantics."
     (markdown-mode . "\\S-\\( \\| \\{3,\\}\\|\\s-*\t\\s-*\\)$")))
 
 (defun my/show-trailing-whitespace-maybe-h ()
-  (let* ((element (cl-some (lambda (e)
-                             (when (derived-mode-p (car-safe e)) e))
-                           my/trailing-whitespace-mode-alist))
-         (value (if (consp element)
-                    (cdr element)
-                  my/show-trailing-whitespace)))
-    (when value
-      (when (stringp value)
-        (setq-local whitespace-trailing-regexp value))
-      (cl-pushnew 'trailing whitespace-style)
-      (whitespace-turn-on))))
+  ;; This allows us to toggle trailing whitespace (both on and off)
+  (when whitespace-mode
+    (let* ((element (cl-some (lambda (e)
+                               (when (derived-mode-p (car-safe e)) e))
+                             my/trailing-whitespace-mode-alist))
+           (value (if (consp element)
+                      (cdr element)
+                    my/show-trailing-whitespace)))
+      (when value
+        (when (stringp value)
+          (setq-local whitespace-trailing-regexp value))
+        (cl-pushnew 'trailing whitespace-style)
+        (whitespace-turn-on)))))
 
 (add-hook 'whitespace-mode-hook
           #'my/show-trailing-whitespace-maybe-h)
