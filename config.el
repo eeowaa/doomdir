@@ -251,7 +251,7 @@ with special dedication semantics."
 (setq my/fonts '(("Iosevka Comfy Fixed" ;; Remove " Fixed" if you want ligatures
                   :variable-pitch "Iosevka Comfy Duo"
                   :serif "Iosevka Comfy Motion Fixed"
-                  :default-size 22)
+                  :default-size 16)
                  ("Source Code Pro"
                   :default-size 22)
                  ("Terminus"
