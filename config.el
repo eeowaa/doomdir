@@ -790,6 +790,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
       display-time-load-average-threshold 0) ;; always display the load average
 
 (after! vimish-tab
+  (cl-pushnew "^\\*Ediff Control Panel\\*" vimish-tab-exclude-names))
+
+(after! vimish-tab
   (dolist (entry display-buffer-alist)
     (when-let ((condition (car entry))
                (fn-name (and (symbolp condition) (symbol-name condition)))

@@ -2133,7 +2133,7 @@ Accepts the same arguments as `display-buffer-in-side-window'. You must set
 `window--sides-inhibit-check' to non-nil for this work properly.
 #+end_quote
 
-** tabs [6/8] :eeowaa:
+** tabs [7/9] :eeowaa:
 #+begin_quote
 +This module adds an Atom-esque tab bar to the Emacs UI.+
 Custom implementation of =:ui tabs=.
@@ -2261,6 +2261,12 @@ this is OK for now.
 #+begin_src emacs-lisp :tangle yes
 (setq display-time-day-and-date t ;; show the DoW and date in addition to the time
       display-time-load-average-threshold 0) ;; always display the load average
+#+end_src
+
+*** DONE [#B] Do not display tabs in the Ediff control window
+#+begin_src emacs-lisp :tangle yes
+(after! vimish-tab
+  (cl-pushnew "^\\*Ediff Control Panel\\*" vimish-tab-exclude-names))
 #+end_src
 
 *** STRT [#B] Do not display tabs in side windows
