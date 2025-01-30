@@ -7679,7 +7679,7 @@ though addresses of data blocks are prefixed with \"data.\" while
 addresses of resource blocks have no prefix."
     (save-excursion
       (when pos (goto-char pos))
-      (goto-char (bol))
+      (goto-char (pos-bol))
       (save-match-data
         (if-let ((re "^\\s-*\\(data\\|resource\\)[ \\t]+\"\\([^\"]+\\)\"[ \\t]+\"\\([^\"]+\\)\"")
                  (found (or (looking-at re) (re-search-backward re nil t)))
