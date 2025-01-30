@@ -242,21 +242,6 @@ npm install -g dockerfile-language-server-nodejs
 # Install prerequisites for `tools/editorconfig` module
 sudo dnf -y install editorconfig
 
-# Install prerequisites for `tools/ein` module
-sudo dnf -y install python3 pipx
-pipx install --include-deps jupyter
-
-## Install the bash_kernel package into the jupyter virtualenv
-pipx inject jupyter bash_kernel
-
-## Run the installer script to install the kernel in the virtualenv
-. "$(pipx environment -V PIPX_LOCAL_VENVS)/jupyter/bin/activate"
-python -m bash_kernel.install --sys-prefix
-deactivate
-
-## Verify that the bash kernel is visible to jupyter
-jupyter kernelspec list
-
 # Install prerequisites for `tools/Kubernetes` module
 
 ## Helm language server
@@ -340,9 +325,6 @@ cpan install App::Git::Autofixup
 # Install prerequisites for `tools/nginx` module
 pipx install --python `which python3.10` nginx-language-server
 
-# Install prerequisites for `tools/terraform` module
-sudo dnf -y install terraform terraform-ls
-
 # Install prerequisites for `lang/cc` module
 
 ## GCC
@@ -372,27 +354,6 @@ sudo dnf -y install glslang
 ## CMake
 sudo dnf -y install cmake
 pipx install cmake-language-server
-
-# Install prerequisites for `lang/csharp` module
-
-## dotnet
-sudo dnf -y install dotnet
-
-## omnisharp-roslyn
-github_binary_release \
-    --repo OmniSharp/omnisharp-roslyn \
-    --asset omnisharp-linux-x64-net6.0.tar.gz \
-    --prefix "$HOME/.local/opt/microsoft/omnisharp-roslyn" \
-    --path . \
-    --binary OmniSharp
-
-## netcoredbg
-github_binary_release \
-    --repo Samsung/netcoredbg \
-    --asset netcoredbg-linux-amd64.tar.gz \
-    --prefix "$HOME/.local/opt/microsoft" \
-    --path netcoredbg \
-    --binary netcoredbg
 
 # Install prerequisites for `lang/data` module
 curl --create-dirs \
@@ -429,44 +390,6 @@ github_binary_release \
 
 ## Debugging
 sudo dnf -y install llvm
-
-# Install prerequisites for `lang/haskell` module
-
-## Meta package manager
-## TODO: Verify GPG signatures (https://www.haskell.org/ghcup/install/#manual-install)
-curl --proto '=https' --tlsv1.2 -fsSLo "$HOME/.local/bin/ghcup" \
-    https://downloads.haskell.org/~ghcup/x86_64-linux-ghcup
-chmod +x "$HOME/.local/bin/ghcup"
-
-## Compiler
-rm -f ~/.ghcup/bin/ghc
-rm -f ~/.ghcup/bin/ghci
-ghcup install ghc
-(
-    version=`
-        ghcup list \
-            --tool ghc \
-            --show-criteria installed \
-            --raw-format 2>/dev/null |
-        tail -1 | awk '{print $2}'
-    `
-    cd ~/.ghcup/bin
-    ln -s ghc-$version ghc
-    ln -s ghci-$version ghci
-)
-
-## Language server
-ghcup install hls
-
-## Code formatting
-ghcup install stack
-stack install brittany # "$HOME/.ghcup/bin" must be in PATH
-
-## Linter and documentation lookup
-ghcup install cabal
-cabal update           # "$HOME/.ghcup/bin" must be in PATH
-cabal install hlint    # "$HOME/.ghcup/bin" must be in PATH
-cabal install hoogle   # "$HOME/.ghcup/bin" must be in PATH
 
 # Install prerequisites for `lang/json` module
 sudo dnf -y install jq
@@ -571,10 +494,6 @@ pipx install --include-deps jupyter
 ## Debugging
 pip3 install --user debugpy
 
-# Install prerequisites for `lang/racket` module
-sudo dnf -y install racket
-raco pkg install --auto racket-langserver
-
 # Install prerequisites for `lang/rest` module
 sudo dnf -y install jq
 
@@ -618,10 +537,3 @@ npm install -g yaml-language-server
 
 # Install prerequisites for `app/Miscellany`
 sudo dnf -y install w3m
-
-# Install prerequisites for `app/everywhere` module
-# XXX This will only work for X sessions (not Wayland)
-sudo dnf -y install xclip xdotool xprop xwininfo
-
-# Install prerequisites for `app/irc` module
-sudo dnf -y install gnutls

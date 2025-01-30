@@ -105,8 +105,8 @@
        direnv
        (docker +lsp)
        editorconfig      ; let someone else argue about tabs vs spaces
-       ein               ; tame Jupyter notebooks with emacs
-       elasticsearch       ; XXX user module
+       ;;ein               ; tame Jupyter notebooks with emacs
+       ;;elasticsearch       ; XXX user module
        (eval +overlay)     ; run code, run (also, repls)
        ;;gist              ; interacting with github gists
        (kubernetes +lsp +tree-sitter) ; XXX user module
@@ -121,7 +121,7 @@
        ;;prodigy           ; FIXME managing external services & code builders
        ;;rgb               ; creating color strings
        ;;taskrunner        ; taskrunner for all your projects
-       (terraform +lsp)  ; infrastructure as code
+       ;;(terraform +lsp)  ; infrastructure as code
        ;;tmux              ; an API for interacting with tmux
        tree-sitter       ; syntax and parsing, sitting in a tree...
        ;;upload            ; map local to remote projects via ssh/ftp
@@ -139,7 +139,7 @@
        ;;common-lisp       ; if you've seen one lisp, you've seen them all
        ;;coq               ; proofs-as-programs
        ;;crystal           ; ruby at the speed of c
-       (csharp +lsp +tree-sitter +dotnet)
+       ;;(csharp +lsp +tree-sitter +dotnet)
                          ; unity, .NET, and mono shenanigans
        data              ; config/data formats
        ;;(dart +flutter)   ; paint ui and not much else
@@ -157,7 +157,7 @@
        ;;gdscript          ; the language you waited for
        (go +lsp +tree-sitter) ; the hipster dialect
        ;;(graphql +lsp)    ; Give queries a REST
-       (haskell +lsp +tree-sitter) ; a language that's lazier than I am
+       ;;(haskell +lsp +tree-sitter) ; a language that's lazier than I am
        ;;hy                ; readability of scheme w/ speed of python
        ;;idris             ; a language you can depend on
        (json +lsp +tree-sitter) ; At least it ain't XML
@@ -181,7 +181,7 @@
        (python +lsp +tree-sitter +pyright)
                          ; beautiful is better than ugly
        ;;qt                ; the 'cutest' gui framework ever
-       (racket +lsp +xp) ; a DSL for DSLs
+       ;;(racket +lsp +xp) ; a DSL for DSLs
        ;;raku              ; the artist formerly known as perl6
        (rest +jq)        ; Emacs as a REST client
        rst               ; ReST in peace
@@ -208,9 +208,9 @@
        :app
        ;;calendar
        ;;emms
-       everywhere        ; *leave* Emacs!? You must be joking
-       irc               ; how neckbeards socialize
-       rss               ; emacs as an RSS reader
+       ;;everywhere        ; *leave* Emacs!? You must be joking
+       ;;irc               ; how neckbeards socialize
+       ;;rss               ; emacs as an RSS reader
        ;;twitter           ; twitter client https://twitter.com/vnought
 
        :config

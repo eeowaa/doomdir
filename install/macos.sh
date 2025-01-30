@@ -134,21 +134,6 @@ npm install -g dockerfile-language-server-nodejs
 # Install prerequisites for `tools/editorconfig` module
 brew install editorconfig
 
-# Install prerequisites for `tools/ein` module
-brew install python
-pipx install --include-deps jupyter
-
-## Install the bash_kernel package into the jupyter virtualenv
-pipx inject jupyter bash_kernel
-
-## Run the installer script to install the kernel in the virtualenv
-. "$(pipx environment -V PIPX_LOCAL_VENVS)/jupyter/bin/activate"
-python -m bash_kernel.install --sys-prefix
-deactivate
-
-## Verify that the bash kernel is visible to jupyter
-jupyter kernelspec list
-
 # Install prerequisites for `tools/lookup` module
 brew install ripgrep sqlite3
 
@@ -166,13 +151,8 @@ brew install pkg-config poppler automake
 # Install prerequisites for `tools/pdf` module
 sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
 
-# Install prerequisites for `tools/terraform` module
-brew install terraform hashicorp/tap/terraform-ls
-
 # Install prerequisites for `lang/cc` module
 brew install ccls gdb glslang
-
-# Install prerequisites for `lang/csharp` module
 
 # Install prerequisites for `lang/data` module
 curl --create-dirs \
@@ -225,9 +205,6 @@ pipx install --include-deps jupyter
 ## Debugging
 pip3 install --user debugpy
 
-# Install prerequisites for `lang/racket` module
-brew install --cask racket
-
 # Install prerequisites for `lang/rest` module
 brew install jq
 
@@ -242,6 +219,3 @@ npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 
 # Install prerequisites for `lang/yaml` module
 npm install -g yaml-language-server
-
-# Install prerequisites for `app/irc` module
-brew install gnutls

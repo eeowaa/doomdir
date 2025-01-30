@@ -86,8 +86,8 @@
   (package! ob-applescript))
 
 ;; MongoDB
-(package! ob-mongo)
-(package! inf-mongo)
+;;(package! ob-mongo)
+;;(package! inf-mongo)
 
 ;; Graphics
 (package! graphviz-dot-mode)
@@ -213,8 +213,6 @@
 ;;(package! mastadon)
 
 (package! gptel)
-
-(package! elfeed-goodies :disable t)
 
 ;;; :config
 

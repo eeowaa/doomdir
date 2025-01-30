@@ -5869,6 +5869,7 @@ displayed on the laptop I am currently using:
 I would prefer to make this dynamic.
 
 ** cloudformation [0/0] :eeowaa:ARCHIVE:
+** collab [0/0] :ARCHIVE:
 ** debugger [1/8]
 References:
 + https://www.youtube.com/watch?v=0bilcQVSlbM
@@ -6418,7 +6419,7 @@ rule used by ~markdownlint~. *UPDATE*: For now, I am just adding
 }
 #+end_src
 
-** ein [3/4]
+** ein [3/4] :ARCHIVE:
 #+begin_quote
 Adds Jupyter notebook integration into emacs.
 #+end_quote
@@ -6524,7 +6525,7 @@ echo "Hi, ${name}!"
 
 A workaround is to simply *not export* the results.
 
-** elasticsearch [0/0] :eeowaa:
+** elasticsearch [0/0] :eeowaa:ARCHIVE:
 ** eval [1/4]
 *** DONE [#A] Implement arbitrary region copy/paste between buffers :feat:
 I would like to be able to "send" a region from one buffer to another buffer
@@ -7364,7 +7365,7 @@ sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
 
 ** rgb [0/0] :ARCHIVE:
 ** taskrunner [0/0] :ARCHIVE:
-** terraform [4/6]
+** terraform [4/6] :ARCHIVE:
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -7999,8 +8000,8 @@ Miscellaneous configuration without a corresponding module.
   (package! ob-applescript))
 
 ;; MongoDB
-(package! ob-mongo)
-(package! inf-mongo)
+;;(package! ob-mongo)
+;;(package! inf-mongo)
 
 ;; Graphics
 (package! graphviz-dot-mode)
@@ -8144,7 +8145,7 @@ This module adds [[https://coq.inria.fr][coq]] support, powered by [[https://pro
 This modules adds [[https://crystal-lang.org/][crystal]] support.
 #+end_quote
 
-** csharp [1/2]
+** csharp [1/2] :ARCHIVE:
 #+begin_quote
 This module adds C# support to Emacs. Powered by omnisharp (directly or through
 LSP).
@@ -8431,7 +8432,7 @@ github_binary_release \
 sudo dnf -y install llvm
 #+end_src
 
-** haskell [2/2]
+** haskell [2/2] :ARCHIVE:
 #+begin_quote
 This module adds [[https://www.haskell.org/][Haskell]] support, powered by either [[https://github.com/jyp/dante][dante]] (the default) or LSP
 (haskell-language-server or ghcide).
@@ -8513,7 +8514,7 @@ npm install -g vscode-langservers-extracted
 **** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `lang/json` module
-dnf -y install jq
+sudo dnf -y install jq
 npm install -g vscode-langservers-extracted
 #+end_src
 
@@ -10297,7 +10298,7 @@ _Verdict_:
 This module provides language functionality for [[https://qt.io][Qt]] specific files.
 #+end_quote
 
-** racket [1/1]
+** racket [1/1] :ARCHIVE:
 #+begin_quote
 This module provides integration for [[https://github.com/greghendershott/racket-mode][racket-mode]].
 #+end_quote
@@ -11089,7 +11090,7 @@ This module enables Emacs to be used as a music player. It uses [[https://www.mu
 server and [[https://musicpd.org/clients/mpc/][mpc]] to update your music database.
 #+end_quote
 
-** everywhere [0/1]
+** everywhere [0/1] :ARCHIVE:
 #+begin_quote
 This module adds system-wide popup Emacs windows for quick edits.
 #+end_quote
@@ -11260,7 +11261,7 @@ with my own philosophy of using Emacs.
         "C-c C-g" #'gptel-menu))
 #+end_src
 
-** irc [3/5]
+** irc [3/5] :ARCHIVE:
 #+begin_quote
 This module turns Emacs into an IRC client, capable of OS notifications.
 #+end_quote
@@ -11325,7 +11326,7 @@ I would much prefer a single =circe= command to do this rather than that whole
 song and dance. See also: https://libera.chat/guides/findingchannels
 
 *** TODO [#C] Figure out how to display inline images :tweak:
-** rss [4/4]
+** rss [4/4] :ARCHIVE:
 #+begin_quote
 Read RSS feeds in the comfort of DOOM (Emacs)
 #+end_quote
