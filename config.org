@@ -3698,39 +3698,42 @@ marker, indent and syntax-based code folding for as many languages as possible.
 #+end_quote
 
 *** COMMENT Documentation
+**** Folding packages
 Emacs has a lot of different packages available for folding. For example:
 
 + =vimish-fold=
   - Used by =:editor fold=
   - External package installed by Doom
-  - Define folds by region
+  - Define folds by region (like ~set foldmethod=manual~ in Vim)
     + Create via =zf= (~evil-vimish-fold/create~)
-    + Expand via =zo=
-  - Can also fold via markers
+    + Expand via =zo= (~+fold/open~)
+    + Delete via =zd= (~vimish-fold-delete~)
+  - Can also fold via markers (like ~set foldmethod=marker~ in Vim)
     + See ~vimish-fold-marks~
 
 + =ts-fold=
   - Used by =:editor fold=
   - External package (at least for Emacs < 29) installed by Doom
-  - Leverages =tree-sitter= parser to define foldable regions
+  - Leverages =tree-sitter= parser to define foldable regions (like ~set foldmethod=syntax~)
     + =ts-fold= must be instrumented separately from =tree-sitter=
     + Just because a mode has a =tree-sitter= parser doesn't mean that it has a
-      corresponding =ts-fold= implementation
+      corresponding =ts-fold= implementation (see ~ts-fold-range-alist~)
   - *Use this when available*
 
 + =hideshow=
   - Used by =:editor fold=
   - Builtin package
-  - Fold between start/end regexps
-    + End regexp is technically optional
-    + For example, take a look at Doom's customization of the ~yaml-mode~ entry
-      for ~hs-special-modes-alist~, which uses ~+fold-hideshow-forward-block-by-indent-fn~
-      to find the end of the foldable region
-  - Regexps are defined per major mode
-    + Only one start/end pair of regexps available at a time
-    + Can possibly overcome this limitation via a custom
-      ~hs-forward-sexp-function~ that moves point to the end of a foldable block
-      based on the starting regexp that point is "looking at"
+  - Fold between arbitrary buffer positions (like ~set foldmethod=expr~)
+    + Start/end positions are defined by regexps and/or functions
+    + Buffer-local =hideshow= configuration variables are automatically set by
+      ~hs-special-modes-alist~, which allows language-specific folding
+  - Only one start/end pair of regexps are available at a time
+    + Can possibly overcome this limitation via a custom ~hs-forward-sexp-function~
+      (or FORWARD-SEXP-FUNC member of ~hs-special-modes-alist~) that moves point to
+      the end of a foldable block based on the starting regexp that point is "looking at"
+  - Indentation-based folding is possible (like ~set foldmethod=indent~)
+    + Look at how =:editor fold= instruments this via ~+fold-hideshow-forward-block-by-indent-fn~
+    + For a language-specific example, see ~python-hideshow-forward-sexp-function~
 
 + =outline-minor-mode=
   - Used by =:editor fold=
@@ -3747,6 +3750,7 @@ Emacs has a lot of different packages available for folding. For example:
     + Define ad-hoc parser functions per major mode
     + Comes with helper functions for defining start/end regexp pairs, which can
       be used to define multiple types of foldable blocks per major mode
+    + =hideshow= might be capable of this via ~hs-special-modes-alist~
   - Most flexible keybindings
     + Supports most or all Vim keybindings for closing and expanding folds
     + List of bindings available here: [[*Vim help text for folding]]
@@ -3758,10 +3762,41 @@ Emacs has a lot of different packages available for folding. For example:
 + =yafolding=
   - Not supported by =:editor fold= (must advise)
   - External package
-  - Fold based on indentation
+  - Fold based on indentation (like ~set foldmethod=indent~ in Vim)
     + =origami= falls back to indentation-based folding
     + =hideshow= can utilize ~+fold-hideshow-forward-block-by-indent-fn~
   - I see no reason to install this at the moment
+
+**** Observations
++ Sometimes folds seems to get "stuck" and I cannot unfold a region
+  - This could be due to conflicts between different folding packages
+  - It would make things a lot easier to debug if only one package was enabled at a time
+    + Could take inspiration from Vim's ~foldmethod~ option
+    + Here is a mapping of ~foldmethod~ values to minor modes that implement them:
+      - manual :: ~evil-vimish-fold-mode~
+      - marker :: ~hs-minor-mode~ /(configured for marker-based folding)/
+        + Note that the ~vimish-fold-marks~ option is only used by =vimish-fold=
+          to automatically create folds within a region, or when activating
+          ~vimish-fold-mode~ (either directly or through ~evil-vimish-fold-mode~)
+        + Using ~hs-minor-mode~ with temporary overrides of buffer-local variables
+          (e.g., ~hs-block-start-regexp~, ~hs-block-end-regexp~) would more
+          accurately simulate Vim's ~set foldmethod=marker~
+      - indent :: ~hs-minor-mode~ /(configured for indentation-based folding)/
+        + Look at how =:editor fold= instruments this via ~+fold-hideshow-forward-block-by-indent-fn~
+        + For a language-specific example, see ~python-hideshow-forward-sexp-function~
+        + I'd rather avoid installing =yafolding= just for indentation-based folding
+      - expr :: ~hs-minor-mode~ /(default configuration)/
+        + In Vim, ~set foldmethod=expr~ defines the start/end fold positions via
+          arbitrary code execution, which is essentially how ~hs-minor-mode~ works
+      - syntax :: ~ts-fold-mode~
+        + Unlike in Emacs, Vim uses unified syntax definitions to specify both
+          highlighting and folding. This is somewhat similar to Tree-sitter, although
+          much less powerful, and technically there is a Tree-sitter plugin for Vim.
+          However, there is no analog in Emacs to ~set foldmethod=syntax~, so using
+          ~tree-sitter-mode~ to approximate ~set foldmethod=syntax~ makes sense to me.
++ ~hs-minor-mode~ automatically re-enables itself when using =:editor fold= functions
+  - I would like to prevent that from happening
+  - Take a look at ~+fold--ensure-hideshow-mode~ and where that gets called
 
 *** COMMENT Vim help text for folding
 This only contains the relevant commands and nothing Vim-internal.
