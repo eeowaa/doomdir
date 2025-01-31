@@ -9285,7 +9285,7 @@ Adds many tools for [[https://nixos.org/][Nix(OS)]] users in nice package for Do
 This module adds [[https://ocaml.org/][OCaml]] support to Doom Emacs, powered by [[https://github.com/ocaml/tuareg][tuareg-mode]].
 #+end_quote
 
-** org [29/56]
+** org [29/55]
 :PROPERTIES:
 :CATEGORY: doom/org
 :COOKIE_DATA: recursive
@@ -9690,7 +9690,7 @@ widen the narrowed capture buffer and save the buffer over =~/org/todo.org=
 + https://www.reddit.com/r/orgmode/comments/6ybjjw/aligned_agenda_view_anyway_to_make_this_more/
 + IIRC, this is called the "fancy diary"
 
-*** Markup for Rich Contents [1/3]
+*** Markup for Rich Contents [2/3]
 **** DONE [#C] Maintain proper spacing of footnotes :tweak:hack:
 I had to override the ~org-footnote-sort~ function to *not* insert a leading
 ~\n~ before new footnote definitions.
@@ -9739,16 +9739,6 @@ This appears to cause freezes. For now, I'll get by without.
 (after! org
   (setcar (nthcdr 4 org-emphasis-regexp-components) 4))
 #+end_src
-
-**** TODO [#C] Ignore surrounding tildes for interactive help functions :tweak:
-Doom's org markup convention is to surround elisp symbols with tildes. However,
-this makes it difficult to use commands such as ~counsel-describe-variable~
-(=SPC h v=), ~counsel-describe-function~ (=SPC h f=), and ~find-function~
-(custom-mapped to =C-h C-f=) for symbols under point.
-
-The current workaround is to select the "object" under point using =v i e= and
-then use the corresponding help command. This works well enough, but is an
-annoying extra step.
 
 *** Exporting [2/6]
 **** DONE [#A] Do not execute source blocks when exporting :tweak:
