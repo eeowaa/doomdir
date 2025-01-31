@@ -8040,9 +8040,6 @@ Miscellaneous configuration without a corresponding module.
 ;;(package! ob-mongo)
 ;;(package! inf-mongo)
 
-;; Graphics
-(package! graphviz-dot-mode)
-
 ;; Metasyntax
 (package! ebnf-mode)
 #+end_src
@@ -10177,7 +10174,7 @@ This module adds support for PHP 5.3+ (including PHP7).
 #+end_quote
 
 ** plantuml [0/0] :ARCHIVE:
-** graphviz [0/0] :ARCHIVE:
+** graphviz [0/0]
 ** purescript [0/0] :ARCHIVE:
 ** python [5/9]
 :PROPERTIES:

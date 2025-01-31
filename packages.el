@@ -89,9 +89,6 @@
 ;;(package! ob-mongo)
 ;;(package! inf-mongo)
 
-;; Graphics
-(package! graphviz-dot-mode)
-
 ;; Metasyntax
 (package! ebnf-mode)
 

@@ -179,7 +179,7 @@
                          ; organize your plain life in plain text
        ;;php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
-       ;;graphviz          ; diagrams for confusing yourself even more
+       graphviz          ; diagrams for confusing yourself even more
        ;;purescript        ; javascript, but functional
        (python +lsp +tree-sitter +pyright)
                          ; beautiful is better than ugly
