@@ -2980,11 +2980,7 @@ block at point is a pre block (as opposed to a code block)."
 (after! org
   (setq org-hide-leading-stars nil
         org-startup-indented nil
-        org-adapt-indentation nil)
-
-  ;; HACK The following `require' line prevents error messages like this:
-  ;; Invalid face reference: org-indent
-  (require 'org-indent))
+        org-adapt-indentation nil))
 
 (defadvice! my/inhibit-indentation-a (f &rest r)
   "Prevent `org-indent-mode' from running."
