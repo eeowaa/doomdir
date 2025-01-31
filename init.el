@@ -27,6 +27,7 @@
        :completion
        (company +childframe)
                          ; the ultimate code completion backend
+       ;;(corfu +orderless)  ; complete with cap(f), cape and a flying feather!
        ;;helm              ; the *other* search engine for love and life
        ;;ido               ; the other *other* search engine...
        ;;(ivy +icons)      ; a search engine for love and life
@@ -78,6 +79,7 @@
        :emacs
        (dired +icons)    ; making dired pretty [functional]
        electric          ; smarter, keyword-based electric-indent
+       ;;eww               ; the internet is gross
        (ibuffer +icons)  ; interactive buffer management
        ;; FIXME (find-file (doom-module-locate-path :emacs "undo" "README.org"))
        (undo +tree)      ; persistent, smarter undo for your inevitable mistakes
@@ -177,6 +179,7 @@
                          ; organize your plain life in plain text
        ;;php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
+       ;;graphviz          ; diagrams for confusing yourself even more
        ;;purescript        ; javascript, but functional
        (python +lsp +tree-sitter +pyright)
                          ; beautiful is better than ugly

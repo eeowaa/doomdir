@@ -576,6 +576,7 @@ child frame, which is not made visible.
 Check ~company-active-map~, ~company-show-doc-buffer~, ~company-doc-buffer~,
 ~company--electric-do~, and ~company-mode-hook~ (~evil-normalize-keys~).
 
+** corfu [0/0] :ARCHIVE:
 ** helm [0/0] :ARCHIVE:
 #+begin_quote
 This module provides Helm integration for a variety of Emacs commands, as well as
@@ -4656,6 +4657,7 @@ some additional functionality in =vimish-tab= (namely a new function called
 #+end_src
 
 ** electric [0/0]
+** eww [0/0] :ARCHIVE:
 ** ibuffer [1/7]
 #+begin_quote
 This module augments ibuffer.
@@ -10175,6 +10177,7 @@ This module adds support for PHP 5.3+ (including PHP7).
 #+end_quote
 
 ** plantuml [0/0] :ARCHIVE:
+** graphviz [0/0] :ARCHIVE:
 ** purescript [0/0] :ARCHIVE:
 ** python [5/9]
 :PROPERTIES:
