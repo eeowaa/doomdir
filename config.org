@@ -10155,7 +10155,7 @@ This module adds support for PHP 5.3+ (including PHP7).
 
 ** plantuml [0/0] :ARCHIVE:
 ** purescript [0/0] :ARCHIVE:
-** python [6/9]
+** python [5/9]
 :PROPERTIES:
 :CATEGORY: doom/python
 :END:
@@ -10221,15 +10221,31 @@ More than a simple "Hello World":
   (display-fill-column-indicator-mode))
 #+end_src
 
-*** DONE [#B] Install texinfo documentation :feat:
-#+begin_src emacs-lisp :tangle packages.el
-(package! python-info)
-#+end_src
-
 *** DONE [#C] Filename-mode associations :feat:
 #+begin_src emacs-lisp :tangle yes
 (pushnew! auto-mode-alist '("pylint" . conf-mode)
                           '("/activate\\'" . sh-mode))
+#+end_src
+
+*** TODO [#B] Install texinfo documentation :feat:
+The =python-info= package installs documentation for Python 2.
+
+#+begin_src emacs-lisp :tangle no
+(package! python-info)
+#+end_src
+
+We want documentation for Python 3 instead. Here's how to get it (note that
+=tar.bz= files are available, too):
+
+#+begin_src sh :tangle no
+version=`python --version | awk '{print $2}'`
+tmpdir=`mktemp -d`
+zipfile=python-${version}-docs-texinfo.zip
+cd "${tmpdir}"
+curl -fsSLO "https://www.python.org/ftp/python/doc/${version}/${zipfile}"
+unzip "${zipfile}"
+cd "${zipfile%*.zip}"
+make infodir="${HOME}/.local/share/info" install-info
 #+end_src
 
 *** STRT [#B] Discover ~pipx~ virtualenvs with projectile :tweak:

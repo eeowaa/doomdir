@@ -103,8 +103,6 @@
 (unpin! zmq)
 (unpin! jupyter)
 
-(package! python-info)
-
 ;;; :email
 
 ;;; :app
