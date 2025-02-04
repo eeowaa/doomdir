@@ -3695,7 +3695,7 @@ shell scripts, so I created my own:
 $0
 #+end_src
 
-** fold [0/5]
+** fold [0/6]
 #+begin_quote
 This module marries hideshow, vimish-fold and outline-minor-mode to bring you
 marker, indent and syntax-based code folding for as many languages as possible.
@@ -3951,7 +3951,9 @@ Some buffers only support ~outline-minor-mode~, but the =:editor fold= module
 does not account for that very well. The following advice fixes /most/ of those
 problems (still need to advise ~+fold/next~ and ~+fold/previous~):
 
-#+begin_src emacs-lisp :tangle yes
+*UPDATE*: This may have broken folding for Python souce code.
+
+#+begin_src emacs-lisp :tangle no
 (defadvice! my/hideshow-suppress-error-a (fn &rest args)
   :around #'+fold--ensure-hideshow-mode
   (ignore-errors (apply fn args)))
@@ -7814,7 +7816,7 @@ a single line."
 #+end_src
 
 ** tmux [0/0] :ARCHIVE:
-** tree-sitter [5/6]
+** tree-sitter [4/6]
 *** DONE [#A] Unpin =tree-sitter-langs= :feat:
 Unfortunately, the font-locking provided by =yaml-mode= does not properly
 fontify multiline quoted strings within string literals. My hope is that
@@ -7852,15 +7854,25 @@ Also, ~tree-sitter-major-mode-language-alist~ already sets ~terraform-mode~ to
   (pushnew! evil-textobj-tree-sitter-major-mode-language-alist '(terraform-mode . "hcl")))
 #+end_src
 
-*** DONE [#A] Do not use =ts-fold= for modes without a parser :bug:
+*** STRT [#A] Do not use =ts-fold= for modes without a parser :bug:
 There is a comment above the current definition of ~+fold--ts-fold-p~ that says
 "does this need more?", and the answer is "yes":
 
-#+begin_src emacs-lisp :tangle yes
+*UPDATE*: The following code block works great, but I've disabled it:
+
+#+begin_src emacs-lisp :tangle no
 (defadvice! my/fold--ts-fold-p-a ()
   "Check for tree-sitter-based folding in the current major mode."
   :after-while #'+fold--ts-fold-p
   (assq major-mode ts-fold-range-alist))
+#+end_src
+
+However, the =:editor fold= module has a lot of problems and I eventually want
+to replace it. For now, I'm going to completely disallow ~ts-fold-mode~.
+
+#+begin_src emacs-lisp :tangle packages.el
+;; HACK: Do not install ts-fold mode
+(package! ts-fold :disable t)
 #+end_src
 
 *** DONE [#C] Write test function for obtaining fold summaries :module:

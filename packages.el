@@ -61,6 +61,9 @@
   :recipe (:host github
            :repo "emacsattic/tree-sitter-indent"))
 
+;; HACK: Do not install ts-fold mode
+(package! ts-fold :disable t)
+
 (package! x509-mode)
 
 ;;; :os

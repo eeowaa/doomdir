@@ -1376,31 +1376,6 @@ current buffer first unless the `force' argument is given."
 
 (setq hs-allow-nesting t)
 
-(defadvice! my/hideshow-suppress-error-a (fn &rest args)
-  :around #'+fold--ensure-hideshow-mode
-  (ignore-errors (apply fn args)))
-
-(defadvice! my/hideshow-skip-maybe-a (fn &rest args)
-  :around #'+fold/open-all
-  (if-let ((level (car-safe args))
-           (_ (integerp level)))
-      (letf! ((defun my/outline-correct-sublevel-a (args)
-                (list level))
-              (defadvice #'outline-hide-sublevels :filter-args
-                         #'my/outline-correct-sublevel-a))
-        (apply fn args))
-    (letf! ((defun my/hs-life-goes-on-a (fn &rest args)
-              (hs-life-goes-on (apply fn args)))
-            (defadvice #'hs-show-all :around
-                       #'my/hs-life-goes-on-a))
-      (apply fn args))))
-
-(defadvice! my/outline-close-all-maybe-a (&optional level)
-  :after #'+fold/close-all
-  (when (fboundp 'outline-hide-sublevels)
-    (save-excursion
-      (outline-hide-sublevels (or level 1)))))
-
 (after! projectile
 
   (defun my/projectile-skel-variable-cons ()
@@ -2539,11 +2514,6 @@ This variable should be set by `my/lsp-ui-set-delay'.")
 ;; Missing from evil-textobj-tree-sitter.el:
 (after! evil-textobj-tree-sitter
   (pushnew! evil-textobj-tree-sitter-major-mode-language-alist '(terraform-mode . "hcl")))
-
-(defadvice! my/fold--ts-fold-p-a ()
-  "Check for tree-sitter-based folding in the current major mode."
-  :after-while #'+fold--ts-fold-p
-  (assq major-mode ts-fold-range-alist))
 
 (after! ts-fold
   (defun my/ts-fold-summary-test (&optional summary-parser)
