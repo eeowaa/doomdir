@@ -3404,7 +3404,7 @@ For some reason, the ~use-package~ form for =so-long= (in
 =~/.config/emacs/lisp/doom-editor.el=) is not in effect, though I would like to
 use it.
 
-** evil [9/12]
+** evil [8/12]
 #+begin_quote
 This holy module brings the vim experience to Emacs.
 #+end_quote
@@ -3581,7 +3581,10 @@ builtin game.
     :e "J" #'solitaire-move-down))
 #+end_src
 
-*** DONE [#C] Make =C-i= behave as =TAB= in info mode :tweak:module:
+*** TODO [#C] Make =C-i= behave as =TAB= in info mode :tweak:module:
+*UPDATE*: It seems as though ~evil-collection-info-setup~ is no longer getting
+called automatically. I must call it myself after entering ~Info-mode~.
+
 #+begin_src emacs-lisp :tangle yes
 (defadvice! my/ergonomic-info-bindings-a (&rest _)
   :after #'evil-collection-info-setup
@@ -4005,6 +4008,9 @@ Reference: https://www.reddit.com/r/emacs/comments/5ei7wa/awesome_vimlike_foldin
 
 + =origami= is recommended
 + Vim keybindings are provided
+
+*UPDATE*: I now believe that =hideshow= would be the best choice.
+See the /Documentation/Observations/ section above for notes.
 
 ** format [0/0] :ARCHIVE:
 #+begin_quote
@@ -11466,6 +11472,7 @@ Miscellaneous configuration without a corresponding module.
     :channels ("#emacs"
                "#")))
 
+;; GPT
 (after! gptel
   (setq gptel-api-key "<redacted>"))
 
