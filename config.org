@@ -11521,10 +11521,14 @@ problem.
             (:success t)))))))
 #+end_src
 
-*** DONE [#B] Enable automatic discovery of project directories :tweak:
+*** KILL [#B] Enable automatic discovery of project directories :tweak:
 Doom disables this feature for performance reasons. Let's re-enable it.
 
-#+begin_src emacs-lisp :tangle yes
+*UPDATE*: I've come to agree with Doom's defaults here. I'll just run
+=M-x projectile-discover-projects-in-search-path RET= when I want to pick up
+discover projects.
+
+#+begin_src emacs-lisp :tangle no
 (setq projectile-auto-discover t)
 #+end_src
 

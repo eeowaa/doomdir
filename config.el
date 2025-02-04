@@ -3517,8 +3517,6 @@ This is a list of lists, not a list of cons cells.")
               (t t)))
             (:success t)))))))
 
-(setq projectile-auto-discover t)
-
 (setq projectile-project-search-path
       (list
        ;; Standard source directories
