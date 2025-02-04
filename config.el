@@ -1922,6 +1922,8 @@ which causes problems even if there is no existing buffer."
 
 (setq vterm-copy-mode-remove-fake-newlines t)
 
+(setq next-error-verbose nil)
+
 (after! flycheck
   (defadvice! my/org-src-a (&rest _)
     "Consider Org Src buffers as ephemeral (do not enable flycheck)."

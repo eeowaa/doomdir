@@ -5424,10 +5424,18 @@ WS   (str)   Resize  display. This capability has the desired width and height a
 ;;; :checkers
 #+end_src
 
-** Miscellany [0/0] :ARCHIVE:
+** Miscellany [1/1]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
+
+*** DONE [#C] Remove "next/previous locus from <source>" messages
+When running ~next-error~ (=]e=) or ~previous-error~ (=[=), messages get
+displayed in the echo area that I do not want to see. Let's disable them.
+
+#+begin_src emacs-lisp :tangle yes
+(setq next-error-verbose nil)
+#+end_src
 
 ** syntax [6/10]
 *** DONE [#A] Disable flycheck in all Org source blocks :hack:
