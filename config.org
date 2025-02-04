@@ -11546,8 +11546,12 @@ Some ideas for more project directories:
        (cons (concat (file-name-as-directory (getenv "HOME")) ".local/src") 2)
 
        ;; Personal source directories
-       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/work") 2)
-       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/life") 2)))
+       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/work") 4)
+       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/life") 2)
+
+       ;; Personal notes directories
+       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "notes/work") 2)
+       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "notes/life") 2)))
 #+end_src
 
 *** DONE [#B] Remove =straight= package repos from =projectile= :tweak:

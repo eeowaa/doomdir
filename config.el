@@ -3525,8 +3525,12 @@ This is a list of lists, not a list of cons cells.")
        (cons (concat (file-name-as-directory (getenv "HOME")) ".local/src") 2)
 
        ;; Personal source directories
-       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/work") 2)
-       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/life") 2)))
+       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/work") 4)
+       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "src/life") 2)
+
+       ;; Personal notes directories
+       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "notes/work") 2)
+       (cons (concat (file-name-as-directory (xdg-user-dir "DOCUMENTS")) "notes/life") 2)))
 
 ;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
 (after! projectile
