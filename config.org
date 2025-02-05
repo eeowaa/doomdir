@@ -2305,7 +2305,7 @@ loads, so tabs will appear in the ~ilist~ buffer until you manually run the
 Wait until you have a Maildir set up, then look at configuration options for
 ~display-time-mode~.
 
-** treemacs [13/19]
+** treemacs [13/18]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -2322,7 +2322,7 @@ utilities.
 ;;   (treemacs-indent-guide-mode))
 ;; TODO: `treemacs-sorting' (sort by file extension, etc.)
 (setq treemacs-user-mode-line-format " Treemacs")
-(setq treemacs-indentation 3)
+(setq treemacs-indentation (if initial-window-system 3 2))
 
 ;; XXX: Run this before opening icons
 ;; FIXME: Some icons (LICENSE, packages.lock, *.service) are 3 characters wide instead of 2
@@ -2420,7 +2420,7 @@ This slows down startup a bit, but whatever (I'm not obsessed with startup):
 
 Reference: https://github.com/hlissner/doom-emacs/issues/4555
 
-*** DONE [#B] Do not collapse path strings :tweak:
+*** OKAY [#B] Do not collapse path strings :tweak:
 Doom sets ~treemacs-collapse-dirs~ to 3, and I'm OK with that for now.
 
 #+begin_src emacs-lisp :tangle no
@@ -2550,7 +2550,9 @@ Until I have a permanent fix for Treemacs icons, I want to call
 #+begin_src emacs-lisp :tangle yes
 (after! treemacs
   (defun my/treemacs-revert-buffer-function (&rest _)
-    (my/treemacs-modify-icons)
+    (when initial-window-system
+      ;; HACK: Right now, TUI icons look good
+      (my/treemacs-modify-icons))
     (treemacs-refresh))
   (setq-hook! 'treemacs-mode-hook
     revert-buffer-function #'my/treemacs-revert-buffer-function))
@@ -6939,7 +6941,7 @@ it doesn't want to install user-contributed docsets. References:
 + ~dash-docs-install-user-docset~
   - https://github.com/roberth-k/dash-docset-terraform
 
-** lsp [4/13]
+** lsp [5/14]
 *** COMMENT Documentation
 + [[doom-modules:tools/lsp/README.org][tools/lsp module documentation]]
 + [[doom:.local/straight/repos/lsp-mode/README.md][lsp-mode package README]]
@@ -6978,6 +6980,16 @@ This is also possible via =SPC c l h g= (~lsp-ui-doc-glance~).
         `((side . right)
           (slot . 0)
           (window-width . ,treemacs-width))))
+#+end_src
+
+*** DONE [#B] Disable documentation popups in TUI Emacs :bug:
+Although it should be possible to get this working without childframes
+(see ~lsp-ui-doc-use-childframe~), in practice, I cannot find a configuration
+that works without causing alignment issues.
+
+#+begin_src emacs-lisp :tangle yes
+(unless initial-window-system
+  (setq lsp-ui-doc-enable nil))
 #+end_src
 
 *** STRT [#B] Allow symbol windows to be easily resized :feat:

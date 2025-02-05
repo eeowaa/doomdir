@@ -816,7 +816,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 ;;   (treemacs-indent-guide-mode))
 ;; TODO: `treemacs-sorting' (sort by file extension, etc.)
 (setq treemacs-user-mode-line-format " Treemacs")
-(setq treemacs-indentation 3)
+(setq treemacs-indentation (if initial-window-system 3 2))
 
 ;; XXX: Run this before opening icons
 ;; FIXME: Some icons (LICENSE, packages.lock, *.service) are 3 characters wide instead of 2
@@ -898,7 +898,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
 (after! treemacs
   (defun my/treemacs-revert-buffer-function (&rest _)
-    (my/treemacs-modify-icons)
+    (when initial-window-system
+      ;; HACK: Right now, TUI icons look good
+      (my/treemacs-modify-icons))
     (treemacs-refresh))
   (setq-hook! 'treemacs-mode-hook
     revert-buffer-function #'my/treemacs-revert-buffer-function))
@@ -2324,6 +2326,9 @@ if you want to send region to a REPL or terminal emulator."
         `((side . right)
           (slot . 0)
           (window-width . ,treemacs-width))))
+
+(unless initial-window-system
+  (setq lsp-ui-doc-enable nil))
 
 (after! lsp-ui-imenu
   (setq lsp-ui-imenu-window-fix-width nil)
