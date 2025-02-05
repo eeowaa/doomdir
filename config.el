@@ -648,11 +648,12 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   (setq-hook! 'imenu-list-major-mode-hook
     revert-buffer-function #'imenu-list-refresh))
 
-(setq my/imenu-list-text-scale -1)
-(after! imenu-list
-  (defun my/imenu-list-text-scale-h ()
-    (text-scale-increase my/imenu-list-text-scale))
-  (add-hook 'imenu-list-major-mode-hook #'my/imenu-list-text-scale-h))
+(when initial-window-system
+  (setq my/imenu-list-text-scale -1)
+  (after! imenu-list
+    (defun my/imenu-list-text-scale-h ()
+      (text-scale-increase my/imenu-list-text-scale))
+    (add-hook 'imenu-list-major-mode-hook #'my/imenu-list-text-scale-h)))
 
 (add-hook! '+indent-guides-inhibit-functions #'always)
 
@@ -893,7 +894,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     (remove-hook 'treemacs-mode-hook #'doom-themes-hide-fringes-maybe)
     (advice-remove #'treemacs-select-window #'doom-themes-hide-fringes-maybe)))
 
-(setq treemacs-text-scale -1)
+(setq treemacs-text-scale (if initial-window-system -1 0))
 
 (after! treemacs
   (defun my/treemacs-revert-buffer-function (&rest _)
@@ -2375,11 +2376,12 @@ This variable should be set by `my/lsp-ui-set-delay'.")
 
 (setq lsp-lens-enable nil)
 
-(setq my/lsp-ui-imenu-text-scale -1)
-(after! lsp-ui-imenu
-  (defun my/lsp-ui-imenu-text-scale-h ()
-    (text-scale-increase my/lsp-ui-imenu-text-scale))
-  (add-hook 'lsp-ui-imenu-mode-hook #'my/lsp-ui-imenu-text-scale-h))
+(when initial-window-system
+  (setq my/lsp-ui-imenu-text-scale -1)
+  (after! lsp-ui-imenu
+    (defun my/lsp-ui-imenu-text-scale-h ()
+      (text-scale-increase my/lsp-ui-imenu-text-scale))
+    (add-hook 'lsp-ui-imenu-mode-hook #'my/lsp-ui-imenu-text-scale-h)))
 
 (setq lsp-modeline-code-actions-segments nil)
 

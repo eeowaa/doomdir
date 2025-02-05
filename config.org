@@ -1866,11 +1866,12 @@ I just need to test this functionality.
 
 **** DONE [#C] Scale down font in imenu-list-major-mode
 #+begin_src emacs-lisp :tangle yes
-(setq my/imenu-list-text-scale -1)
-(after! imenu-list
-  (defun my/imenu-list-text-scale-h ()
-    (text-scale-increase my/imenu-list-text-scale))
-  (add-hook 'imenu-list-major-mode-hook #'my/imenu-list-text-scale-h))
+(when initial-window-system
+  (setq my/imenu-list-text-scale -1)
+  (after! imenu-list
+    (defun my/imenu-list-text-scale-h ()
+      (text-scale-increase my/imenu-list-text-scale))
+    (add-hook 'imenu-list-major-mode-hook #'my/imenu-list-text-scale-h)))
 #+end_src
 
 ** indent-guides [1/1]
@@ -2539,7 +2540,7 @@ don't need ~treemacs-fringe-indicator-mode~ because ~hl-line-mode~ and
 
 *** DONE [#C] Set the text scale to -1 :tweak:
 #+begin_src emacs-lisp :tangle yes
-(setq treemacs-text-scale -1)
+(setq treemacs-text-scale (if initial-window-system -1 0))
 #+end_src
 
 *** LOOP [#C] Configure revert-buffer :tweak:module:
@@ -7121,11 +7122,12 @@ that instead.
 
 *** DONE [#C] Scale down text of LSP UI Imenu windows :tweak:
 #+begin_src emacs-lisp :tangle yes
-(setq my/lsp-ui-imenu-text-scale -1)
-(after! lsp-ui-imenu
-  (defun my/lsp-ui-imenu-text-scale-h ()
-    (text-scale-increase my/lsp-ui-imenu-text-scale))
-  (add-hook 'lsp-ui-imenu-mode-hook #'my/lsp-ui-imenu-text-scale-h))
+(when initial-window-system
+  (setq my/lsp-ui-imenu-text-scale -1)
+  (after! lsp-ui-imenu
+    (defun my/lsp-ui-imenu-text-scale-h ()
+      (text-scale-increase my/lsp-ui-imenu-text-scale))
+    (add-hook 'lsp-ui-imenu-mode-hook #'my/lsp-ui-imenu-text-scale-h)))
 #+end_src
 
 *** LOOP [#C] Do not display code actions in the modeline :bug:
