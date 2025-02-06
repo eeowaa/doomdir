@@ -8051,7 +8051,7 @@ Modules that bring support for a language or group of languages to Emacs.
 ;;; :lang
 #+end_src
 
-** Miscellany [2/4]
+** Miscellany [3/5]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -8082,10 +8082,33 @@ Miscellaneous configuration without a corresponding module.
 
 ;; Metasyntax
 (package! ebnf-mode)
+(if (modulep! :tools tree-sitter)
+    (package! protobuf-ts-mode
+      :recipe (:host github
+               :repo "emacsattic/protobuf-ts-mode"))
+  (package! protobuf-mode))
 #+end_src
 
 Note that MongoDB queries use Javascript syntax, so there is no Mongo-specific
 mode derived from ~prog-mode~ (just use ~js-mode~).
+
+*** DONE [#B] Configure Protobuf support :feat:module:
+#+begin_src emacs-lisp :tangle yes
+(if (modulep! :tools tree-sitter)
+    (progn
+      (add-to-list 'auto-mode-alist '("\\.proto\\'" . protobuf-ts-mode))
+      (add-hook 'protobuf-mode-local-vars-hook #'tree-sitter! 'append)
+      (setq protobuf-ts-mode-indent-offset 4))
+
+  ;; Adapted from protobuf-mode.el documentation
+  (add-to-list 'auto-mode-alist '("\\.proto\\'" . protobuf-mode))
+  (defconst my/protobuf-style
+    '((c-basic-offset . 4)
+      (indent-tabs-mode . nil)))
+  (add-hook 'protobuf-mode-hook
+            (defun my/protobuf-indentation-setup-h ()
+              (c-add-style "my/protobuf-style" my/protobuf-style t))))
+#+end_src
 
 *** DONE [#C] Enable font locking in Desktop Entry mode :bug:module:
 #+begin_src emacs-lisp :tangle yes

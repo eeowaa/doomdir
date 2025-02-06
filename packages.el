@@ -94,6 +94,11 @@
 
 ;; Metasyntax
 (package! ebnf-mode)
+(if (modulep! :tools tree-sitter)
+    (package! protobuf-ts-mode
+      :recipe (:host github
+               :repo "emacsattic/protobuf-ts-mode"))
+  (package! protobuf-mode))
 
 (when (modulep! :lang org +jupyter)
   (package! ox-ipynb
