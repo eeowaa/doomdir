@@ -2577,20 +2577,15 @@ See also: `ts-fold-summary--get'."
         mac-option-modifier 'super
         mac-right-option-modifier 'hyper))
 
-(if (modulep! :tools tree-sitter)
-    (progn
-      (add-to-list 'auto-mode-alist '("\\.proto\\'" . protobuf-ts-mode))
-      (add-hook 'protobuf-mode-local-vars-hook #'tree-sitter! 'append)
-      (setq protobuf-ts-mode-indent-offset 4))
+(add-to-list 'auto-mode-alist '("\\.proto\\'" . protobuf-mode))
 
-  ;; Adapted from protobuf-mode.el documentation
-  (add-to-list 'auto-mode-alist '("\\.proto\\'" . protobuf-mode))
-  (defconst my/protobuf-style
-    '((c-basic-offset . 4)
-      (indent-tabs-mode . nil)))
-  (add-hook 'protobuf-mode-hook
-            (defun my/protobuf-indentation-setup-h ()
-              (c-add-style "my/protobuf-style" my/protobuf-style t))))
+;; Adapted from protobuf-mode.el documentation
+(defconst my/protobuf-style
+  '((c-basic-offset . 4)
+    (indent-tabs-mode . nil)))
+(add-hook 'protobuf-mode-hook
+          (defun my/protobuf-indentation-setup-h ()
+            (c-add-style "my/protobuf-style" my/protobuf-style t)))
 
 (add-hook 'desktop-entry-mode-hook #'font-lock-update)
 
