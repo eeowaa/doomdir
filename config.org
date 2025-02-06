@@ -144,6 +144,10 @@ fi
 :PROPERTIES:
 :header-args: :noweb yes
 :END:
+
+*UPDATE*: The following function could potentially be replaced with a script in
+=stow-dotfiles=, although that would tightly couple the two repositories.
+
 #+name: github_binary_release
 #+begin_src sh :exports none :tangle no
 github_binary_release() {
@@ -209,18 +213,63 @@ $func: (recursively) delete? [y/N]: "
 }
 #+end_src
 
+*UPDATE*: The following is probably only necessary when Emacs is not compiled
+with native =tree-sitter= support.
+
+#+name: tree_sitter_langs
+#+begin_src sh :exports none :tangle no
+
+## Install and use the correct version of the tree-sitter CLI
+npm -g install tree-sitter-cli@0.19.3
+for ts in `which -a tree-sitter | sort -u`
+do
+    case `$ts --version` in
+    tree-sitter\ 0.19.3*)
+        export PATH=${ts%/*}:$PATH
+        break ;;
+    esac
+done
+
+## Install Cask
+if [ -d ~/.local/opt/cask ]
+then
+    git -C ~/.local/opt/cask pull
+else
+    mkdir -p ~/.local/opt
+    git clone https://github.com/cask/cask ~/.local/opt/cask
+    ln -sf ~/.local/opt/cask/bin/cask ~/.local/bin
+fi
+
+## Obtain elisp-tree-sitter source code in its own directory
+[ -d ~/.local/src/emacs/tree-sitter-langs ] || {
+    mkdir -p ~/.local/src/emacs
+    git clone https://github.com/emacs-tree-sitter/tree-sitter-langs \
+        ~/.local/src/emacs/tree-sitter-langs
+}
+
+## Install dependencies for tree-sitter-langs
+cd ~/.local/src/emacs/tree-sitter-langs
+cask install
+#+end_src
+
 *** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install Homebrew to install system packages
 curl -fsSLo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
 
-# Install NVM to install Node.js packages
+# Install NVM
 curl -fsSLo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
     | env PROFILE=/dev/null bash
+
+# Install NodeJS and NPM through NVM
+nvm install node
 
 # Function to install a binary asset from the latest release of a GitHub repo
 brew install jq
 <<github_binary_release>>
+
+# Scaffolding for tree-sitter support
+<<tree_sitter_langs>>
 #+end_src
 
 *** DONE Fedora
@@ -273,9 +322,12 @@ brew install jq
 # Install openssh-askpass to install Elisp packages
 sudo dnf -y install openssh-askpass
 
-# Install NVM to install Node.js packages
+# Install NVM
 curl -fsSLo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
     | env PROFILE=/dev/null bash
+
+# Install NodeJS and NPM through NVM
+nvm install node
 
 # Install pipx to install Python packages
 sudo dnf -y install pipx
@@ -283,6 +335,9 @@ sudo dnf -y install pipx
 # Function to install a binary asset from the latest release of a GitHub repo
 sudo dnf -y install jq
 <<github_binary_release>>
+
+# Scaffolding for tree-sitter support
+<<tree_sitter_langs>>
 #+end_src
 
 ** Elisp setup [4/4]
@@ -6727,42 +6782,9 @@ manifests and Helm charts.
 curl -fsSLo ~/.local/bin/helm_ls \
     https://github.com/mrjosh/helm-ls/releases/download/master/helm_ls_linux_amd64
 
-## Install Cask
-if [ -d ~/.local/opt/cask ]
-then
-    git -C ~/.local/opt/cask pull
-else
-    mkdir -p ~/.local/opt
-    git clone https://github.com/cask/cask ~/.local/opt/cask
-    ln -sf ~/.local/opt/cask/bin/cask ~/.local/bin
-fi
-
-## Install NodeJS
-## (should already be installed)
-
-## Install and use the correct version of the tree-sitter CLI
-npm -g install tree-sitter-cli@0.19.3
-for ts in `which -a tree-sitter | sort -u`
-do
-    case `$ts --version` in
-    tree-sitter\ 0.19.3*)
-        export PATH=${ts%/*}:$PATH
-        break ;;
-    esac
-done
-
-## Obtain elisp-tree-sitter source code in its own directory
-[ -d ~/.local/src/emacs/tree-sitter-langs ] || {
-    mkdir -p ~/.local/src/emacs
-    git clone https://github.com/emacs-tree-sitter/tree-sitter-langs \
-        ~/.local/src/emacs/tree-sitter-langs
-}
-
 ## Build and install the tree-sitter grammar for Go templates
 (
-    # Install dependencies for tree-sitter-langs
     cd ~/.local/src/emacs/tree-sitter-langs
-    cask install
 
     # Register a submodule for tree-sitter-go-template
     git submodule add -b master -- \

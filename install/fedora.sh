@@ -77,9 +77,12 @@ fi
 # Install openssh-askpass to install Elisp packages
 sudo dnf -y install openssh-askpass
 
-# Install NVM to install Node.js packages
+# Install NVM
 curl -fsSLo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
     | env PROFILE=/dev/null bash
+
+# Install NodeJS and NPM through NVM
+nvm install node
 
 # Install pipx to install Python packages
 sudo dnf -y install pipx
@@ -147,6 +150,40 @@ $func: (recursively) delete? [y/N]: "
     }
     ln -sf "$canonical_path/$binary" "$HOME/.local/bin"
 }
+
+# Scaffolding for tree-sitter support
+
+## Install and use the correct version of the tree-sitter CLI
+npm -g install tree-sitter-cli@0.19.3
+for ts in `which -a tree-sitter | sort -u`
+do
+    case `$ts --version` in
+    tree-sitter\ 0.19.3*)
+        export PATH=${ts%/*}:$PATH
+        break ;;
+    esac
+done
+
+## Install Cask
+if [ -d ~/.local/opt/cask ]
+then
+    git -C ~/.local/opt/cask pull
+else
+    mkdir -p ~/.local/opt
+    git clone https://github.com/cask/cask ~/.local/opt/cask
+    ln -sf ~/.local/opt/cask/bin/cask ~/.local/bin
+fi
+
+## Obtain elisp-tree-sitter source code in its own directory
+[ -d ~/.local/src/emacs/tree-sitter-langs ] || {
+    mkdir -p ~/.local/src/emacs
+    git clone https://github.com/emacs-tree-sitter/tree-sitter-langs \
+        ~/.local/src/emacs/tree-sitter-langs
+}
+
+## Install dependencies for tree-sitter-langs
+cd ~/.local/src/emacs/tree-sitter-langs
+cask install
 
 # Install prerequisites for `completion/vertico` module
 sudo dnf -y install ripgrep
@@ -248,42 +285,9 @@ sudo dnf -y install editorconfig
 curl -fsSLo ~/.local/bin/helm_ls \
     https://github.com/mrjosh/helm-ls/releases/download/master/helm_ls_linux_amd64
 
-## Install Cask
-if [ -d ~/.local/opt/cask ]
-then
-    git -C ~/.local/opt/cask pull
-else
-    mkdir -p ~/.local/opt
-    git clone https://github.com/cask/cask ~/.local/opt/cask
-    ln -sf ~/.local/opt/cask/bin/cask ~/.local/bin
-fi
-
-## Install NodeJS
-## (should already be installed)
-
-## Install and use the correct version of the tree-sitter CLI
-npm -g install tree-sitter-cli@0.19.3
-for ts in `which -a tree-sitter | sort -u`
-do
-    case `$ts --version` in
-    tree-sitter\ 0.19.3*)
-        export PATH=${ts%/*}:$PATH
-        break ;;
-    esac
-done
-
-## Obtain elisp-tree-sitter source code in its own directory
-[ -d ~/.local/src/emacs/tree-sitter-langs ] || {
-    mkdir -p ~/.local/src/emacs
-    git clone https://github.com/emacs-tree-sitter/tree-sitter-langs \
-        ~/.local/src/emacs/tree-sitter-langs
-}
-
 ## Build and install the tree-sitter grammar for Go templates
 (
-    # Install dependencies for tree-sitter-langs
     cd ~/.local/src/emacs/tree-sitter-langs
-    cask install
 
     # Register a submodule for tree-sitter-go-template
     git submodule add -b master -- \
