@@ -3,4 +3,6 @@
 
 (package! nginx-mode)
 (when (modulep! :completion company)
-  (package! company-nginx))
+  (package! company-nginx
+    :recipe (:host github
+             :repo "emacsmirror/company-nginx")))

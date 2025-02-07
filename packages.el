@@ -57,6 +57,13 @@
 
 (unpin! tree-sitter-langs)
 
+(package! tree-sitter-indent
+  :recipe (:host github
+           :repo "emacsattic/tree-sitter-indent"))
+
+;; HACK: Do not install ts-fold mode
+(package! ts-fold :disable t)
+
 (package! x509-mode)
 
 ;;; :os
@@ -75,6 +82,8 @@
 
 ;; Builds
 (package! jenkinsfile-mode)
+;;(package! gitlab-ci-mode)
+;;(package! gitlab-ci-mode-flycheck)
 
 ;; Applescript
 (when (featurep :system 'macos)
@@ -82,14 +91,12 @@
   (package! ob-applescript))
 
 ;; MongoDB
-(package! ob-mongo)
-(package! inf-mongo)
-
-;; Graphics
-(package! graphviz-dot-mode)
+;;(package! ob-mongo)
+;;(package! inf-mongo)
 
 ;; Metasyntax
 (package! ebnf-mode)
+(package! protobuf-mode)
 
 (when (modulep! :lang org +jupyter)
   (package! ox-ipynb
@@ -98,8 +105,6 @@
 ;; (package! zmq :pin "00dea2f9f88cd3e723d3b909aea26313dd33f9c6")
 (unpin! zmq)
 (unpin! jupyter)
-
-(package! python-info)
 
 ;;; :email
 
@@ -124,7 +129,8 @@
 ;;(package! dilbert)
 
 ;;; Weather
-(package! noaa)
+(package! noaa
+  :recipe (:host github :repo "emacsmirror/noaa"))
 ;;(package! aqi)
 
 ;;; Clocks and timers
@@ -132,7 +138,8 @@
 ;;(package! countdown)
 
 ;;; Ebooks
-(package! nov)
+(package! nov
+  :recipe (:host github :repo "emacsmirror/nov"))
 ;;(package! sicp)
 
 ;;; Browsing
@@ -207,8 +214,6 @@
 ;;(package! mastadon)
 
 (package! gptel)
-
-(package! elfeed-goodies :disable t)
 
 ;;; :config
 

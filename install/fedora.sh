@@ -1,18 +1,33 @@
 #!/bin/sh
 
-# Lock Emacs at version 28.2 using DNF
-target_version=28.2
+# Prevent Emacs 29.4 from being installed
+# <https://github.com/doomemacs/doomemacs/issues/7915>
 sudo dnf -y install 'dnf-command(versionlock)'
-sudo ed /etc/dnf/plugins/versionlock.list <<EOF
-/^emacs-1:/d
-\$a
-emacs-1:$target_version.*
-.
-wq
-EOF
-[ "X$target_version" = "X$actual_version" ] || cat >&2 <<EOF
+sudo dnf versionlock exclude --raw 'emacs-1:29.4-*'
+
+# Install the newest release of the desired <name>-<epoch>:<version> RPM and
+# prevent upgrades (even to a newer <name>-<epoch>:<version>-<release>) to avoid
+# ever having to run 'doom upgrade' unexpectedly after upgrading system packages
+# NOTE: "epoch" is an RPM construct and is required for proper version comparison
+target="1:29.2"
+sudo dnf versionlock delete emacs
+rpm -q emacs >/dev/null || {
+    sudo dnf -y install "emacs-$target" || :
+} || {
+    current=`rpm -q --qf '%{epoch}:%{version}' emacs`
+    case `rpm -E "%{lua:print(rpm.vercmp('$current', '$target'))}"` in
+     0) ;;
+    -1) sudo dnf -y upgrade "emacs-$target" ;;
+     1) sudo dnf -y downgrade "emacs-$target" ;;
+    esac
+}
+current=`rpm -q --qf '%{epoch}:%{version}' emacs`
+if [ "X$target" = "X$current" ]
+then sudo dnf versionlock add emacs
+else cat >&2 <<EOF
 WARNING: Incorrect Emacs version (using $actual_version, want $target_version)
 EOF
+fi
 
 # Obtain Emacs source code corresponding to installed RPM
 (
@@ -62,9 +77,12 @@ EOF
 # Install openssh-askpass to install Elisp packages
 sudo dnf -y install openssh-askpass
 
-# Install NVM to install Node.js packages
-curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
+# Install NVM
+curl -fsSLo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
     | env PROFILE=/dev/null bash
+
+# Install NodeJS and NPM through NVM
+nvm install node
 
 # Install pipx to install Python packages
 sudo dnf -y install pipx
@@ -104,7 +122,7 @@ github_binary_release() {
         }
     done
     local url=`
-        curl -s https://api.github.com/repos/$repo/releases/latest | jq -r \
+        curl -fsSLo- https://api.github.com/repos/$repo/releases/latest | jq -r \
         '.assets[] | select(.name | test("^'"$asset"'$")) | .browser_download_url'
     `
     [ "X$url" = X ] && {
@@ -125,13 +143,47 @@ $func: (recursively) delete? [y/N]: "
         esac
     }
     mkdir -p "$prefix" "$HOME/.local/bin"
-    curl -Lo- "$url" | tar -C "$prefix" -xzf -
+    curl -fsSLo- "$url" | tar -C "$prefix" -xzf -
     [ -x "$canonical_path/$binary" ] || {
         echo >&2 "ERROR: $func: not an executable file: $canonical_path/$binary"
         return 1
     }
     ln -sf "$canonical_path/$binary" "$HOME/.local/bin"
 }
+
+# Scaffolding for tree-sitter support
+
+## Install and use the correct version of the tree-sitter CLI
+npm -g install tree-sitter-cli@0.19.3
+for ts in `which -a tree-sitter | sort -u`
+do
+    case `$ts --version` in
+    tree-sitter\ 0.19.3*)
+        export PATH=${ts%/*}:$PATH
+        break ;;
+    esac
+done
+
+## Install Cask
+if [ -d ~/.local/opt/cask ]
+then
+    git -C ~/.local/opt/cask pull
+else
+    mkdir -p ~/.local/opt
+    git clone https://github.com/cask/cask ~/.local/opt/cask
+    ln -sf ~/.local/opt/cask/bin/cask ~/.local/bin
+fi
+
+## Obtain elisp-tree-sitter source code in its own directory
+[ -d ~/.local/src/emacs/tree-sitter-langs ] || {
+    mkdir -p ~/.local/src/emacs
+    git clone https://github.com/emacs-tree-sitter/tree-sitter-langs \
+        ~/.local/src/emacs/tree-sitter-langs
+}
+
+## Install dependencies for tree-sitter-langs
+cd ~/.local/src/emacs/tree-sitter-langs
+cask install
 
 # Install prerequisites for `completion/vertico` module
 sudo dnf -y install ripgrep
@@ -171,6 +223,10 @@ sudo dnf -y install fish
 # Install prerequisites for `term/vterm` module
 sudo dnf -y install libvterm cmake
 
+## Soft line wrapping
+## <https://github.com/akermu/emacs-libvterm/issues/179#issuecomment-1045331359>
+sudo dnf -y install screen
+
 # Install prerequisites for `checkers/spell` module
 sudo dnf -y install aspell
 
@@ -184,7 +240,7 @@ sudo dnf -y install unzip java-latest-openjdk-headless
 
     # Download stable release of LanguageTool
     rm -f LanguageTool-stable.zip
-    curl -o LanguageTool-stable.zip \
+    curl -fsSLo LanguageTool-stable.zip \
          -l https://languagetool.org/download/LanguageTool-stable.zip
 
     # Unzip the tool and determine the release number
@@ -211,79 +267,27 @@ nvm install node
 sudo dnf -y install direnv
 
 # Install prerequisites for `tools/docker` module
-sudo dnf -y install shadow-utils fuse-overlayfs iptables
-sudo systemctl disable --now docker.service docker.socket
-dockerd-rootless-setuptool.sh install
-curl -fsSL https://get.docker.com/rootless | sh
-cat >"$HOME/.profile.d/docker-rootless.sh" <<\EOF
-export PATH=$HOME/bin:$PATH
-export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
-EOF
-. "$HOME/.profile.d/docker-rootless.sh"
-systemctl --user start docker.service
-sudo loginctl enable-linger `whoami`
+which dockerd-rootless-setuptool.sh >/dev/null 2>&1 || {
+    sudo systemctl disable --now docker.service docker.socket
+    curl --proto '=https' --tlsv1.2 -fsSLo- https://get.docker.com | sudo sh -s
+    dockerd-rootless-setuptool.sh install
+    sudo loginctl enable-linger `whoami`
+    systemctl --user start docker.service
+}
 npm install -g dockerfile-language-server-nodejs
 
 # Install prerequisites for `tools/editorconfig` module
 sudo dnf -y install editorconfig
 
-# Install prerequisites for `tools/ein` module
-sudo dnf -y install python3 pipx
-pipx install --include-deps jupyter
-
-## Install the bash_kernel package into the jupyter virtualenv
-pipx inject jupyter bash_kernel
-
-## Run the installer script to install the kernel in the virtualenv
-. "$(pipx environment -V PIPX_LOCAL_VENVS)/jupyter/bin/activate"
-python -m bash_kernel.install --sys-prefix
-deactivate
-
-## Verify that the bash kernel is visible to jupyter
-jupyter kernelspec list
-
 # Install prerequisites for `tools/Kubernetes` module
 
 ## Helm language server
-curl -L https://github.com/mrjosh/helm-ls/releases/download/master/helm_ls_linux_amd64 \
-    --output ~/.local/bin/helm_ls
-
-## Install Cask
-if [ -d ~/.local/opt/cask ]
-then
-    git -C ~/.local/opt/cask pull
-else
-    mkdir -p ~/.local/opt
-    git clone https://github.com/cask/cask ~/.local/opt/cask
-    ln -sf ~/.local/opt/cask/bin/cask ~/.local/bin
-fi
-
-## Install NodeJS
-## (should already be installed)
-
-## Install and use the correct version of the tree-sitter CLI
-npm -g install tree-sitter-cli@0.19.3
-for ts in `which -a tree-sitter | sort -u`
-do
-    case `$ts --version` in
-    tree-sitter\ 0.19.3*)
-        export PATH=${ts%/*}:$PATH
-        break ;;
-    esac
-done
-
-## Obtain elisp-tree-sitter source code in its own directory
-[ -d ~/.local/src/emacs/tree-sitter-langs ] || {
-    mkdir -p ~/.local/src/emacs
-    git clone https://github.com/emacs-tree-sitter/tree-sitter-langs \
-        ~/.local/src/emacs/tree-sitter-langs
-}
+curl -fsSLo ~/.local/bin/helm_ls \
+    https://github.com/mrjosh/helm-ls/releases/download/master/helm_ls_linux_amd64
 
 ## Build and install the tree-sitter grammar for Go templates
 (
-    # Install dependencies for tree-sitter-langs
     cd ~/.local/src/emacs/tree-sitter-langs
-    cask install
 
     # Register a submodule for tree-sitter-go-template
     git submodule add -b master -- \
@@ -325,9 +329,6 @@ cpan install App::Git::Autofixup
 # Install prerequisites for `tools/nginx` module
 pipx install --python `which python3.10` nginx-language-server
 
-# Install prerequisites for `tools/terraform` module
-sudo dnf -y install terraform terraform-ls
-
 # Install prerequisites for `lang/cc` module
 
 ## GCC
@@ -358,30 +359,9 @@ sudo dnf -y install glslang
 sudo dnf -y install cmake
 pipx install cmake-language-server
 
-# Install prerequisites for `lang/csharp` module
-
-## dotnet
-sudo dnf -y install dotnet
-
-## omnisharp-roslyn
-github_binary_release \
-    --repo OmniSharp/omnisharp-roslyn \
-    --asset omnisharp-linux-x64-net6.0.tar.gz \
-    --prefix "$HOME/.local/opt/microsoft/omnisharp-roslyn" \
-    --path . \
-    --binary OmniSharp
-
-# netcoredbg
-github_binary_release \
-    --repo Samsung/netcoredbg \
-    --asset netcoredbg-linux-amd64.tar.gz \
-    --prefix "$HOME/.local/opt/microsoft" \
-    --path netcoredbg \
-    --binary netcoredbg
-
 # Install prerequisites for `lang/data` module
 curl --create-dirs \
-    -o ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
+    -fsSLo ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
     https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.20.0/org.eclipse.lemminx-0.20.0-uber.jar
 
 # Install prerequisites for `lang/go` module
@@ -402,7 +382,7 @@ go install github.com/fatih/gomodifytags@latest
 
 ## Linting
 asset=`
-    curl -s https://api.github.com/repos/golangci/golangci-lint/releases/latest | jq -r \
+    curl -fsSLo- https://api.github.com/repos/golangci/golangci-lint/releases/latest | jq -r \
     '.assets[] | select(.name | endswith("-linux-amd64.tar.gz")) | .name'
 `
 github_binary_release \
@@ -415,46 +395,8 @@ github_binary_release \
 ## Debugging
 sudo dnf -y install llvm
 
-# Install prerequisites for `lang/haskell` module
-
-## Meta package manager
-## TODO: Verify GPG signatures (https://www.haskell.org/ghcup/install/#manual-install)
-curl --proto '=https' --tlsv1.2 -sSf -Lo "$HOME/.local/bin/ghcup" \
-    https://downloads.haskell.org/~ghcup/x86_64-linux-ghcup
-chmod +x "$HOME/.local/bin/ghcup"
-
-## Compiler
-rm -f ~/.ghcup/bin/ghc
-rm -f ~/.ghcup/bin/ghci
-ghcup install ghc
-(
-    version=`
-        ghcup list \
-            --tool ghc \
-            --show-criteria installed \
-            --raw-format 2>/dev/null |
-        tail -1 | awk '{print $2}'
-    `
-    cd ~/.ghcup/bin
-    ln -s ghc-$version ghc
-    ln -s ghci-$version ghci
-)
-
-## Language server
-ghcup install hls
-
-## Code formatting
-ghcup install stack
-stack install brittany # "$HOME/.ghcup/bin" must be in PATH
-
-# Linter and documentation lookup
-ghcup install cabal
-cabal update           # "$HOME/.ghcup/bin" must be in PATH
-cabal install hlint    # "$HOME/.ghcup/bin" must be in PATH
-cabal install hoogle   # "$HOME/.ghcup/bin" must be in PATH
-
 # Install prerequisites for `lang/json` module
-dnf -y install jq
+sudo dnf -y install jq
 npm install -g vscode-langservers-extracted
 
 # Install prerequisites for `lang/javascript` module
@@ -502,8 +444,8 @@ github_binary_release \
 npm install -g markdownlint-cli marked
 pipx install grip
 
-# Install reveal.js for Markdown presentations
-# <https://revealjs.com/installation/>
+## Install reveal.js for Markdown presentations
+## <https://revealjs.com/installation/>
 (
     set -e
     mkdir -p "$HOME/.local/src/utils" && cd "$HOME/.local/src/utils"
@@ -514,7 +456,7 @@ pipx install grip
     cd reveal.js && npm install
 )
 
-# Generate a wrapper script for reveal.js
+## Generate a wrapper script for reveal.js
 cat > ~/.local/bin/revealjs <<\EOF
 #!/usr/bin/env bash
 ## This file was generated by my private Doom Emacs literate config
@@ -556,15 +498,11 @@ pipx install --include-deps jupyter
 ## Debugging
 pip3 install --user debugpy
 
-# Install prerequisites for `lang/racket` module
-sudo dnf -y install racket
-raco pkg install --auto racket-langserver
-
 # Install prerequisites for `lang/rest` module
 sudo dnf -y install jq
 
 # Install prerequisites for `lang/rust` module
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+curl --proto '=https' --tlsv1.2 -fsSLo- https://sh.rustup.rs \
     | sh -s -- --no-modify-path --quiet -y
 cargo install cargo-check
 rustup component add rustfmt-preview clippy-preview
@@ -588,7 +526,7 @@ npm install -g bash-language-server
 # version=5.0-1.1.2
 # [ -d "$HOME/.local/src/bashdb/bashdb-$version" ] || {
 #     url=https://sourceforge.net/projects/bashdb/files/bashdb/"$version"/bashdb-"$version".tar.gz/download
-#     curl -Lo- "$url" | tar -C "$HOME/.local/src/bashdb" -xzf -
+#     curl -fsSLo- "$url" | tar -C "$HOME/.local/src/bashdb" -xzf -
 # }
 
 ## TODO zshdb
@@ -603,10 +541,3 @@ npm install -g yaml-language-server
 
 # Install prerequisites for `app/Miscellany`
 sudo dnf -y install w3m
-
-# Install prerequisites for `app/everywhere` module
-# XXX This will only work for X sessions (not Wayland)
-sudo dnf -y install xclip xdotool xprop xwininfo
-
-# Install prerequisites for `app/irc` module
-sudo dnf -y install gnutls

@@ -34,10 +34,11 @@ on them."
 (defun eeowaa-find-command (key)
   "Find the definition of the command bound to KEY."
   (interactive
-   (letf! (defadvice eeowaa-find-command-prompt-a (args)
-            :filter-args #'read-key-sequence
-            (cons "Find function bound to the following key, mouse click, or menu item: "
-                  (cdr args)))
+   (letf! ((defun eeowaa-find-command-prompt-a (args)
+             (cons "Find function bound to the following key, mouse click, or menu item: "
+                   (cdr args)))
+           (defadvice #'read-key-sequence :filter-args
+                      #'eeowaa-find-command-prompt-a))
      (list (car (help--read-key-sequence 'no-mouse-movement)))))
   (find-function (cadr (help--analyze-key (car key) (cdr key)))))
 

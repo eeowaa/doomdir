@@ -13,11 +13,14 @@ package updates may upgrade Emacs, resulting in:
 EOF
 
 # Install Homebrew to install system packages
-curl -Lo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
+curl -fsSLo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
 
-# Install NVM to install Node.js packages
-curl -Lo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
+# Install NVM
+curl -fsSLo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
     | env PROFILE=/dev/null bash
+
+# Install NodeJS and NPM through NVM
+nvm install node
 
 # Function to install a binary asset from the latest release of a GitHub repo
 brew install jq
@@ -54,7 +57,7 @@ github_binary_release() {
         }
     done
     local url=`
-        curl -s https://api.github.com/repos/$repo/releases/latest | jq -r \
+        curl -fsSLo- https://api.github.com/repos/$repo/releases/latest | jq -r \
         '.assets[] | select(.name | test("^'"$asset"'$")) | .browser_download_url'
     `
     [ "X$url" = X ] && {
@@ -75,13 +78,47 @@ $func: (recursively) delete? [y/N]: "
         esac
     }
     mkdir -p "$prefix" "$HOME/.local/bin"
-    curl -Lo- "$url" | tar -C "$prefix" -xzf -
+    curl -fsSLo- "$url" | tar -C "$prefix" -xzf -
     [ -x "$canonical_path/$binary" ] || {
         echo >&2 "ERROR: $func: not an executable file: $canonical_path/$binary"
         return 1
     }
     ln -sf "$canonical_path/$binary" "$HOME/.local/bin"
 }
+
+# Scaffolding for tree-sitter support
+
+## Install and use the correct version of the tree-sitter CLI
+npm -g install tree-sitter-cli@0.19.3
+for ts in `which -a tree-sitter | sort -u`
+do
+    case `$ts --version` in
+    tree-sitter\ 0.19.3*)
+        export PATH=${ts%/*}:$PATH
+        break ;;
+    esac
+done
+
+## Install Cask
+if [ -d ~/.local/opt/cask ]
+then
+    git -C ~/.local/opt/cask pull
+else
+    mkdir -p ~/.local/opt
+    git clone https://github.com/cask/cask ~/.local/opt/cask
+    ln -sf ~/.local/opt/cask/bin/cask ~/.local/bin
+fi
+
+## Obtain elisp-tree-sitter source code in its own directory
+[ -d ~/.local/src/emacs/tree-sitter-langs ] || {
+    mkdir -p ~/.local/src/emacs
+    git clone https://github.com/emacs-tree-sitter/tree-sitter-langs \
+        ~/.local/src/emacs/tree-sitter-langs
+}
+
+## Install dependencies for tree-sitter-langs
+cd ~/.local/src/emacs/tree-sitter-langs
+cask install
 
 # Install prerequisites for `completion/vertico` module
 brew install ripgrep
@@ -102,6 +139,10 @@ brew install fish
 
 # Install prerequisites for `term/vterm` module
 brew install libvterm cmake
+
+## Soft line wrapping
+## <https://github.com/akermu/emacs-libvterm/issues/179#issuecomment-1045331359>
+brew install screen
 
 # Install prerequisites for `checkers/spell` module
 brew install aspell
@@ -130,21 +171,6 @@ npm install -g dockerfile-language-server-nodejs
 # Install prerequisites for `tools/editorconfig` module
 brew install editorconfig
 
-# Install prerequisites for `tools/ein` module
-brew install python
-pipx install --include-deps jupyter
-
-## Install the bash_kernel package into the jupyter virtualenv
-pipx inject jupyter bash_kernel
-
-## Run the installer script to install the kernel in the virtualenv
-. "$(pipx environment -V PIPX_LOCAL_VENVS)/jupyter/bin/activate"
-python -m bash_kernel.install --sys-prefix
-deactivate
-
-## Verify that the bash kernel is visible to jupyter
-jupyter kernelspec list
-
 # Install prerequisites for `tools/lookup` module
 brew install ripgrep sqlite3
 
@@ -162,24 +188,19 @@ brew install pkg-config poppler automake
 # Install prerequisites for `tools/pdf` module
 sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
 
-# Install prerequisites for `tools/terraform` module
-brew install terraform hashicorp/tap/terraform-ls
-
 # Install prerequisites for `lang/cc` module
 brew install ccls gdb glslang
 
-# Install prerequisites for `lang/csharp` module
-
 # Install prerequisites for `lang/data` module
 curl --create-dirs \
-    -o ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
+    -fsSLo ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
     https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.20.0/org.eclipse.lemminx-0.20.0-uber.jar
 
 # Install prerequisites for `lang/go` module
 (cd ~/Documents/src/life/stow-dotfiles && make go)
 brew install go gopls golangci-lint
 # FIXME (see https://github.com/rocky/ssa-interp)
-# curl -Lo- https://raw.githubusercontent.com/rocky/ssa-interp/HEAD/gub-installer | bash
+# curl -fsSLo- https://raw.githubusercontent.com/rocky/ssa-interp/HEAD/gub-installer | bash
 go get -v -u github.com/motemen/gore/cmd/gore
 go get -v -u github.com/stamblerre/gocode
 go get -v -u golang.org/x/tools/cmd/godoc
@@ -221,9 +242,6 @@ pipx install --include-deps jupyter
 ## Debugging
 pip3 install --user debugpy
 
-# Install prerequisites for `lang/racket` module
-brew install --cask racket
-
 # Install prerequisites for `lang/rest` module
 brew install jq
 
@@ -238,6 +256,3 @@ npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 
 # Install prerequisites for `lang/yaml` module
 npm install -g yaml-language-server
-
-# Install prerequisites for `app/irc` module
-brew install gnutls

@@ -80,6 +80,21 @@ the command buffer. Also use `quit-window' instead of `delete-window'."
     (letf! ((#'pop-to-buffer #'ignore))
       (apply fn args))))
 
+;;;###package magit
+;; Regardless of other display-buffer settings, ensure that `magit-diff-mode'
+;; buffers are displayed in a lower-left side window when creating a git commit
+(progn
+  (setq magit-commit-show-diff t)
+  (defadvice! my/magit-commit-diff-display-a (fn &rest args)
+    :around '(magit-commit-diff magit-commit-squash-internal)
+    (let ((display-buffer-alist
+           `(("^magit-diff: "
+              display-buffer-in-side-window
+              (side . bottom)
+              (slot . 0))
+             ,@display-buffer-alist)))
+      (apply fn args))))
+
 ;;;###package man
 ;; Use `switch-to-buffer' to open new Man buffers
 (setq Man-notify-method 'pushy)

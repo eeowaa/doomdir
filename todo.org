@@ -1,6 +1,6 @@
 #+STARTUP:  overview
 #+FILETAGS: :doom:
-* Inbox [1/7]
+* Inbox [1/8]
 :PROPERTIES:
 :CATEGORY: doom/inbox
 :END:
@@ -46,6 +46,25 @@ implement a file like that. System Crafters has an [[https://systemcrafters.net/
 
 This could be implemented as a ~pre-commit~ hook to make sure that I always have
 versions locked. The problem will be integrating with Doom.
+
+*UPDATE*: A better alternative may be to maintain a personal AppImage containing
+Emacs, Doom, and all packages. This way, I can always be sure to have the exact
+same Emacs (sans dotfiles and external program dependencies) on all Linux
+machines that I work on. Here is a good reference: https://github.com/blahgeek/emacs-appimage
+
+** TODO [#A] Start transitioning to built-in packages :tweak:
+Although external packages can sometimes provide more/better functionality than
+built-in packages, it often takes considerably more integration work to get them
+to play nicely together. When an external package is needed, it is better to use
+a package than integrates tightly with built-in packages.
+
++ projectile :: project
++ flycheck :: flymake
++ lsp-mode :: eglot
++ dap-mode :: [[https://github.com/svaante/dape][dape]] (external package)
++ treemacs :: [[https://github.com/alexluigit/dirvish][dirvish]] (external package)
++ company :: [[https://github.com/minad/corfu][corfu]] (external package)
++ vterm :: [[https://github.com/kephale/emacs-eat][eat]] (external package)
 
 ** TODO [#B] Save/restore buffer position before/after jumps :bug:
 _Replication steps:_

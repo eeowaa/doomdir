@@ -80,7 +80,7 @@ lines of the buffer are checked against this regexp. If there is a match,
 `k8s-mode' is activated in the buffer.")
 
   (defun +kubernetes--k8s-mode-search-lines (line-count)
-    (goto-char (bol))
+    (goto-char (pos-bol))
     (and (cl-plusp line-count)
          (or (looking-at-p +kubernetes-k8s-mode-match-regexp)
              (and (line-move 1 t)

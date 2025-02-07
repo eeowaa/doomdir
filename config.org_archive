@@ -834,3 +834,46 @@ This currently requires [[*Unpin =tree-sitter-langs=][unpinning tree-sitter-lang
 (add-hook 'yaml-mode-local-vars-hook #'tree-sitter! 'append)
 #+end_src
 
+
+* KILL [#C] Prevent ~git-graph~ cutoff :bug:
+:PROPERTIES:
+:ARCHIVE_TIME: 2024-10-16 Wed 14:14
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :term/vterm
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: TODO
+:ARCHIVE_ITAGS: doom
+:END:
+The last character ("o" in this case) gets hidden:
+#+begin_example
+$ git graph
+,* 65a8a6b6da9176bea78eb78c604120714207bcc5 Initial commit  eeowaa   3 weeks ag
+#+end_example
+
+I say "hidden" instead of "truncated" because if you kill the line and yank it
+into another buffer, you can see the "o". *Note that this is only a problem in
+GUI Emacs, not terminal Emacs. Also, this is only a problem in popup buffers.*
+
+I am no longer seeing this issue as of [2024-10-16 Wed].
+
+* KILL [#C] Ignore surrounding tildes for interactive help functions :tweak:
+:PROPERTIES:
+:ARCHIVE_TIME: 2025-01-31 Fri 15:56
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :lang/org/Markup for Rich Contents
+:ARCHIVE_CATEGORY: doom/org
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2025-01-31 Fri 15:56] \\
+  This is no longer a problem for me.
+:END:
+Doom's org markup convention is to surround elisp symbols with tildes. However,
+this makes it difficult to use commands such as ~describe-variable~ (=SPC h v=),
+=describe-function~ (=SPC h f=), and ~find-function~ (custom-mapped to =C-h
+C-f=) for symbols under point.
+
+The current workaround is to select the "object" under point using =v i e= and
+then use the corresponding help command. This works well enough, but is an
+annoying extra step.

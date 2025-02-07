@@ -218,6 +218,7 @@ called by the latter."
 
 ;;; Default buffer groups
 
+;; Diagnostic messages
 (buffer-group-side-window-setup
  (buffer-group-define diagnostics
    `(:names ("^\\*Messages\\*"
@@ -230,12 +231,14 @@ called by the latter."
              "^\\*envrc\\*")
      :modes (messages-buffer-mode backtrace-mode debugger-mode))))
 
+;; Search output
 (buffer-group-side-window-setup
  (buffer-group-define search
    `(:modes (occur-mode grep-mode
              ,@(when (modulep! :completion vertico)
                  '(embark-collect-mode))))))
 
+;; Compilation output
 (buffer-group-side-window-setup
  (buffer-group-define compilation
    `(:names ("^\\*\\(?:[Cc]ompil\\(?:ation\\|e-Log\\)\\)"
@@ -245,6 +248,7 @@ called by the latter."
      :modes (compilation-mode
              native-comp-limple-mode))))
 
+;; Emacs internals
 (buffer-group-side-window-setup
  (buffer-group-define internals
    `(:names ("^\\*\\(?:Process List\\|timer-list\\|Threads\\)\\*"
