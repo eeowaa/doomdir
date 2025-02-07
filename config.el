@@ -3306,8 +3306,8 @@ This is a list of lists, not a list of cons cells.")
         :prefix ("e" . "pipenv")))
 
 (add-hook! python-mode
-  (setq fill-column 79)
-  (display-fill-column-indicator-mode))
+  (defun my/python-fill-column-h ()
+    (setq fill-column 79)))
 
 (pushnew! auto-mode-alist '("pylint" . conf-mode)
                           '("/activate\\'" . sh-mode))

@@ -10312,10 +10312,15 @@ More than a simple "Hello World":
 #+end_src
 
 *** DONE [#B] Set up fill column for PEP 8 compliance :tweak:
+*UPDATE*: I no longer like seeing the fill column by default.
+~display-fill-column-indicator-mode~ can easily be toggled on with =SPC t c=,
+which is good enough for now. Perhaps it might be nice to toggle it together
+with ~flyspell-mode~ or ~flymake-mode~ in the future.
+
 #+begin_src emacs-lisp :tangle yes
 (add-hook! python-mode
-  (setq fill-column 79)
-  (display-fill-column-indicator-mode))
+  (defun my/python-fill-column-h ()
+    (setq fill-column 79)))
 #+end_src
 
 *** DONE [#C] Filename-mode associations :feat:
