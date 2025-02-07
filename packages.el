@@ -82,6 +82,8 @@
 
 ;; Builds
 (package! jenkinsfile-mode)
+;;(package! gitlab-ci-mode)
+;;(package! gitlab-ci-mode-flycheck)
 
 ;; Applescript
 (when (featurep :system 'macos)
