@@ -8799,7 +8799,7 @@ github_binary_release \
                 "main.lua")))
 #+end_src
 
-** markdown [11/18]
+** markdown [12/19]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
@@ -8859,7 +8859,7 @@ Regardless of what I've set ~browse-url-browser-function~ to, I would like to
 preview Markdown rendering in the system browser.
 
 #+begin_src emacs-lisp :tangle yes
-(after! markdown
+(after! markdown-mode
   (defun my/markdown-preview (f &rest r)
     (let ((browse-url-browser-function #'browse-url-default-browser))
       (apply f r)))
@@ -8951,6 +8951,14 @@ Currently only includes code blocks."
         :i "M-i" nil))
 #+end_src
 
+*** DONE [#B] Add a binding to align Markdown tables :tweak:
+#+begin_src emacs-lisp :tangle yes
+(after! markdown-mode
+  (map! :map markdown-mode-map
+        :localleader
+        "a" #'markdown-table-align))
+#+end_src
+
 *** DONE [#B] Disable error reporting in markdown-mode buffers :tweak:
 :LOGBOOK:
 - Note taken on [2023-02-16 Thu 14:58] \\
@@ -8984,17 +8992,13 @@ Reference: [[*Disable error reporting in sh-mode buffers][Disable error reportin
 
 *** DONE [#C] Fontify and scale Markdown headers :tweak:hack:
 #+begin_src emacs-lisp :tangle yes
-(setq markdown-fontify-whole-heading-line nil
-      markdown-header-scaling t)
-
-;; Setting `markdown-header-scaling' (even using Customize) is not enough.
-;; We must call `markdown-update-header-faces' within buffers, too.
-(defun my/markdown--update-display-h ()
-  "Apply desired styling to a markdown buffer."
-  (markdown-update-header-faces markdown-header-scaling))
-(add-hook 'markdown-mode-hook
-          #'my/markdown--update-display-h
-          nil 'local)
+(after! markdown-mode
+  (setq! markdown-fontify-whole-heading-line nil
+         markdown-header-scaling t)
+  (add-hook! markdown-mode
+    (defun my/markdown--update-display-h ()
+      "Apply desired styling to a markdown buffer."
+      (markdown-update-header-faces markdown-header-scaling))))
 #+end_src
 
 *** STRT [#B] Extend editing capabilities of code and pre blocks :feat:hack:
@@ -9229,6 +9233,29 @@ block at point is a pre block (as opposed to a code block)."
             '("sh" . bash-mode)))
 #+end_src
 
+*** STRT [#B] Fix live-preview of Markdown buffers :hack:bug:
+*NOTE*: This crashes when using graphical Emacs. It could possibly be a bug
+related to the PGTK build of Emacs 29.4: https://github.com/doomemacs/doomemacs/issues/7915
+
+#+begin_src emacs-lisp :tangle yes
+;; HACK `grip-start-preview' calls `derived-mode-p' with a list of modes, when
+;; each mode should be passed as a separate argument.
+(after! grip-mode
+  (defadvice! my/grip-start-preview-a ()
+    :override #'grip-start-preview
+    (interactive)
+    (when buffer-file-name
+      (add-hook 'kill-buffer-hook #'grip-stop-preview nil t)
+      (add-hook 'kill-emacs-hook #'grip-stop-preview nil t)
+      (cond ((derived-mode-p 'org-mode)
+             (grip--preview-org))
+            ((derived-mode-p 'markdown-mode 'markdown-ts-mode)
+             (grip--preview-md))
+            (t
+             (grip-mode -1)
+             (user-error "`%s' not supported by grip preview" major-mode))))))
+#+end_src
+
 *** STRT [#C] Support reveal.js :feat:
 [[https://revealjs.com/markup/][Reveal.js]] can be used to run a local HTTP server to present slides written in
 Markdown. Here is the basic structure of such a presentation:
@@ -9343,9 +9370,6 @@ to a new Emacs instance via ~emacs <file>~ on the command line. It is only when
 I have opened Emacs /and then/ attempt to open an image that it will not work. I
 am guessing that the problem is caused by lazy-loaded code that has not loaded
 yet opening an image file from the command line.
-
-*** TODO [#B] Live-preview Markdown buffers in an external browser :tweak:
-Live preview still happens in =eww= buffers.
 
 ** nim [0/0] :ARCHIVE:
 #+begin_quote

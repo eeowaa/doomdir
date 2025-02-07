@@ -2678,7 +2678,7 @@ See also: `ts-fold-summary--get'."
         (concat (file-name-as-directory lsp-clients-lua-language-server-install-dir)
                 "main.lua")))
 
-(after! markdown
+(after! markdown-mode
   (defun my/markdown-preview (f &rest r)
     (let ((browse-url-browser-function #'browse-url-default-browser))
       (apply f r)))
@@ -2727,6 +2727,11 @@ Currently only includes code blocks."
         :i "M-b" nil
         :i "M-i" nil))
 
+(after! markdown-mode
+  (map! :map markdown-mode-map
+        :localleader
+        "a" #'markdown-table-align))
+
 (dolist (mode '(markdown-mode markdown-view-mode
                 gfm-mode gfm-view-mode))
   ;; Prevent flycheck from being automatically enabled
@@ -2746,17 +2751,13 @@ Currently only includes code blocks."
           '("\\.mdx\\'" . markdown-mode)
           '("/\\.markdownlintrc\\'" . json-mode))
 
-(setq markdown-fontify-whole-heading-line nil
-      markdown-header-scaling t)
-
-;; Setting `markdown-header-scaling' (even using Customize) is not enough.
-;; We must call `markdown-update-header-faces' within buffers, too.
-(defun my/markdown--update-display-h ()
-  "Apply desired styling to a markdown buffer."
-  (markdown-update-header-faces markdown-header-scaling))
-(add-hook 'markdown-mode-hook
-          #'my/markdown--update-display-h
-          nil 'local)
+(after! markdown-mode
+  (setq! markdown-fontify-whole-heading-line nil
+         markdown-header-scaling t)
+  (add-hook! markdown-mode
+    (defun my/markdown--update-display-h ()
+      "Apply desired styling to a markdown buffer."
+      (markdown-update-header-faces markdown-header-scaling))))
 
 (after! markdown-mode
   (defun my/markdown-pre-block-bounds ()
@@ -2965,6 +2966,23 @@ block at point is a pre block (as opposed to a code block)."
   (pushnew! markdown-code-lang-modes
             '("http" . restclient-mode)
             '("sh" . bash-mode)))
+
+;; HACK `grip-start-preview' calls `derived-mode-p' with a list of modes, when
+;; each mode should be passed as a separate argument.
+(after! grip-mode
+  (defadvice! my/grip-start-preview-a ()
+    :override #'grip-start-preview
+    (interactive)
+    (when buffer-file-name
+      (add-hook 'kill-buffer-hook #'grip-stop-preview nil t)
+      (add-hook 'kill-emacs-hook #'grip-stop-preview nil t)
+      (cond ((derived-mode-p 'org-mode)
+             (grip--preview-org))
+            ((derived-mode-p 'markdown-mode 'markdown-ts-mode)
+             (grip--preview-md))
+            (t
+             (grip-mode -1)
+             (user-error "`%s' not supported by grip preview" major-mode))))))
 
 (after! org
   (setq org-hide-leading-stars nil
