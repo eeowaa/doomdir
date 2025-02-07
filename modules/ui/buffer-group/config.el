@@ -184,9 +184,6 @@
 
   ;; Diffs
   (buffer-group-define diff '(:names ()))
-  (when (modulep! :tools magit)
-    (buffer-group-property-pushnew
-     'diff :names "^\\magit-diff: "))
   (when (modulep! :ui vc-gutter)
     (buffer-group-property-pushnew
      'diff :names "^\\*diff-hl\\*$"))
