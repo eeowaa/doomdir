@@ -1435,9 +1435,8 @@ deleting the final newline before inserting the \")))\"."
   (setq native-comp-speed 2
         package-native-compile t))
 
-(let ((srcdir (format "%s.local/src/emacs/emacs-%s/src"
-                      (file-name-as-directory (getenv "HOME"))
-                      emacs-version)))
+(let ((srcdir (format "%s.local/src/emacs/gnu-emacs/src"
+                      (file-name-as-directory (getenv "HOME")))))
   (when (file-directory-p srcdir)
     (setq find-function-C-source-directory srcdir)))
 
