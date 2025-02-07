@@ -4235,9 +4235,8 @@ Miscellaneous configuration without a corresponding module.
 
 *** DONE [#A] Configure C source directory :tweak:feat:
 #+begin_src emacs-lisp :tangle yes
-(let ((srcdir (format "%s.local/src/emacs/emacs-%s/src"
-                      (file-name-as-directory (getenv "HOME"))
-                      emacs-version)))
+(let ((srcdir (format "%s.local/src/emacs/gnu-emacs/src"
+                      (file-name-as-directory (getenv "HOME")))))
   (when (file-directory-p srcdir)
     (setq find-function-C-source-directory srcdir)))
 #+end_src
