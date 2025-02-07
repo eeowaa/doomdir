@@ -202,19 +202,21 @@
       (buffer-group-side-window-setup
        (buffer-group-define undo-tree
          `(:names (,(concat "^" (regexp-quote undo-tree-visualizer-buffer-name)))))
-       '((side . left) (slot . 1))))
+       '((side . left) (slot . 1)))))
 
-  ;; Tree views > Imenu
+  ;; Tree views > LSP Symbols
   (buffer-group-side-window-setup
    (buffer-group-define imenu
      `(:names ("^\\*lsp-ui-imenu\\*"
                "^\\*LSP Symbols List\\*") ;; REVIEW This uses Treemacs
        :modes (lsp-ui-imenu-mode)))
    '((slot . 1)))
+
+  ;; Tree views > Imenu list
   (when (modulep! :ui ilist)
     (after! imenu-list
       (buffer-group-side-window-setup
-       (buffer-group-define imenu
+       (buffer-group-define imenu-list
          `(:names (,(concat "^" (regexp-quote imenu-list-buffer-name) "$"))
            :modes (imenu-list-major-mode)))
        `((side . ,imenu-list-position)
