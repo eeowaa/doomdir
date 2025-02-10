@@ -1312,6 +1312,17 @@ current buffer first unless the `force' argument is given."
 
 (setq evil-v$-excludes-newline t)
 
+(when (modulep! :editor evil +everywhere)
+  (add-hook 'Info-mode-hook #'evil-collection-info-setup))
+
+(defadvice! my/ergonomic-info-bindings-a (&rest _)
+  :after #'evil-collection-info-setup
+  (evil-collection-define-key 'normal 'Info-mode-map
+    (kbd "C-t") nil ;; open this up for `vimish-tab'
+    (kbd "C-i") 'Info-next-reference
+    (kbd "M-,") 'Info-history-back
+    (kbd "C-M-,") 'Info-history-forward))
+
 (after! 5x5
   (map! :mode 5x5-mode
     :e "k" #'5x5-up
@@ -1361,14 +1372,6 @@ current buffer first unless the `force' argument is given."
     :e "H" #'solitaire-move-left
     :e "K" #'solitaire-move-up
     :e "J" #'solitaire-move-down))
-
-(defadvice! my/ergonomic-info-bindings-a (&rest _)
-  :after #'evil-collection-info-setup
-  (evil-collection-define-key 'normal 'Info-mode-map
-    (kbd "C-t") nil ;; open this up for `vimish-tab'
-    (kbd "C-i") 'Info-next-reference
-    (kbd "M-,") 'Info-history-back
-    (kbd "C-M-,") 'Info-history-forward))
 
 (map! :v "]b" #'base64-encode-region
       :v "[b" #'base64-decode-region)

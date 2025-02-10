@@ -3462,7 +3462,7 @@ For some reason, the ~use-package~ form for =so-long= (in
 =~/.config/emacs/lisp/doom-editor.el=) is not in effect, though I would like to
 use it.
 
-** evil [8/12]
+** evil [10/13]
 #+begin_quote
 This holy module brings the vim experience to Emacs.
 #+end_quote
@@ -3583,6 +3583,25 @@ form). Using ~:override~ advice in this case seems brittle, but works for now.
 (setq evil-v$-excludes-newline t)
 #+end_src
 
+*** DONE [#B] Activate evil bindings in Info mode :bug:
+This used to work on its own, but not anymore for whatever reason.
+
+#+begin_src emacs-lisp :tangle yes
+(when (modulep! :editor evil +everywhere)
+  (add-hook 'Info-mode-hook #'evil-collection-info-setup))
+#+end_src
+
+*** DONE [#C] Make =C-i= behave as =TAB= in info mode :tweak:module:
+#+begin_src emacs-lisp :tangle yes
+(defadvice! my/ergonomic-info-bindings-a (&rest _)
+  :after #'evil-collection-info-setup
+  (evil-collection-define-key 'normal 'Info-mode-map
+    (kbd "C-t") nil ;; open this up for `vimish-tab'
+    (kbd "C-i") 'Info-next-reference
+    (kbd "M-,") 'Info-history-back
+    (kbd "C-M-,") 'Info-history-forward))
+#+end_src
+
 *** DONE [#C] Define Vim bindings for games :feat:
 =evil-collection= already defines Vim bindings for Tetris, but not for any other
 builtin game.
@@ -3637,20 +3656,6 @@ builtin game.
     :e "H" #'solitaire-move-left
     :e "K" #'solitaire-move-up
     :e "J" #'solitaire-move-down))
-#+end_src
-
-*** TODO [#C] Make =C-i= behave as =TAB= in info mode :tweak:module:
-*UPDATE*: It seems as though ~evil-collection-info-setup~ is no longer getting
-called automatically. I must call it myself after entering ~Info-mode~.
-
-#+begin_src emacs-lisp :tangle yes
-(defadvice! my/ergonomic-info-bindings-a (&rest _)
-  :after #'evil-collection-info-setup
-  (evil-collection-define-key 'normal 'Info-mode-map
-    (kbd "C-t") nil ;; open this up for `vimish-tab'
-    (kbd "C-i") 'Info-next-reference
-    (kbd "M-,") 'Info-history-back
-    (kbd "C-M-,") 'Info-history-forward))
 #+end_src
 
 *** DONE [#C] Bind base64-encoding/decoding commands :feat:
