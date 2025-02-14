@@ -2620,6 +2620,9 @@ See also: `ts-fold-summary--get'."
 (after! ws-butler
   (pushnew! ws-butler-global-exempt-modes 'tsv-mode))
 
+(setq lsp-xml-jar-file
+      (expand-file-name "xmlls/org.eclipse.lemminx-uber.jar" lsp-server-install-dir))
+
 (setq-hook! 'emacs-lisp-mode-hook
   eldoc-idle-delay 0.1)
 

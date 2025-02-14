@@ -8354,22 +8354,42 @@ I would rather use ~use-package-hook!~ than rewrite the whole ~use-package!~
 declaration, but I don't know if/how that is possible, because ~:general~ is
 used instead of ~:config~ to specify the keybinding.
 
-** data [2/2]
+** data [3/3]
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/data` module
-curl --create-dirs \
-    -fsSLo ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
-    https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.20.0/org.eclipse.lemminx-0.20.0-uber.jar
+
+## xmllint
+brew install libxml2
+
+## xmlls
+(
+    xmlls_baseurl=https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx
+    xmlls_version=`curl -fsSLo- "$xmlls_baseurl/maven-metadata.xml" | xmllint --xpath '/metadata/versioning/release/text()' -`
+    mkdir -p ~/.config/emacs/.local/etc/lsp/xmlls
+    cd ~/.config/emacs/.local/etc/lsp/xmlls
+    curl -fsSLO "$xmlls_baseurl/$xmlls_version/org.eclipse.lemminx-$xmlls_version-uber.jar"
+    ln -sf "org.eclipse.lemminx-$xmlls_version-uber.jar" org.eclipse.lemminx-uber.jar
+)
 #+end_src
 
 **** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `lang/data` module
-curl --create-dirs \
-    -fsSLo ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
-    https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.20.0/org.eclipse.lemminx-0.20.0-uber.jar
+
+## xmllint
+sudo dnf -y install libxml2
+
+## xmlls
+(
+    xmlls_baseurl=https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx
+    xmlls_version=`curl -fsSLo- "$xmlls_baseurl/maven-metadata.xml" | xmllint --xpath '/metadata/versioning/release/text()' -`
+    mkdir -p ~/.config/emacs/.local/etc/lsp/xmlls
+    cd ~/.config/emacs/.local/etc/lsp/xmlls
+    curl -fsSLO "$xmlls_baseurl/$xmlls_version/org.eclipse.lemminx-$xmlls_version-uber.jar"
+    ln -sf "org.eclipse.lemminx-$xmlls_version-uber.jar" org.eclipse.lemminx-uber.jar
+)
 #+end_src
 
 *** DONE [#A] Do not remove trailing whitespace in TSV mode :bug:
@@ -8385,6 +8405,21 @@ We could be picky about this and write a different whitespace cleanup function
 for =ws-butler= to use in =tsv-mode= buffers to remove trailing spaces while
 keeping trailing tabs, or maybe even to removing trailing spaces from each
 tab-separated field, but this is good enough for now.
+
+*** DONE [#B] Revert XML language server path to default :tweak:
+=lsp-xml.el= sets ~lsp-xml-jar-file~ as follows:
+: (f-join lsp-server-install-dir "xmlls" lsp-xml-jar-name)
+
+For some reason, however, the =:tools lsp= module is overriding that with
+~$XDG_CONFIG_HOME/emacs/.local/etc/lsp/org.eclipse.lsp4xml-0.3.0-uber.jar~.
+
+There is probably a good reason for that, but I'm going to revert to the default
+configuration unless I am disappointed when editing XML.
+
+#+begin_src emacs-lisp :tangle yes
+(setq lsp-xml-jar-file
+      (expand-file-name "xmlls/org.eclipse.lemminx-uber.jar" lsp-server-install-dir))
+#+end_src
 
 ** dart [0/0] :ARCHIVE:
 #+begin_quote
