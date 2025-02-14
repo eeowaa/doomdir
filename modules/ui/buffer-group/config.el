@@ -36,6 +36,12 @@
 
   ;;; Define additional buffer groups
 
+  ;; FIXME Bookmarks > Auxiliary
+  (buffer-group-side-window-setup
+   (buffer-group-define bookmarks-aux
+     `(:names ("^\\*Bookmark Annotation\\( Compose\\)?\\*")))
+   '((side . top) (slot . 1)))
+
   ;; Calendars
   (buffer-group-side-window-setup
    (buffer-group-define calendar
