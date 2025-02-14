@@ -192,9 +192,19 @@ sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
 brew install ccls gdb glslang
 
 # Install prerequisites for `lang/data` module
-curl --create-dirs \
-    -fsSLo ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
-    https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.20.0/org.eclipse.lemminx-0.20.0-uber.jar
+
+## xmllint
+brew install libxml2
+
+## xmlls
+(
+    xmlls_baseurl=https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx
+    xmlls_version=`curl -fsSLo- "$xmlls_baseurl/maven-metadata.xml" | xmllint --xpath '/metadata/versioning/release/text()' -`
+    mkdir -p ~/.config/emacs/.local/etc/lsp/xmlls
+    cd ~/.config/emacs/.local/etc/lsp/xmlls
+    curl -fsSLO "$xmlls_baseurl/$xmlls_version/org.eclipse.lemminx-$xmlls_version-uber.jar"
+    ln -sf "org.eclipse.lemminx-$xmlls_version-uber.jar" org.eclipse.lemminx-uber.jar
+)
 
 # Install prerequisites for `lang/go` module
 (cd ~/Documents/src/life/stow-dotfiles && make go)
