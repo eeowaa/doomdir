@@ -8354,7 +8354,7 @@ I would rather use ~use-package-hook!~ than rewrite the whole ~use-package!~
 declaration, but I don't know if/how that is possible, because ~:general~ is
 used instead of ~:config~ to specify the keybinding.
 
-** data [2/2]
+** data [3/3]
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -8405,6 +8405,22 @@ We could be picky about this and write a different whitespace cleanup function
 for =ws-butler= to use in =tsv-mode= buffers to remove trailing spaces while
 keeping trailing tabs, or maybe even to removing trailing spaces from each
 tab-separated field, but this is good enough for now.
+
+*** DONE [#B] Revert XML language server path to default :tweak:
+=lsp-xml.el= sets ~lsp-xml-jar-file~ as follows:
+: (f-join lsp-server-install-dir "xmlls" lsp-xml-jar-name)
+
+For some reason, however, the =:tools lsp= module is overriding that with
+~$XDG_CONFIG_HOME/emacs/.local/etc/lsp/org.eclipse.lsp4xml-0.3.0-uber.jar~.
+
+There is probably a good reason for that, but I'm going to revert to the default
+configuration unless I am disappointed when editing XML.
+
+#+begin_src emacs-lisp :tangle yes
+(after! lsp
+  (setq lsp-xml-jar-file
+        (f-join lsp-server-install-dir "xmlls" "org.eclipse.lemminx-uber.jar")))
+#+end_src
 
 ** dart [0/0] :ARCHIVE:
 #+begin_quote
