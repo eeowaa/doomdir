@@ -4825,6 +4825,27 @@ integration with git.
 Modules that offer terminal emulation.
 #+end_quote
 
+** COMMENT Goals
++ Configuration
+  - Bourne-compatible shell (no ~eshell~, for example)
+  - Reuse of my shell dotfiles
++ Keybindings
+  - Plays well with evil keybindings and evil state changes
+  - Evil insert state provides a standard command-line editing experience
+  - =C-x C-e= allows editing of the command line in Emacs
++ Buffer
+  - Reasonable scrollback length
+  - Scrollback is not cleared with =C-l= (maybe with =C-c C-l=)
+  - Soft line wrapping (not possible with =vterm=)
++ Performance
+  - Quick to open new terminal buffers from Emacs
+  - Can output a bunch of lines reasonably fast
++ Integration
+  - Directory tracking (~default-directory~ automatically updates)
+  - Prompt tracking (can quickly jump between prompts)
+  - =$EDITOR= is an =emacsclient= to the parent Emacs
+  - Plays well with TRAMP for Docker, Kubernetes, SSH, etc.
+
 ** Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;;; :term
