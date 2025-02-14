@@ -9586,7 +9586,7 @@ just perform a complete cycle of `org-cycle'."
 + Reference ~org-sort-entries~
 
 *** Tables [0/0]
-*** Hyperlinks [3/6]
+*** Hyperlinks [3/7]
 **** DONE [#A] Add missing org link (=ol-*=) modules :feat:
 References:
 + [[file:~/.config/emacs/modules/lang/org/config.el::(defvar org-modules][~/.config/emacs/modules/lang/org/config.el]]
@@ -9594,16 +9594,19 @@ References:
 
 #+begin_src emacs-lisp :tangle yes
 (after! org
-  (pushnew! org-modules 'ol-man 'ol-info 'ol-w3m))
+  (pushnew! org-modules 'ol-bookmark 'ol-man 'ol-info 'ol-w3m))
 #+end_src
 
-**** DONE [#B] Open file links in another window :tweak:
+**** DONE [#B] Open specific link types in another window :tweak:
 + https://stackoverflow.com/questions/17590784/how-to-let-org-mode-open-a-link-like-file-file-org-in-current-window-inste
 + [[help:org-link-frame-setup]]
 
 #+begin_src emacs-lisp :tangle yes
 (after! org
-  (setcdr (assoc 'file org-link-frame-setup) #'find-file-other-window))
+  (setcdr (assoc 'file org-link-frame-setup) #'find-file-other-window)
+  (defadvice! my/org-bookmark-open-a (bookmark _)
+    :override #'org-bookmark-open
+    (bookmark-jump-other-window bookmark)))
 #+end_src
 
 **** DONE [#C] Configure how links to man pages are opened :tweak:
@@ -9613,6 +9616,56 @@ References:
           #'man
         #'woman))
 #+end_src
+
+**** TODO [#A] Store links to bookmarks by default in file-visiting buffers
+In file-visiting buffers without special link handling (such as ~org-mode~
+buffers), ~org-store-link~ (=SPC n l=) will store a ~file~ link. When
+~org-link-context-for-files~ is non-nil (the default), the link will contain a
+search string so that when visiting the link, the cursor will be positioned on
+the first occurence of that string within the buffer.
+
+Although slightly more robust than simply storing ~<file>:<number>~ links like
+in Vim, this is still a fragile mechanism. What if you want to link to a line
+containing the exact same text that appeared previously in the file? What if you
+want to change the text of that line altogether? For cases like these, the Emacs
+bookmarks mechanism is much better.
+
+Fortunately, =ob-bookmark= can be used to store org links to Emacs bookmarks.
+We have already loaded it in a previous code block; the following just
+configures ~bookmark~ links to be preferred over ~file~ links:
+
+#+begin_src emacs-lisp :tangle yes
+(setq org-bookmark-when-visiting-a-file t
+      org-bookmark-use-first-bookmark nil)
+
+;; Optional: automatically prompt for and display bookmark annotations
+;; (setq bookmark-use-annotations t
+;;       bookmark-automatically-show-annotations t)
+#+end_src
+
+Now, in a file-visiting buffer, the following sequence to create and store an
+org link to the position in the file:
+
+1. Create a bookmark with ~bookmark-set~ (=SPC b m= or =C-x r m=)
+   - Give it a name that is contextually useful and unique
+   - Examples: ~<program>:<function>~, ~<task>:<step>~
+2. Optionally annotate the bookmark to provide more context
+   - You will be automatically prompted when ~bookmark-use-annotations~ is non-nil
+   - Otherwise open the bookmark menu using ~bookmark-bmenu-list~ (=C-x r l=)
+     and annotate your bookmark with ~bookmark-bmenu-edit-annotation~ (=E=)
+   - Note that you can show annotations in the bookmark menu using
+     ~bookmark-bmenu-show-annotation~ (=a=) and ~bookmark-bmenu-show-all-annotations~ (=A=)
+   - To delete an annotation from a bookmark, edit the annotation from the bookmark menu,
+     comment out all lines in the ~bookmark-edit-annotation-mode~ buffer, and commit changes
+3. Store an org link to the bookmark at point using (=SPC n l=)
+4. Insert the link into another buffer using ~org-insert-link~ (=SPC m l l= or =C-c C-l=)
+   - Note that the buffer into which you are inserting the link may be a better place than
+     annotations to provide long-form commentary
+   - For example, you could copy a code snippet at the bookmark location into the kill ring
+     and yank the snippet into an org source block next to the inserted link
+
+For now, this process is somewhat manual. Once I have developed a workflow
+that works for me, I will automate the menial steps.
 
 **** TODO [#B] Create method to open links in specified window :feat:
 I have at least four different options:

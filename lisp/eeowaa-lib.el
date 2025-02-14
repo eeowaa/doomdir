@@ -72,6 +72,14 @@ PROMPT defaults to \"Positive integer: \""
        (setcdr ,list-var (pushnew! list-cdr ,value))
        ,list-var)))
 
+(defun eeowaa-alist-set (alist key value &optional compare-fn)
+  "Ensure that ALIST contains (KEY . VALUE).
+If ALIST already contains an element with a car of KEY, the cdr
+of that element will be set to VALUE. Otherwise, a new element
+will be inserted into the ALIST. If COMPARE-FN is provided, ALIST
+element KEY values will be compared with that instead of `eq'."
+  (error "Unimplemented"))
+
 
 ;;; Faces
 

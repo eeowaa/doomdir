@@ -3064,15 +3064,25 @@ just perform a complete cycle of `org-cycle'."
                                       #'my/org-insert-heading-evil-state))
 
 (after! org
-  (pushnew! org-modules 'ol-man 'ol-info 'ol-w3m))
+  (pushnew! org-modules 'ol-bookmark 'ol-man 'ol-info 'ol-w3m))
 
 (after! org
-  (setcdr (assoc 'file org-link-frame-setup) #'find-file-other-window))
+  (setcdr (assoc 'file org-link-frame-setup) #'find-file-other-window)
+  (defadvice! my/org-bookmark-open-a (bookmark _)
+    :override #'org-bookmark-open
+    (bookmark-jump-other-window bookmark)))
 
 (setq org-man-command
       (if (and (not (featurep :system 'macos)) (executable-find "man"))
           #'man
         #'woman))
+
+(setq org-bookmark-when-visiting-a-file t
+      org-bookmark-use-first-bookmark nil)
+
+;; Optional: automatically prompt for and display bookmark annotations
+;; (setq bookmark-use-annotations t
+;;       bookmark-automatically-show-annotations t)
 
 (after! org
   (defun my/org-inherited-priority (s)
