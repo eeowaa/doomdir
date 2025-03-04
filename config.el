@@ -2151,8 +2151,9 @@ which causes problems even if there is no existing buffer."
 
 ;; Replace default association with a more generic one
 (delq! "/Dockerfile\\(?:\\.[^/\\]*\\)?\\'" auto-mode-alist #'assoc-string)
-(pushnew! auto-mode-alist
-          '("/[^/\\]*\\<\\(Docker\\|Container\\)file\\>[^/\\]*$" . dockerfile-mode))
+(add-to-list 'auto-mode-alist
+             '("/[^/\\]*\\<\\(Docker\\|Container\\)file\\>[^/\\]*$" . dockerfile-mode)
+             'append)
 
 (after! editorconfig
   (add-to-list 'editorconfig-exclude-regexps

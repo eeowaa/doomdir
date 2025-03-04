@@ -6422,8 +6422,9 @@ npm install -g dockerfile-language-server-nodejs
 #+begin_src emacs-lisp :tangle yes
 ;; Replace default association with a more generic one
 (delq! "/Dockerfile\\(?:\\.[^/\\]*\\)?\\'" auto-mode-alist #'assoc-string)
-(pushnew! auto-mode-alist
-          '("/[^/\\]*\\<\\(Docker\\|Container\\)file\\>[^/\\]*$" . dockerfile-mode))
+(add-to-list 'auto-mode-alist
+             '("/[^/\\]*\\<\\(Docker\\|Container\\)file\\>[^/\\]*$" . dockerfile-mode)
+             'append)
 #+end_src
 
 *** TODO [#A] Seamlessly edit files from =vterm= buffers to Docker containers :feat:
