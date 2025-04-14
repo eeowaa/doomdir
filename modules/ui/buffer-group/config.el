@@ -62,6 +62,14 @@
          :modes (bitwarden-list-dialog-mode)))
      '((side . top))))
 
+  ;; Message inbox
+  (buffer-group-side-window-setup
+   (buffer-group-define inbox '(:names () :modes ()))
+   '((side . top)))
+  (when (modulep! :tools magit +forge)
+    (buffer-group-property-pushnew 'inbox :names "^\\*forge-topics\\*")
+    (buffer-group-property-pushnew 'inbox :modes 'forge-topics-mode))
+
   (when (modulep! :tools docker)
     ;; Docker > Object listings
     (buffer-group-side-window-setup
