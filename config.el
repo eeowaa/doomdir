@@ -156,6 +156,8 @@ with special dedication semantics."
 (unless initial-window-system
   (setq-default wrap-prefix "↪ "))
 
+(setq visible-cursor nil)
+
 (setq-hook! '(prog-mode-hook text-mode-hook conf-mode-hook)
   indicate-empty-lines t)
 
@@ -234,9 +236,9 @@ with special dedication semantics."
     (eeowaa-use-face tab-bar mode-line-inactive)))
 
 (setq doom-theme
-      (if initial-window-system
-          'ef-bio
-        'ef-tritanopia-dark))
+      (cond (initial-window-system 'ef-bio)
+            ((getenv "SSH_CLIENT") 'modus-vivendi) ;; best theme over SSH
+            (t 'ef-tritanopia-dark)))
 
 (after! (:and solaire-mode (:or vertico ivy))
   (let ((face (cond
@@ -693,6 +695,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     (nerd-icons-install-fonts t)))
 
 (setq column-number-indicator-zero-based nil)
+
+(when (getenv "SSH_CLIENT")
+  (setq! doom-modeline-icon nil))
 
 (after! evil-goggles
 
@@ -1609,6 +1614,13 @@ If the current frame has one window, restore the previous windows."
                       dired-listing-switches)
               (concat dired-listing-switches " -d"))))
 
+(when (getenv "SSH_CLIENT")
+  (when (modulep! :emacs dired +icons)
+    (after! dirvish
+      (setq dirvish-subtree-always-show-state nil)
+      (delq! 'nerd-icons dirvish-attributes)
+      (delq! 'subtree-state dirvish-attributes))))
+
 (defun my/+dired-split-jump ()
   (interactive)
   (select-window (split-window-below))
@@ -1638,12 +1650,21 @@ If the current frame has one window, restore the previous windows."
 
 (add-hook 'ibuffer-mode-hook #'ibuffer-auto-mode)
 
+(when (and (getenv "SSH_CLIENT")
+           (modulep! :emacs ibuffer +icons))
+  (after! ibuffer
+    (setcar ibuffer-formats
+            (let ((fmt (car ibuffer-formats)))
+              (append (seq-subseq fmt 0 5)
+                      (seq-subseq fmt 7)))))
+  (after! ibuffer-projectile
+    (setq ibuffer-projectile-prefix "Project: ")))
+
 (add-hook! ibuffer-mode
   (defun my/ibuffer-mode-line-h ()
     "Clean up the modeline and improve performance."
     (setcar mode-line-process "by ")
     (setf (nth 2 ibuffer-header-line-format) " by ")))
-    ;; (setf (alist-get 'header-line-format mode-line-process) "")))
 
 ;; This should already be enabled by emacs/undo/config.el
 (global-undo-tree-mode)

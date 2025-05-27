@@ -36,6 +36,10 @@ WARNINGS:
 (unless initial-window-system
   (use-package-hook! company-box :pre-config nil))
 
+(when (getenv "SSH_CLIENT")
+  ;; :completion vertico +icons
+  (advice-add 'nerd-icons-completion-marginalia-setup :override #'always))
+
 (use-package-hook! persp-mode
   :pre-init (setq persp-keymap-prefix (kbd "C-c w")))
 

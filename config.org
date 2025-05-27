@@ -663,7 +663,7 @@ sudo dnf -y install ripgrep
 (setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
 #+end_src
 
-** vertico [3/4]
+** vertico [4/5]
 #+begin_quote
 This module enhances the Emacs search and completion experience, and also
 provides a united interface for project search and replace, powered by [[https://github.com/BurntSushi/ripgrep/][ripgrep]].
@@ -685,6 +685,13 @@ sudo dnf -y install ripgrep
 *** DONE [#B] Find a reference for the symbols in the completing-read buffer :doc:
 These symbols are described in the docstring for the function
 ~marginalia--symbol-class~.
+
+*** DONE [#C] Do not use icons over SSH :tweak:
+#+begin_src emacs-lisp :tangle early-init.el
+(when (getenv "SSH_CLIENT")
+  ;; :completion vertico +icons
+  (advice-add 'nerd-icons-completion-marginalia-setup :override #'always))
+#+end_src
 
 *** OKAY [#A] Prevent Emacs from freezing during ~consult-org-heading~ :bug:
 Lately, Emacs will occasionally freeze when searching for headlines in this
@@ -727,7 +734,7 @@ Aesthetic modules that affect the Emacs interface or user experience.
 ;;; :ui
 #+end_src
 
-** Miscellany [13/14]
+** Miscellany [14/16]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -886,6 +893,11 @@ original text, even though they might look a little better. Let's disable them:
 #+begin_src emacs-lisp :tangle yes
 (unless initial-window-system
   (setq-default wrap-prefix "↪ "))
+#+end_src
+
+*** DONE [#C] Prevent the cursor from blinking over SSH :tweak:
+#+begin_src emacs-lisp :tangle yes
+(setq visible-cursor nil)
 #+end_src
 
 *** DONE [#C] Replace =vi-tilde-fringe= with builtin functionality :tweak:
@@ -1246,9 +1258,9 @@ migrated to ~ef-bio~ for now.
 
 #+begin_src emacs-lisp :tangle yes
 (setq doom-theme
-      (if initial-window-system
-          'ef-bio
-        'ef-tritanopia-dark))
+      (cond (initial-window-system 'ef-bio)
+            ((getenv "SSH_CLIENT") 'modus-vivendi) ;; best theme over SSH
+            (t 'ef-tritanopia-dark)))
 
 (after! (:and solaire-mode (:or vertico ivy))
   (let ((face (cond
@@ -1954,7 +1966,7 @@ This module adds a minimap to the right side of Emacs, similar to the feature
 found in many other editors.
 #+end_quote
 
-** modeline [3/3]
+** modeline [4/4]
 #+begin_quote
 This module provides an Atom-inspired, minimalistic modeline for Doom Emacs,
 powered by [[https://github.com/seagle0128/doom-modeline][the doom-modeline package]] (where you can find screenshots).
@@ -2012,6 +2024,12 @@ icons if they are missing:
 *** DONE [#C] Use 1-based column numbering in modeline :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setq column-number-indicator-zero-based nil)
+#+end_src
+
+*** DONE [#C] Do not use icons over SSH :tweak:
+#+begin_src emacs-lisp :tangle yes
+(when (getenv "SSH_CLIENT")
+  (setq! doom-modeline-icon nil))
 #+end_src
 
 ** nav-flash [0/0] :ARCHIVE:
@@ -4635,7 +4653,7 @@ Compare with my old config and try to match it.
 I mostly want to do this to have an easier time tracking the local time of
 servers I have deployed around the world.
 
-** dired [2/3]
+** dired [3/4]
 #+begin_quote
 This module provides configuration for dired.
 #+end_quote
@@ -4691,6 +4709,16 @@ Now run the following snippets and compare with the previous example:
 (find-grep-dired default-directory "kubernetes\\|k8s")
 #+end_src
 
+*** DONE [#C] Do not use icons over SSH :tweak:
+#+begin_src emacs-lisp :tangle yes
+(when (getenv "SSH_CLIENT")
+  (when (modulep! :emacs dired +icons)
+    (after! dirvish
+      (setq dirvish-subtree-always-show-state nil)
+      (delq! 'nerd-icons dirvish-attributes)
+      (delq! 'subtree-state dirvish-attributes))))
+#+end_src
+
 *** STRT [#A] Define directory-exploring =evil-ex= commands :feat:
 I would like to refactor ~my/+dired-tab-jump~ to use mechanisms similar to
 ~dired-other-tab~ and ~switch-to-buffer-other-tab~. This will probably require
@@ -4728,7 +4756,7 @@ some additional functionality in =vimish-tab= (namely a new function called
 
 ** electric [0/0]
 ** eww [0/0] :ARCHIVE:
-** ibuffer [1/7]
+** ibuffer [2/8]
 #+begin_quote
 This module augments ibuffer.
 #+end_quote
@@ -4741,6 +4769,19 @@ to forget to refresh the buffer.
 
 #+begin_src emacs-lisp :tangle yes
 (add-hook 'ibuffer-mode-hook #'ibuffer-auto-mode)
+#+end_src
+
+*** DONE [#C] Do not use icons over SSH :tweak:
+#+begin_src emacs-lisp :tangle yes
+(when (and (getenv "SSH_CLIENT")
+           (modulep! :emacs ibuffer +icons))
+  (after! ibuffer
+    (setcar ibuffer-formats
+            (let ((fmt (car ibuffer-formats)))
+              (append (seq-subseq fmt 0 5)
+                      (seq-subseq fmt 7)))))
+  (after! ibuffer-projectile
+    (setq ibuffer-projectile-prefix "Project: ")))
 #+end_src
 
 *** STRT [#B] Clean up the modeline :tweak:hack:
