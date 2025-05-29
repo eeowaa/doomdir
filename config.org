@@ -884,12 +884,12 @@ original text, even though they might look a little better. Let's disable them:
 (setq text-quoting-style 'grave)
 #+end_src
 
-*** DONE [#C] Display raw bytes in hexadecimal instead of octal
+*** DONE [#C] Display raw bytes in hexadecimal instead of octal :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setq display-raw-bytes-as-hex t)
 #+end_src
 
-*** DONE [#C] Display line continuation characters in TTY Emacs
+*** DONE [#C] Display line continuation characters in TTY Emacs :tweak:
 #+begin_src emacs-lisp :tangle yes
 (unless initial-window-system
   (setq-default wrap-prefix "↪ "))
@@ -1917,21 +1917,21 @@ I just need to test this functionality.
 #+end_src
 
 ** ilist [3/3] :eeowaa:
-**** DONE [#A] Window configuration :tweak:
+*** DONE [#A] Window configuration :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setq imenu-list-mode-line-format "  Ilist"
       imenu-list-position 'right
       imenu-list-size 35) ;; same as treemacs
 #+end_src
 
-**** DONE [#C] Configure revert-buffer :tweak:module:
+*** DONE [#C] Configure revert-buffer :tweak:module:
 #+begin_src emacs-lisp :tangle yes
 (after! imenu-list
   (setq-hook! 'imenu-list-major-mode-hook
     revert-buffer-function #'imenu-list-refresh))
 #+end_src
 
-**** DONE [#C] Scale down font in imenu-list-major-mode
+*** DONE [#C] Scale down font in imenu-list-major-mode
 #+begin_src emacs-lisp :tangle yes
 (when initial-window-system
   (setq my/imenu-list-text-scale -1)
@@ -4896,7 +4896,7 @@ Modules that offer terminal emulation.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-*** DONE Define a helper function to wrap calls to ~with-editor-export-editor~ :feat:
+*** DONE [#B] Define a helper function to wrap calls to ~with-editor-export-editor~ :feat:
 #+begin_src emacs-lisp :tangle yes
 (defun my/with-editor-export ()
   "Run `with-editor-export-editor' for all envvars that I care about"
@@ -7244,7 +7244,7 @@ https://emacs-lsp.github.io/lsp-mode/page/main-features/#code-actions-on-modelin
 #+end_src
 
 ** magit [3/6]
-*** STRT [#A] Install prerequisites :feat:
+*** STRT [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/magit` module
@@ -8067,7 +8067,7 @@ Modules to improve integration into your OS, system, or devices.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-*** TODO Eliminate display bugs on Wayland :bug:
+*** TODO [#B] Eliminate display bugs on Wayland :bug:
 The ~inhibit-double-buffering~ frame parameter might need to be set on Wayland.
 See also:
 
@@ -8477,7 +8477,7 @@ or [[https://github.com/elixir-lsp/elixir-ls/][elixir-ls]].
 #+end_quote
 
 ** elm [0/0] :ARCHIVE:
-** emacs-lisp [3/4]
+** emacs-lisp [4/4]
 #+begin_quote
 This module extends support for Emacs Lisp in Doom Emacs.
 #+end_quote
@@ -8529,11 +8529,11 @@ Reference: https://emacs.stackexchange.com/a/55914/21977
 (pushnew! auto-mode-alist '("Cask\\'" . lisp-data-mode))
 #+end_src
 
-*** LOOP [#B] Prepend ";; => " to output in Lisp Interaction Mode :tweak:
+*** DONE [#B] Prepend ";; => " to output in Lisp Interaction Mode :tweak:
 https://www.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_thread/eqrf693?utm_source=share&utm_medium=web2x
 
-*UPDATE*: This doesn't seem to be working for me anymore. All of my output is in
-an overlay due to the =eros= package.
+Use =C-j= to run ~eval-print-last-sexp~ and show the result in the buffer.
+This only works in ~lisp-interation-mode~ (not ~emacs-lisp-mode~).
 
 #+begin_src emacs-lisp :tangle yes
 (defadvice! my/format-result-a (f &rest r)
@@ -9546,7 +9546,7 @@ reload the contents into a fresh buffer) has nearly become muscle memory, but I
 really shouldn't have to do this. *UPDATE*: I am not seeing this problem
 anymore.
 
-**** DONE [#B] Unbind =C-j= from ~org-down-element~ in Evil insert state
+**** DONE [#B] Unbind =C-j= from ~org-down-element~ in Evil insert state :tweak:
 I want =C-j= to simply insert a new line without electric/auto indentation.
 
 #+begin_src emacs-lisp :tangle yes
@@ -9555,7 +9555,7 @@ I want =C-j= to simply insert a new line without electric/auto indentation.
         :i "C-j" #'+default/newline))
 #+end_src
 
-**** STRT [#A] Insert new headlines just how I like them :tweak:
+**** STRT [#A] Insert new headlines just how I like them :tweak:hack:
 This is mostly done, but I do not want there to be a blank line after drawers or
 scheduling information:
 
@@ -10626,7 +10626,7 @@ This module adds a major mode and flycheck for Raku.
 This module adds [[https://en.wikipedia.org/wiki/Representational_state_transfer][REST]] support.
 #+end_quote
 
-*** DONE [#A] Install prerequisites :feat:
+*** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/rest` module
@@ -10651,7 +10651,7 @@ This module adds support for the Rust language and integration for its tools,
 e.g. ~cargo~.
 #+end_quote
 
-*** OKAY [#A] Install prerequisites :feat:
+*** OKAY [#A] Install prerequisites
 **** OKAY macOS
 #+begin_src sh :tangle no
 # Install prerequisites for `lang/rust` module
@@ -10757,7 +10757,7 @@ powered by [[https://www.nongnu.org/geiser/geiser_1.html#introduction][geiser]].
 This module adds support for shell scripting languages.
 #+end_quote
 
-*** TODO [#A] Install prerequisites :feat:
+*** TODO [#A] Install prerequisites
 Still need to install PowerShell language server. References:
 
 + =lsp-pwsh=
@@ -11394,7 +11394,7 @@ server and [[https://musicpd.org/clients/mpc/][mpc]] to update your music databa
 This module adds system-wide popup Emacs windows for quick edits.
 #+end_quote
 
-*** TODO [#A] Install prerequisites :feat:
+*** TODO [#A] Install prerequisites
 **** WAIT macOS
 ***** WAIT Create an automator service to run a command
 ****** DONE Manual instructions

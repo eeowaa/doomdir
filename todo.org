@@ -326,7 +326,7 @@ keybindings.
   ;;   presentations or streaming.
   #+end_quote
 
-* Config [6/15]
+* Config [7/15]
 :PROPERTIES:
 :CATEGORY: doom/config
 :END:
@@ -403,7 +403,7 @@ I suppose it makes sense. But certain things do *not* make sense:
 :END:
 I want my configuration to use Doom idioms as much as possible.
 
-** DONE [#C] Make ~PREREQ~ lines OS-independent
+** OKAY [#C] Make ~PREREQ~ lines OS-independent
 :LOGBOOK:
 - Note taken on [2021-09-23 Thu 08:43] \\
   I ended up taking a different approach: I moved the ~PREREQ~ comments into
@@ -445,8 +445,64 @@ doom info | sed -n \
 
 Which doesn't miss anything, and seems more idiomatic.
 
+** OKAY [#C] Normalize curl calls in prerequisite installation
+As of now, I pass different combinations of flags to ~curl~ without much thought
+or understanding. It would be best to wrap the command in a function that I call
+in all code blocks used to install prerequisites.
+
+*UPDATE*: For now, I just always pass ~-fsSL[oO]~ to ~curl~ (using the mnemonic
+"f-ing sssslow") and sometimes pass additional flags that I might not need.
+Here is what each of my chosen-standard flags mean:
+
+#+begin_example
+-f, --fail           Fail silently on HTTP 5xx response.
+-s, --silent         Don't show the progress meter or error messages.
+-S, --show-error     Show an error message if curl fails.
+-L, --location       Automatically redo the request upon HTTP 3xx response.
+-o, --output <file>  Write output to <file> instead of stdout.
+-O, --remote-name    Write output to a local file named after the remote.
+#+end_example
+
 ** STRT [#A] Add tags to all literal config subtrees
++ Ignore ~Install prerequisites~ subtrees
++ Primary tags (must have exactly one) are as follows:
+  - ~feat~  :: New feature
+  - ~bug~   :: Bug fix
+  - ~tweak~ :: Configuration preference
+  - ~doc~   :: ???
+    + Often used with the ~noexport~ tag
+    + Contrast with the ~COMMENT~ TODO keyword
++ Secondary tags (in addition to primary tags) are as follows:
+  - ~hack~   :: Kludge or fragile workaround
+    + Add this tag when advising functions or macros
+    + Periodically revisit these entries
+  - ~module~ :: Custom module
+    + Should be extracted to =modules/<category>/<module>/=
+
+**TODO:** Find all TODO items without a ~feat~, ~bug~, ~tweak~, or ~doc~ tag. \\
+Reference: [[info:org#Matching tags and properties][org#Matching tags and properties]]
+
 ** TODO [#A] Create custom Doom modules according to ~:module:~ tags
+To get an Org Agenda view containing all subtrees in =config.org= that have a
+~:module:~ tag:
+
+1. Open a buffer to =config.org= and make it current
+2. Run ~org-agenda-set-restriction-lock~ with a prefix argument (=SPC u C-c C-x <=)
+   to restrict the Org Agenda to the current buffer's file
+3. Run ~org-tags-view~ (=SPC o a m=) and enter ~module~ when prompted to open an
+   Org Agenda view with all subtrees with the ~:module:~ tag (direct or inherited)
+4. Run ~org-agenda-remove-restriction-lock~ (=C-c C-x >=) when finished to remove
+   the Org Agenda file restriction
+
+The following code block effectively does the same thing, except that tag
+inheritance is ignored for whatever reason (see also: ~org-use-tag-ineritance~,
+~org-agenda-use-tag-inheritance~):
+
+#+begin_src emacs-lisp :tangle no
+(let ((org-agenda-files (list (expand-file-name "config.org" doom-user-dir))))
+  (org-tags-view nil "module"))
+#+end_src
+
 ** TODO [#A] Tangle =DOOMDIR/init.el= from =DOOMDIR/config.org=
 This doesn't seem too difficult. All I will need is a set of source blocks that
 tangle to =init.el=. There will need to be some boilerplate at the top and
@@ -470,11 +526,6 @@ References:
 + [[help:features]]
 + [[help:use-package-compute-statistics]]
 + [[help:use-package-report]]
-
-** TODO [#C] Normalize curl calls in prerequisite installation
-As of now, I pass different combinations of flags to ~curl~ without much thought
-or understanding. It would be best to wrap the command in a function that I call
-in all code blocks used to install prerequisites.
 
 ** TODO [#C] Figure out how to patch specific functions in Doom
 + =el-patch= looks great: https://github.com/raxod502/el-patch
