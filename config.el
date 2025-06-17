@@ -286,7 +286,7 @@ When called interactively, reload the fonts in the current session."
   (and (interactive-p) (doom/reload-font)))
 
 ;; Set the font
-(my/select-font "Iosevka Comfy Fixed")
+(my/select-font "Comic Mono")
 
 ;; (add-hook 'doom-load-theme-hook #'doom-themes-treemacs-config)
 
@@ -814,53 +814,16 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   ;; Treemacs buffers are treated specially
   (cl-pushnew 'treemacs-mode vimish-tab-exclude-modes))
 
-;; Little tweaks after upgrading to Emacs 29.2 and the newest Doom
-;; (setq treemacs-no-png-images t
-;;       treemacs-indentation-string " ┃")
-;; (after! treemacs
-;;   (treemacs-indent-guide-mode))
-;; TODO: `treemacs-sorting' (sort by file extension, etc.)
+;; Simplify the modeline
 (setq treemacs-user-mode-line-format " Treemacs")
-(setq treemacs-indentation (if initial-window-system 3 2))
 
-;; XXX: Run this before opening icons
-;; FIXME: Some icons (LICENSE, packages.lock, *.service) are 3 characters wide instead of 2
-;; REVIEW: `treemacs-resize-icons', `treemacs--icon-size'
-(defun my/treemacs-fix-nerd-icons ()
-  (interactive)
-  (dolist (item nerd-icons-extension-icon-alist)
-    (let* ((extension (car item))
-           (func (cadr item))
-           (args (append (list (cadr (cdr item))) '(:v-adjust -0.05 :height 1.0) (cdr (cddr item))))
-           (icon (apply func args)))
-      (let* ((icon-pair (cons (format "%s%s" icon treemacs-nerd-icons-tab) (format "%s%s" icon treemacs-nerd-icons-tab)))
-             (gui-icons (treemacs-theme->gui-icons treemacs--current-theme))
-             (tui-icons (treemacs-theme->tui-icons treemacs--current-theme))
-             (gui-icon  (car icon-pair))
-             (tui-icon  (cdr icon-pair)))
-        (ht-set! gui-icons extension gui-icon)
-        (ht-set! tui-icons extension tui-icon))))
-
-  (treemacs-create-icon :icon (format "%s%s" (nerd-icons-faicon "nf-fa-folder_open"  :face 'treemacs-nerd-icons-file-face) treemacs-nerd-icons-tab)
-                        :extensions (dir-open)
-                        :fallback 'same-as-icon)
-
-  (treemacs-create-icon :icon (format "%s%s" (nerd-icons-faicon "nf-fa-folder"  :face 'treemacs-nerd-icons-file-face) treemacs-nerd-icons-tab)
-                        :extensions (dir-closed)
-                        :fallback 'same-as-icon)
-
-  (treemacs-create-icon :icon (format "%s%s" (nerd-icons-faicon "nf-fa-file_o" :face 'treemacs-nerd-icons-file-face) treemacs-nerd-icons-tab)
-                        :extensions (fallback)
-                        :fallback 'same-as-icon))
-
+;; Allow resizable fonts
 (setq doom-themes-treemacs-enable-variable-pitch nil)
 
-(setq +treemacs-git-mode 'extended)
-
-(require 'ace-window)
-
+;; Do not read from popup frames
 (setq treemacs-read-string-input 'from-minibuffer)
 
+;; Add keybindings to visit adjacent files
 (after! treemacs-evil
   (defun my/treemacs-visit-next ()
     "Open the next node in another window."
@@ -878,218 +841,70 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     "J" #'my/treemacs-visit-next
     "K" #'my/treemacs-visit-previous))
 
+;; Allow selection of treemacs window via `ace-window'
 (after! (:and treemacs ace-window)
   (setq aw-ignored-buffers (delq 'treemacs-mode aw-ignored-buffers)))
 
-(setq treemacs-show-cursor t)
-
-;; No need for the fringe indicator with `hl-line' mode and visible cursor
-;; (after! doom-themes-ext-treemacs
-;;   (with-eval-after-load 'treemacs
-;;     (setq treemacs-fringe-indicator-mode nil)))
-(with-eval-after-load 'treemacs
-  (setq treemacs-fringe-indicator-mode nil))
-
-;; Use a solid box cursor instead of an underline
-(setq-hook! 'treemacs-mode-hook
-  evil-treemacs-state-cursor 'box)
-
-(after! doom-themes-ext-treemacs
-  (with-eval-after-load 'treemacs
-    (remove-hook 'treemacs-mode-hook #'doom-themes-hide-fringes-maybe)
-    (advice-remove #'treemacs-select-window #'doom-themes-hide-fringes-maybe)))
-
-(setq treemacs-text-scale (if initial-window-system -1 0))
-
+;; Configure `revert-buffer' (modified from original config)
 (after! treemacs
   (defun my/treemacs-revert-buffer-function (&rest _)
-    (when initial-window-system
-      ;; HACK: Right now, TUI icons look good
-      (my/treemacs-modify-icons))
     (treemacs-refresh))
   (setq-hook! 'treemacs-mode-hook
     revert-buffer-function #'my/treemacs-revert-buffer-function))
 
-;; REVIEW Consider detecting troublesome icons and automatically falling back to
-;; the default icon for text files.
-(defvar my/treemacs-icon-extension-alist
-  '(
-   ;("org" . ("org_archive"))
-   ;("sh" . ("bat"))
-   ;("txt" . ("Pipfile"))
-   ;("json" ;; "configuration" icon
-   ; . ("project"
-   ;    "Pipfile.lock"
-   ;    "Cargo.lock"
-   ;    "Cargo.toml"
-   ;    ;; systemd units
-   ;    "service"
-   ;    "socket"
-   ;    "device"
-   ;    "mount"
-   ;    "automount"
-   ;    "swap"
-   ;    "target"
-   ;    "path"
-   ;    "timer"
-   ;    "slice"
-   ;    "scope"))
-   ;("xlsx" . ("ods"))
+;; Prevent treemacs from using icons when using Emacs over SSH
+(when (getenv "SSH_CLIENT")
+  (setq treemacs-no-png-images t
+        doom-themes-treemacs-theme "my/minimal" ;; REVIEW This is not taking effect
+        lsp-treemacs-theme "my/minimal") ;; REVIEW This is not taking effect
+  (after! treemacs-icons
+    ;; Treemacs doesn't know when we are using SSH
+    (defadvice! my/treemacs--no-images-a (&rest _)
+      :override '(treemacs--is-image-creation-impossible?
+                  treemacs--is-image-creation-impossible?--inliner)
+      t)
+    ;; Always use two spaces for file icons
+    ;; FIXME: I always have to set `treemacs-icon-fallback' in the buffer
+    (setq treemacs-icon-fallback "  ")
+    (setq-default treemacs-icon-fallback "  ")
+    (setq-hook! 'treemacs-mode-hook treemacs-icon-fallback "  ")
+    (add-hook! 'treemacs-mode-hook :append
+      (defun my/treemacs-load-minimal-theme ()
+        (treemacs-load-theme "my/minimal")))
+    (treemacs-create-theme "my/minimal"
+      :icon-directory (treemacs-join-path treemacs-dir "icons/default")
+      :config
+      (progn
+        ;; Root
+        (treemacs-create-icon :file "vsc/root-closed.png"   :extensions (root-closed) :fallback "")
+        (treemacs-create-icon :file "vsc/root-open.png"     :extensions (root-open)   :fallback "")
 
-    ;; TODO Match on file "vcs/dir-.+-closed\\.svg"
-    ("dir-closed"
-     . ("src-closed"
-        "test-closed"
-        "bin-closed"
-        "build-closed"
-        "git-closed"
-        "github-closed"
-        "public-closed"
-        "private-closed"
-        "temp-closed" "tmp-closed"
-        "readme-closed" "docs-closed"
-        "screenshots-closed" "icons-closed"))
+        ;; Directory
+        (treemacs-create-icon :file "vsc/dir-closed.png"    :extensions (dir-closed)  :fallback (propertize "+ " 'face 'treemacs-term-node-face))
+        (treemacs-create-icon :file "vsc/dir-open.png"      :extensions (dir-open)    :fallback (propertize "- " 'face 'treemacs-term-node-face))
 
-    ;; TODO Match on file "vcs/dir-.+-open\\.svg"
-    ("dir-open"
-     . ("src-open"
-        "test-open"
-        "bin-open"
-        "build-open"
-        "git-open"
-        "github-open"
-        "public-open"
-        "private-open"
-        "temp-open" "tmp-open"
-        "readme-open" "docs-open"
-        "screenshots-open" "icons-open")))
-  "Alist of file extension mappings for Treemacs icons.
+        ;; Tag
+        (treemacs-create-icon :file "tags-leaf.png"         :extensions (tag-leaf)    :fallback (propertize "• " 'face 'font-lock-constant-face))
+        (treemacs-create-icon :file "tags-open.png"         :extensions (tag-open)    :fallback (propertize "▸ " 'face 'font-lock-string-face))
+        (treemacs-create-icon :file "tags-closed.png"       :extensions (tag-closed)  :fallback (propertize "▾ " 'face 'font-lock-string-face))
 
-The `car' of each element is a file extension with a desirable
-Treemacs icon; the `cdr' is a list of file extensions that should
-use that same icon.
+        ;; Status
+        (treemacs-create-icon :file "error.png"             :extensions (error)       :fallback (propertize "• " 'face 'font-lock-string-face))
+        (treemacs-create-icon :file "warning.png"           :extensions (warning)     :fallback (propertize "• " 'face 'font-lock-string-face))
+        (treemacs-create-icon :file "info.png"              :extensions (info)        :fallback (propertize "• " 'face 'font-lock-string-face))
 
-If the `car' is a string, it is treated case-insensitively, as
-Treemacs defines string extensions as lowercase. See the
-`treemacs-icons' package for more info; for a quick reference,
-see how `treemacs-create-theme' is used to define the \"Default\"
-Treemacs theme.")
+        ;; File
+        (treemacs-create-icon :file "txt.png"               :extensions (fallback)    :fallback "~ ")))))
+        ;; (treemacs-create-icon :file "txt.png"               :extensions (fallback))))))
+;;  (defadvice! my/treemacs--no-icons-a (&rest _)
+;;    :override '(treemacs-icon-for-file
+;;                treemacs-icon-for-file--inliner
+;;                treemacs-icon-for-mode
+;;                treemacs-icon-for-mode--inliner)
+;;    treemacs-icon-fallback)))
 
-(defvar my/treemacs-fallback-icon-alist
-  '((dir-closed . " +\t")
-    (dir-open . " -\t")
-    (root-closed . " +\t")
-    (root-open . " -\t"))
-  "Alist of file extension mappings for Treemacs TUI icons.
-
-The `car' of each element is a file extension or a symbol
-representing a special Treemacs entry (see documentation for the
-EXTENSIONS argument of `treemacs-create-icon' for more info).
-
-The `cdr' of each element is a string to use in place of an icon
-in TTY Emacs (or whenever Treemacs cannot render icons).")
-
-(defvar my/treemacs-fallback-icon-default "  \t"
-  "Default fallback string for TUI icons.
-
-This string is used as the TUI icon for all Treemacs entries not
-matched in `my/treemacs-icon-fallback-alist'.")
-
-(defun my/treemacs-fallback-icon (extension)
-  "Return the fallback icon corresponding to EXTENSION."
-  (when (stringp extension)
-    (setq extension (downcase extension)))
-  (or (alist-get extension my/treemacs-fallback-icon-alist)
-      my/treemacs-fallback-icon-default))
-
-(after! treemacs
-  (defun my/treemacs-modify-icons (&optional theme)
-    "Modify the icons for the Treemacs THEME (default current).
-The following variables are consulted when modifying the theme:
-
-  `my/treemacs-icon-extension-alist'
-  `my/treemacs-fallback-icon-alist'
-  `my/treemacs-fallback-icon-default'
-
-Call this function after `treemacs-create-theme' is called to
-ensure your customizations take hold."
-    (unless (treemacs-theme-p theme)
-      (setq theme (if (stringp theme)
-                      (treemacs--find-theme theme)
-                    treemacs--current-theme)))
-    (let ((gui-icons (treemacs-theme->gui-icons theme))
-          (tui-icons (treemacs-theme->tui-icons theme)))
-
-      ;; Modify GUI icons
-      (dolist (entry my/treemacs-icon-extension-alist)
-        (let* ((key (car entry))
-               (gui-icon (treemacs-get-icon-value (if (stringp key) (downcase key) key)))
-               (extension-list (cdr entry)))
-          (dolist (ext extension-list)
-            (ht-set! gui-icons (if (stringp ext) (downcase ext) ext) gui-icon))))
-
-      ;; Modify TUI icons
-      (treemacs--maphash tui-icons (extension _)
-        (ht-set! tui-icons extension (my/treemacs-fallback-icon extension)))))
-
-  ;; FIXME: This advice either causes errors or fails to run
-  (undefadvice! my/treemacs-modify-icons-a (theme &rest _)
-    :after #'treemacs-create-theme
-    :before #'treemacs-load-theme
-    (my/treemacs-modify-icons theme))
-
-  ;; FIXME: This doesn't work, either (this is easy to see when
-  ;; `doom-themes-treemacs-theme' is set to `doom-color', or when running in TTY
-  ;; Emacs). The only workaround I've found is to run `my/treemacs-modify-icons'
-  ;; manually after opening Treemacs, closing the Treemacs window via
-  ;; `treemacs-kill-buffer', and then opening Treemacs again.
-  (add-hook! 'doom-load-theme-hook :append #'my/treemacs-modify-icons)
-
-  ;; FIXME This function does not work when the Treemacs window is selected.
-  ;; Also, the Treemacs window is always selected after this function runs, and
-  ;; I'd rather keep the current window selected.
-  (defun my/treemacs-select-theme ()
-    "Select and load a new Treemacs theme.
-Closes and re-opens Treemacs to apply the new theme."
-    (interactive)
-    (call-interactively #'treemacs-load-theme)
-    (unless (eq (treemacs-current-visibility) 'none)
-      (treemacs-select-window)
-      (treemacs-kill-buffer)
-      (treemacs)))
-
-  (defun my/treemacs-current-theme ()
-    "Return the name of the current Treemacs theme."
-    (treemacs-theme->name treemacs--current-theme)))
-
-;; I think I actually prefer the `doom-atom' theme -- it's less distracting
-;; (setq doom-themes-treemacs-theme "doom-colors")
-(setq doom-themes-treemacs-theme "nerd-icons")
-
-(defun my/treemacs-workaround-fix ()
-  "Run this command if Treemacs fails to open"
-  (interactive)
-  (cl-assert (eq major-mode 'treemacs-mode))
-
-  ;; Workaround for utter brokenness
-  (treemacs--consolidate-projects)
-
-  ;; This is to facillitate a workaround for ugly icons
-  (setq revert-buffer-function #'my/treemacs-revert-buffer-function)
-
-  ;; Display the modeline in the expected format
-  (treemacs--setup-mode-line)
-
-  ;; Expand the root node at the top of the Treemacs buffer
-  (goto-char 0)
-  (treemacs-do-for-button-state
-   :on-root-node-closed (treemacs--expand-root-node btn)
-   :on-root-node-open (ignore btn)))
-
-(setq treemacs-hide-dot-git-directory nil)
-
-(after! diff-hl
-  (unless (window-system) (diff-hl-margin-mode)))
+;; REVIEW Where is this supposed to happen?
+;; (add-hook 'doom-load-theme-hook #'doom-themes-treemacs-config))
 
 (defvar my/diff-hl-minor-modes '(not git-commit-mode smerge-mode)
   "List of minor modes to prevent `diff-hl-mode' from activating.
@@ -1108,6 +923,9 @@ works even when `global-diff-hl-mode' is disabled.")
    ((eq (car-safe my/diff-hl-minor-modes) 'not)
     (not (seq-intersection local-minor-modes (cdr my/diff-hl-minor-modes))))
    (t (seq-intersection local-minor-modes my/diff-hl-minor-modes))))
+
+(after! diff-hl
+  (unless (window-system) (diff-hl-margin-mode)))
 
 (when (and (modulep! :ui vc-gutter +pretty)
            (modulep! :ui vc-gutter +diff-hl)

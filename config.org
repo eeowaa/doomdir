@@ -2378,7 +2378,7 @@ loads, so tabs will appear in the ~ilist~ buffer until you manually run the
 Wait until you have a Maildir set up, then look at configuration options for
 ~display-time-mode~.
 
-** treemacs [13/18]
+** COMMENT treemacs [13/19]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -2820,7 +2820,10 @@ Attempting the first option:
 #+begin_src emacs-lisp :tangle yes
 ;; I think I actually prefer the `doom-atom' theme -- it's less distracting
 ;; (setq doom-themes-treemacs-theme "doom-colors")
-(setq doom-themes-treemacs-theme "nerd-icons")
+(setq doom-themes-treemacs-theme
+      (if (getenv "SSH_CLIENT")
+          "default"
+        "nerd-icons"))
 #+end_src
 
 *UPDATE*: This does bring the Treemacs icon set closer to the Dired icon set,
@@ -2993,6 +2996,114 @@ I can at least manually navigate to the worktrees.
 (setq treemacs-hide-dot-git-directory nil)
 #+end_src
 
+*** TODO [#C] Customize ~treemacs-sorting~ (sort by file extension, etc.) :tweak:
+** treemacs-rewrite
+My original =treemacs= configuration has grown out of control. This section
+attempts to fix it. Long-term, consider removing =:ui doom=. Also consider
+possibly replacing =:ui treemacs= with your own configuration.
+
+#+begin_src emacs-lisp :tangle early-init.el
+;; Prevent loading of nerd icons when using Emacs over SSH
+(when (getenv "SSH_CLIENT")
+  (use-package-hook! treemacs-nerd-icons
+    :pre-init nil     ;; (require 'treemacs-nerd-icons)
+    :pre-config nil)) ;; (treemacs-load-theme "nerd-icons")
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+;; Simplify the modeline
+(setq treemacs-user-mode-line-format " Treemacs")
+
+;; Allow resizable fonts
+(setq doom-themes-treemacs-enable-variable-pitch nil)
+
+;; Do not read from popup frames
+(setq treemacs-read-string-input 'from-minibuffer)
+
+;; Add keybindings to visit adjacent files
+(after! treemacs-evil
+  (defun my/treemacs-visit-next ()
+    "Open the next node in another window."
+    (interactive)
+    (treemacs-next-line 1)
+    (save-selected-window
+      (treemacs-visit-node-no-split 1)))
+  (defun my/treemacs-visit-previous ()
+    "Open the previous node in another window."
+    (interactive)
+    (treemacs-previous-line 1)
+    (save-selected-window
+      (treemacs-visit-node-no-split 1)))
+  (define-key! evil-treemacs-state-map
+    "J" #'my/treemacs-visit-next
+    "K" #'my/treemacs-visit-previous))
+
+;; Allow selection of treemacs window via `ace-window'
+(after! (:and treemacs ace-window)
+  (setq aw-ignored-buffers (delq 'treemacs-mode aw-ignored-buffers)))
+
+;; Configure `revert-buffer' (modified from original config)
+(after! treemacs
+  (defun my/treemacs-revert-buffer-function (&rest _)
+    (treemacs-refresh))
+  (setq-hook! 'treemacs-mode-hook
+    revert-buffer-function #'my/treemacs-revert-buffer-function))
+
+;; Prevent treemacs from using icons when using Emacs over SSH
+(when (getenv "SSH_CLIENT")
+  (setq treemacs-no-png-images t
+        doom-themes-treemacs-theme "my/minimal" ;; REVIEW This is not taking effect
+        lsp-treemacs-theme "my/minimal") ;; REVIEW This is not taking effect
+  (after! treemacs-icons
+    ;; Treemacs doesn't know when we are using SSH
+    (defadvice! my/treemacs--no-images-a (&rest _)
+      :override '(treemacs--is-image-creation-impossible?
+                  treemacs--is-image-creation-impossible?--inliner)
+      t)
+    ;; Always use two spaces for file icons
+    ;; FIXME: I always have to set `treemacs-icon-fallback' in the buffer
+    (setq treemacs-icon-fallback "  ")
+    (setq-default treemacs-icon-fallback "  ")
+    (setq-hook! 'treemacs-mode-hook treemacs-icon-fallback "  ")
+    (add-hook! 'treemacs-mode-hook :append
+      (defun my/treemacs-load-minimal-theme ()
+        (treemacs-load-theme "my/minimal")))
+    (treemacs-create-theme "my/minimal"
+      :icon-directory (treemacs-join-path treemacs-dir "icons/default")
+      :config
+      (progn
+        ;; Root
+        (treemacs-create-icon :file "vsc/root-closed.png"   :extensions (root-closed) :fallback "")
+        (treemacs-create-icon :file "vsc/root-open.png"     :extensions (root-open)   :fallback "")
+
+        ;; Directory
+        (treemacs-create-icon :file "vsc/dir-closed.png"    :extensions (dir-closed)  :fallback (propertize "+ " 'face 'treemacs-term-node-face))
+        (treemacs-create-icon :file "vsc/dir-open.png"      :extensions (dir-open)    :fallback (propertize "- " 'face 'treemacs-term-node-face))
+
+        ;; Tag
+        (treemacs-create-icon :file "tags-leaf.png"         :extensions (tag-leaf)    :fallback (propertize "• " 'face 'font-lock-constant-face))
+        (treemacs-create-icon :file "tags-open.png"         :extensions (tag-open)    :fallback (propertize "▸ " 'face 'font-lock-string-face))
+        (treemacs-create-icon :file "tags-closed.png"       :extensions (tag-closed)  :fallback (propertize "▾ " 'face 'font-lock-string-face))
+
+        ;; Status
+        (treemacs-create-icon :file "error.png"             :extensions (error)       :fallback (propertize "• " 'face 'font-lock-string-face))
+        (treemacs-create-icon :file "warning.png"           :extensions (warning)     :fallback (propertize "• " 'face 'font-lock-string-face))
+        (treemacs-create-icon :file "info.png"              :extensions (info)        :fallback (propertize "• " 'face 'font-lock-string-face))
+
+        ;; File
+        (treemacs-create-icon :file "txt.png"               :extensions (fallback)    :fallback "~ ")))))
+        ;; (treemacs-create-icon :file "txt.png"               :extensions (fallback))))))
+;;  (defadvice! my/treemacs--no-icons-a (&rest _)
+;;    :override '(treemacs-icon-for-file
+;;                treemacs-icon-for-file--inliner
+;;                treemacs-icon-for-mode
+;;                treemacs-icon-for-mode--inliner)
+;;    treemacs-icon-fallback)))
+
+;; REVIEW Where is this supposed to happen?
+;; (add-hook 'doom-load-theme-hook #'doom-themes-treemacs-config))
+#+end_src
+
 ** unicode [0/0] :ARCHIVE:
 #+begin_quote
 This module extends Doom's ability to display non-English unicode. It is
@@ -3000,25 +3111,8 @@ primarily useful for non-English Emacs users, for whom Doom's built-in unicode
 support in insufficient.
 #+end_quote
 
-** vc-gutter [3/4]
-*** DONE [#B] Enable =vc-gutter= in terminal Emacs :feat:
-TUI Emacs does not have a fringe; however, it does have a margin. Look to Doom
-module documentation for =:ui vc-gutter= and =:os tty= for details.
-
-#+begin_src emacs-lisp :tangle yes
-(after! diff-hl
-  (unless (window-system) (diff-hl-margin-mode)))
-#+end_src
-
-*** OKAY [#B] Enable toggling of VCS diff in the fringe :bug:
-Unfortunately, when the =vc-gutter= module is enabled, I have found no way to
-persistently disable =git-gutter= in a buffer.
-
-*UPDATE*: With the =+diff-hl= module flag (to use =diff-hl= instead of
-=git-gutter=), I have found that =M-x diff-hl-mode= does what I want. I just
-added a toggle keybinding for this.
-
-*** DONE [#C] Do not display =vc-gutter= in COMMIT_EDITMSG buffers :feat:
+** vc-gutter [2/4]
+*** LOOP [#C] Do not display =vc-gutter= in COMMIT_EDITMSG buffers :feat:
 This is mainly a nuisance in terminal Emacs, where an empty margin is created.
 
 Observations:
@@ -3064,6 +3158,23 @@ works even when `global-diff-hl-mode' is disabled.")
     (not (seq-intersection local-minor-modes (cdr my/diff-hl-minor-modes))))
    (t (seq-intersection local-minor-modes my/diff-hl-minor-modes))))
 #+end_src
+
+*** DONE [#B] Enable =vc-gutter= in terminal Emacs :feat:
+TUI Emacs does not have a fringe; however, it does have a margin. Look to Doom
+module documentation for =:ui vc-gutter= and =:os tty= for details.
+
+#+begin_src emacs-lisp :tangle yes
+(after! diff-hl
+  (unless (window-system) (diff-hl-margin-mode)))
+#+end_src
+
+*** OKAY [#B] Enable toggling of VCS diff in the fringe :bug:
+Unfortunately, when the =vc-gutter= module is enabled, I have found no way to
+persistently disable =git-gutter= in a buffer.
+
+*UPDATE*: With the =+diff-hl= module flag (to use =diff-hl= instead of
+=git-gutter=), I have found that =M-x diff-hl-mode= does what I want. I just
+added a toggle keybinding for this.
 
 *** STRT [#C] Keep fringe bitmaps looking good when changing themes :bug:
 So far, only the Doom themes have /really/ good-looking fringe bitmaps for
