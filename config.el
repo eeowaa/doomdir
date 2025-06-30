@@ -814,11 +814,18 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   ;; Treemacs buffers are treated specially
   (cl-pushnew 'treemacs-mode vimish-tab-exclude-modes))
 
+;; Load custom Treemacs theme definitions
+(after! treemacs
+  (require 'eeowaa-treemacs-themes))
+
 ;; Simplify the modeline
 (setq treemacs-user-mode-line-format " Treemacs")
 
 ;; Allow resizable fonts
 (setq doom-themes-treemacs-enable-variable-pitch nil)
+
+;; Set the text scale to -1 in graphical Emacs
+(setq treemacs-text-scale (if initial-window-system -1 0))
 
 ;; Do not read from popup frames
 (setq treemacs-read-string-input 'from-minibuffer)
@@ -852,56 +859,44 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   (setq-hook! 'treemacs-mode-hook
     revert-buffer-function #'my/treemacs-revert-buffer-function))
 
-;; Prevent treemacs from using icons when using Emacs over SSH
-(when (getenv "SSH_CLIENT")
-  (setq treemacs-no-png-images t
-        doom-themes-treemacs-theme "my/minimal" ;; REVIEW This is not taking effect
-        lsp-treemacs-theme "my/minimal") ;; REVIEW This is not taking effect
-  (after! treemacs-icons
-    ;; Treemacs doesn't know when we are using SSH
-    (defadvice! my/treemacs--no-images-a (&rest _)
-      :override '(treemacs--is-image-creation-impossible?
-                  treemacs--is-image-creation-impossible?--inliner)
-      t)
-    ;; Always use two spaces for file icons
-    ;; FIXME: I always have to set `treemacs-icon-fallback' in the buffer
-    (setq treemacs-icon-fallback "  ")
-    (setq-default treemacs-icon-fallback "  ")
-    (setq-hook! 'treemacs-mode-hook treemacs-icon-fallback "  ")
-    (add-hook! 'treemacs-mode-hook :append
-      (defun my/treemacs-load-minimal-theme ()
-        (treemacs-load-theme "my/minimal")))
-    (treemacs-create-theme "my/minimal"
-      :icon-directory (treemacs-join-path treemacs-dir "icons/default")
-      :config
-      (progn
-        ;; Root
-        (treemacs-create-icon :file "vsc/root-closed.png"   :extensions (root-closed) :fallback "")
-        (treemacs-create-icon :file "vsc/root-open.png"     :extensions (root-open)   :fallback "")
+(if (getenv "SSH_CLIENT")
+    ;; Prevent treemacs from using icons when using Emacs over SSH
+    (progn
+      (setq treemacs-no-png-images t
+            doom-themes-treemacs-theme "eeowaa-minimal" ;; REVIEW This is not taking effect
+            lsp-treemacs-theme "eeowaa-minimal") ;; REVIEW This is not taking effect
 
-        ;; Directory
-        (treemacs-create-icon :file "vsc/dir-closed.png"    :extensions (dir-closed)  :fallback (propertize "+ " 'face 'treemacs-term-node-face))
-        (treemacs-create-icon :file "vsc/dir-open.png"      :extensions (dir-open)    :fallback (propertize "- " 'face 'treemacs-term-node-face))
+      (after! treemacs-icons
+        ;; Treemacs doesn't know when we are using SSH
+        (defadvice! my/treemacs--no-images-a (&rest _)
+          :override '(treemacs--is-image-creation-impossible?
+                      treemacs--is-image-creation-impossible?--inliner)
+          t)
 
-        ;; Tag
-        (treemacs-create-icon :file "tags-leaf.png"         :extensions (tag-leaf)    :fallback (propertize "• " 'face 'font-lock-constant-face))
-        (treemacs-create-icon :file "tags-open.png"         :extensions (tag-open)    :fallback (propertize "▸ " 'face 'font-lock-string-face))
-        (treemacs-create-icon :file "tags-closed.png"       :extensions (tag-closed)  :fallback (propertize "▾ " 'face 'font-lock-string-face))
+        ;; Always use two spaces for file icons
+        ;; FIXME: I always have to set `treemacs-icon-fallback' in the buffer
+        ;;  (defadvice! my/treemacs--no-icons-a (&rest _)
+        ;;    :override '(treemacs-icon-for-file
+        ;;                treemacs-icon-for-file--inliner
+        ;;                treemacs-icon-for-mode
+        ;;                treemacs-icon-for-mode--inliner)
+        ;;    treemacs-icon-fallback)
+        (setq treemacs-icon-fallback "  ")
+        (setq-default treemacs-icon-fallback "  ")
+        (setq-hook! 'treemacs-mode-hook treemacs-icon-fallback "  ")
+        (add-hook! 'treemacs-mode-hook :append
+          (defun my/treemacs-load-minimal-theme ()
+            (treemacs-load-theme "eeowaa-minimal")))))
 
-        ;; Status
-        (treemacs-create-icon :file "error.png"             :extensions (error)       :fallback (propertize "• " 'face 'font-lock-string-face))
-        (treemacs-create-icon :file "warning.png"           :extensions (warning)     :fallback (propertize "• " 'face 'font-lock-string-face))
-        (treemacs-create-icon :file "info.png"              :extensions (info)        :fallback (propertize "• " 'face 'font-lock-string-face))
+  ;; Use a custom Treemacs theme
+  (setq doom-themes-treemacs-theme "eeowaa-nerd-icons"
+        lsp-treemacs-theme "eeowaa-nerd-icons")
+  (add-hook! 'treemacs-mode-hook :append
+    (defun my/treemacs-load-nerd-theme ()
+      (treemacs-load-theme "eeowaa-nerd-icons"))))
 
-        ;; File
-        (treemacs-create-icon :file "txt.png"               :extensions (fallback)    :fallback "~ ")))))
-        ;; (treemacs-create-icon :file "txt.png"               :extensions (fallback))))))
-;;  (defadvice! my/treemacs--no-icons-a (&rest _)
-;;    :override '(treemacs-icon-for-file
-;;                treemacs-icon-for-file--inliner
-;;                treemacs-icon-for-mode
-;;                treemacs-icon-for-mode--inliner)
-;;    treemacs-icon-fallback)))
+;; Use proper indentation for the environment
+(setq treemacs-indentation (if initial-window-system 3 2))
 
 ;; REVIEW Where is this supposed to happen?
 ;; (add-hook 'doom-load-theme-hook #'doom-themes-treemacs-config))

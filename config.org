@@ -2387,15 +2387,109 @@ navigation and exploration, while also possessing basic file management
 utilities.
 #+end_quote
 
+*** Migrated
+#+begin_src emacs-lisp :tangle yes
+(setq treemacs-user-mode-line-format " Treemacs")
+(setq treemacs-indentation (if initial-window-system 3 2))
+#+end_src
+
+**** DONE [#A] Allow resizable fonts :tweak:bug:
+Right now, =C--= (~text-scale-decrease~) and =C-== (~text-scale-increase~) are
+unmapped, but I can still use =C-x C--= or =C-x C-== to invoke
+~text-scale-adjust~. However, before incorporating the following code snippet,
+only the icons got resized, not the text itself:
+
+#+begin_src emacs-lisp :tangle yes
+(setq doom-themes-treemacs-enable-variable-pitch nil)
+#+end_src
+
+The culprit seems to have been that ~doom-themes-treemacs-enable-variable-pitch~
+was enabled, so the file/directory labels were using the face specified by
+~doom-themes-treemacs-variable-pitch-face~, which is currently ~variable-pitch~
+(see =SPC h F variable-pitch RET= to get information on the face). Basically,
+the face did not get resized.
+
+The only downside is that Treemacs only uses fixed-width fonts now, which makes
+certain things harder to read. Overall, however, I think it looks better.
+
+See also:
++ [[help:doom-variable-pitch-font][doom-variable-pitch-font]]
++ [[doom:.local/straight/repos/themes/extensions/doom-themes-ext-treemacs.el][doom-themes-ext-treemacs.el]]
++ =M-x customize-group doom-themes-treemacs RET=
+
+**** DONE [#B] Do not read from popup frames :tweak:
+Certain operations in Treemacs (e.g. renaming files) will pop up a child frame
+in GUI Emacs to read a string. This frame is very small and has no borders, so
+if the frame loses focus, it can look like Emacs is frozen (the child frame does
+not close when it loses focus). There are two ways to fix this:
+
+1. Configure the child frame to close when it loses focus
+2. Always read from the minibuffer
+
+I will go with option 2 for the following reasons:
+
+- Consistent UI
+- Easier to implement
+- More flexible editing in the minibuffer vs. in the child frame
+
+#+begin_src emacs-lisp :tangle yes
+(setq treemacs-read-string-input 'from-minibuffer)
+#+end_src
+
+**** DONE [#C] Add keybindings to visit adjacent files :feat:
+#+begin_src emacs-lisp :tangle yes
+(after! treemacs-evil
+  (defun my/treemacs-visit-next ()
+    "Open the next node in another window."
+    (interactive)
+    (treemacs-next-line 1)
+    (save-selected-window
+      (treemacs-visit-node-no-split 1)))
+  (defun my/treemacs-visit-previous ()
+    "Open the previous node in another window."
+    (interactive)
+    (treemacs-previous-line 1)
+    (save-selected-window
+      (treemacs-visit-node-no-split 1)))
+  (define-key! evil-treemacs-state-map
+    "J" #'my/treemacs-visit-next
+    "K" #'my/treemacs-visit-previous))
+#+end_src
+
+**** DONE [#C] Allow selection of treemacs window via =ace-window= :tweak:
+https://github.com/doomemacs/doomemacs/issues/1177#issuecomment-464936107
+#+begin_src emacs-lisp :tangle yes
+(after! (:and treemacs ace-window)
+  (setq aw-ignored-buffers (delq 'treemacs-mode aw-ignored-buffers)))
+#+end_src
+
+**** DONE [#C] Set the text scale to -1 :tweak:
+#+begin_src emacs-lisp :tangle yes
+(setq treemacs-text-scale (if initial-window-system -1 0))
+#+end_src
+
+**** LOOP [#C] Configure revert-buffer :tweak:module:
+Until I have a permanent fix for Treemacs icons, I want to call
+~my/treemacs-modify-icons~ when refreshing the buffer.
+
+#+begin_src emacs-lisp :tangle yes
+(after! treemacs
+  (defun my/treemacs-revert-buffer-function (&rest _)
+    (when initial-window-system
+      ;; HACK: Right now, TUI icons look good
+      (my/treemacs-modify-icons))
+    (treemacs-refresh))
+  (setq-hook! 'treemacs-mode-hook
+    revert-buffer-function #'my/treemacs-revert-buffer-function))
+#+end_src
+
+*** Not Migrated
 #+begin_src emacs-lisp :tangle yes
 ;; Little tweaks after upgrading to Emacs 29.2 and the newest Doom
 ;; (setq treemacs-no-png-images t
 ;;       treemacs-indentation-string " ┃")
 ;; (after! treemacs
 ;;   (treemacs-indent-guide-mode))
-;; TODO: `treemacs-sorting' (sort by file extension, etc.)
-(setq treemacs-user-mode-line-format " Treemacs")
-(setq treemacs-indentation (if initial-window-system 3 2))
 
 ;; XXX: Run this before opening icons
 ;; FIXME: Some icons (LICENSE, packages.lock, *.service) are 3 characters wide instead of 2
@@ -2428,20 +2522,20 @@ utilities.
                         :fallback 'same-as-icon))
 #+end_src
 
-*** DONE [#A] Install prerequisites
-**** DONE macOS
+**** DONE [#A] Install prerequisites
+***** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `ui/treemacs` module
 brew install python3
 #+end_src
 
-**** DONE Fedora
+***** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `ui/treemacs` module
 sudo dnf -y install python3
 #+end_src
 
-*** DONE [#A] Unpin treemacs packages :bug:
+**** DONE [#A] Unpin treemacs packages :bug:
 It seems like half of the problems I encounter with =treemacs= and
 =treemacs-lsp= are already solved upstream, so I'm going to roll the dice and
 unpin those packages:
@@ -2450,31 +2544,7 @@ unpin those packages:
 (unpin! (:ui treemacs))
 #+end_src
 
-*** DONE [#A] Allow resizable fonts :tweak:bug:
-Right now, =C--= (~text-scale-decrease~) and =C-== (~text-scale-increase~) are
-unmapped, but I can still use =C-x C--= or =C-x C-== to invoke
-~text-scale-adjust~. However, before incorporating the following code snippet,
-only the icons got resized, not the text itself:
-
-#+begin_src emacs-lisp :tangle yes
-(setq doom-themes-treemacs-enable-variable-pitch nil)
-#+end_src
-
-The culprit seems to have been that ~doom-themes-treemacs-enable-variable-pitch~
-was enabled, so the file/directory labels were using the face specified by
-~doom-themes-treemacs-variable-pitch-face~, which is currently ~variable-pitch~
-(see =SPC h F variable-pitch RET= to get information on the face). Basically,
-the face did not get resized.
-
-The only downside is that Treemacs only uses fixed-width fonts now, which makes
-certain things harder to read. Overall, however, I think it looks better.
-
-See also:
-+ [[help:doom-variable-pitch-font][doom-variable-pitch-font]]
-+ [[doom:.local/straight/repos/themes/extensions/doom-themes-ext-treemacs.el][doom-themes-ext-treemacs.el]]
-+ =M-x customize-group doom-themes-treemacs RET=
-
-*** DONE [#A] Remove "Invalid face reference" errors :bug:
+**** DONE [#A] Remove "Invalid face reference" errors :bug:
 This comes from incorrect parsing of ~git status --porcelain~, which only
 happens when ~treemacs-git-mode~ is operating in ~simple~ mode. By setting the
 Doom-specific ~+treemacs-git-mode~ variable to ~extended~, we use a ~python3~
@@ -2485,7 +2555,7 @@ script instead of ~git~ to determine the git status of each file in a project.
 (setq +treemacs-git-mode 'extended)
 #+end_src
 
-*** DONE [#B] Fix ace-window keybindings :hack:
+**** DONE [#B] Fix ace-window keybindings :hack:
 This slows down startup a bit, but whatever (I'm not obsessed with startup):
 #+begin_src emacs-lisp :tangle yes
 (require 'ace-window)
@@ -2493,7 +2563,7 @@ This slows down startup a bit, but whatever (I'm not obsessed with startup):
 
 Reference: https://github.com/hlissner/doom-emacs/issues/4555
 
-*** OKAY [#B] Do not collapse path strings :tweak:
+**** OKAY [#B] Do not collapse path strings :tweak:
 Doom sets ~treemacs-collapse-dirs~ to 3, and I'm OK with that for now.
 
 #+begin_src emacs-lisp :tangle no
@@ -2501,26 +2571,7 @@ Doom sets ~treemacs-collapse-dirs~ to 3, and I'm OK with that for now.
   (setq treemacs-collapse-dirs 0))
 #+end_src
 
-*** DONE [#B] Do not read from popup frames :tweak:
-Certain operations in Treemacs (e.g. renaming files) will pop up a child frame
-in GUI Emacs to read a string. This frame is very small and has no borders, so
-if the frame loses focus, it can look like Emacs is frozen (the child frame does
-not close when it loses focus). There are two ways to fix this:
-
-1. Configure the child frame to close when it loses focus
-2. Always read from the minibuffer
-
-I will go with option 2 for the following reasons:
-
-- Consistent UI
-- Easier to implement
-- More flexible editing in the minibuffer vs. in the child frame
-
-#+begin_src emacs-lisp :tangle yes
-(setq treemacs-read-string-input 'from-minibuffer)
-#+end_src
-
-*** OKAY [#B] Display "+" and "-" icons in tty emacs :bug:
+**** OKAY [#B] Display "+" and "-" icons in tty emacs :bug:
 :LOGBOOK:
 - Note taken on [2023-05-17 Wed 18:08] \\
   This is working for me today.
@@ -2538,34 +2589,7 @@ fallbacks).
 Better yet, =doom-themes-ext-treemacs= could be patched to use the fallback TUI
 icons from the default theme.
 
-*** DONE [#C] Add keybindings to visit adjacent files :feat:
-#+begin_src emacs-lisp :tangle yes
-(after! treemacs-evil
-  (defun my/treemacs-visit-next ()
-    "Open the next node in another window."
-    (interactive)
-    (treemacs-next-line 1)
-    (save-selected-window
-      (treemacs-visit-node-no-split 1)))
-  (defun my/treemacs-visit-previous ()
-    "Open the previous node in another window."
-    (interactive)
-    (treemacs-previous-line 1)
-    (save-selected-window
-      (treemacs-visit-node-no-split 1)))
-  (define-key! evil-treemacs-state-map
-    "J" #'my/treemacs-visit-next
-    "K" #'my/treemacs-visit-previous))
-#+end_src
-
-*** DONE [#C] Allow selection of treemacs window via =ace-window= :tweak:
-https://github.com/doomemacs/doomemacs/issues/1177#issuecomment-464936107
-#+begin_src emacs-lisp :tangle yes
-(after! (:and treemacs ace-window)
-  (setq aw-ignored-buffers (delq 'treemacs-mode aw-ignored-buffers)))
-#+end_src
-
-*** DONE [#C] Show the cursor in treemacs windows :tweak:
+**** DONE [#C] Show the cursor in treemacs windows :tweak:
 Once you've gotten used to the cursor being hidden in the Treemacs file explorer
 window, seeing the cursor there can be visually jarring. However, consider the
 following benefits of enabling the cursor in Treemacs:
@@ -2592,7 +2616,7 @@ following benefits of enabling the cursor in Treemacs:
   evil-treemacs-state-cursor 'box)
 #+end_src
 
-*** DONE [#C] Display truncation characters in the fringe :tweak:
+**** DONE [#C] Display truncation characters in the fringe :tweak:
 Fringes are not displayed in Treemacs. When the right fringe is not displayed,
 truncated lines end in ~$~. When running =C-l=, I can restore the fringes in
 Treemacs and truncated lines are indicated by an arrow in the right fringe.
@@ -2611,27 +2635,7 @@ don't need ~treemacs-fringe-indicator-mode~ because ~hl-line-mode~ and
     (advice-remove #'treemacs-select-window #'doom-themes-hide-fringes-maybe)))
 #+end_src
 
-*** DONE [#C] Set the text scale to -1 :tweak:
-#+begin_src emacs-lisp :tangle yes
-(setq treemacs-text-scale (if initial-window-system -1 0))
-#+end_src
-
-*** LOOP [#C] Configure revert-buffer :tweak:module:
-Until I have a permanent fix for Treemacs icons, I want to call
-~my/treemacs-modify-icons~ when refreshing the buffer.
-
-#+begin_src emacs-lisp :tangle yes
-(after! treemacs
-  (defun my/treemacs-revert-buffer-function (&rest _)
-    (when initial-window-system
-      ;; HACK: Right now, TUI icons look good
-      (my/treemacs-modify-icons))
-    (treemacs-refresh))
-  (setq-hook! 'treemacs-mode-hook
-    revert-buffer-function #'my/treemacs-revert-buffer-function))
-#+end_src
-
-*** STRT [#B] Align all Treemacs icons :bug:
+**** STRT [#B] Align all Treemacs icons :bug:
 Some files, like =config.org_archive=, do not have icons configured in
 =doom-themes-ext-treemacs=. This has been a recurring problem for me, despite
 the gradual improvements upstream.
@@ -2808,7 +2812,7 @@ Closes and re-opens Treemacs to apply the new theme."
     (treemacs-theme->name treemacs--current-theme)))
 #+end_src
 
-*** STRT [#C] Use the same icons in treemacs as in dired :tweak:
+**** STRT [#C] Use the same icons in treemacs as in dired :tweak:
 I think there are at least two ways to achieve this:
 
 1. Set ~doom-themes-treemacs-theme~ to ~doom-colors~, which uses
@@ -2835,7 +2839,7 @@ but there are still some differences:
 
 That third difference is the most annoying in Treemacs.
 
-*** TODO [#A] Fix treemacs workspace integration :bug:
+**** TODO [#A] Fix treemacs workspace integration :bug:
 This longstanding bug *impacts me worse than any other issue in my Emacs
 installation*, because it is the only bug that meets all of the following
 negative criteria:
@@ -2873,7 +2877,7 @@ function exited non-locally before running ~treemacs--setup-mode-line~, so
    :on-root-node-open (ignore btn)))
 #+end_src
 
-**** Symptoms
+***** Symptoms
 + Cannot remove projects from Treemacs via =C-c C-p d=
   (~treemacs-remove-project-from-workspace~). For example:
 
@@ -2894,7 +2898,7 @@ function exited non-locally before running ~treemacs--setup-mode-line~, so
   Error running timer ‘treemacs--process-file-events’: (wrong-type-argument arrayp nil)
   #+end_example
 
-**** Diagnostics
+***** Diagnostics
 + The symptoms seem to appear after opening a file outside of the project
   corresponding to the current workspace, but that might not be the one and only
   cause, if it even is a cause. =SPC p F= (~doom/find-file-in-other-project~)
@@ -2953,7 +2957,7 @@ function exited non-locally before running ~treemacs--setup-mode-line~, so
   reason, it does not get set properly. Running ~treemacs--consolidate-projects~
   fixes the problem, however.
 
-**** Ideas
+***** Ideas
 + Did the ~treemacs-workspace~ definition (~cl-struct~ and/or ~eieio~ class?)
   change the data type of the project list? It seems that arrays are expected,
   but lists are used. Maybe =treemacs-projectile= and/or Doom are out of sync
@@ -2973,7 +2977,7 @@ function exited non-locally before running ~treemacs--setup-mode-line~, so
   ~treemacs--find-current-user-project~, which is used by both =treemacs= and
   =treemacs-persp=.
 
-*** TODO [#B] Allow switching git worktrees :feat:
+**** TODO [#B] Allow switching git worktrees :feat:
 My convention is to put alternate worktrees under =.git/worktree-paths=, which
 is not allowed by Treemacs:
 
@@ -2996,7 +3000,7 @@ I can at least manually navigate to the worktrees.
 (setq treemacs-hide-dot-git-directory nil)
 #+end_src
 
-*** TODO [#C] Customize ~treemacs-sorting~ (sort by file extension, etc.) :tweak:
+**** TODO [#C] Customize ~treemacs-sorting~ (sort by file extension, etc.) :tweak:
 ** treemacs-rewrite
 My original =treemacs= configuration has grown out of control. This section
 attempts to fix it. Long-term, consider removing =:ui doom=. Also consider
@@ -3011,11 +3015,18 @@ possibly replacing =:ui treemacs= with your own configuration.
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
+;; Load custom Treemacs theme definitions
+(after! treemacs
+  (require 'eeowaa-treemacs-themes))
+
 ;; Simplify the modeline
 (setq treemacs-user-mode-line-format " Treemacs")
 
 ;; Allow resizable fonts
 (setq doom-themes-treemacs-enable-variable-pitch nil)
+
+;; Set the text scale to -1 in graphical Emacs
+(setq treemacs-text-scale (if initial-window-system -1 0))
 
 ;; Do not read from popup frames
 (setq treemacs-read-string-input 'from-minibuffer)
@@ -3049,56 +3060,44 @@ possibly replacing =:ui treemacs= with your own configuration.
   (setq-hook! 'treemacs-mode-hook
     revert-buffer-function #'my/treemacs-revert-buffer-function))
 
-;; Prevent treemacs from using icons when using Emacs over SSH
-(when (getenv "SSH_CLIENT")
-  (setq treemacs-no-png-images t
-        doom-themes-treemacs-theme "my/minimal" ;; REVIEW This is not taking effect
-        lsp-treemacs-theme "my/minimal") ;; REVIEW This is not taking effect
-  (after! treemacs-icons
-    ;; Treemacs doesn't know when we are using SSH
-    (defadvice! my/treemacs--no-images-a (&rest _)
-      :override '(treemacs--is-image-creation-impossible?
-                  treemacs--is-image-creation-impossible?--inliner)
-      t)
-    ;; Always use two spaces for file icons
-    ;; FIXME: I always have to set `treemacs-icon-fallback' in the buffer
-    (setq treemacs-icon-fallback "  ")
-    (setq-default treemacs-icon-fallback "  ")
-    (setq-hook! 'treemacs-mode-hook treemacs-icon-fallback "  ")
-    (add-hook! 'treemacs-mode-hook :append
-      (defun my/treemacs-load-minimal-theme ()
-        (treemacs-load-theme "my/minimal")))
-    (treemacs-create-theme "my/minimal"
-      :icon-directory (treemacs-join-path treemacs-dir "icons/default")
-      :config
-      (progn
-        ;; Root
-        (treemacs-create-icon :file "vsc/root-closed.png"   :extensions (root-closed) :fallback "")
-        (treemacs-create-icon :file "vsc/root-open.png"     :extensions (root-open)   :fallback "")
+(if (getenv "SSH_CLIENT")
+    ;; Prevent treemacs from using icons when using Emacs over SSH
+    (progn
+      (setq treemacs-no-png-images t
+            doom-themes-treemacs-theme "eeowaa-minimal" ;; REVIEW This is not taking effect
+            lsp-treemacs-theme "eeowaa-minimal") ;; REVIEW This is not taking effect
 
-        ;; Directory
-        (treemacs-create-icon :file "vsc/dir-closed.png"    :extensions (dir-closed)  :fallback (propertize "+ " 'face 'treemacs-term-node-face))
-        (treemacs-create-icon :file "vsc/dir-open.png"      :extensions (dir-open)    :fallback (propertize "- " 'face 'treemacs-term-node-face))
+      (after! treemacs-icons
+        ;; Treemacs doesn't know when we are using SSH
+        (defadvice! my/treemacs--no-images-a (&rest _)
+          :override '(treemacs--is-image-creation-impossible?
+                      treemacs--is-image-creation-impossible?--inliner)
+          t)
 
-        ;; Tag
-        (treemacs-create-icon :file "tags-leaf.png"         :extensions (tag-leaf)    :fallback (propertize "• " 'face 'font-lock-constant-face))
-        (treemacs-create-icon :file "tags-open.png"         :extensions (tag-open)    :fallback (propertize "▸ " 'face 'font-lock-string-face))
-        (treemacs-create-icon :file "tags-closed.png"       :extensions (tag-closed)  :fallback (propertize "▾ " 'face 'font-lock-string-face))
+        ;; Always use two spaces for file icons
+        ;; FIXME: I always have to set `treemacs-icon-fallback' in the buffer
+        ;;  (defadvice! my/treemacs--no-icons-a (&rest _)
+        ;;    :override '(treemacs-icon-for-file
+        ;;                treemacs-icon-for-file--inliner
+        ;;                treemacs-icon-for-mode
+        ;;                treemacs-icon-for-mode--inliner)
+        ;;    treemacs-icon-fallback)
+        (setq treemacs-icon-fallback "  ")
+        (setq-default treemacs-icon-fallback "  ")
+        (setq-hook! 'treemacs-mode-hook treemacs-icon-fallback "  ")
+        (add-hook! 'treemacs-mode-hook :append
+          (defun my/treemacs-load-minimal-theme ()
+            (treemacs-load-theme "eeowaa-minimal")))))
 
-        ;; Status
-        (treemacs-create-icon :file "error.png"             :extensions (error)       :fallback (propertize "• " 'face 'font-lock-string-face))
-        (treemacs-create-icon :file "warning.png"           :extensions (warning)     :fallback (propertize "• " 'face 'font-lock-string-face))
-        (treemacs-create-icon :file "info.png"              :extensions (info)        :fallback (propertize "• " 'face 'font-lock-string-face))
+  ;; Use a custom Treemacs theme
+  (setq doom-themes-treemacs-theme "eeowaa-nerd-icons"
+        lsp-treemacs-theme "eeowaa-nerd-icons")
+  (add-hook! 'treemacs-mode-hook :append
+    (defun my/treemacs-load-nerd-theme ()
+      (treemacs-load-theme "eeowaa-nerd-icons"))))
 
-        ;; File
-        (treemacs-create-icon :file "txt.png"               :extensions (fallback)    :fallback "~ ")))))
-        ;; (treemacs-create-icon :file "txt.png"               :extensions (fallback))))))
-;;  (defadvice! my/treemacs--no-icons-a (&rest _)
-;;    :override '(treemacs-icon-for-file
-;;                treemacs-icon-for-file--inliner
-;;                treemacs-icon-for-mode
-;;                treemacs-icon-for-mode--inliner)
-;;    treemacs-icon-fallback)))
+;; Use proper indentation for the environment
+(setq treemacs-indentation (if initial-window-system 3 2))
 
 ;; REVIEW Where is this supposed to happen?
 ;; (add-hook 'doom-load-theme-hook #'doom-themes-treemacs-config))
