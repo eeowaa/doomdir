@@ -783,6 +783,19 @@ with special dedication semantics."
       (prog1 t (message "Window is strongly dedicated"))
     (prog1 nil (message "Window is no longer dedicated"))))
 
+(defvar my/toggle-window-splitting--restore-function #'split-window-sensibly)
+(defun my/toggle-window-splitting ()
+  "Toggle the ability to split most windows."
+  (interactive)
+  (if (eq split-window-preferred-function #'ignore)
+      (prog1 t
+        (setq split-window-preferred-function my/toggle-window-splitting--restore-function)
+        (message "Window splitting has been globally restored"))
+    (prog1 nil
+      (setq my/toggle-window-splitting--restore-function split-window-preferred-function
+            split-window-preferred-function #'ignore)
+      (message "Window splitting has been globally disabled"))))
+
 (define-key! evil-window-map
   ;; replaces `+workspace/close-window-or-workspace'
   "d" #'my/dedicate-window-temporarily
@@ -12241,6 +12254,7 @@ even when there are only two frames. Let's fix that.
        :desc "Menu bar"              "M"   #'menu-bar-mode
        :desc "Overwrite"             "o"   #'overwrite-mode
        :desc "Truncate lines"        "t"   #'toggle-truncate-lines
+       :desc "Window splitting"      "S"   #'my/toggle-window-splitting
        :desc "Tab bar"               "T"   #'tab-bar-mode
        :desc "Visual fill column"    "|"   #'visual-fill-column-mode
        :desc "Page break lines"      "C-l" #'page-break-lines-mode
