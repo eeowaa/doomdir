@@ -7155,7 +7155,7 @@ it doesn't want to install user-contributed docsets. References:
 + ~dash-docs-install-user-docset~
   - https://github.com/roberth-k/dash-docset-terraform
 
-** lsp [5/14]
+** lsp [6/15]
 *** COMMENT Documentation
 + [[doom-modules:tools/lsp/README.org][tools/lsp module documentation]]
 + [[doom:.local/straight/repos/lsp-mode/README.md][lsp-mode package README]]
@@ -7352,8 +7352,21 @@ that instead.
   (setq my/lsp-ui-imenu-text-scale -1)
   (after! lsp-ui-imenu
     (defun my/lsp-ui-imenu-text-scale-h ()
-      (text-scale-increase my/lsp-ui-imenu-text-scale))
+      (text-scale-set my/lsp-ui-imenu-text-scale))
     (add-hook 'lsp-ui-imenu-mode-hook #'my/lsp-ui-imenu-text-scale-h)))
+#+end_src
+
+*** DONE [#C] Prevent decreasing text scale too much in =lsp-treemacs= buffers :hack:bug:
+The ~lsp-treemacs-render~ function calls ~text-scale-increase~ when it should
+really be calling ~text-scale-set~. The result is that the text scale is
+increased or decreased by double the amount specified in ~treemacs-text-scale~.
+
+#+begin_src emacs-lisp :tangle yes
+(after! lsp-treemacs-generic
+  (defadvice! my/lsp-treemacs-render--text-scale (fn &rest args)
+    :around #'lsp-treemacs-render
+    (letf! ((#'text-scale-increase #'text-scale-set))
+      (apply fn args))))
 #+end_src
 
 *** LOOP [#C] Do not display code actions in the modeline :bug:

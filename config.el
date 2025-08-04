@@ -2236,8 +2236,14 @@ This variable should be set by `my/lsp-ui-set-delay'.")
   (setq my/lsp-ui-imenu-text-scale -1)
   (after! lsp-ui-imenu
     (defun my/lsp-ui-imenu-text-scale-h ()
-      (text-scale-increase my/lsp-ui-imenu-text-scale))
+      (text-scale-set my/lsp-ui-imenu-text-scale))
     (add-hook 'lsp-ui-imenu-mode-hook #'my/lsp-ui-imenu-text-scale-h)))
+
+(after! lsp-treemacs-generic
+  (defadvice! my/lsp-treemacs-render--text-scale (fn &rest args)
+    :around #'lsp-treemacs-render
+    (letf! ((#'text-scale-increase #'text-scale-set))
+      (apply fn args))))
 
 (setq lsp-modeline-code-actions-segments nil)
 
