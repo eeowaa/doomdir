@@ -2477,6 +2477,8 @@ See also: `ts-fold-summary--get'."
 (setq lsp-xml-jar-file
       (expand-file-name "xmlls/org.eclipse.lemminx-uber.jar" lsp-server-install-dir))
 
+(add-to-list 'auto-mode-alist '("/CODEOWNERS\\(?:\\.md\\)?\\'" . conf-mode))
+
 (setq-hook! 'emacs-lisp-mode-hook
   eldoc-idle-delay 0.1)
 

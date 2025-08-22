@@ -8533,7 +8533,7 @@ I would rather use ~use-package-hook!~ than rewrite the whole ~use-package!~
 declaration, but I don't know if/how that is possible, because ~:general~ is
 used instead of ~:config~ to specify the keybinding.
 
-** data [3/3]
+** data [4/4]
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -8598,6 +8598,11 @@ configuration unless I am disappointed when editing XML.
 #+begin_src emacs-lisp :tangle yes
 (setq lsp-xml-jar-file
       (expand-file-name "xmlls/org.eclipse.lemminx-uber.jar" lsp-server-install-dir))
+#+end_src
+
+*** DONE [#C] Add basic support for CODEOWNERS files :feat:
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'auto-mode-alist '("/CODEOWNERS\\(?:\\.md\\)?\\'" . conf-mode))
 #+end_src
 
 ** dart [0/0] :ARCHIVE:
