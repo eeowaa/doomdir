@@ -6699,14 +6699,14 @@ sudo dnf -y install editorconfig
 #+begin_src emacs-lisp :tangle yes
 (after! editorconfig
   (add-to-list 'editorconfig-exclude-regexps
-               "/\\(?:\\(?:COMMIT\\|TAG\\)_EDIT\\|MERGE_\\)MSG\\'"))
+               "/\\(?:\\(?:COMMIT\\|TAG\\|NOTES\\)_EDIT\\|MERGE_\\)MSG\\'"))
 #+end_src
 
 It is also a good idea to add the following entry to project-specific
 editorconfig files ([[https://stackoverflow.com/questions/2290016/git-commit-messages-50-72-formatting][reference]]):
 
 #+begin_src editorconfig-conf :tangle no
-[COMMIT_EDITMSG,TAG_EDITMSG,MERGE_MSG]
+[COMMIT_EDITMSG,TAG_EDITMSG,NOTES_EDITMSG,MERGE_MSG]
 max_line_length = 70
 #+end_src
 

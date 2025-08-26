@@ -106,7 +106,7 @@
     ;; Magit > Interactive edits
     (buffer-group-side-window-setup
      (buffer-group-define magit-edit
-       `(:names ("^\\(?:\\(?:COMMIT\\|TAG\\)_EDIT\\|MERGE_\\)MSG")))
+       `(:names ("^\\(?:\\(?:COMMIT\\|TAG\\|NOTES\\)_EDIT\\|MERGE_\\)MSG")))
      '((side . bottom) (slot . 1)))
 
     ;; Magit > Interactive selections

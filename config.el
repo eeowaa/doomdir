@@ -2005,7 +2005,7 @@ which causes problems even if there is no existing buffer."
 
 (after! editorconfig
   (add-to-list 'editorconfig-exclude-regexps
-               "/\\(?:\\(?:COMMIT\\|TAG\\)_EDIT\\|MERGE_\\)MSG\\'"))
+               "/\\(?:\\(?:COMMIT\\|TAG\\|NOTES\\)_EDIT\\|MERGE_\\)MSG\\'"))
 
 (defvar-local my/linked-buffer nil
   "The buffer that `my/send-region' sends text to.")
