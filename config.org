@@ -2071,6 +2071,18 @@ Having trouble with ace-window
 Found a potential fix for vimish-tab tab label updating
   Look for "HACK" comment in doom-modeline package
   Look for "TODO" or "FIXME" comment in vimish-tab package
+
+Note that Emacs does not have a primitive way to get a window number.
+Here is a workaround:
+
+(defun my/window-number (&optional window)
+  "Return the number of the current window as a string."
+  (let* ((window-obj (or window (selected-window)))
+         (window-str (format "%s" window-obj))
+         (window-num (string-match "#<window \\([0-9]+\\) on" window-str)))
+    (if window-num
+        (match-string 1 window-str)
+      (error "No window number found"))))
 #+end_src
 
 *** STRT [#A] Remove the filename from the modeline :tweak:hack:
