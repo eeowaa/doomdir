@@ -1020,7 +1020,7 @@ works even when `global-diff-hl-mode' is disabled.")
                   (bound-and-true-p diff-hl-mode))
 
             ;; Remove distractions
-            (setq display-line-numbers nil)
+            (display-line-numbers-mode -1)
             (hl-line-mode -1)
             (column-highlight-mode -1)
             (display-fill-column-indicator-mode -1)
@@ -1030,7 +1030,9 @@ works even when `global-diff-hl-mode' is disabled.")
             (diff-hl-mode -1))
 
         ;; Restore previous state
-        (setq display-line-numbers my/zen--old-display-line-numbers)
+        (if my/zen--old-display-line-numbers
+            (let ((display-line-numbers-type my/zen--old-display-line-numbers))
+              (display-line-numbers-mode)))
         (if my/zen--old-hl-line-mode (hl-line-mode +1))
         (if my/zen--old-column-highlight-mode (column-highlight-mode +1))
         (if my/zen--old-display-fill-column-indicator-mode (display-fill-column-indicator-mode +1))
@@ -3260,9 +3262,6 @@ This is a list of lists, not a list of cons cells.")
 
 (put 'lsp-yaml-schemas 'safe-local-variable #'always)
 
-(setq-hook! 'yaml-mode-hook
-  display-line-numbers t)
-
 (when (modulep! :tools tree-sitter)
   (eeowaa-add-to-exclusion-list +tree-sitter-hl-enabled-modes 'yaml-mode))
 
@@ -3486,8 +3485,8 @@ This is a list of lists, not a list of cons cells.")
 
 (remove-hook 'text-mode-hook #'display-line-numbers-mode)
 
-(setq-hook! '(lisp-interaction-mode-hook doom-sandbox-emacs-lisp-mode-hook)
-  display-line-numbers nil)
+(add-hook! (lisp-interaction-mode doom-sandbox-emacs-lisp-mode)
+  (display-line-numbers-mode -1))
 
 (defun my/toggle-line-numbers ()
   "Toggle line numbers.
@@ -3498,10 +3497,12 @@ and uses visual instead."
   (interactive)
   (cond
    ((not display-line-numbers)
-    (setq display-line-numbers t)
+    (let ((display-line-numbers-type t))
+      (display-line-numbers-mode +1)
+      (setq display-line-numbers t)) ;; workaround for `my/inhibit-line-numbers-globally'
     (message "Switched to normal line numbers"))
    ((memq display-line-numbers '(visual relative))
-    (setq display-line-numbers nil)
+    (display-line-numbers-mode -1)
     (message "Switched to disabled line numbers"))
    (visual-line-mode
     (setq display-line-numbers 'visual)
@@ -3561,6 +3562,58 @@ and uses visual instead."
     (cond ((> frame-count 2) (call-interactively fn))
           ((= frame-count 2) (other-frame 1))
           (t (message "Fewer than 2 visible frames")))))
+
+(defvar my/inhibit-line-numbers-globally nil)
+
+(defun my/inhibit-line-numbers-h ()
+  (unless (bound-and-true-p my/inhibited-display-line-numbers)
+    (setq-local my/inhibited-display-line-numbers display-line-numbers))
+  (unless (bound-and-true-p my/inhibited-display-line-numbers-mode)
+    (setq-local my/inhibited-display-line-numbers-mode display-line-numbers-mode))
+  (setq display-line-numbers nil))
+
+(defun my/inhibit-line-numbers-globally ()
+  (interactive)
+
+  ;; Disable line numbers for all current buffers
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (setq-local my/inhibited-display-line-numbers display-line-numbers
+                  my/inhibited-display-line-numbers-mode display-line-numbers-mode)
+      (display-line-numbers-mode -1)))
+
+  ;; Disable global-display-line-numbers-mode
+  (global-display-line-numbers-mode -1)
+
+  ;; Nullify the effects of `display-line-numbers-mode'
+  (add-hook 'display-line-numbers-mode-hook #'my/inhibit-line-numbers-h 100)
+
+  (setq my/inhibit-line-numbers-globally t)
+  (message "Use `my/restore-line-numbers-globally' to allow line numbers"))
+
+(defun my/restore-line-numbers-globally ()
+  (interactive)
+  (if (not my/inhibit-line-numbers-globally)
+      (message "Line numbers are not globally inhibited (nothing to restore)")
+
+    ;; Allow `display-line-numbers-mode' to work again
+    (remove-hook 'display-line-numbers-mode-hook #'my/inhibit-line-numbers-h)
+
+    ;; Restore line numbers to previous state (if not already displayed)
+    (dolist (buffer (buffer-list))
+      (with-current-buffer buffer
+        (if (and (not display-line-numbers-mode)
+                 (bound-and-true-p my/inhibited-display-line-numbers-mode))
+            (let ((display-line-numbers-type
+                   (or display-line-numbers
+                       (bound-and-true-p my/inhibited-display-line-numbers))))
+              (display-line-numbers-mode +1))
+          (when (and (not display-line-numbers)
+                     (bound-and-true-p my/inhibited-display-line-numbers))
+            (setq display-line-numbers my/inhibited-display-line-numbers)))))
+
+    (setq my/inhibit-line-numbers-globally nil)
+    (message "Line numbers have been restored")))
 
 (defun my/toggle-sentence-end-double-space ()
   "Toggle 1 or 2 spaces at the end of sentences."

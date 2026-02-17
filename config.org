@@ -3533,7 +3533,7 @@ centering text within a window.
                   (bound-and-true-p diff-hl-mode))
 
             ;; Remove distractions
-            (setq display-line-numbers nil)
+            (display-line-numbers-mode -1)
             (hl-line-mode -1)
             (column-highlight-mode -1)
             (display-fill-column-indicator-mode -1)
@@ -3543,7 +3543,9 @@ centering text within a window.
             (diff-hl-mode -1))
 
         ;; Restore previous state
-        (setq display-line-numbers my/zen--old-display-line-numbers)
+        (if my/zen--old-display-line-numbers
+            (let ((display-line-numbers-type my/zen--old-display-line-numbers))
+              (display-line-numbers-mode)))
         (if my/zen--old-hl-line-mode (hl-line-mode +1))
         (if my/zen--old-column-highlight-mode (column-highlight-mode +1))
         (if my/zen--old-display-fill-column-indicator-mode (display-fill-column-indicator-mode +1))
@@ -11161,8 +11163,7 @@ saying that the implementation of ~lsp-yaml-download-schema-store-db~ is buggy.
 explicitly enable line numbers.
 
 #+begin_src emacs-lisp :tangle yes
-(setq-hook! 'yaml-mode-hook
-  display-line-numbers t)
+(add-hook! 'yaml-mode-hook #'display-line-numbers-mode)
 #+end_src
 
 *** STRT [#C] Display indent guides in YAML mode :tweak:
@@ -12034,7 +12035,7 @@ This can be done with ~#+INCLUDE~ directives. Doing so might make tangling
 faster, but currently I don't have any problems with performance. If and when I
 start to notice a problem, I'll revisit this item.
 
-** default [11/12]
+** default [12/13]
 #+begin_quote
 This module provides a set of reasonable defaults.
 #+end_quote
@@ -12077,6 +12078,52 @@ describing where all invocations of a key sequence is.
   "C-c" #'eeowaa-find-command)  ;; replaces `describe-coding-system' b/c I never use it
 #+end_src
 
+*** OKAY [#A] Prevent the =which-key= popop from "bouncing" :bug:doc:
+:LOGBOOK:
+- Note taken on [2023-01-22 Sun 16:48] \\
+  I have set ~which-key-popup-type~ to ~minibuffer~ for compatibility with my new
+  window management system (powered by my custom =:ui buffer-group= module). This
+  had the incidental benefit of "fixing" the window bouncing, although the problem
+  would probably still exist for me if I were to go back to Doom's way of
+  displaying the =which-key= popup window.
+:END:
+**** Description
+- Sometimes the window overshoots its height and settles back down to where it
+  should be. This is an annoying visual distraction.
+- The problem resides either within Doom's popup system or Emacs' side window
+  system, and only seems to happen when the ~window-height~ or ~size~ element of
+  ~display-buffer-alist~ or Doom's corresponding ~+popup--display-buffer-alist~
+  is set a to a resize function such as ~fit-window-to-buffer~ or Doom's
+  ~+popup-shrink-to-fit~.
+- Here is the function call sequence for displaying =which-key= buffers:
+  1. ~(which-key--create-buffer-and-show)~
+  2. ~(which-key--show-page)~
+  3. ~(which-key--show-popup act-popup-dim)~
+  4. ~(funcall which-key-custom-show-popup-function act-popup-dim)~
+     - lambda defined in =~/.config/emacs/modules/ui/popup/+hacks.el=
+  5. ~(which-key--show-buffer-side-window act-popup-dim)~
+  6. ~(+popup-display-buffer-stacked-side-window-fn ...)~
+     - overrides ~display-buffer-in-side-window~
+     - alist defined in ~which-key-custom-show-popup-function~ lambda and in
+       ~which-key--show-buffer-side-window~:
+       #+begin_src emacs-lisp :tangle no
+       `((vslot . -9999)
+         (select . t)
+         (window-width .  ,which-key--fit-buffer-to-window-horizontally)
+         (window-height . (lambda (w) (fit-window-to-buffer w nil 1)))
+         (side . ,which-key-side-window-location)
+         (slot . ,which-key-side-window-slot))
+       #+end_src
+  7. ~(window--display-buffer)~
+
+**** Debugging ideas
+- Use the Emacs debugger to step through
+  ~+popup-display-buffer-stacked-side-window-fn~ when it is called. You should
+  see the =which-key= window displayed at a taller height before being shrunk.
+- Disable the =:ui popup= module and try to replicate the issue (if you can't,
+  then the problem probably resides in Doom and not Emacs)
+- Try experimenting with ~which-key-side-window-*-height~ variables
+
 *** DONE [#B] Do not display line numbers in text mode :tweak:
 #+begin_src emacs-lisp :tangle yes
 (remove-hook 'text-mode-hook #'display-line-numbers-mode)
@@ -12084,8 +12131,8 @@ describing where all invocations of a key sequence is.
 
 *** DONE [#B] Do not display line numbers in lisp interaction mode :tweak:
 #+begin_src emacs-lisp :tangle yes
-(setq-hook! '(lisp-interaction-mode-hook doom-sandbox-emacs-lisp-mode-hook)
-  display-line-numbers nil)
+(add-hook! (lisp-interaction-mode doom-sandbox-emacs-lisp-mode)
+  (display-line-numbers-mode -1))
 #+end_src
 
 *** DONE [#B] Normalize the behavior of toggling line numbers :tweak:bug:
@@ -12108,10 +12155,12 @@ and uses visual instead."
   (interactive)
   (cond
    ((not display-line-numbers)
-    (setq display-line-numbers t)
+    (let ((display-line-numbers-type t))
+      (display-line-numbers-mode +1)
+      (setq display-line-numbers t)) ;; workaround for `my/inhibit-line-numbers-globally'
     (message "Switched to normal line numbers"))
    ((memq display-line-numbers '(visual relative))
-    (setq display-line-numbers nil)
+    (display-line-numbers-mode -1)
     (message "Switched to disabled line numbers"))
    (visual-line-mode
     (setq display-line-numbers 'visual)
@@ -12173,52 +12222,6 @@ and uses visual instead."
                   which-key-replacement-alist))))
 #+end_src
 
-*** OKAY [#A] Prevent the =which-key= popop from "bouncing" :bug:doc:
-:LOGBOOK:
-- Note taken on [2023-01-22 Sun 16:48] \\
-  I have set ~which-key-popup-type~ to ~minibuffer~ for compatibility with my new
-  window management system (powered by my custom =:ui buffer-group= module). This
-  had the incidental benefit of "fixing" the window bouncing, although the problem
-  would probably still exist for me if I were to go back to Doom's way of
-  displaying the =which-key= popup window.
-:END:
-**** Description
-- Sometimes the window overshoots its height and settles back down to where it
-  should be. This is an annoying visual distraction.
-- The problem resides either within Doom's popup system or Emacs' side window
-  system, and only seems to happen when the ~window-height~ or ~size~ element of
-  ~display-buffer-alist~ or Doom's corresponding ~+popup--display-buffer-alist~
-  is set a to a resize function such as ~fit-window-to-buffer~ or Doom's
-  ~+popup-shrink-to-fit~.
-- Here is the function call sequence for displaying =which-key= buffers:
-  1. ~(which-key--create-buffer-and-show)~
-  2. ~(which-key--show-page)~
-  3. ~(which-key--show-popup act-popup-dim)~
-  4. ~(funcall which-key-custom-show-popup-function act-popup-dim)~
-     - lambda defined in =~/.config/emacs/modules/ui/popup/+hacks.el=
-  5. ~(which-key--show-buffer-side-window act-popup-dim)~
-  6. ~(+popup-display-buffer-stacked-side-window-fn ...)~
-     - overrides ~display-buffer-in-side-window~
-     - alist defined in ~which-key-custom-show-popup-function~ lambda and in
-       ~which-key--show-buffer-side-window~:
-       #+begin_src emacs-lisp :tangle no
-       `((vslot . -9999)
-         (select . t)
-         (window-width .  ,which-key--fit-buffer-to-window-horizontally)
-         (window-height . (lambda (w) (fit-window-to-buffer w nil 1)))
-         (side . ,which-key-side-window-location)
-         (slot . ,which-key-side-window-slot))
-       #+end_src
-  7. ~(window--display-buffer)~
-
-**** Debugging ideas
-- Use the Emacs debugger to step through
-  ~+popup-display-buffer-stacked-side-window-fn~ when it is called. You should
-  see the =which-key= window displayed at a taller height before being shrunk.
-- Disable the =:ui popup= module and try to replicate the issue (if you can't,
-  then the problem probably resides in Doom and not Emacs)
-- Try experimenting with ~which-key-side-window-*-height~ variables
-
 *** DONE [#B] Improve interactive frame selection :feat:
 ~select-frame-by-name~ (bound to =SPC o F=) always prompts for a frame name,
 even when there are only two frames. Let's fix that.
@@ -12231,6 +12234,75 @@ even when there are only two frames. Let's fix that.
     (cond ((> frame-count 2) (call-interactively fn))
           ((= frame-count 2) (other-frame 1))
           (t (message "Fewer than 2 visible frames")))))
+#+end_src
+
+*** DONE [#B] Allow line numbers to be globally inhibited :feat:
+Sometimes line numbers just get in the way, especially on small displays.
+Unfortunately, there is no native way to globally inhibit line numbers. I've
+implemented a workaround that works well enough for now.
+
+To disable line numbers globally, call =M-x my/inhibit-line-numbers-globally=.
+To restore line numbers, call =M-x my/restore-line-numbers-globally=. While
+line numbers are globally disabled, you can still set ~display-line-numbers~
+via =SPC t l=, which sets an internal C variable that is /actually/ used by
+Emacs to control the display of line numbers per buffer.
+
+Going forward, make sure to use ~display-line-numbers-mode~ instead of setting
+~display-line-numbers~ directly, especially in hooks. This will ensure that
+global inhibition/restoration of line numbers works as expected.
+
+#+begin_src emacs-lisp :tangle yes
+(defvar my/inhibit-line-numbers-globally nil)
+
+(defun my/inhibit-line-numbers-h ()
+  (unless (bound-and-true-p my/inhibited-display-line-numbers)
+    (setq-local my/inhibited-display-line-numbers display-line-numbers))
+  (unless (bound-and-true-p my/inhibited-display-line-numbers-mode)
+    (setq-local my/inhibited-display-line-numbers-mode display-line-numbers-mode))
+  (setq display-line-numbers nil))
+
+(defun my/inhibit-line-numbers-globally ()
+  (interactive)
+
+  ;; Disable line numbers for all current buffers
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (setq-local my/inhibited-display-line-numbers display-line-numbers
+                  my/inhibited-display-line-numbers-mode display-line-numbers-mode)
+      (display-line-numbers-mode -1)))
+
+  ;; Disable global-display-line-numbers-mode
+  (global-display-line-numbers-mode -1)
+
+  ;; Nullify the effects of `display-line-numbers-mode'
+  (add-hook 'display-line-numbers-mode-hook #'my/inhibit-line-numbers-h 100)
+
+  (setq my/inhibit-line-numbers-globally t)
+  (message "Use `my/restore-line-numbers-globally' to allow line numbers"))
+
+(defun my/restore-line-numbers-globally ()
+  (interactive)
+  (if (not my/inhibit-line-numbers-globally)
+      (message "Line numbers are not globally inhibited (nothing to restore)")
+
+    ;; Allow `display-line-numbers-mode' to work again
+    (remove-hook 'display-line-numbers-mode-hook #'my/inhibit-line-numbers-h)
+
+    ;; Restore line numbers to previous state (if not already displayed)
+    (dolist (buffer (buffer-list))
+      (with-current-buffer buffer
+        (if (and (not display-line-numbers-mode)
+                 (bound-and-true-p my/inhibited-display-line-numbers-mode))
+            (let ((display-line-numbers-type
+                   (or display-line-numbers
+                       (bound-and-true-p my/inhibited-display-line-numbers))))
+              (display-line-numbers-mode +1))
+          (when (and (not display-line-numbers)
+                     (bound-and-true-p my/inhibited-display-line-numbers))
+            (setq display-line-numbers my/inhibited-display-line-numbers)))))
+
+    (setq my/inhibit-line-numbers-globally nil)
+    (message "Line numbers have been restored")))
 #+end_src
 
 *** STRT [#B] Add additional toggle keybindings :tweak:module:
