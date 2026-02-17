@@ -1979,11 +1979,182 @@ This module adds a minimap to the right side of Emacs, similar to the feature
 found in many other editors.
 #+end_quote
 
-** modeline [4/4]
+** modeline [4/5]
 #+begin_quote
 This module provides an Atom-inspired, minimalistic modeline for Doom Emacs,
 powered by [[https://github.com/seagle0128/doom-modeline][the doom-modeline package]] (where you can find screenshots).
 #+end_quote
+
+*** COMMENT Documentation
+#+begin_src text
+Content of mode lines are getting truncated due to long file names
+Attempts to abbreviate paths or just use base name did not work:
+  (setq doom-modeline-buffer-file-name-style 'file-name)
+  (setq doom-modeline-buffer-name-name-fundction #'abbreviate-file-name)
+Still do not understand why this is the case
+Looked into configuration of :ui modeline module (SPC h d m)
+Dug into doom-modeline package:
+  doom-modeline-core.el
+    doom-modeline-set-modeline
+      mode-line-format ***
+        doom-modeline
+          doom-modeline-def-modeline (definition)
+            doom-modeline-def-segment (definition)
+            doom-modeline--prepare-segments
+              doom-modeline-fn-alist
+              doom-modeline-var-alist
+  doom-modeline-segments.el
+    doom-modeline-def-segment (invocations)
+  doom-modeline.el
+    doom-modeline-def-modeline (invocations)
+Found some other things I would like to do with the mode line:
+  Remove file name altogether
+    Already shown in tab-line tabs via vimish-tab
+    Can just display the project for more context
+  Display the project
+    doom-modeline-project-name
+      doom-modeline--project-name
+    doom-modeline-persp-icon
+    doom-modeline-workspace-name
+  Display window numbers
+    Both for ace-window selection and debugging
+    Can modify existing constructs
+      doom-modeline-segments.el
+        ace-window-display-mode-hook
+        doom-modeline-def-segment window-number
+        doom-modeline-aw-update
+      Just display ace-window indicator when needed
+    Can just define a new segment and modeline with the segment
+      Display internal window number
+      Display other window properties
+        Dedicated (?) => enable even when not debugging
+          my/dedicate-window-temporarily
+          my/toggle-window-dedicated
+        Side window (?)
+        Vimish-tab properties (?)
+      Enable only just for debugging of windows
+        Define native function to modify modeline
+          See how ace-window does this (ace-window-display-mode)
+          Support doom-modeline through an extention
+        Display text representation of window tree:
+          Idea:
+            Buttons can be used to navigate to windows
+            Non-leaf nodes represent window objects
+            Leafs are window properties
+          Internal functions:
+            window-tree
+            walk-window-tree
+          External packages:
+            https://melpa.org/#/treeview (visualization library)
+            https://melpa.org/#/dir-treeview (reference library usage)
+            https://melpa.org/#/treepy (tree walking library)
+          Doom config:
+            lisp/eeowaa-debug.el (could put code here)
+            lisp/cli-help.el (for creation of buttons)
+    Would also like to do this for special modelines in side windows
+      Treemacs and Imenu use simplified modelines
+      I will need to use doom-modeline-def-modeline for those windows
+  Remove buffer size from modeline
+    Not something I usually care about; can figure out via `C-x ='
+    Part of the matches segment
+    Can disable with size-indication-mode
+  Put XX%/Top/Bot to the left of <line>:<col>
+    The width of XX%/Top/Bot is fixed, unlike <line>:<col>
+    I like having fixed-width segments towards the modeline edges
+    Part of buffer-position segment (should create my own)
+Having trouble with ace-window
+  Evil-mode (and other all Emacs input) breaks after C-g
+    I cannot get back to any sort of functional state
+    Need to kill the tmux pane
+  Background is not dimmed anymore during window selection
+  Should enable prompt in minibuffer during selection
+Found a potential fix for vimish-tab tab label updating
+  Look for "HACK" comment in doom-modeline package
+  Look for "TODO" or "FIXME" comment in vimish-tab package
+#+end_src
+
+*** STRT [#A] Remove the filename from the modeline :tweak:hack:
+Using =vimish-tab=, I already have universal visual indication of buffer names
+(file names for file-visiting buffers), so no need to clutter up the modeline.
+
+*NOTE*: A lot of modeline improvements have been made beyond the original goal.
+See the *Documentation* section above and notes below.
+
+#+begin_src emacs-lisp :tangle yes
+;; HACK: I redefine `doom-modeline-format--main' from its original value (see below)
+;; because `doom-modeline' is not responding to changes to `doom-modeline-buffer-name'
+;; as it should. Other segments have been removed and rearranged, as well.
+;;
+;;   (doom-modeline-def-modeline 'main
+;;     '(eldoc bar workspace-name window-number modals matches follow buffer-info remote-host buffer-position word-count parrot selection-info)
+;;     '(compilation objed-state misc-info project-name persp-name battery grip irc mu4e gnus github debug repl lsp minor-modes input-method indent-info buffer-encoding major-mode process vcs check time))
+;;
+
+;; Do not display buffer size in `doom-modeline-segment--matches'.
+(setq size-indication-mode nil)
+
+;; [1/2] Always display the project in `doom-modeline-segment--project-name'.
+(setq doom-modeline-project-name t)
+
+(after! doom-modeline
+
+  ;; [2/2] Always display the project in `doom-modeline-segment--project-name'.
+  (add-to-list 'doom-modeline-always-visible-segments 'project-name)
+
+  ;; Remove extra surrounding spaces
+  (doom-modeline-def-segment my/modals
+    "Displays modal editing states for `evil'."
+    (when doom-modeline-modal
+      (doom-modeline--evil)))
+
+  ;; Move percent before line/column and remove position scroller
+  (doom-modeline-def-segment my/buffer-position
+    "The buffer position information."
+    (let ((sep (doom-modeline-spc))
+          (face (doom-modeline-face))
+          (help-echo "Buffer percentage\n\
+  mouse-1: Display Line and Column Mode Menu")
+          (mouse-face 'doom-modeline-highlight)
+          (local-map mode-line-column-line-number-mode-map))
+      `(,sep
+
+        ;; Percent position
+        (doom-modeline-percent-position
+         ((:propertize ("" doom-modeline-percent-position)
+           face ,face
+           help-echo ,help-echo
+           mouse-face ,mouse-face
+           local-map ,local-map)
+          ,sep
+          ))
+
+        ;; Line and column
+        (:propertize
+         ((line-number-mode
+           (column-number-mode
+            (doom-modeline-column-zero-based
+             doom-modeline-position-column-line-format
+             ,(string-replace
+               "%c" "%C" (car doom-modeline-position-column-line-format)))
+            doom-modeline-position-line-format)
+           (column-number-mode
+            (doom-modeline-column-zero-based
+             doom-modeline-position-column-format
+             ,(string-replace
+               "%c" "%C" (car doom-modeline-position-column-format)))))
+          (doom-modeline-total-line-number
+           ,(and doom-modeline-total-line-number
+                 (format "/%d" (line-number-at-pos (point-max))))))
+         face ,face
+         help-echo ,help-echo
+         mouse-face ,mouse-face
+         local-map ,local-map)
+        ((or line-number-mode column-number-mode) ,sep))))
+
+  (doom-modeline-def-modeline 'main
+    '(bar window-number my/modals follow remote-host my/buffer-position matches selection-info)
+    '(compilation check misc-info repl lsp input-method buffer-encoding major-mode process project-name vcs)))
+#+end_src
 
 *** DONE [#B] Do not display buffer modification info for non-file buffers :tweak:
 #+begin_src emacs-lisp :tangle yes

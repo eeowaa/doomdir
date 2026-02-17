@@ -675,6 +675,80 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (setq +ligatures-in-modes '(org-mode)
       +ligatures-extras-in-modes '(org-mode))
 
+;; HACK: I redefine `doom-modeline-format--main' from its original value (see below)
+;; because `doom-modeline' is not responding to changes to `doom-modeline-buffer-name'
+;; as it should. Other segments have been removed and rearranged, as well.
+;;
+;;   (doom-modeline-def-modeline 'main
+;;     '(eldoc bar workspace-name window-number modals matches follow buffer-info remote-host buffer-position word-count parrot selection-info)
+;;     '(compilation objed-state misc-info project-name persp-name battery grip irc mu4e gnus github debug repl lsp minor-modes input-method indent-info buffer-encoding major-mode process vcs check time))
+;;
+
+;; Do not display buffer size in `doom-modeline-segment--matches'.
+(setq size-indication-mode nil)
+
+;; [1/2] Always display the project in `doom-modeline-segment--project-name'.
+(setq doom-modeline-project-name t)
+
+(after! doom-modeline
+
+  ;; [2/2] Always display the project in `doom-modeline-segment--project-name'.
+  (add-to-list 'doom-modeline-always-visible-segments 'project-name)
+
+  ;; Remove extra surrounding spaces
+  (doom-modeline-def-segment my/modals
+    "Displays modal editing states for `evil'."
+    (when doom-modeline-modal
+      (doom-modeline--evil)))
+
+  ;; Move percent before line/column and remove position scroller
+  (doom-modeline-def-segment my/buffer-position
+    "The buffer position information."
+    (let ((sep (doom-modeline-spc))
+          (face (doom-modeline-face))
+          (help-echo "Buffer percentage\n\
+  mouse-1: Display Line and Column Mode Menu")
+          (mouse-face 'doom-modeline-highlight)
+          (local-map mode-line-column-line-number-mode-map))
+      `(,sep
+
+        ;; Percent position
+        (doom-modeline-percent-position
+         ((:propertize ("" doom-modeline-percent-position)
+           face ,face
+           help-echo ,help-echo
+           mouse-face ,mouse-face
+           local-map ,local-map)
+          ,sep
+          ))
+
+        ;; Line and column
+        (:propertize
+         ((line-number-mode
+           (column-number-mode
+            (doom-modeline-column-zero-based
+             doom-modeline-position-column-line-format
+             ,(string-replace
+               "%c" "%C" (car doom-modeline-position-column-line-format)))
+            doom-modeline-position-line-format)
+           (column-number-mode
+            (doom-modeline-column-zero-based
+             doom-modeline-position-column-format
+             ,(string-replace
+               "%c" "%C" (car doom-modeline-position-column-format)))))
+          (doom-modeline-total-line-number
+           ,(and doom-modeline-total-line-number
+                 (format "/%d" (line-number-at-pos (point-max))))))
+         face ,face
+         help-echo ,help-echo
+         mouse-face ,mouse-face
+         local-map ,local-map)
+        ((or line-number-mode column-number-mode) ,sep))))
+
+  (doom-modeline-def-modeline 'main
+    '(bar window-number my/modals follow remote-host my/buffer-position matches selection-info)
+    '(compilation check misc-info repl lsp input-method buffer-encoding major-mode process project-name vcs)))
+
 (if initial-window-system
     ;; Just display an icon for file-visiting buffers
     (setq doom-modeline-highlight-modified-buffer-name nil)
