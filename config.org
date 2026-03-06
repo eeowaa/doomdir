@@ -4759,6 +4759,48 @@ of the current buffer."
 (global-set-key [remap font-lock-update] #'my/font-lock-update)
 #+end_src
 
+*** DONE [#C] Create and bind a command similar to Vim's =C-g= :feat:
+Vim outputs information about the current buffer when you press =C-g=
+(defined by the Vim option ~shortmess~). This normally consists of:
+
+1. The file path
+   - The file path is double-quoted
+   - The path is relative to the working directory if within it
+   - Tildes for home directories are not expanded
+   - If the buffer is not buffer-visiting, ~"[No Name]"~ is used
+2. A series of indicators about the buffer
+   - ~[New]~ if the buffer is file-visiting but has not yet been written
+   - ~[Modified]~ if the buffer has been modified since creation or last filesystem write
+     - [[help:not-modified]]
+     - help:buffer-modified-p
+   - ~[readonly]~ if the buffer is readonly
+     - help:read-only-mode
+     - help:buffer-read-only
+3. Information about the file
+   - Number of lines as ~X lines~
+     - help:count-lines
+   - Percentage into the file as ~--Y%--~
+
+I would like something similar to this for Emacs. The mode line is useful for
+information that I want /all the time/, but I don't want to clutter it up with
+information I only want /some of the time/.
+
+#+begin_src emacs-lisp :tangle yes
+(defun my/current-buffer-information ()
+  (interactive)
+  (let* ((filepath (if buffer-file-name (abbreviate-file-name buffer-file-name) "nil"))
+         (new (if (and buffer-file-name (not (file-exists-p buffer-file-name))) "[new]" ""))
+         (modified (if (buffer-modified-p) "[modified]" ""))
+         (readonly (if buffer-read-only "[readonly]" ""))
+         (space (if (zerop (length (format "%s%s%s" new modified readonly))) "" " "))
+         (lines (format "%d lines" (save-restriction
+                                     (widen)
+                                     (count-lines (point-min) (point-max))))))
+    (message "%S %s%s%s%s%s %S" filepath new modified readonly space lines (buffer-name))))
+
+(define-key! help-map "h" #'my/current-buffer-information)
+#+end_src
+
 *** STRT [#B] Create and bind a function to copy the last message written :feat:
 Although this mostly works as intended, I think it is slowing down Emacs.
 

@@ -1468,6 +1468,20 @@ of the current buffer."
 
 (global-set-key [remap font-lock-update] #'my/font-lock-update)
 
+(defun my/current-buffer-information ()
+  (interactive)
+  (let* ((filepath (if buffer-file-name (abbreviate-file-name buffer-file-name) "nil"))
+         (new (if (and buffer-file-name (not (file-exists-p buffer-file-name))) "[new]" ""))
+         (modified (if (buffer-modified-p) "[modified]" ""))
+         (readonly (if buffer-read-only "[readonly]" ""))
+         (space (if (zerop (length (format "%s%s%s" new modified readonly))) "" " "))
+         (lines (format "%d lines" (save-restriction
+                                     (widen)
+                                     (count-lines (point-min) (point-max))))))
+    (message "%S %s%s%s%s%s %S" filepath new modified readonly space lines (buffer-name))))
+
+(define-key! help-map "h" #'my/current-buffer-information)
+
 (defun my/zoomwin-toggle ()
   "Zoom or unzoom the selected window.
 If the current frame has multiple windows, delete other windows.
