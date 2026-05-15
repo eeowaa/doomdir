@@ -326,6 +326,9 @@ cpan install App::Git::Autofixup
 # Install prerequisites for `tools/nginx` module
 pipx install --python `which python3.10` nginx-language-server
 
+# Install prerequisites for `tools/terraform` module
+sudo dnf -y install terraform terraform-ls
+
 # Install prerequisites for `lang/cc` module
 
 ## GCC
@@ -489,6 +492,9 @@ sudo dnf -y install ditaa gnuplot pandoc graphviz sqlite
 pipx install --include-deps jupyter
 pipx inject jupyter ipykernel
 sudo dnf -y install zeromq-devel libstdc++-static
+
+# Create `org-directory` if missing
+mkdir -p ~/Documents/notes
 
 # Install prerequisites for `lang/python` module
 sudo dnf -y install python3 pipx

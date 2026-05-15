@@ -266,14 +266,15 @@ with special dedication semantics."
 (setq my/fonts '(("Iosevka Comfy Fixed" ;; Remove " Fixed" if you want ligatures
                   :variable-pitch "Iosevka Comfy Duo"
                   :serif "Iosevka Comfy Motion Fixed"
-                  :default-size 16)
+                  ;; :default-size 15)
+                  :default-size 14)
                  ("Source Code Pro"
-                  :default-size 22)
+                  :default-size 15)
                  ("Terminus"
                   :default-size 30)
                  ("Comic Mono"
                   :variable-pitch "Comic Neue"
-                  :default-size 24)))
+                  :default-size 16)))
 
 ;; Define a fuction to change the fonts
 (defun my/select-font (font &optional size)
@@ -299,7 +300,8 @@ When called interactively, reload the fonts in the current session."
   (and (interactive-p) (doom/reload-font)))
 
 ;; Set the font
-(my/select-font "Comic Mono")
+(my/select-font "Iosevka Comfy Fixed")
+;; (my/select-font "Comic Mono")
 
 ;; (add-hook 'doom-load-theme-hook #'doom-themes-treemacs-config)
 
@@ -687,12 +689,12 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 ;; Do not display buffer size in `doom-modeline-segment--matches'.
 (setq size-indication-mode nil)
 
-;; [1/2] Always display the project in `doom-modeline-segment--project-name'.
+;; Always display the project in `doom-modeline-segment--project-name' (part 1 of 2).
 (setq doom-modeline-project-name t)
 
 (after! doom-modeline
 
-  ;; [2/2] Always display the project in `doom-modeline-segment--project-name'.
+  ;; Always display the project in `doom-modeline-segment--project-name' (part 2 of 2).
   (add-to-list 'doom-modeline-always-visible-segments 'project-name)
 
   ;; Remove extra surrounding spaces
@@ -1998,6 +2000,9 @@ which causes problems even if there is no existing buffer."
 (after! ansible
   (pushnew! evil-normal-state-modes 'ansible-doc-module-mode))
 
+(after! projectile
+  (add-to-list 'projectile-project-root-files "ansible.cfg"))
+
 (map! :leader
       (:prefix-map ("o" . "open")
        :desc "Bitwarden vault" "v" #'bitwarden-list-all))
@@ -2465,6 +2470,377 @@ This variable should be set by `my/lsp-ui-set-delay'.")
         (:localleader
          :n "." #'rfc-mode-goto-section)))
 
+;; <https://emacs-lsp.github.io/lsp-mode/page/lsp-terraform-ls/>
+(when (modulep! :tools terraform +lsp)
+  (setq
+    ;; Use the official Hashicorp language server from Hashicorp
+    lsp-disabled-clients '(tfls)
+
+    ;; Enable reference counts
+    lsp-terraform-ls-enable-show-reference t)
+
+  ;; Set keybindings for LSP (reference existing LSP configurations)
+  (after! terraform-mode
+    (map! :map terraform-mode-map
+          :localleader
+          (:prefix ("l" . "LSP")
+           :desc "terraform init" "i" #'lsp-terraform-ls-init
+           :desc "terraform validate" "v" #'lsp-terraform-ls-validate
+           :desc "Providers widget" "p" #'lsp-terraform-ls-providers
+           :desc "Module calls widget" "m" #'lsp-terraform-ls-module-calls))))
+
+(after! terraform-mode
+  (add-hook! terraform-mode :append
+    (defun my/terraform-configure-lookup ()
+      (defadvice! my/terraform-lookup-references-a (fn &rest args)
+        :around #'+lookup/references
+        (if (eq major-mode 'terraform-mode)
+            (letf! ((defun my/terraform-lookup-resource-at-point-a (args)
+                      (list (my/terraform-resource-address-at-pos)))
+                    (defadvice #'+lookup-project-search-backend-fn :filter-args
+                               #'my/terraform-lookup-resource-at-point-a))
+              (apply fn args))
+          (apply fn args))))))
+
+(after! company-keywords
+  (add-to-list
+   'company-keywords-alist
+   '(terraform-mode
+     ;; Numeric functions
+     "abs" "cell" "floor" "log" "max" "min" "parseint" "pow" "signum"
+
+     ;; String functions
+     "chomp" "endswith" "format" "formatlist" "indent" "join" "lower" "regex"
+     "regexall" "replace" "split" "startswith" "strrev" "substr" "title" "trim"
+     "trimprefix" "trimsuffix" "trimspace" "upper"
+
+     ;; Collection functions
+     "alltrue" "anytrue" "chunklist" "coalesce" "coalescelist" "compact" "concat"
+     "contains" "distinct" "element" "flatten" "index" "keys" "length" "list"
+     "lookup" "map" "matchkeys" "merge" "one" "range" "reverse" "setintersection"
+     "setproduct" "setsubtract" "setunion" "slice" "sort" "sum" "transpose"
+     "values" "zipmap"
+
+     ;; Encoding functions
+     "base64decode" "base64encode" "base64gzip" "csvdecode" "jsondecode"
+     "jsonencode" "textdecodebase64" "textencodebase64" "urlencode" "yamldecode"
+     "yamlencode"
+
+     ;; Filesystem functions
+     "abspath" "dirname" "pathexpand" "basename" "file" "fileexists" "fileset"
+     "filebase64" "templatefile"
+
+     ;; Date and Time functions
+     "formatdate" "timeadd" "timecmp" "timestamp"
+
+     ;; Hash and Crypto functions
+     "base64sha256" "base64sha512" "bcrypt" "filebase64sha256" "filebase64sha512"
+     "filemd5" "filesha1" "filesha256" "filesha512" "filemd5" "filesha1"
+     "filesha256" "filesha512" "md5" "rsadecrypt" "sha1" "sha256" "sha512" "uuid"
+     "uuidv5"
+
+     ;; IP Network functions
+     "cidrhost" "cidrnetmast" "cidrsubnet" "cidrsubnets"
+
+     ;; Type Conversion functions
+     "can" "nonsensitive" "sensitive" "tobool" "tolist" "tomap" "tonumber" "toset"
+     "tostring" "try" "type")))
+
+(after! terraform-mode
+  (defgroup my/terraform nil
+    "Extended functionality for Terraform."
+    :group 'languages
+    :prefix "my/terraform-")
+
+  (defcustom my/terraform-executable (executable-find "terraform")
+    "The `terraform' executable used by my private functions."
+    :type '(file :must-match t)
+    :group 'my/terraform)
+
+  ;; NOTE I could just use Emac's built-in `json' library, but I would rather
+  ;; use query syntax that I can also use outside of Emacs.
+  (defcustom my/terraform-jq-executable (executable-find "jq")
+    "The `jq' executable used to query Terraform state."
+    :type '(file :must-match t)
+    :group 'my/terraform)
+
+  (defcustom my/terraform-state-buffer-name-format "*tfstate: %s*"
+    "Buffer name format string for Terraform state query results.
+Should include a single \"%s\" sequence to hold the resource address."
+    :type 'string
+    :group 'my/terraform)
+
+  (defcustom my/terraform-state-file "terraform.tfstate"
+    "The Terraform state file corresponding to the current buffer."
+    :local t
+    :type 'file
+    :group 'my/terraform)
+
+  (defun my/terraform--ensure-state-file ()
+    "Ensure the existence of `my/terraform-state-file'.
+Prompts the user to download the state file if missing. Once the
+state file has been pulled, the expanded file name of the file is
+returned if it exists, otherwise nil."
+    (if (file-exists-p my/terraform-state-file)
+        (expand-file-name my/terraform-state-file)
+      (let ((read-answer-short t))
+        (pcase
+            (save-window-excursion
+              (read-answer
+               "Could not find Terraform state file. How to proceed? "
+               `(("specify" ?s "specify a path to an existing state file")
+                 ("pull" ?p ,(format "pull the state file to %s" my/terraform-state-file))
+                 ("specify-and-pull" ?P "pull the state file to another path")
+                 ("quit" ?q "abort operation"))))
+          ("specify"
+           (setq my/terraform-state-file (read-file-name "Terraform state file: " nil nil t)))
+          ("pull"
+           (my/terraform-state-pull))
+          ("specify-and-pull"
+           (setq my/terraform-state-file (read-file-name "Terraform state file: "))
+           (my/terraform-state-pull))
+          ("quit" nil)))
+      (when (file-exists-p my/terraform-state-file)
+        (expand-file-name my/terraform-state-file))))
+
+  ;; TODO Pull state asynchronously via `make-process'
+  (defun my/terraform-state-pull ()
+    "Populate `my/terraform-state-file' with Terraform state."
+    (interactive)
+    (when (or (not (file-exists-p my/terraform-state-file))
+              (yes-or-no-p (format "Overwrite existing file (%s)? " my/terraform-state-file)))
+      (let* ((program my/terraform-executable)
+             (args '("state" "pull"))
+             (stdout (expand-file-name my/terraform-state-file))
+             (stderr (make-temp-file "emacs-" nil ".stderr"))
+             (exit-code nil)
+             (success-msg (format "Pulled Terraform state to %s" stdout))
+             (error-msg (format "Failed to pull Terraform state to %s" stdout))
+             (warning-type 'my/terraform)
+             (default-directory (or (projectile-project-root) default-directory)))
+        (unless (with-temp-buffer
+                  (when (zerop (setq exit-code
+                                     (apply #'call-process program nil (list t stderr) nil args)))
+                    (write-file stdout)
+                    (message success-msg)))
+          (with-temp-buffer
+            (insert (format "%s
+Command: %s
+Directory: %s
+Exit code: %d
+Standard error \"" error-msg (string-join (cons program args) " ") default-directory exit-code))
+            (insert-file-contents stderr)
+            (goto-char (point-max))
+            (insert "\"")
+            (display-warning warning-type (buffer-string) :error)))
+        (delete-file stderr))))
+
+  ;; TODO Add support for outputs
+  (defvar my/terraform--state-show-jq-filter "\
+.resources |
+map(select(
+    .mode == $mode and
+    .type == $type and
+    .name == $name
+)) |
+if $modpath == \"\" then
+    map(select(
+        has(\"module\") | not
+    ))[0]
+    .instances |
+    if (.[0] | has(\"index_key\")) then
+        map({
+            \"key\": .index_key,
+            \"value\": .attributes
+        }) |
+        from_entries
+    else
+        .[0].attributes
+    end
+else
+    map(
+        select(
+            has(\"module\") and
+            (.module | gsub(\"\\\\[.+?]\"; \"\")) == $modpath
+        ) |
+        .module as $m |
+        .instances |
+        if (.[0] | has(\"index_key\")) then
+            map({
+                \"key\": ($m + \".\" + .index_key),
+                \"value\": .attributes
+            })[]
+        else {
+            \"key\": $m,
+            \"value\": .[0].attributes
+        } end
+    ) |
+    from_entries
+end")
+
+  (defun my/terraform--parse-address (address)
+    "Return a list describing a Terraform resource ADDRESS.
+The list has the form (MODULE-PATH MODE TYPE NAME), where
+MODULE-PATH is the unkeyed module path, MODE is either `data' or
+`managed', TYPE is the resource type, and NAME is the resource
+name."
+    (save-match-data
+      (unless (string-match "\\`\\(?:\\(module\\..+\\)\\.\\)?\\(data\\.\\)?\\([^\\.]+\\)\\.\\([^\\.]+\\)\\'" address)
+        (user-error "Unrecognized Terraform resource address: %s" address))
+      (list (or (match-string-no-properties 1 address) "")
+            (if (string= "data." (match-string-no-properties 2 address))
+                "data" "managed")
+            (match-string-no-properties 3 address)
+            (match-string-no-properties 4 address))))
+
+  (defun my/terraform-state-show (address)
+    "Display JSON respresentation of Terraform resource at ADDRESS.
+Terraform is assumed to be initialized in the default directory.
+Always queries a local state file for performance reasons."
+    (interactive
+     (list (read-string
+            "Resource address: "
+            (when (region-active-p)
+              (buffer-substring-no-properties (region-beginning) (region-end))))))
+    (cl-destructuring-bind (module-path mode type name) (my/terraform--parse-address address)
+      (let* ((state-file (or (my/terraform--ensure-state-file)
+                             (user-error "File not found: %s"
+                                         (expand-file-name my/terraform-state-file))))
+             (buffer (get-buffer-create (format my/terraform-state-buffer-name-format
+                                                address)))
+             (jq-args `("--arg" "modpath" ,module-path
+                        "--arg" "mode" ,mode
+                        "--arg" "type" ,type
+                        "--arg" "name" ,name
+                        ,my/terraform--state-show-jq-filter)))
+        (with-current-buffer buffer
+          (erase-buffer)
+          (json-mode))
+        (when (apply #'call-process
+                     my/terraform-jq-executable state-file buffer nil jq-args)
+          (pop-to-buffer buffer)
+          (goto-char (point-min))))))
+
+  (defun my/terraform-state-show-at-pos (&optional pos)
+    "Display JSON representation of Terraform resource at POS or point.
+Both resource and data blocks are considered to be resources."
+    (interactive)
+    (my/terraform-state-show (my/terraform-resource-address-at-pos pos)))
+
+  ;; FIXME: Make this portable for Windows and WSL
+  ;; FIXME: Handle more modules paths than just "/modules/<name>" and "/<name>"
+  (defun my/terraform-module-path-of-file (&optional file)
+    "Display the Terraform module path of FILE.
+FILE is an absolute or relative path to a filesystem entry. It
+defaults to the file visited by the current buffer, or to
+`default-directory' if the current buffer is not file-visiting."
+    (let* ((file (expand-file-name (or file buffer-file-name default-directory)))
+           (_ (or (file-exists-p file)
+                  (user-error "File does not exist: %s" file)))
+           (dir (directory-file-name (or (and (file-directory-p file) file)
+                                         (file-name-directory file))))
+           (root (or (projectile-project-root dir)
+                     (user-error "Unable to determine root path for file: %s" file)))
+           (path (file-relative-name dir root)))
+      (if (string= path ".") ""
+        (substring (string-replace "/" ".module." (string-replace "/modules/" "/" (concat "/" path)))
+                   1))))
+
+  ;; FIXME Handle unquoted resource types and names
+  (defun my/terraform-resource-address-at-pos (&optional pos)
+    "Return the address of the Terraform resource at POS or point.
+Both resource and data blocks are considered to be resources,
+though addresses of data blocks are prefixed with \"data.\" while
+addresses of resource blocks have no prefix."
+    (save-excursion
+      (when pos (goto-char pos))
+      (goto-char (pos-bol))
+      (save-match-data
+        (if-let ((re "^\\s-*\\(data\\|resource\\)[ \\t]+\"\\([^\"]+\\)\"[ \\t]+\"\\([^\"]+\\)\"")
+                 (found (or (looking-at re) (re-search-backward re nil t)))
+                 (mode (match-string-no-properties 1))
+                 (type (match-string-no-properties 2))
+                 (name (match-string-no-properties 3))
+                 (data-prefix (if (string= mode "data") "data." ""))
+                 (module-path (my/terraform-module-path-of-file))
+                 (module-path-prefix (if (string= module-path "") "" (concat module-path "."))))
+            (concat module-path-prefix data-prefix type "." name)
+          (user-error "No Terraform resource at position")))))
+
+  (when (modulep! :ui buffer-group)
+    (buffer-group-reuse-window-setup
+     (buffer-group-define tfstate
+       `(:names ("^\\*tfstate: ")))))
+
+  (map! :map terraform-mode-map
+            :localleader
+            (:prefix ("s" . "state")
+             :desc "Show instances at point" "." #'my/terraform-state-show-at-pos
+             :desc "Show instances of address" "a" #'my/terraform-state-show
+             :desc "Pull remote state" "p" #'my/terraform-state-pull)))
+
+(after! terraform-mode
+  (defvar my/terraform-shell "/bin/sh")
+  (defvar my/terraform-hcl-single-line-command "\
+sed -e 's/^ *//' \\
+    -e 's/ *#.*//' \\
+    -e 's/\\([^[{ ]\\) *,\\{0,1\\} *$/\\1,/' \\
+    -e '$s/,$//' |
+tr '\\n' ' ' |
+sed -e 's/ $/\\n/'"
+    "Shell command used to transform HCL to a single line.")
+
+  (defvar my/terraform-hcl-single-line-buffer "*HCL Single Line*"
+    "Buffer containing a backtrace of generated single-line HCL.")
+
+  (defun my/terraform-hcl-single-line (beg end &optional show-message)
+    "Return a single-line string corresponding to a region of HCL.
+Pass the resulting string to terraform console.
+
+With optional SHOW-MESSAGE, outputs the resulting string to the
+echo area, truncating to a single line.
+
+This function always appends the resulting string to the buffer
+`my/terraform-hcl-single-line-buffer', which can be used in
+debugging issues with the transformation command
+`my/terraform-hcl-single-line-command'."
+    (interactive "r")
+    (let ((hcl (my/region-string beg end))
+          (buffer (get-buffer-create my/terraform-hcl-single-line-buffer))
+          result)
+      (with-current-buffer buffer
+        (hcl-mode)
+        (goto-char (point-max))
+        (let ((start (point-marker)))
+          (insert hcl)
+          (call-process-region start (point) my/terraform-shell t t nil
+                               "-c" my/terraform-hcl-single-line-command)
+          (newline)
+          (setq result (buffer-substring-no-properties start (point-max)))))
+      (when show-message
+        (let ((truncate-partial-width-windows t)
+              ;; FIXME: The echo area still consumes multiple lines, even though
+              ;; the message gets truncated to a single line (there are blanks
+              ;; lines shown below the message).
+              (message-truncate-lines t)
+              (max-mini-window-height 1)
+              (resize-mini-windows t))
+          (message result)))
+      result))
+
+  (defun my/terraform-console-kill-ring-save (beg end)
+    "Save region of HCL to be evaluated in terraform console.
+Uses `my/terraform-hcl-single-line' to transform the HCL code to
+a single line."
+    (interactive "r")
+    (kill-new (my/terraform-hcl-single-line beg end))
+    (message "Single-line HCL yanked to kill-ring"))
+
+  (map! :map terraform-mode-map
+            :localleader
+            (:prefix ("c" . "console")
+             :desc "Yank single-line HCL" "y" #'my/terraform-console-kill-ring-save)))
+
 (add-hook 'terraform-mode-local-vars-hook #'tree-sitter! 'append)
 
 ;; Missing from evil-textobj-tree-sitter.el:
@@ -2712,209 +3088,6 @@ Currently only includes code blocks."
       (markdown-update-header-faces markdown-header-scaling))))
 
 (after! markdown-mode
-  (defun my/markdown-pre-block-bounds ()
-    "Return the bounds of a pre block at point.
-
-This is slightly more effective than `markdown-code-block-at-point-p'
-at determining bounds for pre blocks containing multiple
-consecutive blank lines, and it only returns non-nil when the
-block at point is a pre block (as opposed to a code block)."
-    (save-excursion
-      (let ((pos (point)))
-        (while (and (not (bobp))
-                    (markdown-cur-line-blank-p))
-          (forward-line -1))
-        (when-let ((bounds (get-text-property (point) 'markdown-pre))
-                   (begin (car bounds))
-                   (end (cadr bounds)))
-          (when (<= begin pos end)
-            bounds)))))
-
-  (defun my/markdown-pre-block-string ()
-    "Return string of pre block at point, indentation removed."
-    (when-let ((bounds (my/markdown-pre-block-bounds))
-               (text (apply #'buffer-substring-no-properties bounds))
-               (indentation (length (markdown-pre-indentation (car bounds)))))
-      (replace-regexp-in-string (format "^ \\{1,%d\\}" indentation) "" text)))
-
-  (defvar-local my/markdown--indirect-indentation nil)
-  (defvar-local my/markdown--indirect-block-type nil)
-
-  (defun my/markdown-edit-pre-block ()
-    "Edit Markdown pre block in an indirect buffer."
-    (interactive)
-    (save-excursion
-      (if (fboundp 'edit-indirect-region)
-          (if-let ((bounds (my/markdown-pre-block-bounds))
-                   (begin (car bounds))
-                   (end (cadr bounds))
-                   (indentation (length (markdown-pre-indentation begin))))
-              (with-current-buffer (edit-indirect-region begin end 'display-buffer)
-                (setq my/markdown--indirect-indentation indentation
-                      my/markdown--indirect-block-type 'pre)
-                (indent-rigidly (point-min) (point-max) (- indentation)))
-            (user-error "Not inside a pre block"))
-        (warn "Package edit-indirect needed to edit preformatted blocks.")
-        nil)))
-
-  ;; HACK Added indentation instrumentation to this function
-  (defadvice! my/markdown--edit-code-block-a ()
-    :override #'markdown-edit-code-block
-    (interactive)
-    (save-excursion
-      (if (fboundp 'edit-indirect-region)
-          (let* ((bounds (markdown-get-enclosing-fenced-block-construct))
-                 (begin (and bounds (not (null (nth 0 bounds))) (goto-char (nth 0 bounds)) (point-at-bol 2)))
-                 (end (and bounds (not (null (nth 1 bounds)))  (goto-char (nth 1 bounds)) (point-at-bol 1))))
-            (if (and begin end)
-                (let* ((indentation (and (goto-char (nth 0 bounds)) (current-indentation)))
-                       (lang (markdown-code-block-lang))
-                       (mode (or (and lang (markdown-get-lang-mode lang))
-                                 markdown-edit-code-block-default-mode))
-                       (edit-indirect-guess-mode-function
-                        (lambda (_parent-buffer _beg _end)
-                          (funcall mode)))
-                       (indirect-buf (edit-indirect-region begin end 'display-buffer)))
-                  ;; reset `sh-shell' when indirect buffer
-                  (when (and (not (member system-type '(ms-dos windows-nt)))
-                             (member mode '(shell-script-mode sh-mode))
-                             (member lang (append
-                                           (mapcar (lambda (e) (symbol-name (car e)))
-                                                   sh-ancestor-alist)
-                                           '("csh" "rc" "sh"))))
-                    (with-current-buffer indirect-buf
-                      (sh-set-shell lang)))
-                  (when (> indentation 0) ;; un-indent in edit-indirect buffer
-                    (with-current-buffer indirect-buf
-                      (setq my/markdown--indirect-indentation indentation
-                            my/markdown--indirect-block-type 'code)
-                      (indent-rigidly (point-min) (point-max) (- indentation)))))
-              (user-error "Not inside a GFM or tilde fenced code block")))
-        (warn "Package edit-indirect needed to edit code blocks.")
-        nil)))
-
-  ;; HACK Removed indentation and newline insertion from this hook
-  (defadvice! my/markdown--edit-indirect-after-commit-function-a (beg end)
-    :override #'markdown--edit-indirect-after-commit-function
-    (font-lock-ensure))
-
-  (defun my/markdown-edit-block ()
-    "Edit a code or pre block at point in an indirect buffer."
-    (interactive)
-    (cond
-     ((markdown-get-enclosing-fenced-block-construct)
-      (markdown-edit-code-block))
-     ((my/markdown-pre-block-bounds)
-      (my/markdown-edit-pre-block))
-     (t
-      (message "No block at point can be edited indirectly."))))
-
-  (define-key markdown-mode-map
-    [remap markdown-edit-code-block] #'my/markdown-edit-block)
-
-  (defun my/markdown-forward-code-block (&optional count)
-    "Move forward COUNT source blocks (default 1)."
-    (interactive "p")
-    (unless (zerop count)
-      (let ((re (format "\\(?:%s\\)\\|\\(?:%s\\)"
-                        markdown-regex-gfm-code-block-open
-                        markdown-regex-tilde-fence-begin))
-            target)
-        (save-excursion
-          (when-let ((bounds (markdown-code-block-at-point-p))
-                     (beg (car bounds))
-                     (end (cadr bounds)))
-            (goto-char (if (cl-plusp count) end beg)))
-          (re-search-forward re nil t (if (cl-plusp count) 1 -1))
-          (setq target (car-safe (markdown-code-block-at-point-p))))
-        (if target
-            (progn
-              (goto-char target)
-              (my/markdown-forward-code-block
-               (funcall (if (cl-plusp count) #'1- #'1+) count)))
-          (message "No further code blocks")))))
-
-  (defun my/markdown-backward-code-block (&optional count)
-    "Move backward COUNT source blocks (default 1)."
-    (interactive "p")
-    (my/markdown-forward-code-block (- count)))
-
-  (after! evil-markdown
-    (map! :map evil-markdown-mode-map
-          :nv "]c" #'my/markdown-forward-code-block
-          :nv "[c" #'my/markdown-backward-code-block))
-
-  (defun my/markdown--edit-indirect-before-commit-function-h ()
-    "Re-indent indirect buffer before commiting."
-    (when (wholenump my/markdown--indirect-indentation)
-      (let ((inhibit-redisplay t))
-        (indent-rigidly (point-min) (point-max) my/markdown--indirect-indentation))))
-
-  (defun my/markdown--edit-indirect-after-creation-hook-h ()
-    "Add buffer-local hooks to indirect buffer."
-    (setq header-line-format
-      (substitute-command-keys
-       "Edit, then exit with `\\[edit-indirect-commit]' or abort with \
-`\\[edit-indirect-abort]'"))
-    (add-hook 'edit-indirect-before-commit-hook
-              #'my/markdown--edit-indirect-before-commit-function-h
-              nil 'local))
-
-  (defun my/markdown-edit-indirect-setup-h ()
-    "Instrument indirect editing for `markdown-mode' buffers."
-    (add-hook 'edit-indirect-after-creation-hook
-              #'my/markdown--edit-indirect-after-creation-hook-h
-              nil 'local))
-
-  (add-hook! markdown-mode #'my/markdown-edit-indirect-setup-h)
-
-  ;; In case the major mode is changed within the indirect buffer
-  (put 'my/markdown--edit-indirect-before-commit-function-h 'permanent-local-hook t)
-  (put 'my/markdown--indirect-indentation 'permanent-local t)
-  (put 'my/markdown--indirect-block-type 'permanent-local t))
-
-(setq-hook! 'markdown-mode-hook hs-allow-nesting nil)
-
-(after! markdown-mode
-  (let* ((start `(,markdown-regex-gfm-code-block-open 5))
-         (end markdown-regex-gfm-code-block-close)
-         (comment-start nil)
-         (forward-sexp-func (lambda (&rest _)
-                              (re-search-forward markdown-regex-gfm-code-block-close
-                                                 (point-max)
-                                                 'ignore)))
-         (adjust-beg-func nil)
-         (hs-spec `(,start ,end ,comment-start ,forward-sexp-func ,adjust-beg-func)))
-    (dolist (mode '(markdown-mode gfm-mode))
-      (add-to-list 'hs-special-modes-alist (cons mode hs-spec))))
-
-  (defadvice! my/markdown-looking-at-block-start-a ()
-    :before-while #'hs-looking-at-block-start-p
-    (or (not (eq major-mode 'markdown-mode))
-        (when-let ((bounds (markdown-code-block-at-point))
-                   (start (car bounds)))
-          (= (line-number-at-pos)
-             (line-number-at-pos start)))))
-
-  (defun my/markdown-find-block-start ()
-    (when-let ((bounds (markdown-code-block-at-point))
-               (start (car bounds)))
-      (goto-char start)))
-
-  (defadvice! my/markdown-find-block-start-a (&rest _)
-    :before-while #'hs-find-block-beginning
-    :after (if (modulep! :editor fold)
-               '(+fold/close +fold/open +fold/toggle)
-             '(hs-hide-block hs-show-block))
-    (or (not (eq major-mode 'markdown-mode))
-        (my/markdown-find-block-start)))
-
-  (when (modulep! :editor fold)
-    (defadvice! my/+fold-from-eol-a (&rest body)
-      :override #'+fold-from-eol
-      (macroexp-progn body))))
-
-(after! markdown-mode
   (pushnew! markdown-code-lang-modes
             '("http" . restclient-mode)
             '("sh" . bash-mode)))
@@ -3023,8 +3196,10 @@ just perform a complete cycle of `org-cycle'."
           #'man
         #'woman))
 
-(setq org-bookmark-when-visiting-a-file t
-      org-bookmark-use-first-bookmark nil)
+(setq org-link-context-for-files nil)
+
+;; (setq org-bookmark-when-visiting-a-file t
+;;       org-bookmark-use-first-bookmark nil)
 
 ;; Optional: automatically prompt for and display bookmark annotations
 ;; (setq bookmark-use-annotations t
@@ -3062,7 +3237,7 @@ just perform a complete cycle of `org-cycle'."
 
 (setq
       ;; Top-level directory (used by `+default/find-in-notes', etc.)
-      org-directory "~/org"
+      org-directory "~/Documents/notes"
 
       ;; Directories to search for agenda files
       my/org-directories `("work" "life" ,doom-user-dir)
@@ -3490,6 +3665,11 @@ This is a list of lists, not a list of cons cells.")
   ;; Do not stream responses
   (setq gptel-stream nil)
 
+  ;; Use 2-character prefixes instead of 3-character prefix
+  (setq gptel-prompt-prefix-alist '((markdown-mode . "## ")
+                                    (org-mode . "** ")
+                                    (text-mode . "## ")))
+
   (map! :map gptel-mode-map
         "C-c C-g" #'gptel-menu))
 
@@ -3721,6 +3901,15 @@ and uses visual instead."
     (unless (setq lsp-ui-doc-show-with-cursor
                   (not lsp-ui-doc-show-with-cursor))
       (lsp-ui-doc-hide))))
+
+;; TODO: Create toggle for interpretation of ANSI color sequences (cannot toggle off)
+;; (defvar-local my/ansi-colors-on nil)
+;; (defun my/toggle-ansi-colors ()
+;;   "Toggle ANSI color rendering in the current buffer."
+;;   (interactive)
+;;   (if (setq my/ansi-colors-on (not my/ansi-colors-on))
+;;       (ansi-color-apply-on-region (point-min) (point-max))
+;;     (ansi-color-filter-region (point-min) (point-max))))
 
 (map! :leader
       (:prefix-map ("t" . "toggle")

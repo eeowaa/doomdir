@@ -185,6 +185,9 @@ brew install pkg-config poppler automake
 # Install prerequisites for `tools/pdf` module
 sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
 
+# Install prerequisites for `tools/terraform` module
+brew install terraform hashicorp/tap/terraform-ls
+
 # Install prerequisites for `lang/cc` module
 brew install ccls gdb glslang
 
@@ -232,7 +235,9 @@ npm install -g markdownlint-cli marked
 
 # Install prerequisites for `lang/org` module
 brew install ditaa gnuplot pandoc graphviz pngpaste
-mkdir -p ~/org/roam
+
+# Create `org-directory` if missing
+mkdir -p ~/Documents/notes
 
 # Install prerequisites for `lang/python` module
 brew install python
