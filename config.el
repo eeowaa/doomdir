@@ -1591,6 +1591,10 @@ If the current frame has one window, restore the previous windows."
 ;; Not sure what the best way is to add this hook
 (add-hook 'evil-local-mode-hook #'turn-on-undo-tree-mode)
 
+(after! undo-tree
+  (advice-remove 'undo-tree-visualizer-show-diff
+                 '+undo-tree--show-visualizer-diff-safely-a))
+
 (after! git-commit
   (delq! 'overlong-summary-line git-commit-style-convention-checks))
 

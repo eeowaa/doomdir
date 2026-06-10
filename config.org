@@ -5185,7 +5185,7 @@ chosen). This should still respect ~display-buffer-alist~ rules.
 *** TODO [#C] Adjust ~ibuffer~ table format :tweak:
 Some columns are too close together. See ~ibuffer-formats~ (configured by Doom).
 
-** undo [1/1]
+** undo [2/2]
 #+begin_quote
 This module augments Emacs' built-in undo system to be more intuitive and to
 persist across Emacs sessions.
@@ -5204,6 +5204,13 @@ Sometimes this doesn't seem to work.
 
 ;; Not sure what the best way is to add this hook
 (add-hook 'evil-local-mode-hook #'turn-on-undo-tree-mode)
+#+end_src
+
+*** DONE [#A] Remove ~undo-tree~ display advice :hack:
+#+begin_src emacs-lisp :tangle yes
+(after! undo-tree
+  (advice-remove 'undo-tree-visualizer-show-diff
+                 '+undo-tree--show-visualizer-diff-safely-a))
 #+end_src
 
 ** vc [2/2]
