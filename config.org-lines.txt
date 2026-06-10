@@ -1,0 +1,430 @@
+config.org:85:*** OKAY macOS
+config.org:102:*** DONE Fedora
+config.org:255:*** DONE macOS
+config.org:275:*** DONE Fedora
+config.org:344:*** DONE [#A] Add =$DOOMDIR/lisp= to ~load-path~
+config.org:359:*** DONE [#A] Load libraries used by my config
+config.org:365:*** DONE [#A] Load my own local packages
+config.org:394:*** DONE [#C] Allow easy input of accented and special characters via =C-\= :tweak:
+config.org:437:*** DONE [#A] Do not use =company-box= in TTY Emacs :bug:
+config.org:450:*** DONE [#A] Enable echo frontend when disabling ~company-box-mode~ :hack:bug:
+config.org:466:*** DONE [#A] Ensure that =tab-bar-mode= is disabled in =company-box= frames :bug:
+config.org:498:*** DONE [#B] Never start completion automatically (require =C-SPC=) :tweak:
+config.org:514:*** DONE [#B] Lower the wait time before displaying documentation :tweak:
+config.org:530:*** DONE [#B] Redisplay visible =company-box-doc= frame when =company-box= frame moves :bug:
+config.org:543:*** STRT [#C] Quit =company-box= when switching evil states :bug:
+config.org:592:*** STRT [#A] Ensure that =company-box-doc= popup frames and their content are fully visible :bug:
+config.org:617:*** TODO [#A] Prevent backtrace windows from opening in =company-box= child frames :bug:
+config.org:629:*** TODO [#A] Display doc buffer without =company-box= :feat:
+config.org:661:*** DONE [#A] Make it easier to jump to headlines across Org buffers
+config.org:685:*** DONE [#B] Find a reference for the symbols in the completing-read buffer :doc:
+config.org:689:*** DONE [#C] Do not use icons over SSH :tweak:
+config.org:696:*** OKAY [#A] Prevent Emacs from freezing during ~consult-org-heading~ :bug:
+config.org:717:*** TODO [#B] Fix bug with cursor color getting stuck when previewing themes :bug:
+config.org:742:*** DONE [#A] Install packages
+config.org:761:*** DONE [#B] Create and bind window dedication functions :feat:
+config.org:792:*** DONE [#C] Keep icons small by default :tweak:
+config.org:797:*** DONE [#C] Don't suggest abbreviations for long command names :tweak:
+config.org:802:*** DONE [#C] Set the frame title :tweak:
+config.org:821:*** DONE [#C] Start Emacs with a maximized frame :tweak:
+config.org:826:*** DONE [#C] Configure =col-highlight= :tweak:module:
+config.org:833:*** DONE [#C] Configure =info-colors= :tweak:module:
+config.org:843:*** DONE [#C] Highlight trailing whitespace where appropriate :tweak:
+config.org:879:*** DONE [#C] Prevent translation of quote characters into curved quotes :tweak:
+config.org:887:*** DONE [#C] Display raw bytes in hexadecimal instead of octal :tweak:
+config.org:892:*** DONE [#C] Display line continuation characters in TTY Emacs :tweak:
+config.org:898:*** DONE [#C] Prevent the cursor from blinking over SSH :tweak:
+config.org:903:*** DONE [#C] Replace =vi-tilde-fringe= with builtin functionality :tweak:
+config.org:917:*** STRT [#B] Configure =vdiff= :feat:module:
+config.org:970:*** COMMENT Reference
+config.org:1073:*** DONE [#A] Use full frame height for left and right side windows
+config.org:1078:*** DONE [#A] Make ~switch-to-buffer~ respect ~display-buffer-alist~
+config.org:1085:*** DONE [#A] Open buffers in the current window by default
+config.org:1100:*** DONE [#B] Keep window dividers aligned :tweak:
+config.org:1113:*** STRT [#B] Replace key bindings for =:ui popup= :tweak:
+config.org:1167:*** DONE [#A] Never hide the modeline :tweak:bug:
+config.org:1213:*** DONE [#C] Tweak the style of the tab bar :tweak:
+config.org:1228:*** DONE [#C] Set the theme :tweak:
+config.org:1281:*** DONE [#C] Set the font :tweak:
+config.org:1336:*** TODO [#C] Make Treemacs look good again
+config.org:1341:*** TODO [#C] Set the Unicode font :tweak:
+config.org:1364:*** DONE [#A] Do not prompt to download emojis :bug:
+config.org:1374:*** DONE [#C] Enable emojis (just for =SPC i e=) :doc:
+config.org:1383:*** DONE [#B] Add a few different tags to highlight in programming major-modes :tweak:
+config.org:1399:*** COMMENT Documentation
+config.org:1403:*** OKAY [#A] Write macros to help create hydras :feat:
+config.org:1464:*** DONE [#A] Add a hydra for projectile run commands :feat:
+config.org:1491:*** DONE [#C] Add a hydra for games :feat:module:
+config.org:1531:*** DONE [#C] Add a hydra for counsel-spotify :feat:module:
+config.org:1570:*** DONE [#C] Add a hydra for timeclock :feat:module:
+config.org:1585:*** STRT [#A] Add a hydra for debugging elisp :feat:
+config.org:1771:*** STRT [#B] Add a hydra for table.el :feat:
+config.org:1945:*** DONE [#B] Disable =highlight-indent-guides-mode= by default :tweak:
+config.org:1957:*** DONE [#C] Only enable ligatures in Org mode (for now)
+config.org:1975:*** DONE [#B] Do not display buffer modification info for non-file buffers :tweak:
+config.org:1993:*** DONE [#C] Unpin package :tweak:
+config.org:2024:*** DONE [#C] Use 1-based column numbering in modeline :tweak:
+config.org:2029:*** DONE [#C] Do not use icons over SSH :tweak:
+config.org:2054:*** OKAY [#C] Flash after specific jump operations :feat:
+config.org:2101:*** DONE [#A] Only stack =which-key= popups :hack:
+config.org:2135:*** DONE [#B] Add a terminal-friendly keybinding for ~+popup/raise~
+config.org:2150:*** DONE [#B] Enable line wrapping in buffers before shrinking their popup
+config.org:2159:*** DONE [#B] Add popup rule for terminals :feat:
+config.org:2165:*** STRT [#B] Add popup rule for Ilist :feat:
+config.org:2180:*** STRT [#B] Make left and right popups use full vertical space :bug:
+config.org:2217:*** DONE [#A] Bind keys
+config.org:2261:*** DONE [#A] Bind =evil-ex= commands
+config.org:2296:*** DONE [#C] Remove spaces between tabs
+config.org:2302:*** DONE [#C] Use the default faces for the tab bar
+config.org:2323:*** DONE [#C] Open up =gt= for ~+tabs:next-window-tab~
+config.org:2332:*** OKAY [#C] Configure ~display-time-mode~ for tab bar
+config.org:2341:*** DONE [#B] Do not display tabs in the Ediff control window
+config.org:2347:*** STRT [#B] Do not display tabs in side windows
+config.org:2377:*** HOLD [#C] Configure mail indicator
+config.org:2444:*** DONE [#A] Unpin treemacs packages :bug:
+config.org:2453:*** DONE [#A] Allow resizable fonts :tweak:bug:
+config.org:2477:*** DONE [#A] Remove "Invalid face reference" errors :bug:
+config.org:2488:*** DONE [#B] Fix ace-window keybindings :hack:
+config.org:2496:*** OKAY [#B] Do not collapse path strings :tweak:
+config.org:2504:*** DONE [#B] Do not read from popup frames :tweak:
+config.org:2523:*** OKAY [#B] Display "+" and "-" icons in tty emacs :bug:
+config.org:2541:*** DONE [#C] Add keybindings to visit adjacent files :feat:
+config.org:2561:*** DONE [#C] Allow selection of treemacs window via =ace-window= :tweak:
+config.org:2568:*** DONE [#C] Show the cursor in treemacs windows :tweak:
+config.org:2595:*** DONE [#C] Display truncation characters in the fringe :tweak:
+config.org:2614:*** DONE [#C] Set the text scale to -1 :tweak:
+config.org:2619:*** LOOP [#C] Configure revert-buffer :tweak:module:
+config.org:2634:*** STRT [#B] Align all Treemacs icons :bug:
+config.org:2811:*** STRT [#C] Use the same icons in treemacs as in dired :tweak:
+config.org:2838:*** TODO [#A] Fix treemacs workspace integration :bug:
+config.org:2976:*** TODO [#B] Allow switching git worktrees :feat:
+config.org:3007:*** DONE [#B] Enable =vc-gutter= in terminal Emacs :feat:
+config.org:3016:*** OKAY [#B] Enable toggling of VCS diff in the fringe :bug:
+config.org:3024:*** DONE [#C] Do not display =vc-gutter= in COMMIT_EDITMSG buffers :feat:
+config.org:3071:*** STRT [#C] Keep fringe bitmaps looking good when changing themes :bug:
+config.org:3113:*** STRT [#B] Create a =vi-tilde-margin= package :feat:module:
+config.org:3180:*** DONE [#B] Allow =ace-window= to operate across frames in graphical Emacs :tweak:
+config.org:3207:*** DONE [#B] Do not dim the buffer content during selection :tweak:
+config.org:3212:*** OKAY [#B] Show =ace-window= selection indicators in ~*info*~ buffers :bug:
+config.org:3225:*** OKAY [#B] Make the selection character more visible :tweak:
+config.org:3237:*** DONE [#C] Make the selection character the default size :tweak:
+config.org:3249:*** TODO [#B] Display window numbers in the mode line :feat:
+config.org:3261:*** COMMENT Vim documentation
+config.org:3298:*** DONE [#A] Bind ~+workspace/swap-left~ and ~+workspace/swap-right~ to keys :feat:
+config.org:3307:*** DONE [#B] Give ~persp-keymap-prefix~ binding to =projectile= :tweak:
+config.org:3323:*** DONE [#B] Delete workspaces even if a childframe references once :bug:hack:
+config.org:3336:*** DONE [#B] Do not continually add ~display-time-mode~ information to tab bar :bug:hack:
+config.org:3357:*** DONE [#B] Create a minor mode to center text and do nothing else :tweak:
+config.org:3372:*** DONE [#C] Keep the VC gutter close to the text in Zen mode :tweak:
+config.org:3377:*** DONE [#C] Unclutter the interface in additional ways :feat:
+config.org:3449:*** DONE [#A] Configure line-feed behavior :feat:tweak:
+config.org:3471:*** DONE [#B] Truncate lines by default :tweak:
+config.org:3481:*** TODO [#B] Use Doom's =so-long= configuration :bug:
+config.org:3491:*** DONE [#A] Redefine =:q= and =:wq= semantics :tweak:
+config.org:3517:*** DONE [#A] Redefine =:bd= semantics :tweak:module:
+config.org:3555:*** DONE [#B] Do not recenter windows after splitting :hack:tweak:
+config.org:3596:*** DONE [#B] Always select newly-split window :tweak:
+config.org:3602:*** DONE [#B] Do not select trailing newlines with =v$= :tweak:
+config.org:3607:*** DONE [#B] Activate evil bindings in Info mode :bug:
+config.org:3615:*** DONE [#C] Make =C-i= behave as =TAB= in info mode :tweak:module:
+config.org:3626:*** DONE [#C] Define Vim bindings for games :feat:
+config.org:3682:*** DONE [#C] Bind base64-encoding/decoding commands :feat:
+config.org:3695:*** DONE [#B] Do not automatically balance windows :tweak:
+config.org:3706:*** LOOP [#B] Improve visual line navigation :bug:
+config.org:3723:*** STRT [#B] Associate evil states with major modes :tweak:
+config.org:3728:*** TODO [#B] Associate evil states with buffer names :feat:
+config.org:3746:*** DONE [#A] Figure out how to override existing templates :doc:
+config.org:3774:*** DONE [#B] Simplify the file template for =sh-mode= :tweak:
+config.org:3788:*** COMMENT Documentation
+config.org:3889:*** COMMENT Vim help text for folding
+config.org:3977:*** STRT [#A] Enable fine-grained folding for YAML mode :bug:
+config.org:4004:*** STRT [#A] Enable fine-grained folding for JSON mode :bug:
+config.org:4033:*** STRT [#B] Fix support for ~outline-minor-mode~ without =hideshow= :hack:bug:
+config.org:4067:*** STRT [#C] Make the =vimish-fold= header fill the window :tweak:
+config.org:4092:*** TODO [#A] Enable Vim fold markers :feat:
+config.org:4132:*** DONE [#B] Fix ~projectile-edit-dir-locals~ :bug:
+config.org:4195:*** DONE [#B] Do not add extra indentation :tweak:
+config.org:4200:*** DONE [#B] Do not activate ~+word-wrap-mode~ by default :tweak:
+config.org:4212:*** TODO [#C] Add paragraph formatting to ~+word-wrap-mode~ :feat:
+config.org:4245:*** DONE [#A] Enable all disabled commands :tweak:
+config.org:4250:*** DONE [#A] Configure native compilation :feat:
+config.org:4257:*** DONE [#A] Configure C source directory :tweak:feat:
+config.org:4265:*** DONE [#B] Fix ~doom/sudo-find-file~ and ~doom/sudo-this-file~ :hack:
+config.org:4289:*** DONE [#B] Configure Man for AWS CLI man pages :module:
+config.org:4335:*** DONE [#B] Prevent AWS credentials from being written to ~doom-env-file~ :tweak:module:
+config.org:4344:*** DONE [#B] Save shell command lines automatically with ~server-edit~ :bug:
+config.org:4358:*** DONE [#C] Don't prompt about killing running processing when quitting :tweak:
+config.org:4363:*** DONE [#C] Add aliases for common commands :feat:
+config.org:4370:*** DONE [#C] Use elisp formatting for debugger stack trace :tweak:module:
+config.org:4378:*** DONE [#C] Do not restrict (Wo)Man buffer width :tweak:
+config.org:4389:*** DONE [#C] Add a binding to make the current file executable :feat:
+config.org:4406:*** DONE [#C] Configure revert-buffer for ~helpful-mode~ :tweak:module:
+config.org:4413:*** DONE [#C] Configure revert-buffer for ~Man-mode~ and ~Woman-mode~ :tweak:module:
+config.org:4424:*** DONE [#C] Replace =C-x x f= binding with custom font-lock update function :tweak:
+config.org:4455:*** STRT [#B] Create and bind a function to copy the last message written :feat:
+config.org:4494:*** STRT [#B] Configure the timeclock :feat:module:
+config.org:4581:*** STRT [#C] Make =C-w o= behave like Vim's ZoomWin package :feat:module:
+config.org:4608:*** TODO [#B] Attempt to open a file with ~sudo~ if needed :feat:
+config.org:4619:*** TODO [#B] Configure WoMan for AWS CLI man pages :feat:module:
+config.org:4620:*** LOOP [#B] Always trust file-location and directory-local variables :tweak:
+config.org:4652:*** TODO [#B] Figure out the autosave and backup situation for Doom Emacs :tweak:
+config.org:4655:*** TODO [#C] Configure the world clock :tweak:
+config.org:4677:*** DONE [#C] Format the results of ~find-dired~ to be like ~dired~ :tweak:
+config.org:4715:*** DONE [#C] Do not use icons over SSH :tweak:
+config.org:4725:*** STRT [#A] Define directory-exploring =evil-ex= commands :feat:
+config.org:4767:*** DONE [#B] Auto-update ibuffer contents :tweak:
+config.org:4777:*** DONE [#C] Do not use icons over SSH :tweak:
+config.org:4790:*** STRT [#B] Clean up the modeline :tweak:hack:
+config.org:4801:*** TODO [#A] Figure out how to dynamically resize ~ibuffer~ columns :feat:
+config.org:4810:*** TODO [#A] Provide a prefix map for ~ibuffer-mode~ :feat:
+config.org:4813:*** TODO [#B] Fix ~ibuffer-do-view~ and related commands :bug:
+config.org:4817:*** TODO [#B] Integrate with =ace-window= :feat:
+config.org:4822:*** TODO [#C] Adjust ~ibuffer~ table format :tweak:
+config.org:4831:*** OKAY [#A] Enable ~undo-tree~ :bug:
+config.org:4852:*** DONE [#B] Do not prompt when the commit message is too long :tweak:
+config.org:4858:*** DONE [#C] Filename-mode associations :tweak:
+config.org:4901:*** DONE [#B] Define a helper function to wrap calls to ~with-editor-export-editor~ :feat:
+config.org:4927:*** DONE [#B] Define aliases :feat:
+config.org:4959:*** DONE [#B] Do not scroll after every command :tweak:
+config.org:4965:*** DONE [#B] Make ^L simply scroll (not insert a bunch of blank lines :tweak:
+config.org:4974:*** DONE [#B] Export ~$EDITOR~ to =eshell= :feat:
+config.org:5019:*** DONE [#B] Export editor variables to =vterm= :feat:
+config.org:5033:*** DONE [#B] Let =C-m= send =<return>= :tweak:
+config.org:5039:*** DONE [#B] Let =C-h=, =C-u=, =C-j=, and =<M-backspace>= pass through in Evil insert state :tweak:
+config.org:5047:*** DONE [#B] Rename ~vterm~ buffers according to the host and directory :tweak:
+config.org:5077:*** DONE [#B] Let =C-x C-e= pass through in Evil insert state :feat:
+config.org:5115:*** DONE [#C] Configure revert-buffer :tweak:module:
+config.org:5124:*** DONE [#B] Let =M-:= and =M-<digit>= pass through in Evil insert and normal state :feat:
+config.org:5142:*** DONE [#C] Use =C-s= as the ~evil-window-map~ leader key in Evil insert state :tweak:
+config.org:5149:*** STRT [#B] Define aliases :feat:
+config.org:5211:*** STRT [#A] Get =vterm= working with ~kubectl~ :bug:
+config.org:5234:*** STRT [#A] Get =vterm= working with ~kubernetes~ :hack:bug:
+config.org:5279:*** STRT [#A] Allow scrolling back while output is being written :tweak:
+config.org:5316:*** STRT [#A] Prevent cursor misplacement when switching Evil states :bug:
+config.org:5409:*** TODO [#B] Retain column positions in command history :feat:
+config.org:5449:*** STRT [#C] Enable soft line wrapping :tweak:
+config.org:5558:*** DONE [#C] Remove "next/previous locus from <source>" messages
+config.org:5567:*** DONE [#A] Disable flycheck in all Org source blocks :hack:
+config.org:5596:*** DONE [#A] Configure =flycheck-posframe= child frames :tweak:
+config.org:5603:*** DONE [#B] Display =flycheck= message at point when entering a buffer :bug:
+config.org:5613:*** DONE [#B] Hide =flycheck-posframe= child frame upon moving point :bug:
+config.org:5623:*** DONE [#C] Configure =flycheck-posframe= messages :tweak:
+config.org:5632:*** DONE [#C] Raise error threshold for =flycheck= :tweak:
+config.org:5638:*** STRT [#A] Allow dynamic changing of error levels displayed :feat:
+config.org:5686:*** STRT [#B] Show error indicators in the margin when in terminal Emacs :bug:
+config.org:5701:*** STRT [#B] Always use =flycheck-posframe= instead of alternatives :tweak:
+config.org:5712:*** TODO [#B] Update =flycheck-posframe= child frame position as needed :bug:
+config.org:5747:*** DONE [#A] Prevent spell checking from being enabled by default :tweak:
+config.org:5795:*** DONE [#B] Prevent =which-key= errors related to =spell-fu= :hack:
+config.org:5818:*** DONE [#B] Fix ~+spell/add-word~ :bug:
+config.org:5908:*** DONE [#A] Specify JAR paths on Linux :tweak:
+config.org:5917:*** DONE [#B] Disable =writegood-mode= by default :tweak:
+config.org:5928:*** TODO [#B] Add toggle bindings for =lang-tool= and/or =writegood-mode= :feat:
+config.org:5944:*** LOOP [#C] Configure =eeowaa-project= package
+config.org:5964:*** LOOP [#C] Add templates for each file in =eeowaa-project= :feat:
+config.org:5965:*** LOOP [#C] Add support to =eeowaa-project= for language-specific files :feat:
+config.org:5976:*** LOOP [#C] Add support to =eeowaa-project= for environment-specific files :feat:
+config.org:5995:*** DONE [#B] Use evil keybindings in Ansible documentation modes :tweak:
+config.org:6001:*** LOOP [#A] Ensure that ~+ansible-yaml-mode~ is enabled on all relevant YAML files :bug:
+config.org:6023:*** DONE [#A] Configure bitwarden
+config.org:6031:*** DONE [#B] Bind key to open Bitwarden vault
+config.org:6038:*** STRT [#B] Configure UI elements
+config.org:6058:*** COMMENT Documentation
+config.org:6215:*** TODO [#A] Delete breakpoints when their file is deleted :bug:
+config.org:6220:*** TODO [#A] Allow displaying breakpoints in the margin :feat:
+config.org:6225:*** STRT [#B] Replace DAP Hydra with prefix map :feat:
+config.org:6269:*** WAIT [#B] Fix DAP mode error message re: =lsp-treemacs= :bug:
+config.org:6284:*** TODO [#C] Use =projectile= instead of =project= when expanding variables :feat:
+config.org:6287:*** TODO [#C] Sort stack frames in numerical order :bug:
+config.org:6292:*** STRT [#C] Configure which DAP UI elements appear at startup :tweak:
+config.org:6335:*** TODO [#A] See why =direnv= prevents envvars from propagating between buffers :hack:bug:
+config.org:6364:*** TODO [#A] Understand how Emacs handles environment variables :doc:
+config.org:6385:*** TODO [#B] Try =direnv.el= instead of =envrc= :tweak:
+config.org:6431:*** DONE [#B] Adjust column widths :tweak:
+config.org:6456:*** DONE [#B] Give the ~docker~ command a better keybinding :tweak:
+config.org:6464:*** DONE [#C] Filename-mode associations :tweak:
+config.org:6473:*** TODO [#A] Seamlessly edit files from =vterm= buffers to Docker containers :feat:
+config.org:6547:*** TODO [#B] Enable prompt tracking from =vterm= buffers to Docker containers :feat:
+config.org:6575:*** DONE [#C] Tell ~git-commit-mode~ buffers to ignore editorconfig :tweak:
+config.org:6590:*** TODO [#C] Tell flycheck for Markdown to respect editorconfig :tweak:
+config.org:6644:*** DONE [#B] Display inline images in output :feat:
+config.org:6650:*** DONE [#B] Configure =ob-ein= :feat:
+config.org:6692:*** TODO [#C] Exclude result names from =ox-ipynb= output :tweak:
+config.org:6710:*** DONE [#A] Implement arbitrary region copy/paste between buffers :feat:
+config.org:6798:*** STRT [#C] Configure =comint= scrollback behave similarly to =vterm= :tweak:
+config.org:6824:*** TODO [#B] Configure comint to select previous input in an intelligent way :bug:
+config.org:6830:*** TODO [#C] Enable "echo off" in ~my/send-region~ :feat:
+config.org:6900:*** DONE [#A] Fix ~+lookup-project-search-backend-fn~ :bug:hack:
+config.org:6918:*** DONE [#A] Prefer online dictionaries when available :feat:
+config.org:6929:*** DONE [#B] Truncate eldoc messages to fit in a single minibuffer line :tweak:
+config.org:6935:*** DONE [#B] Do not automatically select documentation windows :tweak:
+config.org:6950:*** DONE [#B] Use completing-read for =dumb-jump= backend :tweak:bug:
+config.org:6962:*** DONE [#B] Fix offline word lookup :bug:hack:
+config.org:6978:*** DONE [#B] Enable folding in =wordnut= buffers :feat:
+config.org:6986:*** LOOP [#A] Fix the error "Given parent class xref-location is not a class" :bug:
+config.org:6995:*** STRT [#A] Automatically install missing docsets :feat:
+config.org:7011:*** STRT [#B] Use Zeal's Dash.app docsets when available :tweak:
+config.org:7036:*** COMMENT Documentation
+config.org:7043:*** DONE [#A] Unpin package :hack:
+config.org:7056:*** DONE [#B] Enable documentation popups upon mouseover :tweak:
+config.org:7065:*** DONE [#B] Display symbols in a right side window :tweak:
+config.org:7076:*** DONE [#B] Disable documentation popups in TUI Emacs :bug:
+config.org:7086:*** STRT [#B] Allow symbol windows to be easily resized :feat:
+config.org:7097:*** STRT [#B] Add alternate bindings for some LSP commands :tweak:
+config.org:7110:*** STRT [#B] Sync the timing of display updates :tweak:
+config.org:7138:*** LOOP [#B] Automatically restart the LSP server when it crashes :tweak:
+config.org:7146:*** LOOP [#B] Provide better integration with lsp-ui-imenu :feat:
+config.org:7169:*** LOOP [#B] Look into LSP performance improvements :tweak:
+config.org:7203:*** TODO [#B] Shrink the LSP help window to its content size :tweak:
+config.org:7221:*** TODO [#B] Disable =lsp-lens= by default :tweak:
+config.org:7226:*** DONE [#C] Scale down text of LSP UI Imenu windows :tweak:
+config.org:7236:*** LOOP [#C] Do not display code actions in the modeline :bug:
+config.org:7268:*** DONE [#A] Pin packages for compatibility :bug:hack:
+config.org:7277:*** DONE [#C] Configure list of repositories :tweak:
+config.org:7284:*** OKAY [#C] Add keybindings :feat:
+config.org:7292:*** TODO [#B] Add support for Azure DevOps :feat:
+config.org:7296:*** TODO [#C] Restore window config after aborting a commit :bug:
+config.org:7301:*** DONE [#A] Search for =GNUmakefile= files :hack:bug:
+config.org:7345:*** DONE [#A] Do not allow ~include~ statements to break target listing :hack:bug:
+config.org:7392:*** DONE [#A] Allow selection of Makefiles not seen by =projectile= :bug:
+config.org:7411:*** DONE [#B] Bind ~+make/run~ to a key :feat:
+config.org:7435:*** COMMENT Documentation
+config.org:7454:*** TODO Documentation
+config.org:7457:*** DONE Packages
+config.org:7462:*** STRT Configuration
+config.org:7540:*** DONE [#B] Configure LSP :feat:tweak:
+config.org:7567:*** DONE [#B] Lookup references for resource block at point if LSP lookup fails :feat:
+config.org:7583:*** DONE [#B] Add completion keywords for Terraform :feat:
+config.org:7630:*** STRT [#B] Write functionality to display resource state as JSON :feat:
+config.org:7866:*** STRT [#B] Write functionality to evaluate a region in ~terraform console~ :feat:
+config.org:7933:*** DONE [#A] Unpin =tree-sitter-langs= :feat:
+config.org:7945:*** DONE [#A] Use a different recipe for =tree-sitter-indent= :hack:
+config.org:7955:*** DONE [#A] Add tree-sitter syntax highlighting to terraform :feat:
+config.org:7970:*** STRT [#A] Do not use =ts-fold= for modes without a parser :bug:
+config.org:7991:*** DONE [#C] Write test function for obtaining fold summaries :module:
+config.org:8010:*** STRT [#B] Disable LSP semantic highlighting when tree-sitter is available :tweak:
+config.org:8024:*** TODO Documentation
+config.org:8027:*** DONE Packages
+config.org:8032:*** TODO Configuration
+config.org:8072:*** TODO [#B] Eliminate display bugs on Wayland :bug:
+config.org:8081:*** DONE [#A] Remap keys for macOS :tweak:
+config.org:8097:*** DONE [#B] Experiment with Keychain as a member of ~auth-sources~ :doc:
+config.org:8150:*** DONE [#A] Install packages
+config.org:8184:*** DONE [#B] Configure Protobuf support :feat:module:
+config.org:8197:*** DONE [#C] Enable font locking in Desktop Entry mode :bug:module:
+config.org:8202:*** STRT [#B] Configure faces used by AsciiDoc mode :tweak:module:
+config.org:8219:*** TODO [#A] Configure Perl modes :feat:module:
+config.org:8280:*** DONE [#B] Disable reference tooltips in Emacs source tree :bug:
+config.org:8293:*** STRT [#B] Use Linux kernel style for C :tweak:
+config.org:8368:*** DONE [#A] Replace =C-c d= with =C-c n= :hack:tweak:
+config.org:8438:*** DONE [#A] Do not remove trailing whitespace in TSV mode :bug:
+config.org:8452:*** DONE [#B] Revert XML language server path to default :tweak:
+config.org:8487:*** COMMENT Documentation
+config.org:8502:*** DONE [#B] Show docstring for thing-at-point without delay :tweak:
+config.org:8512:*** DONE [#B] Display function docstring along with arguments :feat:
+config.org:8529:*** DONE [#C] Filename-mode associations :feat:
+config.org:8534:*** DONE [#B] Prepend ";; => " to output in Lisp Interaction Mode :tweak:
+config.org:8705:*** DONE [#A] Specify desired formatter :feat:
+config.org:8790:*** DONE [#B] Set up debugging :bug:
+config.org:8812:*** DONE [#C] Filename-mode associations :feat:
+config.org:8853:*** STRT [#B] Configure LaTeX preview in Org files :tweak:
+config.org:8887:*** STRT [#A] Configure ~lua-language-server~ integration :feat:
+config.org:8961:*** DONE [#B] Preview Markdown buffers in an external browser :tweak:
+config.org:8973:*** DONE [#B] Fontify source blocks :feat:
+config.org:8983:*** DONE [#B] Show edit buffer in the current window :tweak:
+config.org:9008:*** DONE [#B] Create a =SPC m .= binding like in Org mode :feat:
+config.org:9023:*** DONE [#B] Disable LateX syntax highlighting by default :tweak:
+config.org:9031:*** DONE [#B] Select code block at point with =vie= evil binding :feat:
+config.org:9050:*** DONE [#B] Remove Doom's =M-b= and =M-i= insert state bindings from Markdown :tweak:
+config.org:9058:*** DONE [#B] Add a binding to align Markdown tables :tweak:
+config.org:9066:*** DONE [#B] Disable error reporting in markdown-mode buffers :tweak:
+config.org:9090:*** DONE [#C] Filename-mode associations :feat:
+config.org:9097:*** DONE [#C] Fontify and scale Markdown headers :tweak:hack:
+config.org:9108:*** STRT [#B] Extend editing capabilities of code and pre blocks :feat:hack:
+config.org:9281:*** STRT [#B] Implement folding of code and pre blocks :feat:
+config.org:9332:*** STRT [#B] Associate language names in code block headers with major modes :tweak:
+config.org:9340:*** STRT [#B] Fix live-preview of Markdown buffers :hack:bug:
+config.org:9363:*** STRT [#C] Support reveal.js :feat:
+config.org:9420:*** TODO [#A] Fix font-lock in Markdown buffers :bug:
+config.org:9425:*** TODO [#B] Transform character sequences in Markdown buffers :tweak:
+config.org:9521:*** Document Structure [3/5]
+config.org:9631:*** Tables [0/0]
+config.org:9632:*** Hyperlinks [3/7]
+config.org:9756:*** Todo Items [2/4]
+config.org:9813:*** Tags [0/0]
+config.org:9814:*** Properties and Columns [0/1]
+config.org:9845:*** Dates and Times [0/0]
+config.org:9846:*** Refiling and Archiving [0/1]
+config.org:9856:*** Capture and Attachments [2/3]
+config.org:9907:*** Agenda Views [2/4]
+config.org:9953:*** Markup for Rich Contents [2/3]
+config.org:10003:*** Exporting [2/6]
+config.org:10096:*** Publishing [0/0]
+config.org:10097:*** Working with Source Code [7/12]
+config.org:10356:*** Miscellaneous [1/2]
+config.org:10367:*** Contrib [1/2]
+config.org:10392:*** Pomodoro [2/3]
+config.org:10485:*** DONE [#A] Develop and run a simple "Hello World" program :noexport:doc:
+config.org:10490:*** DONE [#A] Fix quirks with keymaps :bug:tweak:
+config.org:10499:*** DONE [#B] Set up fill column for PEP 8 compliance :tweak:
+config.org:10511:*** DONE [#C] Filename-mode associations :feat:
+config.org:10517:*** TODO [#B] Install texinfo documentation :feat:
+config.org:10538:*** STRT [#B] Discover ~pipx~ virtualenvs with projectile :tweak:
+config.org:10551:*** STRT [#B] Integrate Pipenv with projectile :bug:
+config.org:10590:*** HOLD [#C] Set up debugging :feat:
+config.org:10708:*** DONE [#C] Open =Cargo.lock= files as read-only TOML config files :feat:
+config.org:10714:*** TODO [#B] Get debugging to work :feat:
+config.org:10797:*** DONE [#A] Assume Bourne Shell by default :tweak:
+config.org:10802:*** DONE [#B] Disable error reporting in sh-mode buffers :tweak:
+config.org:10820:*** DONE [#C] Filename-mode associations :tweak:
+config.org:10827:*** DONE [#C] Enable ~outline-minor-mode~ in ~sh-mode~ :feat:
+config.org:10836:*** DONE [#C] Do not run ~lsp!~ in ZSH buffers :bug:
+config.org:10869:*** DONE [#B] Do not use tree-sitter to hightlight sh-mode buffers :bug:tweak:
+config.org:10877:*** STRT [#A] Enable ~hs-minor-mode~ in ~sh-mode~ using Vim fold markers :feat:
+config.org:10911:*** STRT [#C] Edit the current region in an indirect buffer :feat:
+config.org:10935:*** TODO [#B] Improve syntax highlighting for ZSH :tweak:
+config.org:10968:*** TODO [#B] Indent HTML by 2 spaces :tweak:
+config.org:11003:*** DONE [#A] Download the schema definitions if we don't have them already :feat:
+config.org:11015:*** DONE [#B] Allow YAML schemas to be decided in .dir-locals.el :tweak:
+config.org:11020:*** DONE [#B] Display line numbers in YAML mode :tweak:
+config.org:11029:*** STRT [#C] Display indent guides in YAML mode :tweak:
+config.org:11038:*** DONE [#B] Do not use tree-sitter to hightlight YAML :bug:tweak:
+config.org:11046:*** TODO [#A] Fix output from LSP server :bug:
+config.org:11051:*** TODO [#C] Add custom text object queries :feat:
+config.org:11077:*** TODO [#B] Set up mu4e with work email :feat:
+config.org:11112:*** STRT [#A] Install packages :module:
+config.org:11222:*** STRT [#A] Configure kubel :feat:module:
+config.org:11250:*** STRT [#A] Configure kubernetes :feat:module:
+config.org:11304:*** STRT [#C] Configure w3m :tweak:module:
+config.org:11531:*** TODO Documentation
+config.org:11532:*** STRT Packages
+config.org:11541:*** STRT Configuration
+config.org:11585:*** DONE [#A] Configure =circe= for Libera.Chat :doc:
+config.org:11589:*** DONE [#B] Find some interesting channels :doc:
+config.org:11615:*** TODO [#B] Find an easier way to search for channels :tweak:doc:
+config.org:11631:*** TODO [#C] Figure out how to display inline images :tweak:
+config.org:11637:*** DONE [#A] Automatically update feed when opening =elfeed= :tweak:
+config.org:11643:*** OKAY [#A] Undo breakage caused by unfortunate pull request :tweak:
+config.org:11653:*** DONE [#B] Allow widening of the description column :hack:tweak:
+config.org:11673:*** DONE [#C] Leave point on the current entry in the ~*elfeed-search*~ buffer :tweak:
+config.org:11705:*** DONE [#A] Load custom config if present :doc:feat:
+config.org:11749:*** DONE [#A] Detect invalid config before quitting Emacs :feat:
+config.org:11772:*** KILL [#B] Enable automatic discovery of project directories :tweak:
+config.org:11783:*** OKAY [#B] Add search directories for =projectile= :tweak:
+config.org:11805:*** DONE [#B] Remove =straight= package repos from =projectile= :tweak:
+config.org:11825:*** LOOP [#C] Add ergonomic keybindings for hard-to-reach keys :module:tweak:
+config.org:11887:*** DONE [#B] Tangle to =packages.el= :tweak:
+config.org:11890:*** TODO [#C] Link tangled blocks back to source :feat:
+config.org:11893:*** HOLD [#C] Split up my literate config into separate files :tweak:
+config.org:11903:*** DONE [#A] Start with ~smartparens-global-mode~ disabled :tweak:
+config.org:11910:*** DONE [#A] Disable =smartparens= in the minibuffer, including the =evil-ex= prompt :tweak:
+config.org:11919:*** DONE [#A] Adjust =which-key= timing :tweak:
+config.org:11927:*** DONE [#A] Improve builtin help :feat:
+config.org:11941:*** DONE [#B] Do not display line numbers in text mode :tweak:
+config.org:11946:*** DONE [#B] Do not display line numbers in lisp interaction mode :tweak:
+config.org:11952:*** DONE [#B] Normalize the behavior of toggling line numbers :tweak:bug:
+config.org:11989:*** DONE [#B] Define additional Doom search functions :feat:
+config.org:12022:*** DONE [#B] Add additional file keybindings :feat:
+config.org:12037:*** OKAY [#A] Prevent the =which-key= popop from "bouncing" :bug:doc:
+config.org:12083:*** DONE [#B] Improve interactive frame selection :feat:
+config.org:12097:*** STRT [#B] Add additional toggle keybindings :tweak:module:

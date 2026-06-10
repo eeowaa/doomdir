@@ -97,7 +97,7 @@
 ;;LEAN (syntax +childframe)
        (syntax)
                          ; tasing you for every semicolon you forget
-;;GONE spell             ; tasing you for misspelling mispelling
+;;GONE (spell +hunspell +flyspell) ; tasing you for misspelling mispelling
 ;;GONE grammar           ; tasing grammar mistake every you make
 
        :tools
@@ -129,7 +129,7 @@
        ;;prodigy           ; FIXME managing external services & code builders
        ;;rgb               ; creating color strings
        ;;taskrunner        ; taskrunner for all your projects
-       ;;(terraform +lsp)  ; infrastructure as code
+;;GONE (terraform +lsp)  ; infrastructure as code
        ;;tmux              ; an API for interacting with tmux
        tree-sitter       ; syntax and parsing, sitting in a tree...
        ;;upload            ; map local to remote projects via ssh/ftp
@@ -186,7 +186,7 @@
        ;;nim               ; python + lisp at the speed of c
        ;;nix               ; I hereby declare "nix geht mehr!"
        ;;ocaml             ; an objective camel
-;;LEAN (org +dragndrop +gnuplot +journal +jupyter +noter +pandoc +pomodoro +present +roam2)
+;;LEAN (org +dragndrop +journal +noter +pandoc +pomodoro +present +roam2)
        (org +pandoc)
                          ; organize your plain life in plain text
        ;;php               ; perl's insecure younger brother

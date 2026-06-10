@@ -234,7 +234,8 @@ called by the latter."
 ;; Search output
 (buffer-group-side-window-setup
  (buffer-group-define search
-   `(:modes (occur-mode grep-mode
+   `(:names ("^\\*Find\\*")
+     :modes (occur-mode grep-mode
              ,@(when (modulep! :completion vertico)
                  '(embark-collect-mode))))))
 

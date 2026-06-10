@@ -1,0 +1,121 @@
+# DNF packages
+
+Reference:
+ x: Installed as a system package
+ o: Installed through some other mechanism
+ /: Not required
+ -: Alternative program might work
+
+## Development
+
+[o] direnv (curl)
+[o] editorconfig (npm)
+
+## Terminals
+
+[o] libvterm => unpack into $installroot
+[x] screen
+
+## Shell
+
+[x] bash
+[/] zsh
+[/] fish
+[/] powershell
+[o] ShellCheck ($installroot + cabal)
+
+## Python
+
+[x] python3
+[x] pipx (python)
+
+## C/C++
+
+[x] gcc
+[x] gdb
+[ ] clang
+[ ] clang-devel
+[ ] clang-tools-extra
+[x] cmake
+[ ] glslang
+[ ] lldb
+[ ] llvm
+[ ] llvm-devel
+[ ] rapidjson-devel
+
+## HTML/JS/CSS
+
+[ ] tidy
+
+## Golang
+
+[o] golang (curl)
+
+## Lua
+
+[/] lua-devel
+[/] luarocks
+
+## .NET
+
+[/] dotnet
+
+## Racket
+
+[/] racket
+
+## Jupyter
+
+[/] zeromq-devel
+[/] libstdc++-static
+
+## IaC
+
+[/] terraform
+[/] terraform-ls
+
+## Visualization
+
+[/] ditaa
+[/] gnuplot
+[x] graphviz
+
+## Security
+
+[x] gnutls
+[x] openssh-askpass
+
+## Spelling and grammar
+
+[-] aspell (hunspell)
+[x] java-latest-openjdk-headless
+[ ] wordnet
+
+## Desktop integration
+
+[/] xclip
+[x] xdotool
+[/] xprop
+[/] xwininfo
+
+## System fonts
+
+[ ] terminus-fonts
+
+## LaTeX
+
+[ ] texlive-scheme-basic
+[ ] texlive-ulem
+
+## Documentation lookup
+
+[ ] w3m
+
+## Miscellaneous
+
+[x] coreutils
+[x] unzip
+[x] jq
+[o] ripgrep (cargo)
+[o] pandoc ($installroot + cabal) - WIP
+[x] sqlite

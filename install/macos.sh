@@ -128,9 +128,6 @@ brew install font-terminus
 
 # TODO: Comic Mono
 
-# Install prerequisites for `ui/treemacs` module
-brew install python3
-
 # Install prerequisites for `emacs/dired` module
 brew install coreutils
 
@@ -188,13 +185,26 @@ brew install pkg-config poppler automake
 # Install prerequisites for `tools/pdf` module
 sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
 
+# Install prerequisites for `tools/terraform` module
+brew install terraform hashicorp/tap/terraform-ls
+
 # Install prerequisites for `lang/cc` module
 brew install ccls gdb glslang
 
 # Install prerequisites for `lang/data` module
-curl --create-dirs \
-    -fsSLo ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
-    https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.20.0/org.eclipse.lemminx-0.20.0-uber.jar
+
+## xmllint
+brew install libxml2
+
+## xmlls
+(
+    xmlls_baseurl=https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx
+    xmlls_version=`curl -fsSLo- "$xmlls_baseurl/maven-metadata.xml" | xmllint --xpath '/metadata/versioning/release/text()' -`
+    mkdir -p ~/.config/emacs/.local/etc/lsp/xmlls
+    cd ~/.config/emacs/.local/etc/lsp/xmlls
+    curl -fsSLO "$xmlls_baseurl/$xmlls_version/org.eclipse.lemminx-$xmlls_version-uber.jar"
+    ln -sf "org.eclipse.lemminx-$xmlls_version-uber.jar" org.eclipse.lemminx-uber.jar
+)
 
 # Install prerequisites for `lang/go` module
 (cd ~/Documents/src/life/stow-dotfiles && make go)
@@ -225,7 +235,9 @@ npm install -g markdownlint-cli marked
 
 # Install prerequisites for `lang/org` module
 brew install ditaa gnuplot pandoc graphviz pngpaste
-mkdir -p ~/org/roam
+
+# Create `org-directory` if missing
+mkdir -p ~/Documents/notes
 
 # Install prerequisites for `lang/python` module
 brew install python

@@ -36,6 +36,12 @@
 
   ;;; Define additional buffer groups
 
+  ;; FIXME Bookmarks > Auxiliary
+  (buffer-group-side-window-setup
+   (buffer-group-define bookmarks-aux
+     `(:names ("^\\*Bookmark Annotation\\( Compose\\)?\\*")))
+   '((side . top) (slot . 1)))
+
   ;; Calendars
   (buffer-group-side-window-setup
    (buffer-group-define calendar
@@ -55,6 +61,14 @@
        `(:names ("^\\*bitwarden-list\\*")
          :modes (bitwarden-list-dialog-mode)))
      '((side . top))))
+
+  ;; Message inbox
+  (buffer-group-side-window-setup
+   (buffer-group-define inbox '(:names () :modes ()))
+   '((side . top)))
+  (when (modulep! :tools magit +forge)
+    (buffer-group-property-pushnew 'inbox :names "^\\*forge-topics\\*")
+    (buffer-group-property-pushnew 'inbox :modes 'forge-topics-mode))
 
   (when (modulep! :tools docker)
     ;; Docker > Object listings
@@ -92,7 +106,7 @@
     ;; Magit > Interactive edits
     (buffer-group-side-window-setup
      (buffer-group-define magit-edit
-       `(:names ("^\\(?:\\(?:COMMIT\\|TAG\\)_EDIT\\|MERGE_\\)MSG")))
+       `(:names ("^\\(?:\\(?:COMMIT\\|TAG\\|NOTES\\)_EDIT\\|MERGE_\\)MSG")))
      '((side . bottom) (slot . 1)))
 
     ;; Magit > Interactive selections

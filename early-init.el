@@ -36,6 +36,16 @@ WARNINGS:
 (unless initial-window-system
   (use-package-hook! company-box :pre-config nil))
 
+(when (getenv "SSH_CLIENT")
+  ;; :completion vertico +icons
+  (advice-add 'nerd-icons-completion-marginalia-setup :override #'always))
+
+;; Prevent loading of nerd icons when using Emacs over SSH
+(when (getenv "SSH_CLIENT")
+  (use-package-hook! treemacs-nerd-icons
+    :pre-init nil     ;; (require 'treemacs-nerd-icons)
+    :pre-config nil)) ;; (treemacs-load-theme "nerd-icons")
+
 (use-package-hook! persp-mode
   :pre-init (setq persp-keymap-prefix (kbd "C-c w")))
 

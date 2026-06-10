@@ -80,6 +80,19 @@ with special dedication semantics."
       (prog1 t (message "Window is strongly dedicated"))
     (prog1 nil (message "Window is no longer dedicated"))))
 
+(defvar my/toggle-window-splitting--restore-function #'split-window-sensibly)
+(defun my/toggle-window-splitting ()
+  "Toggle the ability to split most windows."
+  (interactive)
+  (if (eq split-window-preferred-function #'ignore)
+      (prog1 t
+        (setq split-window-preferred-function my/toggle-window-splitting--restore-function)
+        (message "Window splitting has been globally restored"))
+    (prog1 nil
+      (setq my/toggle-window-splitting--restore-function split-window-preferred-function
+            split-window-preferred-function #'ignore)
+      (message "Window splitting has been globally disabled"))))
+
 (define-key! evil-window-map
   ;; replaces `+workspace/close-window-or-workspace'
   "d" #'my/dedicate-window-temporarily
@@ -155,6 +168,8 @@ with special dedication semantics."
 
 (unless initial-window-system
   (setq-default wrap-prefix "↪ "))
+
+(setq visible-cursor nil)
 
 (setq-hook! '(prog-mode-hook text-mode-hook conf-mode-hook)
   indicate-empty-lines t)
@@ -234,9 +249,9 @@ with special dedication semantics."
     (eeowaa-use-face tab-bar mode-line-inactive)))
 
 (setq doom-theme
-      (if initial-window-system
-          'ef-bio
-        'ef-tritanopia-dark))
+      (cond (initial-window-system 'ef-bio)
+            ((getenv "SSH_CLIENT") 'modus-vivendi) ;; best theme over SSH
+            (t 'ef-tritanopia-dark)))
 
 (after! (:and solaire-mode (:or vertico ivy))
   (let ((face (cond
@@ -251,14 +266,15 @@ with special dedication semantics."
 (setq my/fonts '(("Iosevka Comfy Fixed" ;; Remove " Fixed" if you want ligatures
                   :variable-pitch "Iosevka Comfy Duo"
                   :serif "Iosevka Comfy Motion Fixed"
-                  :default-size 16)
+                  ;; :default-size 15)
+                  :default-size 14)
                  ("Source Code Pro"
-                  :default-size 22)
+                  :default-size 15)
                  ("Terminus"
                   :default-size 30)
                  ("Comic Mono"
                   :variable-pitch "Comic Neue"
-                  :default-size 24)))
+                  :default-size 16)))
 
 ;; Define a fuction to change the fonts
 (defun my/select-font (font &optional size)
@@ -285,6 +301,7 @@ When called interactively, reload the fonts in the current session."
 
 ;; Set the font
 (my/select-font "Iosevka Comfy Fixed")
+;; (my/select-font "Comic Mono")
 
 ;; (add-hook 'doom-load-theme-hook #'doom-themes-treemacs-config)
 
@@ -660,6 +677,80 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (setq +ligatures-in-modes '(org-mode)
       +ligatures-extras-in-modes '(org-mode))
 
+;; HACK: I redefine `doom-modeline-format--main' from its original value (see below)
+;; because `doom-modeline' is not responding to changes to `doom-modeline-buffer-name'
+;; as it should. Other segments have been removed and rearranged, as well.
+;;
+;;   (doom-modeline-def-modeline 'main
+;;     '(eldoc bar workspace-name window-number modals matches follow buffer-info remote-host buffer-position word-count parrot selection-info)
+;;     '(compilation objed-state misc-info project-name persp-name battery grip irc mu4e gnus github debug repl lsp minor-modes input-method indent-info buffer-encoding major-mode process vcs check time))
+;;
+
+;; Do not display buffer size in `doom-modeline-segment--matches'.
+(setq size-indication-mode nil)
+
+;; Always display the project in `doom-modeline-segment--project-name' (part 1 of 2).
+(setq doom-modeline-project-name t)
+
+(after! doom-modeline
+
+  ;; Always display the project in `doom-modeline-segment--project-name' (part 2 of 2).
+  (add-to-list 'doom-modeline-always-visible-segments 'project-name)
+
+  ;; Remove extra surrounding spaces
+  (doom-modeline-def-segment my/modals
+    "Displays modal editing states for `evil'."
+    (when doom-modeline-modal
+      (doom-modeline--evil)))
+
+  ;; Move percent before line/column and remove position scroller
+  (doom-modeline-def-segment my/buffer-position
+    "The buffer position information."
+    (let ((sep (doom-modeline-spc))
+          (face (doom-modeline-face))
+          (help-echo "Buffer percentage\n\
+  mouse-1: Display Line and Column Mode Menu")
+          (mouse-face 'doom-modeline-highlight)
+          (local-map mode-line-column-line-number-mode-map))
+      `(,sep
+
+        ;; Percent position
+        (doom-modeline-percent-position
+         ((:propertize ("" doom-modeline-percent-position)
+           face ,face
+           help-echo ,help-echo
+           mouse-face ,mouse-face
+           local-map ,local-map)
+          ,sep
+          ))
+
+        ;; Line and column
+        (:propertize
+         ((line-number-mode
+           (column-number-mode
+            (doom-modeline-column-zero-based
+             doom-modeline-position-column-line-format
+             ,(string-replace
+               "%c" "%C" (car doom-modeline-position-column-line-format)))
+            doom-modeline-position-line-format)
+           (column-number-mode
+            (doom-modeline-column-zero-based
+             doom-modeline-position-column-format
+             ,(string-replace
+               "%c" "%C" (car doom-modeline-position-column-format)))))
+          (doom-modeline-total-line-number
+           ,(and doom-modeline-total-line-number
+                 (format "/%d" (line-number-at-pos (point-max))))))
+         face ,face
+         help-echo ,help-echo
+         mouse-face ,mouse-face
+         local-map ,local-map)
+        ((or line-number-mode column-number-mode) ,sep))))
+
+  (doom-modeline-def-modeline 'main
+    '(bar window-number my/modals follow remote-host my/buffer-position matches selection-info)
+    '(compilation check misc-info repl lsp input-method buffer-encoding major-mode process project-name vcs)))
+
 (if initial-window-system
     ;; Just display an icon for file-visiting buffers
     (setq doom-modeline-highlight-modified-buffer-name nil)
@@ -693,6 +784,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     (nerd-icons-install-fonts t)))
 
 (setq column-number-indicator-zero-based nil)
+
+(when (getenv "SSH_CLIENT")
+  (setq! doom-modeline-icon nil))
 
 (after! evil-goggles
 
@@ -809,53 +903,23 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   ;; Treemacs buffers are treated specially
   (cl-pushnew 'treemacs-mode vimish-tab-exclude-modes))
 
-;; Little tweaks after upgrading to Emacs 29.2 and the newest Doom
-;; (setq treemacs-no-png-images t
-;;       treemacs-indentation-string " ┃")
-;; (after! treemacs
-;;   (treemacs-indent-guide-mode))
-;; TODO: `treemacs-sorting' (sort by file extension, etc.)
+;; Load custom Treemacs theme definitions
+(after! treemacs
+  (require 'eeowaa-treemacs-themes))
+
+;; Simplify the modeline
 (setq treemacs-user-mode-line-format " Treemacs")
-(setq treemacs-indentation (if initial-window-system 3 2))
 
-;; XXX: Run this before opening icons
-;; FIXME: Some icons (LICENSE, packages.lock, *.service) are 3 characters wide instead of 2
-;; REVIEW: `treemacs-resize-icons', `treemacs--icon-size'
-(defun my/treemacs-fix-nerd-icons ()
-  (interactive)
-  (dolist (item nerd-icons-extension-icon-alist)
-    (let* ((extension (car item))
-           (func (cadr item))
-           (args (append (list (cadr (cdr item))) '(:v-adjust -0.05 :height 1.0) (cdr (cddr item))))
-           (icon (apply func args)))
-      (let* ((icon-pair (cons (format "%s%s" icon treemacs-nerd-icons-tab) (format "%s%s" icon treemacs-nerd-icons-tab)))
-             (gui-icons (treemacs-theme->gui-icons treemacs--current-theme))
-             (tui-icons (treemacs-theme->tui-icons treemacs--current-theme))
-             (gui-icon  (car icon-pair))
-             (tui-icon  (cdr icon-pair)))
-        (ht-set! gui-icons extension gui-icon)
-        (ht-set! tui-icons extension tui-icon))))
-
-  (treemacs-create-icon :icon (format "%s%s" (nerd-icons-faicon "nf-fa-folder_open"  :face 'treemacs-nerd-icons-file-face) treemacs-nerd-icons-tab)
-                        :extensions (dir-open)
-                        :fallback 'same-as-icon)
-
-  (treemacs-create-icon :icon (format "%s%s" (nerd-icons-faicon "nf-fa-folder"  :face 'treemacs-nerd-icons-file-face) treemacs-nerd-icons-tab)
-                        :extensions (dir-closed)
-                        :fallback 'same-as-icon)
-
-  (treemacs-create-icon :icon (format "%s%s" (nerd-icons-faicon "nf-fa-file_o" :face 'treemacs-nerd-icons-file-face) treemacs-nerd-icons-tab)
-                        :extensions (fallback)
-                        :fallback 'same-as-icon))
-
+;; Allow resizable fonts
 (setq doom-themes-treemacs-enable-variable-pitch nil)
 
-(setq +treemacs-git-mode 'extended)
+;; Set the text scale to -1 in graphical Emacs
+(setq treemacs-text-scale (if initial-window-system -1 0))
 
-(require 'ace-window)
-
+;; Do not read from popup frames
 (setq treemacs-read-string-input 'from-minibuffer)
 
+;; Add keybindings to visit adjacent files
 (after! treemacs-evil
   (defun my/treemacs-visit-next ()
     "Open the next node in another window."
@@ -873,218 +937,58 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
     "J" #'my/treemacs-visit-next
     "K" #'my/treemacs-visit-previous))
 
+;; Allow selection of treemacs window via `ace-window'
 (after! (:and treemacs ace-window)
   (setq aw-ignored-buffers (delq 'treemacs-mode aw-ignored-buffers)))
 
-(setq treemacs-show-cursor t)
-
-;; No need for the fringe indicator with `hl-line' mode and visible cursor
-;; (after! doom-themes-ext-treemacs
-;;   (with-eval-after-load 'treemacs
-;;     (setq treemacs-fringe-indicator-mode nil)))
-(with-eval-after-load 'treemacs
-  (setq treemacs-fringe-indicator-mode nil))
-
-;; Use a solid box cursor instead of an underline
-(setq-hook! 'treemacs-mode-hook
-  evil-treemacs-state-cursor 'box)
-
-(after! doom-themes-ext-treemacs
-  (with-eval-after-load 'treemacs
-    (remove-hook 'treemacs-mode-hook #'doom-themes-hide-fringes-maybe)
-    (advice-remove #'treemacs-select-window #'doom-themes-hide-fringes-maybe)))
-
-(setq treemacs-text-scale (if initial-window-system -1 0))
-
+;; Configure `revert-buffer' (modified from original config)
 (after! treemacs
   (defun my/treemacs-revert-buffer-function (&rest _)
-    (when initial-window-system
-      ;; HACK: Right now, TUI icons look good
-      (my/treemacs-modify-icons))
     (treemacs-refresh))
   (setq-hook! 'treemacs-mode-hook
     revert-buffer-function #'my/treemacs-revert-buffer-function))
 
-;; REVIEW Consider detecting troublesome icons and automatically falling back to
-;; the default icon for text files.
-(defvar my/treemacs-icon-extension-alist
-  '(
-   ;("org" . ("org_archive"))
-   ;("sh" . ("bat"))
-   ;("txt" . ("Pipfile"))
-   ;("json" ;; "configuration" icon
-   ; . ("project"
-   ;    "Pipfile.lock"
-   ;    "Cargo.lock"
-   ;    "Cargo.toml"
-   ;    ;; systemd units
-   ;    "service"
-   ;    "socket"
-   ;    "device"
-   ;    "mount"
-   ;    "automount"
-   ;    "swap"
-   ;    "target"
-   ;    "path"
-   ;    "timer"
-   ;    "slice"
-   ;    "scope"))
-   ;("xlsx" . ("ods"))
+(if (getenv "SSH_CLIENT")
+    ;; Prevent treemacs from using icons when using Emacs over SSH
+    (progn
+      (setq treemacs-no-png-images t
+            doom-themes-treemacs-theme "eeowaa-minimal" ;; REVIEW This is not taking effect
+            lsp-treemacs-theme "eeowaa-minimal") ;; REVIEW This is not taking effect
 
-    ;; TODO Match on file "vcs/dir-.+-closed\\.svg"
-    ("dir-closed"
-     . ("src-closed"
-        "test-closed"
-        "bin-closed"
-        "build-closed"
-        "git-closed"
-        "github-closed"
-        "public-closed"
-        "private-closed"
-        "temp-closed" "tmp-closed"
-        "readme-closed" "docs-closed"
-        "screenshots-closed" "icons-closed"))
+      (after! treemacs-icons
+        ;; Treemacs doesn't know when we are using SSH
+        (defadvice! my/treemacs--no-images-a (&rest _)
+          :override '(treemacs--is-image-creation-impossible?
+                      treemacs--is-image-creation-impossible?--inliner)
+          t)
 
-    ;; TODO Match on file "vcs/dir-.+-open\\.svg"
-    ("dir-open"
-     . ("src-open"
-        "test-open"
-        "bin-open"
-        "build-open"
-        "git-open"
-        "github-open"
-        "public-open"
-        "private-open"
-        "temp-open" "tmp-open"
-        "readme-open" "docs-open"
-        "screenshots-open" "icons-open")))
-  "Alist of file extension mappings for Treemacs icons.
+        ;; Always use two spaces for file icons
+        ;; FIXME: I always have to set `treemacs-icon-fallback' in the buffer
+        ;;  (defadvice! my/treemacs--no-icons-a (&rest _)
+        ;;    :override '(treemacs-icon-for-file
+        ;;                treemacs-icon-for-file--inliner
+        ;;                treemacs-icon-for-mode
+        ;;                treemacs-icon-for-mode--inliner)
+        ;;    treemacs-icon-fallback)
+        (setq treemacs-icon-fallback "  ")
+        (setq-default treemacs-icon-fallback "  ")
+        (setq-hook! 'treemacs-mode-hook treemacs-icon-fallback "  ")
+        (add-hook! 'treemacs-mode-hook :append
+          (defun my/treemacs-load-minimal-theme ()
+            (treemacs-load-theme "eeowaa-minimal")))))
 
-The `car' of each element is a file extension with a desirable
-Treemacs icon; the `cdr' is a list of file extensions that should
-use that same icon.
+  ;; Use a custom Treemacs theme
+  (setq doom-themes-treemacs-theme "eeowaa-nerd-icons"
+        lsp-treemacs-theme "eeowaa-nerd-icons")
+  (add-hook! 'treemacs-mode-hook :append
+    (defun my/treemacs-load-nerd-theme ()
+      (treemacs-load-theme "eeowaa-nerd-icons"))))
 
-If the `car' is a string, it is treated case-insensitively, as
-Treemacs defines string extensions as lowercase. See the
-`treemacs-icons' package for more info; for a quick reference,
-see how `treemacs-create-theme' is used to define the \"Default\"
-Treemacs theme.")
+;; Use proper indentation for the environment
+(setq treemacs-indentation (if initial-window-system 3 2))
 
-(defvar my/treemacs-fallback-icon-alist
-  '((dir-closed . " +\t")
-    (dir-open . " -\t")
-    (root-closed . " +\t")
-    (root-open . " -\t"))
-  "Alist of file extension mappings for Treemacs TUI icons.
-
-The `car' of each element is a file extension or a symbol
-representing a special Treemacs entry (see documentation for the
-EXTENSIONS argument of `treemacs-create-icon' for more info).
-
-The `cdr' of each element is a string to use in place of an icon
-in TTY Emacs (or whenever Treemacs cannot render icons).")
-
-(defvar my/treemacs-fallback-icon-default "  \t"
-  "Default fallback string for TUI icons.
-
-This string is used as the TUI icon for all Treemacs entries not
-matched in `my/treemacs-icon-fallback-alist'.")
-
-(defun my/treemacs-fallback-icon (extension)
-  "Return the fallback icon corresponding to EXTENSION."
-  (when (stringp extension)
-    (setq extension (downcase extension)))
-  (or (alist-get extension my/treemacs-fallback-icon-alist)
-      my/treemacs-fallback-icon-default))
-
-(after! treemacs
-  (defun my/treemacs-modify-icons (&optional theme)
-    "Modify the icons for the Treemacs THEME (default current).
-The following variables are consulted when modifying the theme:
-
-  `my/treemacs-icon-extension-alist'
-  `my/treemacs-fallback-icon-alist'
-  `my/treemacs-fallback-icon-default'
-
-Call this function after `treemacs-create-theme' is called to
-ensure your customizations take hold."
-    (unless (treemacs-theme-p theme)
-      (setq theme (if (stringp theme)
-                      (treemacs--find-theme theme)
-                    treemacs--current-theme)))
-    (let ((gui-icons (treemacs-theme->gui-icons theme))
-          (tui-icons (treemacs-theme->tui-icons theme)))
-
-      ;; Modify GUI icons
-      (dolist (entry my/treemacs-icon-extension-alist)
-        (let* ((key (car entry))
-               (gui-icon (treemacs-get-icon-value (if (stringp key) (downcase key) key)))
-               (extension-list (cdr entry)))
-          (dolist (ext extension-list)
-            (ht-set! gui-icons (if (stringp ext) (downcase ext) ext) gui-icon))))
-
-      ;; Modify TUI icons
-      (treemacs--maphash tui-icons (extension _)
-        (ht-set! tui-icons extension (my/treemacs-fallback-icon extension)))))
-
-  ;; FIXME: This advice either causes errors or fails to run
-  (undefadvice! my/treemacs-modify-icons-a (theme &rest _)
-    :after #'treemacs-create-theme
-    :before #'treemacs-load-theme
-    (my/treemacs-modify-icons theme))
-
-  ;; FIXME: This doesn't work, either (this is easy to see when
-  ;; `doom-themes-treemacs-theme' is set to `doom-color', or when running in TTY
-  ;; Emacs). The only workaround I've found is to run `my/treemacs-modify-icons'
-  ;; manually after opening Treemacs, closing the Treemacs window via
-  ;; `treemacs-kill-buffer', and then opening Treemacs again.
-  (add-hook! 'doom-load-theme-hook :append #'my/treemacs-modify-icons)
-
-  ;; FIXME This function does not work when the Treemacs window is selected.
-  ;; Also, the Treemacs window is always selected after this function runs, and
-  ;; I'd rather keep the current window selected.
-  (defun my/treemacs-select-theme ()
-    "Select and load a new Treemacs theme.
-Closes and re-opens Treemacs to apply the new theme."
-    (interactive)
-    (call-interactively #'treemacs-load-theme)
-    (unless (eq (treemacs-current-visibility) 'none)
-      (treemacs-select-window)
-      (treemacs-kill-buffer)
-      (treemacs)))
-
-  (defun my/treemacs-current-theme ()
-    "Return the name of the current Treemacs theme."
-    (treemacs-theme->name treemacs--current-theme)))
-
-;; I think I actually prefer the `doom-atom' theme -- it's less distracting
-;; (setq doom-themes-treemacs-theme "doom-colors")
-(setq doom-themes-treemacs-theme "nerd-icons")
-
-(defun my/treemacs-workaround-fix ()
-  "Run this command if Treemacs fails to open"
-  (interactive)
-  (cl-assert (eq major-mode 'treemacs-mode))
-
-  ;; Workaround for utter brokenness
-  (treemacs--consolidate-projects)
-
-  ;; This is to facillitate a workaround for ugly icons
-  (setq revert-buffer-function #'my/treemacs-revert-buffer-function)
-
-  ;; Display the modeline in the expected format
-  (treemacs--setup-mode-line)
-
-  ;; Expand the root node at the top of the Treemacs buffer
-  (goto-char 0)
-  (treemacs-do-for-button-state
-   :on-root-node-closed (treemacs--expand-root-node btn)
-   :on-root-node-open (ignore btn)))
-
-(setq treemacs-hide-dot-git-directory nil)
-
-(after! diff-hl
-  (unless (window-system) (diff-hl-margin-mode)))
+;; REVIEW Where is this supposed to happen?
+;; (add-hook 'doom-load-theme-hook #'doom-themes-treemacs-config))
 
 (defvar my/diff-hl-minor-modes '(not git-commit-mode smerge-mode)
   "List of minor modes to prevent `diff-hl-mode' from activating.
@@ -1103,6 +1007,9 @@ works even when `global-diff-hl-mode' is disabled.")
    ((eq (car-safe my/diff-hl-minor-modes) 'not)
     (not (seq-intersection local-minor-modes (cdr my/diff-hl-minor-modes))))
    (t (seq-intersection local-minor-modes my/diff-hl-minor-modes))))
+
+(after! diff-hl
+  (unless (window-system) (diff-hl-margin-mode)))
 
 (when (and (modulep! :ui vc-gutter +pretty)
            (modulep! :ui vc-gutter +diff-hl)
@@ -1133,10 +1040,11 @@ works even when `global-diff-hl-mode' is disabled.")
 
 (setq aw-background nil)
 
-(defadvice! my/aw-face-height-a (theme &rest _)
-  :after '(load-theme consult-theme)
-  (set-face-attribute 'aw-leading-char-face nil
-                      :height (face-attribute 'default :height)))
+(after! ace-window
+  (defadvice! my/aw-face-height-a (theme &rest _)
+    :after '(load-theme consult-theme)
+    (set-face-attribute 'aw-leading-char-face nil
+                        :height (face-attribute 'default :height))))
 
 (map! :leader
       (:when (modulep! :ui workspaces)
@@ -1188,7 +1096,7 @@ works even when `global-diff-hl-mode' is disabled.")
                   (bound-and-true-p diff-hl-mode))
 
             ;; Remove distractions
-            (setq display-line-numbers nil)
+            (display-line-numbers-mode -1)
             (hl-line-mode -1)
             (column-highlight-mode -1)
             (display-fill-column-indicator-mode -1)
@@ -1198,7 +1106,9 @@ works even when `global-diff-hl-mode' is disabled.")
             (diff-hl-mode -1))
 
         ;; Restore previous state
-        (setq display-line-numbers my/zen--old-display-line-numbers)
+        (if my/zen--old-display-line-numbers
+            (let ((display-line-numbers-type my/zen--old-display-line-numbers))
+              (display-line-numbers-mode)))
         (if my/zen--old-hl-line-mode (hl-line-mode +1))
         (if my/zen--old-column-highlight-mode (column-highlight-mode +1))
         (if my/zen--old-display-fill-column-indicator-mode (display-fill-column-indicator-mode +1))
@@ -1312,6 +1222,17 @@ current buffer first unless the `force' argument is given."
 
 (setq evil-v$-excludes-newline t)
 
+(when (modulep! :editor evil +everywhere)
+  (add-hook 'Info-mode-hook #'evil-collection-info-setup))
+
+(defadvice! my/ergonomic-info-bindings-a (&rest _)
+  :after #'evil-collection-info-setup
+  (evil-collection-define-key 'normal 'Info-mode-map
+    (kbd "C-t") nil ;; open this up for `vimish-tab'
+    (kbd "C-i") 'Info-next-reference
+    (kbd "M-,") 'Info-history-back
+    (kbd "C-M-,") 'Info-history-forward))
+
 (after! 5x5
   (map! :mode 5x5-mode
     :e "k" #'5x5-up
@@ -1361,14 +1282,6 @@ current buffer first unless the `force' argument is given."
     :e "H" #'solitaire-move-left
     :e "K" #'solitaire-move-up
     :e "J" #'solitaire-move-down))
-
-(defadvice! my/ergonomic-info-bindings-a (&rest _)
-  :after #'evil-collection-info-setup
-  (evil-collection-define-key 'normal 'Info-mode-map
-    (kbd "C-t") nil ;; open this up for `vimish-tab'
-    (kbd "C-i") 'Info-next-reference
-    (kbd "M-,") 'Info-history-back
-    (kbd "C-M-,") 'Info-history-forward))
 
 (map! :v "]b" #'base64-encode-region
       :v "[b" #'base64-decode-region)
@@ -1432,9 +1345,8 @@ deleting the final newline before inserting the \")))\"."
   (setq native-comp-speed 2
         package-native-compile t))
 
-(let ((srcdir (format "%s.local/src/emacs/emacs-%s/src"
-                      (file-name-as-directory (getenv "HOME"))
-                      emacs-version)))
+(let ((srcdir (format "%s.local/src/emacs/gnu-emacs/src"
+                      (file-name-as-directory (getenv "HOME")))))
   (when (file-directory-p srcdir)
     (setq find-function-C-source-directory srcdir)))
 
@@ -1558,6 +1470,20 @@ of the current buffer."
 
 (global-set-key [remap font-lock-update] #'my/font-lock-update)
 
+(defun my/current-buffer-information ()
+  (interactive)
+  (let* ((filepath (if buffer-file-name (abbreviate-file-name buffer-file-name) "nil"))
+         (new (if (and buffer-file-name (not (file-exists-p buffer-file-name))) "[new]" ""))
+         (modified (if (buffer-modified-p) "[modified]" ""))
+         (readonly (if buffer-read-only "[readonly]" ""))
+         (space (if (zerop (length (format "%s%s%s" new modified readonly))) "" " "))
+         (lines (format "%d lines" (save-restriction
+                                     (widen)
+                                     (count-lines (point-min) (point-max))))))
+    (message "%S %s%s%s%s%s %S" filepath new modified readonly space lines (buffer-name))))
+
+(define-key! help-map "h" #'my/current-buffer-information)
+
 (defun my/zoomwin-toggle ()
   "Zoom or unzoom the selected window.
 If the current frame has multiple windows, delete other windows.
@@ -1607,6 +1533,13 @@ If the current frame has one window, restore the previous windows."
                       dired-listing-switches)
               (concat dired-listing-switches " -d"))))
 
+(when (getenv "SSH_CLIENT")
+  (when (modulep! :emacs dired +icons)
+    (after! dirvish
+      (setq dirvish-subtree-always-show-state nil)
+      (delq! 'nerd-icons dirvish-attributes)
+      (delq! 'subtree-state dirvish-attributes))))
+
 (defun my/+dired-split-jump ()
   (interactive)
   (select-window (split-window-below))
@@ -1636,12 +1569,21 @@ If the current frame has one window, restore the previous windows."
 
 (add-hook 'ibuffer-mode-hook #'ibuffer-auto-mode)
 
+(when (and (getenv "SSH_CLIENT")
+           (modulep! :emacs ibuffer +icons))
+  (after! ibuffer
+    (setcar ibuffer-formats
+            (let ((fmt (car ibuffer-formats)))
+              (append (seq-subseq fmt 0 5)
+                      (seq-subseq fmt 7)))))
+  (after! ibuffer-projectile
+    (setq ibuffer-projectile-prefix "Project: ")))
+
 (add-hook! ibuffer-mode
   (defun my/ibuffer-mode-line-h ()
     "Clean up the modeline and improve performance."
     (setcar mode-line-process "by ")
     (setf (nth 2 ibuffer-header-line-format) " by ")))
-    ;; (setf (alist-get 'header-line-format mode-line-process) "")))
 
 ;; This should already be enabled by emacs/undo/config.el
 (global-undo-tree-mode)
@@ -2058,6 +2000,9 @@ which causes problems even if there is no existing buffer."
 (after! ansible
   (pushnew! evil-normal-state-modes 'ansible-doc-module-mode))
 
+(after! projectile
+  (add-to-list 'projectile-project-root-files "ansible.cfg"))
+
 (map! :leader
       (:prefix-map ("o" . "open")
        :desc "Bitwarden vault" "v" #'bitwarden-list-all))
@@ -2149,12 +2094,13 @@ which causes problems even if there is no existing buffer."
 
 ;; Replace default association with a more generic one
 (delq! "/Dockerfile\\(?:\\.[^/\\]*\\)?\\'" auto-mode-alist #'assoc-string)
-(pushnew! auto-mode-alist
-          '("/[^/\\]*\\<\\(Docker\\|Container\\)file\\>[^/\\]*$" . dockerfile-mode))
+(add-to-list 'auto-mode-alist
+             '("/[^/\\]*\\<\\(Docker\\|Container\\)file\\>[^/\\]*$" . dockerfile-mode)
+             'append)
 
 (after! editorconfig
   (add-to-list 'editorconfig-exclude-regexps
-               "/\\(?:\\(?:COMMIT\\|TAG\\)_EDIT\\|MERGE_\\)MSG\\'"))
+               "/\\(?:\\(?:COMMIT\\|TAG\\|NOTES\\)_EDIT\\|MERGE_\\)MSG\\'"))
 
 (defvar-local my/linked-buffer nil
   "The buffer that `my/send-region' sends text to.")
@@ -2385,8 +2331,14 @@ This variable should be set by `my/lsp-ui-set-delay'.")
   (setq my/lsp-ui-imenu-text-scale -1)
   (after! lsp-ui-imenu
     (defun my/lsp-ui-imenu-text-scale-h ()
-      (text-scale-increase my/lsp-ui-imenu-text-scale))
+      (text-scale-set my/lsp-ui-imenu-text-scale))
     (add-hook 'lsp-ui-imenu-mode-hook #'my/lsp-ui-imenu-text-scale-h)))
+
+(after! lsp-treemacs-generic
+  (defadvice! my/lsp-treemacs-render--text-scale (fn &rest args)
+    :around #'lsp-treemacs-render
+    (letf! ((#'text-scale-increase #'text-scale-set))
+      (apply fn args))))
 
 (setq lsp-modeline-code-actions-segments nil)
 
@@ -2518,6 +2470,377 @@ This variable should be set by `my/lsp-ui-set-delay'.")
         (:localleader
          :n "." #'rfc-mode-goto-section)))
 
+;; <https://emacs-lsp.github.io/lsp-mode/page/lsp-terraform-ls/>
+(when (modulep! :tools terraform +lsp)
+  (setq
+    ;; Use the official Hashicorp language server from Hashicorp
+    lsp-disabled-clients '(tfls)
+
+    ;; Enable reference counts
+    lsp-terraform-ls-enable-show-reference t)
+
+  ;; Set keybindings for LSP (reference existing LSP configurations)
+  (after! terraform-mode
+    (map! :map terraform-mode-map
+          :localleader
+          (:prefix ("l" . "LSP")
+           :desc "terraform init" "i" #'lsp-terraform-ls-init
+           :desc "terraform validate" "v" #'lsp-terraform-ls-validate
+           :desc "Providers widget" "p" #'lsp-terraform-ls-providers
+           :desc "Module calls widget" "m" #'lsp-terraform-ls-module-calls))))
+
+(after! terraform-mode
+  (add-hook! terraform-mode :append
+    (defun my/terraform-configure-lookup ()
+      (defadvice! my/terraform-lookup-references-a (fn &rest args)
+        :around #'+lookup/references
+        (if (eq major-mode 'terraform-mode)
+            (letf! ((defun my/terraform-lookup-resource-at-point-a (args)
+                      (list (my/terraform-resource-address-at-pos)))
+                    (defadvice #'+lookup-project-search-backend-fn :filter-args
+                               #'my/terraform-lookup-resource-at-point-a))
+              (apply fn args))
+          (apply fn args))))))
+
+(after! company-keywords
+  (add-to-list
+   'company-keywords-alist
+   '(terraform-mode
+     ;; Numeric functions
+     "abs" "cell" "floor" "log" "max" "min" "parseint" "pow" "signum"
+
+     ;; String functions
+     "chomp" "endswith" "format" "formatlist" "indent" "join" "lower" "regex"
+     "regexall" "replace" "split" "startswith" "strrev" "substr" "title" "trim"
+     "trimprefix" "trimsuffix" "trimspace" "upper"
+
+     ;; Collection functions
+     "alltrue" "anytrue" "chunklist" "coalesce" "coalescelist" "compact" "concat"
+     "contains" "distinct" "element" "flatten" "index" "keys" "length" "list"
+     "lookup" "map" "matchkeys" "merge" "one" "range" "reverse" "setintersection"
+     "setproduct" "setsubtract" "setunion" "slice" "sort" "sum" "transpose"
+     "values" "zipmap"
+
+     ;; Encoding functions
+     "base64decode" "base64encode" "base64gzip" "csvdecode" "jsondecode"
+     "jsonencode" "textdecodebase64" "textencodebase64" "urlencode" "yamldecode"
+     "yamlencode"
+
+     ;; Filesystem functions
+     "abspath" "dirname" "pathexpand" "basename" "file" "fileexists" "fileset"
+     "filebase64" "templatefile"
+
+     ;; Date and Time functions
+     "formatdate" "timeadd" "timecmp" "timestamp"
+
+     ;; Hash and Crypto functions
+     "base64sha256" "base64sha512" "bcrypt" "filebase64sha256" "filebase64sha512"
+     "filemd5" "filesha1" "filesha256" "filesha512" "filemd5" "filesha1"
+     "filesha256" "filesha512" "md5" "rsadecrypt" "sha1" "sha256" "sha512" "uuid"
+     "uuidv5"
+
+     ;; IP Network functions
+     "cidrhost" "cidrnetmast" "cidrsubnet" "cidrsubnets"
+
+     ;; Type Conversion functions
+     "can" "nonsensitive" "sensitive" "tobool" "tolist" "tomap" "tonumber" "toset"
+     "tostring" "try" "type")))
+
+(after! terraform-mode
+  (defgroup my/terraform nil
+    "Extended functionality for Terraform."
+    :group 'languages
+    :prefix "my/terraform-")
+
+  (defcustom my/terraform-executable (executable-find "terraform")
+    "The `terraform' executable used by my private functions."
+    :type '(file :must-match t)
+    :group 'my/terraform)
+
+  ;; NOTE I could just use Emac's built-in `json' library, but I would rather
+  ;; use query syntax that I can also use outside of Emacs.
+  (defcustom my/terraform-jq-executable (executable-find "jq")
+    "The `jq' executable used to query Terraform state."
+    :type '(file :must-match t)
+    :group 'my/terraform)
+
+  (defcustom my/terraform-state-buffer-name-format "*tfstate: %s*"
+    "Buffer name format string for Terraform state query results.
+Should include a single \"%s\" sequence to hold the resource address."
+    :type 'string
+    :group 'my/terraform)
+
+  (defcustom my/terraform-state-file "terraform.tfstate"
+    "The Terraform state file corresponding to the current buffer."
+    :local t
+    :type 'file
+    :group 'my/terraform)
+
+  (defun my/terraform--ensure-state-file ()
+    "Ensure the existence of `my/terraform-state-file'.
+Prompts the user to download the state file if missing. Once the
+state file has been pulled, the expanded file name of the file is
+returned if it exists, otherwise nil."
+    (if (file-exists-p my/terraform-state-file)
+        (expand-file-name my/terraform-state-file)
+      (let ((read-answer-short t))
+        (pcase
+            (save-window-excursion
+              (read-answer
+               "Could not find Terraform state file. How to proceed? "
+               `(("specify" ?s "specify a path to an existing state file")
+                 ("pull" ?p ,(format "pull the state file to %s" my/terraform-state-file))
+                 ("specify-and-pull" ?P "pull the state file to another path")
+                 ("quit" ?q "abort operation"))))
+          ("specify"
+           (setq my/terraform-state-file (read-file-name "Terraform state file: " nil nil t)))
+          ("pull"
+           (my/terraform-state-pull))
+          ("specify-and-pull"
+           (setq my/terraform-state-file (read-file-name "Terraform state file: "))
+           (my/terraform-state-pull))
+          ("quit" nil)))
+      (when (file-exists-p my/terraform-state-file)
+        (expand-file-name my/terraform-state-file))))
+
+  ;; TODO Pull state asynchronously via `make-process'
+  (defun my/terraform-state-pull ()
+    "Populate `my/terraform-state-file' with Terraform state."
+    (interactive)
+    (when (or (not (file-exists-p my/terraform-state-file))
+              (yes-or-no-p (format "Overwrite existing file (%s)? " my/terraform-state-file)))
+      (let* ((program my/terraform-executable)
+             (args '("state" "pull"))
+             (stdout (expand-file-name my/terraform-state-file))
+             (stderr (make-temp-file "emacs-" nil ".stderr"))
+             (exit-code nil)
+             (success-msg (format "Pulled Terraform state to %s" stdout))
+             (error-msg (format "Failed to pull Terraform state to %s" stdout))
+             (warning-type 'my/terraform)
+             (default-directory (or (projectile-project-root) default-directory)))
+        (unless (with-temp-buffer
+                  (when (zerop (setq exit-code
+                                     (apply #'call-process program nil (list t stderr) nil args)))
+                    (write-file stdout)
+                    (message success-msg)))
+          (with-temp-buffer
+            (insert (format "%s
+Command: %s
+Directory: %s
+Exit code: %d
+Standard error \"" error-msg (string-join (cons program args) " ") default-directory exit-code))
+            (insert-file-contents stderr)
+            (goto-char (point-max))
+            (insert "\"")
+            (display-warning warning-type (buffer-string) :error)))
+        (delete-file stderr))))
+
+  ;; TODO Add support for outputs
+  (defvar my/terraform--state-show-jq-filter "\
+.resources |
+map(select(
+    .mode == $mode and
+    .type == $type and
+    .name == $name
+)) |
+if $modpath == \"\" then
+    map(select(
+        has(\"module\") | not
+    ))[0]
+    .instances |
+    if (.[0] | has(\"index_key\")) then
+        map({
+            \"key\": .index_key,
+            \"value\": .attributes
+        }) |
+        from_entries
+    else
+        .[0].attributes
+    end
+else
+    map(
+        select(
+            has(\"module\") and
+            (.module | gsub(\"\\\\[.+?]\"; \"\")) == $modpath
+        ) |
+        .module as $m |
+        .instances |
+        if (.[0] | has(\"index_key\")) then
+            map({
+                \"key\": ($m + \".\" + .index_key),
+                \"value\": .attributes
+            })[]
+        else {
+            \"key\": $m,
+            \"value\": .[0].attributes
+        } end
+    ) |
+    from_entries
+end")
+
+  (defun my/terraform--parse-address (address)
+    "Return a list describing a Terraform resource ADDRESS.
+The list has the form (MODULE-PATH MODE TYPE NAME), where
+MODULE-PATH is the unkeyed module path, MODE is either `data' or
+`managed', TYPE is the resource type, and NAME is the resource
+name."
+    (save-match-data
+      (unless (string-match "\\`\\(?:\\(module\\..+\\)\\.\\)?\\(data\\.\\)?\\([^\\.]+\\)\\.\\([^\\.]+\\)\\'" address)
+        (user-error "Unrecognized Terraform resource address: %s" address))
+      (list (or (match-string-no-properties 1 address) "")
+            (if (string= "data." (match-string-no-properties 2 address))
+                "data" "managed")
+            (match-string-no-properties 3 address)
+            (match-string-no-properties 4 address))))
+
+  (defun my/terraform-state-show (address)
+    "Display JSON respresentation of Terraform resource at ADDRESS.
+Terraform is assumed to be initialized in the default directory.
+Always queries a local state file for performance reasons."
+    (interactive
+     (list (read-string
+            "Resource address: "
+            (when (region-active-p)
+              (buffer-substring-no-properties (region-beginning) (region-end))))))
+    (cl-destructuring-bind (module-path mode type name) (my/terraform--parse-address address)
+      (let* ((state-file (or (my/terraform--ensure-state-file)
+                             (user-error "File not found: %s"
+                                         (expand-file-name my/terraform-state-file))))
+             (buffer (get-buffer-create (format my/terraform-state-buffer-name-format
+                                                address)))
+             (jq-args `("--arg" "modpath" ,module-path
+                        "--arg" "mode" ,mode
+                        "--arg" "type" ,type
+                        "--arg" "name" ,name
+                        ,my/terraform--state-show-jq-filter)))
+        (with-current-buffer buffer
+          (erase-buffer)
+          (json-mode))
+        (when (apply #'call-process
+                     my/terraform-jq-executable state-file buffer nil jq-args)
+          (pop-to-buffer buffer)
+          (goto-char (point-min))))))
+
+  (defun my/terraform-state-show-at-pos (&optional pos)
+    "Display JSON representation of Terraform resource at POS or point.
+Both resource and data blocks are considered to be resources."
+    (interactive)
+    (my/terraform-state-show (my/terraform-resource-address-at-pos pos)))
+
+  ;; FIXME: Make this portable for Windows and WSL
+  ;; FIXME: Handle more modules paths than just "/modules/<name>" and "/<name>"
+  (defun my/terraform-module-path-of-file (&optional file)
+    "Display the Terraform module path of FILE.
+FILE is an absolute or relative path to a filesystem entry. It
+defaults to the file visited by the current buffer, or to
+`default-directory' if the current buffer is not file-visiting."
+    (let* ((file (expand-file-name (or file buffer-file-name default-directory)))
+           (_ (or (file-exists-p file)
+                  (user-error "File does not exist: %s" file)))
+           (dir (directory-file-name (or (and (file-directory-p file) file)
+                                         (file-name-directory file))))
+           (root (or (projectile-project-root dir)
+                     (user-error "Unable to determine root path for file: %s" file)))
+           (path (file-relative-name dir root)))
+      (if (string= path ".") ""
+        (substring (string-replace "/" ".module." (string-replace "/modules/" "/" (concat "/" path)))
+                   1))))
+
+  ;; FIXME Handle unquoted resource types and names
+  (defun my/terraform-resource-address-at-pos (&optional pos)
+    "Return the address of the Terraform resource at POS or point.
+Both resource and data blocks are considered to be resources,
+though addresses of data blocks are prefixed with \"data.\" while
+addresses of resource blocks have no prefix."
+    (save-excursion
+      (when pos (goto-char pos))
+      (goto-char (pos-bol))
+      (save-match-data
+        (if-let ((re "^\\s-*\\(data\\|resource\\)[ \\t]+\"\\([^\"]+\\)\"[ \\t]+\"\\([^\"]+\\)\"")
+                 (found (or (looking-at re) (re-search-backward re nil t)))
+                 (mode (match-string-no-properties 1))
+                 (type (match-string-no-properties 2))
+                 (name (match-string-no-properties 3))
+                 (data-prefix (if (string= mode "data") "data." ""))
+                 (module-path (my/terraform-module-path-of-file))
+                 (module-path-prefix (if (string= module-path "") "" (concat module-path "."))))
+            (concat module-path-prefix data-prefix type "." name)
+          (user-error "No Terraform resource at position")))))
+
+  (when (modulep! :ui buffer-group)
+    (buffer-group-reuse-window-setup
+     (buffer-group-define tfstate
+       `(:names ("^\\*tfstate: ")))))
+
+  (map! :map terraform-mode-map
+            :localleader
+            (:prefix ("s" . "state")
+             :desc "Show instances at point" "." #'my/terraform-state-show-at-pos
+             :desc "Show instances of address" "a" #'my/terraform-state-show
+             :desc "Pull remote state" "p" #'my/terraform-state-pull)))
+
+(after! terraform-mode
+  (defvar my/terraform-shell "/bin/sh")
+  (defvar my/terraform-hcl-single-line-command "\
+sed -e 's/^ *//' \\
+    -e 's/ *#.*//' \\
+    -e 's/\\([^[{ ]\\) *,\\{0,1\\} *$/\\1,/' \\
+    -e '$s/,$//' |
+tr '\\n' ' ' |
+sed -e 's/ $/\\n/'"
+    "Shell command used to transform HCL to a single line.")
+
+  (defvar my/terraform-hcl-single-line-buffer "*HCL Single Line*"
+    "Buffer containing a backtrace of generated single-line HCL.")
+
+  (defun my/terraform-hcl-single-line (beg end &optional show-message)
+    "Return a single-line string corresponding to a region of HCL.
+Pass the resulting string to terraform console.
+
+With optional SHOW-MESSAGE, outputs the resulting string to the
+echo area, truncating to a single line.
+
+This function always appends the resulting string to the buffer
+`my/terraform-hcl-single-line-buffer', which can be used in
+debugging issues with the transformation command
+`my/terraform-hcl-single-line-command'."
+    (interactive "r")
+    (let ((hcl (my/region-string beg end))
+          (buffer (get-buffer-create my/terraform-hcl-single-line-buffer))
+          result)
+      (with-current-buffer buffer
+        (hcl-mode)
+        (goto-char (point-max))
+        (let ((start (point-marker)))
+          (insert hcl)
+          (call-process-region start (point) my/terraform-shell t t nil
+                               "-c" my/terraform-hcl-single-line-command)
+          (newline)
+          (setq result (buffer-substring-no-properties start (point-max)))))
+      (when show-message
+        (let ((truncate-partial-width-windows t)
+              ;; FIXME: The echo area still consumes multiple lines, even though
+              ;; the message gets truncated to a single line (there are blanks
+              ;; lines shown below the message).
+              (message-truncate-lines t)
+              (max-mini-window-height 1)
+              (resize-mini-windows t))
+          (message result)))
+      result))
+
+  (defun my/terraform-console-kill-ring-save (beg end)
+    "Save region of HCL to be evaluated in terraform console.
+Uses `my/terraform-hcl-single-line' to transform the HCL code to
+a single line."
+    (interactive "r")
+    (kill-new (my/terraform-hcl-single-line beg end))
+    (message "Single-line HCL yanked to kill-ring"))
+
+  (map! :map terraform-mode-map
+            :localleader
+            (:prefix ("c" . "console")
+             :desc "Yank single-line HCL" "y" #'my/terraform-console-kill-ring-save)))
+
 (add-hook 'terraform-mode-local-vars-hook #'tree-sitter! 'append)
 
 ;; Missing from evil-textobj-tree-sitter.el:
@@ -2617,6 +2940,11 @@ See also: `ts-fold-summary--get'."
 (after! ws-butler
   (pushnew! ws-butler-global-exempt-modes 'tsv-mode))
 
+(setq lsp-xml-jar-file
+      (expand-file-name "xmlls/org.eclipse.lemminx-uber.jar" lsp-server-install-dir))
+
+(add-to-list 'auto-mode-alist '("/CODEOWNERS\\(?:\\.md\\)?\\'" . conf-mode))
+
 (setq-hook! 'emacs-lisp-mode-hook
   eldoc-idle-delay 0.1)
 
@@ -2678,7 +3006,7 @@ See also: `ts-fold-summary--get'."
         (concat (file-name-as-directory lsp-clients-lua-language-server-install-dir)
                 "main.lua")))
 
-(after! markdown
+(after! markdown-mode
   (defun my/markdown-preview (f &rest r)
     (let ((browse-url-browser-function #'browse-url-default-browser))
       (apply f r)))
@@ -2727,6 +3055,11 @@ Currently only includes code blocks."
         :i "M-b" nil
         :i "M-i" nil))
 
+(after! markdown-mode
+  (map! :map markdown-mode-map
+        :localleader
+        "a" #'markdown-table-align))
+
 (dolist (mode '(markdown-mode markdown-view-mode
                 gfm-mode gfm-view-mode))
   ;; Prevent flycheck from being automatically enabled
@@ -2746,225 +3079,35 @@ Currently only includes code blocks."
           '("\\.mdx\\'" . markdown-mode)
           '("/\\.markdownlintrc\\'" . json-mode))
 
-(setq markdown-fontify-whole-heading-line nil
-      markdown-header-scaling t)
-
-;; Setting `markdown-header-scaling' (even using Customize) is not enough.
-;; We must call `markdown-update-header-faces' within buffers, too.
-(defun my/markdown--update-display-h ()
-  "Apply desired styling to a markdown buffer."
-  (markdown-update-header-faces markdown-header-scaling))
-(add-hook 'markdown-mode-hook
-          #'my/markdown--update-display-h
-          nil 'local)
-
 (after! markdown-mode
-  (defun my/markdown-pre-block-bounds ()
-    "Return the bounds of a pre block at point.
-
-This is slightly more effective than `markdown-code-block-at-point-p'
-at determining bounds for pre blocks containing multiple
-consecutive blank lines, and it only returns non-nil when the
-block at point is a pre block (as opposed to a code block)."
-    (save-excursion
-      (let ((pos (point)))
-        (while (and (not (bobp))
-                    (markdown-cur-line-blank-p))
-          (forward-line -1))
-        (when-let ((bounds (get-text-property (point) 'markdown-pre))
-                   (begin (car bounds))
-                   (end (cadr bounds)))
-          (when (<= begin pos end)
-            bounds)))))
-
-  (defun my/markdown-pre-block-string ()
-    "Return string of pre block at point, indentation removed."
-    (when-let ((bounds (my/markdown-pre-block-bounds))
-               (text (apply #'buffer-substring-no-properties bounds))
-               (indentation (length (markdown-pre-indentation (car bounds)))))
-      (replace-regexp-in-string (format "^ \\{1,%d\\}" indentation) "" text)))
-
-  (defvar-local my/markdown--indirect-indentation nil)
-  (defvar-local my/markdown--indirect-block-type nil)
-
-  (defun my/markdown-edit-pre-block ()
-    "Edit Markdown pre block in an indirect buffer."
-    (interactive)
-    (save-excursion
-      (if (fboundp 'edit-indirect-region)
-          (if-let ((bounds (my/markdown-pre-block-bounds))
-                   (begin (car bounds))
-                   (end (cadr bounds))
-                   (indentation (length (markdown-pre-indentation begin))))
-              (with-current-buffer (edit-indirect-region begin end 'display-buffer)
-                (setq my/markdown--indirect-indentation indentation
-                      my/markdown--indirect-block-type 'pre)
-                (indent-rigidly (point-min) (point-max) (- indentation)))
-            (user-error "Not inside a pre block"))
-        (warn "Package edit-indirect needed to edit preformatted blocks.")
-        nil)))
-
-  ;; HACK Added indentation instrumentation to this function
-  (defadvice! my/markdown--edit-code-block-a ()
-    :override #'markdown-edit-code-block
-    (interactive)
-    (save-excursion
-      (if (fboundp 'edit-indirect-region)
-          (let* ((bounds (markdown-get-enclosing-fenced-block-construct))
-                 (begin (and bounds (not (null (nth 0 bounds))) (goto-char (nth 0 bounds)) (point-at-bol 2)))
-                 (end (and bounds (not (null (nth 1 bounds)))  (goto-char (nth 1 bounds)) (point-at-bol 1))))
-            (if (and begin end)
-                (let* ((indentation (and (goto-char (nth 0 bounds)) (current-indentation)))
-                       (lang (markdown-code-block-lang))
-                       (mode (or (and lang (markdown-get-lang-mode lang))
-                                 markdown-edit-code-block-default-mode))
-                       (edit-indirect-guess-mode-function
-                        (lambda (_parent-buffer _beg _end)
-                          (funcall mode)))
-                       (indirect-buf (edit-indirect-region begin end 'display-buffer)))
-                  ;; reset `sh-shell' when indirect buffer
-                  (when (and (not (member system-type '(ms-dos windows-nt)))
-                             (member mode '(shell-script-mode sh-mode))
-                             (member lang (append
-                                           (mapcar (lambda (e) (symbol-name (car e)))
-                                                   sh-ancestor-alist)
-                                           '("csh" "rc" "sh"))))
-                    (with-current-buffer indirect-buf
-                      (sh-set-shell lang)))
-                  (when (> indentation 0) ;; un-indent in edit-indirect buffer
-                    (with-current-buffer indirect-buf
-                      (setq my/markdown--indirect-indentation indentation
-                            my/markdown--indirect-block-type 'code)
-                      (indent-rigidly (point-min) (point-max) (- indentation)))))
-              (user-error "Not inside a GFM or tilde fenced code block")))
-        (warn "Package edit-indirect needed to edit code blocks.")
-        nil)))
-
-  ;; HACK Removed indentation and newline insertion from this hook
-  (defadvice! my/markdown--edit-indirect-after-commit-function-a (beg end)
-    :override #'markdown--edit-indirect-after-commit-function
-    (font-lock-ensure))
-
-  (defun my/markdown-edit-block ()
-    "Edit a code or pre block at point in an indirect buffer."
-    (interactive)
-    (cond
-     ((markdown-get-enclosing-fenced-block-construct)
-      (markdown-edit-code-block))
-     ((my/markdown-pre-block-bounds)
-      (my/markdown-edit-pre-block))
-     (t
-      (message "No block at point can be edited indirectly."))))
-
-  (define-key markdown-mode-map
-    [remap markdown-edit-code-block] #'my/markdown-edit-block)
-
-  (defun my/markdown-forward-code-block (&optional count)
-    "Move forward COUNT source blocks (default 1)."
-    (interactive "p")
-    (unless (zerop count)
-      (let ((re (format "\\(?:%s\\)\\|\\(?:%s\\)"
-                        markdown-regex-gfm-code-block-open
-                        markdown-regex-tilde-fence-begin))
-            target)
-        (save-excursion
-          (when-let ((bounds (markdown-code-block-at-point-p))
-                     (beg (car bounds))
-                     (end (cadr bounds)))
-            (goto-char (if (cl-plusp count) end beg)))
-          (re-search-forward re nil t (if (cl-plusp count) 1 -1))
-          (setq target (car-safe (markdown-code-block-at-point-p))))
-        (if target
-            (progn
-              (goto-char target)
-              (my/markdown-forward-code-block
-               (funcall (if (cl-plusp count) #'1- #'1+) count)))
-          (message "No further code blocks")))))
-
-  (defun my/markdown-backward-code-block (&optional count)
-    "Move backward COUNT source blocks (default 1)."
-    (interactive "p")
-    (my/markdown-forward-code-block (- count)))
-
-  (after! evil-markdown
-    (map! :map evil-markdown-mode-map
-          :nv "]c" #'my/markdown-forward-code-block
-          :nv "[c" #'my/markdown-backward-code-block))
-
-  (defun my/markdown--edit-indirect-before-commit-function-h ()
-    "Re-indent indirect buffer before commiting."
-    (when (wholenump my/markdown--indirect-indentation)
-      (let ((inhibit-redisplay t))
-        (indent-rigidly (point-min) (point-max) my/markdown--indirect-indentation))))
-
-  (defun my/markdown--edit-indirect-after-creation-hook-h ()
-    "Add buffer-local hooks to indirect buffer."
-    (setq header-line-format
-      (substitute-command-keys
-       "Edit, then exit with `\\[edit-indirect-commit]' or abort with \
-`\\[edit-indirect-abort]'"))
-    (add-hook 'edit-indirect-before-commit-hook
-              #'my/markdown--edit-indirect-before-commit-function-h
-              nil 'local))
-
-  (defun my/markdown-edit-indirect-setup-h ()
-    "Instrument indirect editing for `markdown-mode' buffers."
-    (add-hook 'edit-indirect-after-creation-hook
-              #'my/markdown--edit-indirect-after-creation-hook-h
-              nil 'local))
-
-  (add-hook! markdown-mode #'my/markdown-edit-indirect-setup-h)
-
-  ;; In case the major mode is changed within the indirect buffer
-  (put 'my/markdown--edit-indirect-before-commit-function-h 'permanent-local-hook t)
-  (put 'my/markdown--indirect-indentation 'permanent-local t)
-  (put 'my/markdown--indirect-block-type 'permanent-local t))
-
-(setq-hook! 'markdown-mode-hook hs-allow-nesting nil)
-
-(after! markdown-mode
-  (let* ((start `(,markdown-regex-gfm-code-block-open 5))
-         (end markdown-regex-gfm-code-block-close)
-         (comment-start nil)
-         (forward-sexp-func (lambda (&rest _)
-                              (re-search-forward markdown-regex-gfm-code-block-close
-                                                 (point-max)
-                                                 'ignore)))
-         (adjust-beg-func nil)
-         (hs-spec `(,start ,end ,comment-start ,forward-sexp-func ,adjust-beg-func)))
-    (dolist (mode '(markdown-mode gfm-mode))
-      (add-to-list 'hs-special-modes-alist (cons mode hs-spec))))
-
-  (defadvice! my/markdown-looking-at-block-start-a ()
-    :before-while #'hs-looking-at-block-start-p
-    (or (not (eq major-mode 'markdown-mode))
-        (when-let ((bounds (markdown-code-block-at-point))
-                   (start (car bounds)))
-          (= (line-number-at-pos)
-             (line-number-at-pos start)))))
-
-  (defun my/markdown-find-block-start ()
-    (when-let ((bounds (markdown-code-block-at-point))
-               (start (car bounds)))
-      (goto-char start)))
-
-  (defadvice! my/markdown-find-block-start-a (&rest _)
-    :before-while #'hs-find-block-beginning
-    :after (if (modulep! :editor fold)
-               '(+fold/close +fold/open +fold/toggle)
-             '(hs-hide-block hs-show-block))
-    (or (not (eq major-mode 'markdown-mode))
-        (my/markdown-find-block-start)))
-
-  (when (modulep! :editor fold)
-    (defadvice! my/+fold-from-eol-a (&rest body)
-      :override #'+fold-from-eol
-      (macroexp-progn body))))
+  (setq! markdown-fontify-whole-heading-line nil
+         markdown-header-scaling t)
+  (add-hook! markdown-mode
+    (defun my/markdown--update-display-h ()
+      "Apply desired styling to a markdown buffer."
+      (markdown-update-header-faces markdown-header-scaling))))
 
 (after! markdown-mode
   (pushnew! markdown-code-lang-modes
             '("http" . restclient-mode)
             '("sh" . bash-mode)))
+
+;; HACK `grip-start-preview' calls `derived-mode-p' with a list of modes, when
+;; each mode should be passed as a separate argument.
+(after! grip-mode
+  (defadvice! my/grip-start-preview-a ()
+    :override #'grip-start-preview
+    (interactive)
+    (when buffer-file-name
+      (add-hook 'kill-buffer-hook #'grip-stop-preview nil t)
+      (add-hook 'kill-emacs-hook #'grip-stop-preview nil t)
+      (cond ((derived-mode-p 'org-mode)
+             (grip--preview-org))
+            ((derived-mode-p 'markdown-mode 'markdown-ts-mode)
+             (grip--preview-md))
+            (t
+             (grip-mode -1)
+             (user-error "`%s' not supported by grip preview" major-mode))))))
 
 (after! org
   (setq org-hide-leading-stars nil
@@ -3040,15 +3183,27 @@ just perform a complete cycle of `org-cycle'."
                                       #'my/org-insert-heading-evil-state))
 
 (after! org
-  (pushnew! org-modules 'ol-man 'ol-info 'ol-w3m))
+  (pushnew! org-modules 'ol-bookmark 'ol-man 'ol-info 'ol-w3m))
 
 (after! org
-  (setcdr (assoc 'file org-link-frame-setup) #'find-file-other-window))
+  (setcdr (assoc 'file org-link-frame-setup) #'find-file-other-window)
+  (defadvice! my/org-bookmark-open-a (bookmark _)
+    :override #'org-bookmark-open
+    (bookmark-jump-other-window bookmark)))
 
 (setq org-man-command
       (if (and (not (featurep :system 'macos)) (executable-find "man"))
           #'man
         #'woman))
+
+(setq org-link-context-for-files nil)
+
+;; (setq org-bookmark-when-visiting-a-file t
+;;       org-bookmark-use-first-bookmark nil)
+
+;; Optional: automatically prompt for and display bookmark annotations
+;; (setq bookmark-use-annotations t
+;;       bookmark-automatically-show-annotations t)
 
 (after! org
   (defun my/org-inherited-priority (s)
@@ -3082,7 +3237,7 @@ just perform a complete cycle of `org-cycle'."
 
 (setq
       ;; Top-level directory (used by `+default/find-in-notes', etc.)
-      org-directory "~/org"
+      org-directory "~/Documents/notes"
 
       ;; Directories to search for agenda files
       my/org-directories `("work" "life" ,doom-user-dir)
@@ -3372,9 +3527,6 @@ This is a list of lists, not a list of cons cells.")
 
 (put 'lsp-yaml-schemas 'safe-local-variable #'always)
 
-(setq-hook! 'yaml-mode-hook
-  display-line-numbers t)
-
 (when (modulep! :tools tree-sitter)
   (eeowaa-add-to-exclusion-list +tree-sitter-hl-enabled-modes 'yaml-mode))
 
@@ -3515,6 +3667,11 @@ This is a list of lists, not a list of cons cells.")
   ;; Do not stream responses
   (setq gptel-stream nil)
 
+  ;; Use 2-character prefixes instead of 3-character prefix
+  (setq gptel-prompt-prefix-alist '((markdown-mode . "## ")
+                                    (org-mode . "** ")
+                                    (text-mode . "## ")))
+
   (map! :map gptel-mode-map
         "C-c C-g" #'gptel-menu))
 
@@ -3598,8 +3755,8 @@ This is a list of lists, not a list of cons cells.")
 
 (remove-hook 'text-mode-hook #'display-line-numbers-mode)
 
-(setq-hook! '(lisp-interaction-mode-hook doom-sandbox-emacs-lisp-mode-hook)
-  display-line-numbers nil)
+(add-hook! (lisp-interaction-mode doom-sandbox-emacs-lisp-mode)
+  (display-line-numbers-mode -1))
 
 (defun my/toggle-line-numbers ()
   "Toggle line numbers.
@@ -3610,10 +3767,12 @@ and uses visual instead."
   (interactive)
   (cond
    ((not display-line-numbers)
-    (setq display-line-numbers t)
+    (let ((display-line-numbers-type t))
+      (display-line-numbers-mode +1)
+      (setq display-line-numbers t)) ;; workaround for `my/inhibit-line-numbers-globally'
     (message "Switched to normal line numbers"))
    ((memq display-line-numbers '(visual relative))
-    (setq display-line-numbers nil)
+    (display-line-numbers-mode -1)
     (message "Switched to disabled line numbers"))
    (visual-line-mode
     (setq display-line-numbers 'visual)
@@ -3674,6 +3833,58 @@ and uses visual instead."
           ((= frame-count 2) (other-frame 1))
           (t (message "Fewer than 2 visible frames")))))
 
+(defvar my/inhibit-line-numbers-globally nil)
+
+(defun my/inhibit-line-numbers-h ()
+  (unless (bound-and-true-p my/inhibited-display-line-numbers)
+    (setq-local my/inhibited-display-line-numbers display-line-numbers))
+  (unless (bound-and-true-p my/inhibited-display-line-numbers-mode)
+    (setq-local my/inhibited-display-line-numbers-mode display-line-numbers-mode))
+  (setq display-line-numbers nil))
+
+(defun my/inhibit-line-numbers-globally ()
+  (interactive)
+
+  ;; Disable line numbers for all current buffers
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (setq-local my/inhibited-display-line-numbers display-line-numbers
+                  my/inhibited-display-line-numbers-mode display-line-numbers-mode)
+      (display-line-numbers-mode -1)))
+
+  ;; Disable global-display-line-numbers-mode
+  (global-display-line-numbers-mode -1)
+
+  ;; Nullify the effects of `display-line-numbers-mode'
+  (add-hook 'display-line-numbers-mode-hook #'my/inhibit-line-numbers-h 100)
+
+  (setq my/inhibit-line-numbers-globally t)
+  (message "Use `my/restore-line-numbers-globally' to allow line numbers"))
+
+(defun my/restore-line-numbers-globally ()
+  (interactive)
+  (if (not my/inhibit-line-numbers-globally)
+      (message "Line numbers are not globally inhibited (nothing to restore)")
+
+    ;; Allow `display-line-numbers-mode' to work again
+    (remove-hook 'display-line-numbers-mode-hook #'my/inhibit-line-numbers-h)
+
+    ;; Restore line numbers to previous state (if not already displayed)
+    (dolist (buffer (buffer-list))
+      (with-current-buffer buffer
+        (if (and (not display-line-numbers-mode)
+                 (bound-and-true-p my/inhibited-display-line-numbers-mode))
+            (let ((display-line-numbers-type
+                   (or display-line-numbers
+                       (bound-and-true-p my/inhibited-display-line-numbers))))
+              (display-line-numbers-mode +1))
+          (when (and (not display-line-numbers)
+                     (bound-and-true-p my/inhibited-display-line-numbers))
+            (setq display-line-numbers my/inhibited-display-line-numbers)))))
+
+    (setq my/inhibit-line-numbers-globally nil)
+    (message "Line numbers have been restored")))
+
 (defun my/toggle-sentence-end-double-space ()
   "Toggle 1 or 2 spaces at the end of sentences."
   (interactive)
@@ -3693,6 +3904,15 @@ and uses visual instead."
                   (not lsp-ui-doc-show-with-cursor))
       (lsp-ui-doc-hide))))
 
+;; TODO: Create toggle for interpretation of ANSI color sequences (cannot toggle off)
+;; (defvar-local my/ansi-colors-on nil)
+;; (defun my/toggle-ansi-colors ()
+;;   "Toggle ANSI color rendering in the current buffer."
+;;   (interactive)
+;;   (if (setq my/ansi-colors-on (not my/ansi-colors-on))
+;;       (ansi-color-apply-on-region (point-min) (point-max))
+;;     (ansi-color-filter-region (point-min) (point-max))))
+
 (map! :leader
       (:prefix-map ("t" . "toggle")
        :desc "Whitespace mode"       "SPC" #'whitespace-mode
@@ -3711,6 +3931,7 @@ and uses visual instead."
        :desc "Menu bar"              "M"   #'menu-bar-mode
        :desc "Overwrite"             "o"   #'overwrite-mode
        :desc "Truncate lines"        "t"   #'toggle-truncate-lines
+       :desc "Window splitting"      "S"   #'my/toggle-window-splitting
        :desc "Tab bar"               "T"   #'tab-bar-mode
        :desc "Visual fill column"    "|"   #'visual-fill-column-mode
        :desc "Page break lines"      "C-l" #'page-break-lines-mode

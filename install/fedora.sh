@@ -211,9 +211,6 @@ fi
 ## Update fonts
 fc-cache -v
 
-# Install prerequisites for `ui/treemacs` module
-sudo dnf -y install python3
-
 # Install prerequisites for `emacs/dired` module
 sudo dnf -y install coreutils
 
@@ -329,6 +326,9 @@ cpan install App::Git::Autofixup
 # Install prerequisites for `tools/nginx` module
 pipx install --python `which python3.10` nginx-language-server
 
+# Install prerequisites for `tools/terraform` module
+sudo dnf -y install terraform terraform-ls
+
 # Install prerequisites for `lang/cc` module
 
 ## GCC
@@ -360,9 +360,19 @@ sudo dnf -y install cmake
 pipx install cmake-language-server
 
 # Install prerequisites for `lang/data` module
-curl --create-dirs \
-    -fsSLo ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
-    https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.20.0/org.eclipse.lemminx-0.20.0-uber.jar
+
+## xmllint
+sudo dnf -y install libxml2
+
+## xmlls
+(
+    xmlls_baseurl=https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx
+    xmlls_version=`curl -fsSLo- "$xmlls_baseurl/maven-metadata.xml" | xmllint --xpath '/metadata/versioning/release/text()' -`
+    mkdir -p ~/.config/emacs/.local/etc/lsp/xmlls
+    cd ~/.config/emacs/.local/etc/lsp/xmlls
+    curl -fsSLO "$xmlls_baseurl/$xmlls_version/org.eclipse.lemminx-$xmlls_version-uber.jar"
+    ln -sf "org.eclipse.lemminx-$xmlls_version-uber.jar" org.eclipse.lemminx-uber.jar
+)
 
 # Install prerequisites for `lang/go` module
 (cd ~/Documents/src/life/stow-dotfiles && make go)
@@ -482,6 +492,9 @@ sudo dnf -y install ditaa gnuplot pandoc graphviz sqlite
 pipx install --include-deps jupyter
 pipx inject jupyter ipykernel
 sudo dnf -y install zeromq-devel libstdc++-static
+
+# Create `org-directory` if missing
+mkdir -p ~/Documents/notes
 
 # Install prerequisites for `lang/python` module
 sudo dnf -y install python3 pipx

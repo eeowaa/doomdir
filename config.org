@@ -663,7 +663,7 @@ sudo dnf -y install ripgrep
 (setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
 #+end_src
 
-** vertico [3/4]
+** vertico [4/5]
 #+begin_quote
 This module enhances the Emacs search and completion experience, and also
 provides a united interface for project search and replace, powered by [[https://github.com/BurntSushi/ripgrep/][ripgrep]].
@@ -685,6 +685,13 @@ sudo dnf -y install ripgrep
 *** DONE [#B] Find a reference for the symbols in the completing-read buffer :doc:
 These symbols are described in the docstring for the function
 ~marginalia--symbol-class~.
+
+*** DONE [#C] Do not use icons over SSH :tweak:
+#+begin_src emacs-lisp :tangle early-init.el
+(when (getenv "SSH_CLIENT")
+  ;; :completion vertico +icons
+  (advice-add 'nerd-icons-completion-marginalia-setup :override #'always))
+#+end_src
 
 *** OKAY [#A] Prevent Emacs from freezing during ~consult-org-heading~ :bug:
 Lately, Emacs will occasionally freeze when searching for headlines in this
@@ -727,7 +734,7 @@ Aesthetic modules that affect the Emacs interface or user experience.
 ;;; :ui
 #+end_src
 
-** Miscellany [13/14]
+** Miscellany [14/16]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -775,6 +782,19 @@ with special dedication semantics."
   (if (set-window-dedicated-p nil (not (window-dedicated-p)))
       (prog1 t (message "Window is strongly dedicated"))
     (prog1 nil (message "Window is no longer dedicated"))))
+
+(defvar my/toggle-window-splitting--restore-function #'split-window-sensibly)
+(defun my/toggle-window-splitting ()
+  "Toggle the ability to split most windows."
+  (interactive)
+  (if (eq split-window-preferred-function #'ignore)
+      (prog1 t
+        (setq split-window-preferred-function my/toggle-window-splitting--restore-function)
+        (message "Window splitting has been globally restored"))
+    (prog1 nil
+      (setq my/toggle-window-splitting--restore-function split-window-preferred-function
+            split-window-preferred-function #'ignore)
+      (message "Window splitting has been globally disabled"))))
 
 (define-key! evil-window-map
   ;; replaces `+workspace/close-window-or-workspace'
@@ -877,15 +897,20 @@ original text, even though they might look a little better. Let's disable them:
 (setq text-quoting-style 'grave)
 #+end_src
 
-*** DONE [#C] Display raw bytes in hexadecimal instead of octal
+*** DONE [#C] Display raw bytes in hexadecimal instead of octal :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setq display-raw-bytes-as-hex t)
 #+end_src
 
-*** DONE [#C] Display line continuation characters in TTY Emacs
+*** DONE [#C] Display line continuation characters in TTY Emacs :tweak:
 #+begin_src emacs-lisp :tangle yes
 (unless initial-window-system
   (setq-default wrap-prefix "↪ "))
+#+end_src
+
+*** DONE [#C] Prevent the cursor from blinking over SSH :tweak:
+#+begin_src emacs-lisp :tangle yes
+(setq visible-cursor nil)
 #+end_src
 
 *** DONE [#C] Replace =vi-tilde-fringe= with builtin functionality :tweak:
@@ -1246,9 +1271,9 @@ migrated to ~ef-bio~ for now.
 
 #+begin_src emacs-lisp :tangle yes
 (setq doom-theme
-      (if initial-window-system
-          'ef-bio
-        'ef-tritanopia-dark))
+      (cond (initial-window-system 'ef-bio)
+            ((getenv "SSH_CLIENT") 'modus-vivendi) ;; best theme over SSH
+            (t 'ef-tritanopia-dark)))
 
 (after! (:and solaire-mode (:or vertico ivy))
   (let ((face (cond
@@ -1285,14 +1310,15 @@ Some of my favorite free and open-source fonts include:
 (setq my/fonts '(("Iosevka Comfy Fixed" ;; Remove " Fixed" if you want ligatures
                   :variable-pitch "Iosevka Comfy Duo"
                   :serif "Iosevka Comfy Motion Fixed"
-                  :default-size 16)
+                  ;; :default-size 15)
+                  :default-size 14)
                  ("Source Code Pro"
-                  :default-size 22)
+                  :default-size 15)
                  ("Terminus"
                   :default-size 30)
                  ("Comic Mono"
                   :variable-pitch "Comic Neue"
-                  :default-size 24)))
+                  :default-size 16)))
 
 ;; Define a fuction to change the fonts
 (defun my/select-font (font &optional size)
@@ -1319,6 +1345,7 @@ When called interactively, reload the fonts in the current session."
 
 ;; Set the font
 (my/select-font "Iosevka Comfy Fixed")
+;; (my/select-font "Comic Mono")
 #+end_src
 
 *** TODO [#C] Make Treemacs look good again
@@ -1905,21 +1932,21 @@ I just need to test this functionality.
 #+end_src
 
 ** ilist [3/3] :eeowaa:
-**** DONE [#A] Window configuration :tweak:
+*** DONE [#A] Window configuration :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setq imenu-list-mode-line-format "  Ilist"
       imenu-list-position 'right
       imenu-list-size 35) ;; same as treemacs
 #+end_src
 
-**** DONE [#C] Configure revert-buffer :tweak:module:
+*** DONE [#C] Configure revert-buffer :tweak:module:
 #+begin_src emacs-lisp :tangle yes
 (after! imenu-list
   (setq-hook! 'imenu-list-major-mode-hook
     revert-buffer-function #'imenu-list-refresh))
 #+end_src
 
-**** DONE [#C] Scale down font in imenu-list-major-mode
+*** DONE [#C] Scale down font in imenu-list-major-mode
 #+begin_src emacs-lisp :tangle yes
 (when initial-window-system
   (setq my/imenu-list-text-scale -1)
@@ -1954,11 +1981,194 @@ This module adds a minimap to the right side of Emacs, similar to the feature
 found in many other editors.
 #+end_quote
 
-** modeline [3/3]
+** modeline [4/5]
 #+begin_quote
 This module provides an Atom-inspired, minimalistic modeline for Doom Emacs,
 powered by [[https://github.com/seagle0128/doom-modeline][the doom-modeline package]] (where you can find screenshots).
 #+end_quote
+
+*** COMMENT Documentation
+#+begin_src text
+Content of mode lines are getting truncated due to long file names
+Attempts to abbreviate paths or just use base name did not work:
+  (setq doom-modeline-buffer-file-name-style 'file-name)
+  (setq doom-modeline-buffer-name-name-fundction #'abbreviate-file-name)
+Still do not understand why this is the case
+Looked into configuration of :ui modeline module (SPC h d m)
+Dug into doom-modeline package:
+  doom-modeline-core.el
+    doom-modeline-set-modeline
+      mode-line-format ***
+        doom-modeline
+          doom-modeline-def-modeline (definition)
+            doom-modeline-def-segment (definition)
+            doom-modeline--prepare-segments
+              doom-modeline-fn-alist
+              doom-modeline-var-alist
+  doom-modeline-segments.el
+    doom-modeline-def-segment (invocations)
+  doom-modeline.el
+    doom-modeline-def-modeline (invocations)
+Found some other things I would like to do with the mode line:
+  Remove file name altogether
+    Already shown in tab-line tabs via vimish-tab
+    Can just display the project for more context
+  Display the project
+    doom-modeline-project-name
+      doom-modeline--project-name
+    doom-modeline-persp-icon
+    doom-modeline-workspace-name
+  Display window numbers
+    Both for ace-window selection and debugging
+    Can modify existing constructs
+      doom-modeline-segments.el
+        ace-window-display-mode-hook
+        doom-modeline-def-segment window-number
+        doom-modeline-aw-update
+      Just display ace-window indicator when needed
+    Can just define a new segment and modeline with the segment
+      Display internal window number
+      Display other window properties
+        Dedicated (?) => enable even when not debugging
+          my/dedicate-window-temporarily
+          my/toggle-window-dedicated
+        Side window (?)
+        Vimish-tab properties (?)
+      Enable only just for debugging of windows
+        Define native function to modify modeline
+          See how ace-window does this (ace-window-display-mode)
+          Support doom-modeline through an extention
+        Display text representation of window tree:
+          Idea:
+            Buttons can be used to navigate to windows
+            Non-leaf nodes represent window objects
+            Leafs are window properties
+          Internal functions:
+            window-tree
+            walk-window-tree
+          External packages:
+            https://melpa.org/#/treeview (visualization library)
+            https://melpa.org/#/dir-treeview (reference library usage)
+            https://melpa.org/#/treepy (tree walking library)
+          Doom config:
+            lisp/eeowaa-debug.el (could put code here)
+            lisp/cli-help.el (for creation of buttons)
+    Would also like to do this for special modelines in side windows
+      Treemacs and Imenu use simplified modelines
+      I will need to use doom-modeline-def-modeline for those windows
+  Remove buffer size from modeline
+    Not something I usually care about; can figure out via `C-x ='
+    Part of the matches segment
+    Can disable with size-indication-mode
+  Put XX%/Top/Bot to the left of <line>:<col>
+    The width of XX%/Top/Bot is fixed, unlike <line>:<col>
+    I like having fixed-width segments towards the modeline edges
+    Part of buffer-position segment (should create my own)
+Having trouble with ace-window
+  Evil-mode (and other all Emacs input) breaks after C-g
+    I cannot get back to any sort of functional state
+    Need to kill the tmux pane
+  Background is not dimmed anymore during window selection
+  Should enable prompt in minibuffer during selection
+Found a potential fix for vimish-tab tab label updating
+  Look for "HACK" comment in doom-modeline package
+  Look for "TODO" or "FIXME" comment in vimish-tab package
+
+Note that Emacs does not have a primitive way to get a window number.
+Here is a workaround:
+
+(defun my/window-number (&optional window)
+  "Return the number of the current window as a string."
+  (let* ((window-obj (or window (selected-window)))
+         (window-str (format "%s" window-obj))
+         (window-num (string-match "#<window \\([0-9]+\\) on" window-str)))
+    (if window-num
+        (match-string 1 window-str)
+      (error "No window number found"))))
+#+end_src
+
+*** STRT [#A] Remove the filename from the modeline :tweak:hack:
+Using =vimish-tab=, I already have universal visual indication of buffer names
+(file names for file-visiting buffers), so no need to clutter up the modeline.
+
+*NOTE*: A lot of modeline improvements have been made beyond the original goal.
+See the *Documentation* section above and notes below.
+
+#+begin_src emacs-lisp :tangle yes
+;; HACK: I redefine `doom-modeline-format--main' from its original value (see below)
+;; because `doom-modeline' is not responding to changes to `doom-modeline-buffer-name'
+;; as it should. Other segments have been removed and rearranged, as well.
+;;
+;;   (doom-modeline-def-modeline 'main
+;;     '(eldoc bar workspace-name window-number modals matches follow buffer-info remote-host buffer-position word-count parrot selection-info)
+;;     '(compilation objed-state misc-info project-name persp-name battery grip irc mu4e gnus github debug repl lsp minor-modes input-method indent-info buffer-encoding major-mode process vcs check time))
+;;
+
+;; Do not display buffer size in `doom-modeline-segment--matches'.
+(setq size-indication-mode nil)
+
+;; Always display the project in `doom-modeline-segment--project-name' (part 1 of 2).
+(setq doom-modeline-project-name t)
+
+(after! doom-modeline
+
+  ;; Always display the project in `doom-modeline-segment--project-name' (part 2 of 2).
+  (add-to-list 'doom-modeline-always-visible-segments 'project-name)
+
+  ;; Remove extra surrounding spaces
+  (doom-modeline-def-segment my/modals
+    "Displays modal editing states for `evil'."
+    (when doom-modeline-modal
+      (doom-modeline--evil)))
+
+  ;; Move percent before line/column and remove position scroller
+  (doom-modeline-def-segment my/buffer-position
+    "The buffer position information."
+    (let ((sep (doom-modeline-spc))
+          (face (doom-modeline-face))
+          (help-echo "Buffer percentage\n\
+  mouse-1: Display Line and Column Mode Menu")
+          (mouse-face 'doom-modeline-highlight)
+          (local-map mode-line-column-line-number-mode-map))
+      `(,sep
+
+        ;; Percent position
+        (doom-modeline-percent-position
+         ((:propertize ("" doom-modeline-percent-position)
+           face ,face
+           help-echo ,help-echo
+           mouse-face ,mouse-face
+           local-map ,local-map)
+          ,sep
+          ))
+
+        ;; Line and column
+        (:propertize
+         ((line-number-mode
+           (column-number-mode
+            (doom-modeline-column-zero-based
+             doom-modeline-position-column-line-format
+             ,(string-replace
+               "%c" "%C" (car doom-modeline-position-column-line-format)))
+            doom-modeline-position-line-format)
+           (column-number-mode
+            (doom-modeline-column-zero-based
+             doom-modeline-position-column-format
+             ,(string-replace
+               "%c" "%C" (car doom-modeline-position-column-format)))))
+          (doom-modeline-total-line-number
+           ,(and doom-modeline-total-line-number
+                 (format "/%d" (line-number-at-pos (point-max))))))
+         face ,face
+         help-echo ,help-echo
+         mouse-face ,mouse-face
+         local-map ,local-map)
+        ((or line-number-mode column-number-mode) ,sep))))
+
+  (doom-modeline-def-modeline 'main
+    '(bar window-number my/modals follow remote-host my/buffer-position matches selection-info)
+    '(compilation check misc-info repl lsp input-method buffer-encoding major-mode process project-name vcs)))
+#+end_src
 
 *** DONE [#B] Do not display buffer modification info for non-file buffers :tweak:
 #+begin_src emacs-lisp :tangle yes
@@ -1986,7 +2196,7 @@ between windows, among other things:
 (unpin! doom-modeline)
 #+end_src
 
-However, =nerd-icons= is now required. Doom does not handle this very graceful
+However, =nerd-icons= is now required. Doom does not handle this very gracefully
 and it may cause yet-to-be-discovered issues. For now, I will just install the
 icons if they are missing:
 
@@ -2012,6 +2222,12 @@ icons if they are missing:
 *** DONE [#C] Use 1-based column numbering in modeline :tweak:
 #+begin_src emacs-lisp :tangle yes
 (setq column-number-indicator-zero-based nil)
+#+end_src
+
+*** DONE [#C] Do not use icons over SSH :tweak:
+#+begin_src emacs-lisp :tangle yes
+(when (getenv "SSH_CLIENT")
+  (setq! doom-modeline-icon nil))
 #+end_src
 
 ** nav-flash [0/0] :ARCHIVE:
@@ -2360,7 +2576,7 @@ loads, so tabs will appear in the ~ilist~ buffer until you manually run the
 Wait until you have a Maildir set up, then look at configuration options for
 ~display-time-mode~.
 
-** treemacs [13/18]
+** COMMENT treemacs [13/19]
 #+begin_quote
 [[https://github.com/Alexander-Miller/treemacs][Treemacs]] is a file and project explorer similar to NeoTree or vim’s NerdTree,
 but largely inspired by the Project Explorer in Eclipse. It shows the file
@@ -2369,15 +2585,111 @@ navigation and exploration, while also possessing basic file management
 utilities.
 #+end_quote
 
+*** Migrated
+#+begin_src emacs-lisp :tangle yes
+(setq treemacs-user-mode-line-format " Treemacs")
+(setq treemacs-indentation (if initial-window-system 3 2))
+#+end_src
+
+**** DONE [#A] Allow resizable fonts :tweak:bug:
+Right now, =C--= (~text-scale-decrease~) and =C-== (~text-scale-increase~) are
+unmapped, but I can still use =C-x C--= or =C-x C-== to invoke
+~text-scale-adjust~. However, before incorporating the following code snippet,
+only the icons got resized, not the text itself:
+
+#+begin_src emacs-lisp :tangle yes
+(setq doom-themes-treemacs-enable-variable-pitch nil)
+#+end_src
+
+The culprit seems to have been that ~doom-themes-treemacs-enable-variable-pitch~
+was enabled, so the file/directory labels were using the face specified by
+~doom-themes-treemacs-variable-pitch-face~, which is currently ~variable-pitch~
+(see =SPC h F variable-pitch RET= to get information on the face). Basically,
+the face did not get resized.
+
+The only downside is that Treemacs only uses fixed-width fonts now, which makes
+certain things harder to read. Overall, however, I think it looks better.
+
+See also:
++ [[help:doom-variable-pitch-font][doom-variable-pitch-font]]
++ [[doom:.local/straight/repos/themes/extensions/doom-themes-ext-treemacs.el][doom-themes-ext-treemacs.el]]
++ =M-x customize-group doom-themes-treemacs RET=
+
+**** DONE [#B] Do not read from popup frames :tweak:
+Certain operations in Treemacs (e.g. renaming files) will pop up a child frame
+in GUI Emacs to read a string. This frame is very small and has no borders, so
+if the frame loses focus, it can look like Emacs is frozen (the child frame does
+not close when it loses focus). There are two ways to fix this:
+
+1. Configure the child frame to close when it loses focus
+2. Always read from the minibuffer
+
+I will go with option 2 for the following reasons:
+
+- Consistent UI
+- Easier to implement
+- More flexible editing in the minibuffer vs. in the child frame
+
+#+begin_src emacs-lisp :tangle yes
+(setq treemacs-read-string-input 'from-minibuffer)
+#+end_src
+
+**** DONE [#C] Add keybindings to visit adjacent files :feat:
+#+begin_src emacs-lisp :tangle yes
+(after! treemacs-evil
+  (defun my/treemacs-visit-next ()
+    "Open the next node in another window."
+    (interactive)
+    (treemacs-next-line 1)
+    (save-selected-window
+      (treemacs-visit-node-no-split 1)))
+  (defun my/treemacs-visit-previous ()
+    "Open the previous node in another window."
+    (interactive)
+    (treemacs-previous-line 1)
+    (save-selected-window
+      (treemacs-visit-node-no-split 1)))
+  (define-key! evil-treemacs-state-map
+    "J" #'my/treemacs-visit-next
+    "K" #'my/treemacs-visit-previous))
+#+end_src
+
+**** DONE [#C] Allow selection of treemacs window via =ace-window= :tweak:
+https://github.com/doomemacs/doomemacs/issues/1177#issuecomment-464936107
+#+begin_src emacs-lisp :tangle yes
+(after! (:and treemacs ace-window)
+  (setq aw-ignored-buffers (delq 'treemacs-mode aw-ignored-buffers)))
+#+end_src
+
+**** DONE [#C] Set the text scale to -1 :tweak:
+*UPDATE*: For now, I do not like (I just want normal font size).
+
+#+begin_src emacs-lisp :tangle no
+(setq treemacs-text-scale (if initial-window-system -1 0))
+#+end_src
+
+**** LOOP [#C] Configure revert-buffer :tweak:module:
+Until I have a permanent fix for Treemacs icons, I want to call
+~my/treemacs-modify-icons~ when refreshing the buffer.
+
+#+begin_src emacs-lisp :tangle yes
+(after! treemacs
+  (defun my/treemacs-revert-buffer-function (&rest _)
+    (when initial-window-system
+      ;; HACK: Right now, TUI icons look good
+      (my/treemacs-modify-icons))
+    (treemacs-refresh))
+  (setq-hook! 'treemacs-mode-hook
+    revert-buffer-function #'my/treemacs-revert-buffer-function))
+#+end_src
+
+*** Not Migrated
 #+begin_src emacs-lisp :tangle yes
 ;; Little tweaks after upgrading to Emacs 29.2 and the newest Doom
 ;; (setq treemacs-no-png-images t
 ;;       treemacs-indentation-string " ┃")
 ;; (after! treemacs
 ;;   (treemacs-indent-guide-mode))
-;; TODO: `treemacs-sorting' (sort by file extension, etc.)
-(setq treemacs-user-mode-line-format " Treemacs")
-(setq treemacs-indentation (if initial-window-system 3 2))
 
 ;; XXX: Run this before opening icons
 ;; FIXME: Some icons (LICENSE, packages.lock, *.service) are 3 characters wide instead of 2
@@ -2410,20 +2722,20 @@ utilities.
                         :fallback 'same-as-icon))
 #+end_src
 
-*** DONE [#A] Install prerequisites
-**** DONE macOS
+**** DONE [#A] Install prerequisites
+***** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `ui/treemacs` module
 brew install python3
 #+end_src
 
-**** DONE Fedora
+***** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `ui/treemacs` module
 sudo dnf -y install python3
 #+end_src
 
-*** DONE [#A] Unpin treemacs packages :bug:
+**** DONE [#A] Unpin treemacs packages :bug:
 It seems like half of the problems I encounter with =treemacs= and
 =treemacs-lsp= are already solved upstream, so I'm going to roll the dice and
 unpin those packages:
@@ -2432,31 +2744,7 @@ unpin those packages:
 (unpin! (:ui treemacs))
 #+end_src
 
-*** DONE [#A] Allow resizable fonts :tweak:bug:
-Right now, =C--= (~text-scale-decrease~) and =C-== (~text-scale-increase~) are
-unmapped, but I can still use =C-x C--= or =C-x C-== to invoke
-~text-scale-adjust~. However, before incorporating the following code snippet,
-only the icons got resized, not the text itself:
-
-#+begin_src emacs-lisp :tangle yes
-(setq doom-themes-treemacs-enable-variable-pitch nil)
-#+end_src
-
-The culprit seems to have been that ~doom-themes-treemacs-enable-variable-pitch~
-was enabled, so the file/directory labels were using the face specified by
-~doom-themes-treemacs-variable-pitch-face~, which is currently ~variable-pitch~
-(see =SPC h F variable-pitch RET= to get information on the face). Basically,
-the face did not get resized.
-
-The only downside is that Treemacs only uses fixed-width fonts now, which makes
-certain things harder to read. Overall, however, I think it looks better.
-
-See also:
-+ [[help:doom-variable-pitch-font][doom-variable-pitch-font]]
-+ [[doom:.local/straight/repos/themes/extensions/doom-themes-ext-treemacs.el][doom-themes-ext-treemacs.el]]
-+ =M-x customize-group doom-themes-treemacs RET=
-
-*** DONE [#A] Remove "Invalid face reference" errors :bug:
+**** DONE [#A] Remove "Invalid face reference" errors :bug:
 This comes from incorrect parsing of ~git status --porcelain~, which only
 happens when ~treemacs-git-mode~ is operating in ~simple~ mode. By setting the
 Doom-specific ~+treemacs-git-mode~ variable to ~extended~, we use a ~python3~
@@ -2467,7 +2755,7 @@ script instead of ~git~ to determine the git status of each file in a project.
 (setq +treemacs-git-mode 'extended)
 #+end_src
 
-*** DONE [#B] Fix ace-window keybindings :hack:
+**** DONE [#B] Fix ace-window keybindings :hack:
 This slows down startup a bit, but whatever (I'm not obsessed with startup):
 #+begin_src emacs-lisp :tangle yes
 (require 'ace-window)
@@ -2475,7 +2763,7 @@ This slows down startup a bit, but whatever (I'm not obsessed with startup):
 
 Reference: https://github.com/hlissner/doom-emacs/issues/4555
 
-*** OKAY [#B] Do not collapse path strings :tweak:
+**** OKAY [#B] Do not collapse path strings :tweak:
 Doom sets ~treemacs-collapse-dirs~ to 3, and I'm OK with that for now.
 
 #+begin_src emacs-lisp :tangle no
@@ -2483,26 +2771,7 @@ Doom sets ~treemacs-collapse-dirs~ to 3, and I'm OK with that for now.
   (setq treemacs-collapse-dirs 0))
 #+end_src
 
-*** DONE [#B] Do not read from popup frames :tweak:
-Certain operations in Treemacs (e.g. renaming files) will pop up a child frame
-in GUI Emacs to read a string. This frame is very small and has no borders, so
-if the frame loses focus, it can look like Emacs is frozen (the child frame does
-not close when it loses focus). There are two ways to fix this:
-
-1. Configure the child frame to close when it loses focus
-2. Always read from the minibuffer
-
-I will go with option 2 for the following reasons:
-
-- Consistent UI
-- Easier to implement
-- More flexible editing in the minibuffer vs. in the child frame
-
-#+begin_src emacs-lisp :tangle yes
-(setq treemacs-read-string-input 'from-minibuffer)
-#+end_src
-
-*** OKAY [#B] Display "+" and "-" icons in tty emacs :bug:
+**** OKAY [#B] Display "+" and "-" icons in tty emacs :bug:
 :LOGBOOK:
 - Note taken on [2023-05-17 Wed 18:08] \\
   This is working for me today.
@@ -2520,34 +2789,7 @@ fallbacks).
 Better yet, =doom-themes-ext-treemacs= could be patched to use the fallback TUI
 icons from the default theme.
 
-*** DONE [#C] Add keybindings to visit adjacent files :feat:
-#+begin_src emacs-lisp :tangle yes
-(after! treemacs-evil
-  (defun my/treemacs-visit-next ()
-    "Open the next node in another window."
-    (interactive)
-    (treemacs-next-line 1)
-    (save-selected-window
-      (treemacs-visit-node-no-split 1)))
-  (defun my/treemacs-visit-previous ()
-    "Open the previous node in another window."
-    (interactive)
-    (treemacs-previous-line 1)
-    (save-selected-window
-      (treemacs-visit-node-no-split 1)))
-  (define-key! evil-treemacs-state-map
-    "J" #'my/treemacs-visit-next
-    "K" #'my/treemacs-visit-previous))
-#+end_src
-
-*** DONE [#C] Allow selection of treemacs window via =ace-window= :tweak:
-https://github.com/doomemacs/doomemacs/issues/1177#issuecomment-464936107
-#+begin_src emacs-lisp :tangle yes
-(after! (:and treemacs ace-window)
-  (setq aw-ignored-buffers (delq 'treemacs-mode aw-ignored-buffers)))
-#+end_src
-
-*** DONE [#C] Show the cursor in treemacs windows :tweak:
+**** DONE [#C] Show the cursor in treemacs windows :tweak:
 Once you've gotten used to the cursor being hidden in the Treemacs file explorer
 window, seeing the cursor there can be visually jarring. However, consider the
 following benefits of enabling the cursor in Treemacs:
@@ -2574,7 +2816,7 @@ following benefits of enabling the cursor in Treemacs:
   evil-treemacs-state-cursor 'box)
 #+end_src
 
-*** DONE [#C] Display truncation characters in the fringe :tweak:
+**** DONE [#C] Display truncation characters in the fringe :tweak:
 Fringes are not displayed in Treemacs. When the right fringe is not displayed,
 truncated lines end in ~$~. When running =C-l=, I can restore the fringes in
 Treemacs and truncated lines are indicated by an arrow in the right fringe.
@@ -2593,27 +2835,7 @@ don't need ~treemacs-fringe-indicator-mode~ because ~hl-line-mode~ and
     (advice-remove #'treemacs-select-window #'doom-themes-hide-fringes-maybe)))
 #+end_src
 
-*** DONE [#C] Set the text scale to -1 :tweak:
-#+begin_src emacs-lisp :tangle yes
-(setq treemacs-text-scale (if initial-window-system -1 0))
-#+end_src
-
-*** LOOP [#C] Configure revert-buffer :tweak:module:
-Until I have a permanent fix for Treemacs icons, I want to call
-~my/treemacs-modify-icons~ when refreshing the buffer.
-
-#+begin_src emacs-lisp :tangle yes
-(after! treemacs
-  (defun my/treemacs-revert-buffer-function (&rest _)
-    (when initial-window-system
-      ;; HACK: Right now, TUI icons look good
-      (my/treemacs-modify-icons))
-    (treemacs-refresh))
-  (setq-hook! 'treemacs-mode-hook
-    revert-buffer-function #'my/treemacs-revert-buffer-function))
-#+end_src
-
-*** STRT [#B] Align all Treemacs icons :bug:
+**** STRT [#B] Align all Treemacs icons :bug:
 Some files, like =config.org_archive=, do not have icons configured in
 =doom-themes-ext-treemacs=. This has been a recurring problem for me, despite
 the gradual improvements upstream.
@@ -2790,7 +3012,7 @@ Closes and re-opens Treemacs to apply the new theme."
     (treemacs-theme->name treemacs--current-theme)))
 #+end_src
 
-*** STRT [#C] Use the same icons in treemacs as in dired :tweak:
+**** STRT [#C] Use the same icons in treemacs as in dired :tweak:
 I think there are at least two ways to achieve this:
 
 1. Set ~doom-themes-treemacs-theme~ to ~doom-colors~, which uses
@@ -2802,7 +3024,10 @@ Attempting the first option:
 #+begin_src emacs-lisp :tangle yes
 ;; I think I actually prefer the `doom-atom' theme -- it's less distracting
 ;; (setq doom-themes-treemacs-theme "doom-colors")
-(setq doom-themes-treemacs-theme "nerd-icons")
+(setq doom-themes-treemacs-theme
+      (if (getenv "SSH_CLIENT")
+          "default"
+        "nerd-icons"))
 #+end_src
 
 *UPDATE*: This does bring the Treemacs icon set closer to the Dired icon set,
@@ -2814,7 +3039,7 @@ but there are still some differences:
 
 That third difference is the most annoying in Treemacs.
 
-*** TODO [#A] Fix treemacs workspace integration :bug:
+**** TODO [#A] Fix treemacs workspace integration :bug:
 This longstanding bug *impacts me worse than any other issue in my Emacs
 installation*, because it is the only bug that meets all of the following
 negative criteria:
@@ -2852,7 +3077,7 @@ function exited non-locally before running ~treemacs--setup-mode-line~, so
    :on-root-node-open (ignore btn)))
 #+end_src
 
-**** Symptoms
+***** Symptoms
 + Cannot remove projects from Treemacs via =C-c C-p d=
   (~treemacs-remove-project-from-workspace~). For example:
 
@@ -2873,7 +3098,7 @@ function exited non-locally before running ~treemacs--setup-mode-line~, so
   Error running timer ‘treemacs--process-file-events’: (wrong-type-argument arrayp nil)
   #+end_example
 
-**** Diagnostics
+***** Diagnostics
 + The symptoms seem to appear after opening a file outside of the project
   corresponding to the current workspace, but that might not be the one and only
   cause, if it even is a cause. =SPC p F= (~doom/find-file-in-other-project~)
@@ -2932,7 +3157,7 @@ function exited non-locally before running ~treemacs--setup-mode-line~, so
   reason, it does not get set properly. Running ~treemacs--consolidate-projects~
   fixes the problem, however.
 
-**** Ideas
+***** Ideas
 + Did the ~treemacs-workspace~ definition (~cl-struct~ and/or ~eieio~ class?)
   change the data type of the project list? It seems that arrays are expected,
   but lists are used. Maybe =treemacs-projectile= and/or Doom are out of sync
@@ -2952,7 +3177,7 @@ function exited non-locally before running ~treemacs--setup-mode-line~, so
   ~treemacs--find-current-user-project~, which is used by both =treemacs= and
   =treemacs-persp=.
 
-*** TODO [#B] Allow switching git worktrees :feat:
+**** TODO [#B] Allow switching git worktrees :feat:
 My convention is to put alternate worktrees under =.git/worktree-paths=, which
 is not allowed by Treemacs:
 
@@ -2975,6 +3200,109 @@ I can at least manually navigate to the worktrees.
 (setq treemacs-hide-dot-git-directory nil)
 #+end_src
 
+**** TODO [#C] Customize ~treemacs-sorting~ (sort by file extension, etc.) :tweak:
+** treemacs-rewrite
+My original =treemacs= configuration has grown out of control. This section
+attempts to fix it. Long-term, consider removing =:ui doom=. Also consider
+possibly replacing =:ui treemacs= with your own configuration.
+
+#+begin_src emacs-lisp :tangle early-init.el
+;; Prevent loading of nerd icons when using Emacs over SSH
+(when (getenv "SSH_CLIENT")
+  (use-package-hook! treemacs-nerd-icons
+    :pre-init nil     ;; (require 'treemacs-nerd-icons)
+    :pre-config nil)) ;; (treemacs-load-theme "nerd-icons")
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+;; Load custom Treemacs theme definitions
+(after! treemacs
+  (require 'eeowaa-treemacs-themes))
+
+;; Simplify the modeline
+(setq treemacs-user-mode-line-format " Treemacs")
+
+;; Allow resizable fonts
+(setq doom-themes-treemacs-enable-variable-pitch nil)
+
+;; Set the text scale to -1 in graphical Emacs
+(setq treemacs-text-scale (if initial-window-system -1 0))
+
+;; Do not read from popup frames
+(setq treemacs-read-string-input 'from-minibuffer)
+
+;; Add keybindings to visit adjacent files
+(after! treemacs-evil
+  (defun my/treemacs-visit-next ()
+    "Open the next node in another window."
+    (interactive)
+    (treemacs-next-line 1)
+    (save-selected-window
+      (treemacs-visit-node-no-split 1)))
+  (defun my/treemacs-visit-previous ()
+    "Open the previous node in another window."
+    (interactive)
+    (treemacs-previous-line 1)
+    (save-selected-window
+      (treemacs-visit-node-no-split 1)))
+  (define-key! evil-treemacs-state-map
+    "J" #'my/treemacs-visit-next
+    "K" #'my/treemacs-visit-previous))
+
+;; Allow selection of treemacs window via `ace-window'
+(after! (:and treemacs ace-window)
+  (setq aw-ignored-buffers (delq 'treemacs-mode aw-ignored-buffers)))
+
+;; Configure `revert-buffer' (modified from original config)
+(after! treemacs
+  (defun my/treemacs-revert-buffer-function (&rest _)
+    (treemacs-refresh))
+  (setq-hook! 'treemacs-mode-hook
+    revert-buffer-function #'my/treemacs-revert-buffer-function))
+
+(if (getenv "SSH_CLIENT")
+    ;; Prevent treemacs from using icons when using Emacs over SSH
+    (progn
+      (setq treemacs-no-png-images t
+            doom-themes-treemacs-theme "eeowaa-minimal" ;; REVIEW This is not taking effect
+            lsp-treemacs-theme "eeowaa-minimal") ;; REVIEW This is not taking effect
+
+      (after! treemacs-icons
+        ;; Treemacs doesn't know when we are using SSH
+        (defadvice! my/treemacs--no-images-a (&rest _)
+          :override '(treemacs--is-image-creation-impossible?
+                      treemacs--is-image-creation-impossible?--inliner)
+          t)
+
+        ;; Always use two spaces for file icons
+        ;; FIXME: I always have to set `treemacs-icon-fallback' in the buffer
+        ;;  (defadvice! my/treemacs--no-icons-a (&rest _)
+        ;;    :override '(treemacs-icon-for-file
+        ;;                treemacs-icon-for-file--inliner
+        ;;                treemacs-icon-for-mode
+        ;;                treemacs-icon-for-mode--inliner)
+        ;;    treemacs-icon-fallback)
+        (setq treemacs-icon-fallback "  ")
+        (setq-default treemacs-icon-fallback "  ")
+        (setq-hook! 'treemacs-mode-hook treemacs-icon-fallback "  ")
+        (add-hook! 'treemacs-mode-hook :append
+          (defun my/treemacs-load-minimal-theme ()
+            (treemacs-load-theme "eeowaa-minimal")))))
+
+  ;; Use a custom Treemacs theme
+  (setq doom-themes-treemacs-theme "eeowaa-nerd-icons"
+        lsp-treemacs-theme "eeowaa-nerd-icons")
+  (add-hook! 'treemacs-mode-hook :append
+    (defun my/treemacs-load-nerd-theme ()
+      (treemacs-load-theme "eeowaa-nerd-icons"))))
+
+;; Use proper indentation for the environment
+(setq treemacs-indentation (if initial-window-system 3 2))
+
+;; REVIEW Where is this supposed to happen?
+;; (add-hook 'doom-load-theme-hook #'doom-themes-treemacs-config))
+#+end_src
+
 ** unicode [0/0] :ARCHIVE:
 #+begin_quote
 This module extends Doom's ability to display non-English unicode. It is
@@ -2982,25 +3310,8 @@ primarily useful for non-English Emacs users, for whom Doom's built-in unicode
 support in insufficient.
 #+end_quote
 
-** vc-gutter [3/4]
-*** DONE [#B] Enable =vc-gutter= in terminal Emacs :feat:
-TUI Emacs does not have a fringe; however, it does have a margin. Look to Doom
-module documentation for =:ui vc-gutter= and =:os tty= for details.
-
-#+begin_src emacs-lisp :tangle yes
-(after! diff-hl
-  (unless (window-system) (diff-hl-margin-mode)))
-#+end_src
-
-*** OKAY [#B] Enable toggling of VCS diff in the fringe :bug:
-Unfortunately, when the =vc-gutter= module is enabled, I have found no way to
-persistently disable =git-gutter= in a buffer.
-
-*UPDATE*: With the =+diff-hl= module flag (to use =diff-hl= instead of
-=git-gutter=), I have found that =M-x diff-hl-mode= does what I want. I just
-added a toggle keybinding for this.
-
-*** DONE [#C] Do not display =vc-gutter= in COMMIT_EDITMSG buffers :feat:
+** vc-gutter [2/4]
+*** LOOP [#C] Do not display =vc-gutter= in COMMIT_EDITMSG buffers :feat:
 This is mainly a nuisance in terminal Emacs, where an empty margin is created.
 
 Observations:
@@ -3046,6 +3357,23 @@ works even when `global-diff-hl-mode' is disabled.")
     (not (seq-intersection local-minor-modes (cdr my/diff-hl-minor-modes))))
    (t (seq-intersection local-minor-modes my/diff-hl-minor-modes))))
 #+end_src
+
+*** DONE [#B] Enable =vc-gutter= in terminal Emacs :feat:
+TUI Emacs does not have a fringe; however, it does have a margin. Look to Doom
+module documentation for =:ui vc-gutter= and =:os tty= for details.
+
+#+begin_src emacs-lisp :tangle yes
+(after! diff-hl
+  (unless (window-system) (diff-hl-margin-mode)))
+#+end_src
+
+*** OKAY [#B] Enable toggling of VCS diff in the fringe :bug:
+Unfortunately, when the =vc-gutter= module is enabled, I have found no way to
+persistently disable =git-gutter= in a buffer.
+
+*UPDATE*: With the =+diff-hl= module flag (to use =diff-hl= instead of
+=git-gutter=), I have found that =M-x diff-hl-mode= does what I want. I just
+added a toggle keybinding for this.
 
 *** STRT [#C] Keep fringe bitmaps looking good when changing themes :bug:
 So far, only the Doom themes have /really/ good-looking fringe bitmaps for
@@ -3207,10 +3535,11 @@ indicator.
   Right now, I'm happy with the default selection character face.
 :END:
 #+begin_src emacs-lisp :tangle no
-(custom-set-faces!
-  '(aw-leading-char-face
-    :foreground "white" :background "red"
-    :weight bold :height 2.5 :box (:line-width 10 :color "red")))
+(after! ace-window
+  (custom-set-faces!
+    '(aw-leading-char-face
+      :foreground "white" :background "red"
+      :weight bold :height 2.5 :box (:line-width 10 :color "red"))))
 #+end_src
 
 *** DONE [#C] Make the selection character the default size :tweak:
@@ -3219,10 +3548,11 @@ the selection character slightly larger than the default face, which makes the
 window content shift slightly downward, which is quite annoying.
 
 #+begin_src emacs-lisp :tangle yes
-(defadvice! my/aw-face-height-a (theme &rest _)
-  :after '(load-theme consult-theme)
-  (set-face-attribute 'aw-leading-char-face nil
-                      :height (face-attribute 'default :height)))
+(after! ace-window
+  (defadvice! my/aw-face-height-a (theme &rest _)
+    :after '(load-theme consult-theme)
+    (set-face-attribute 'aw-leading-char-face nil
+                        :height (face-attribute 'default :height))))
 #+end_src
 
 *** TODO [#B] Display window numbers in the mode line :feat:
@@ -3390,7 +3720,7 @@ centering text within a window.
                   (bound-and-true-p diff-hl-mode))
 
             ;; Remove distractions
-            (setq display-line-numbers nil)
+            (display-line-numbers-mode -1)
             (hl-line-mode -1)
             (column-highlight-mode -1)
             (display-fill-column-indicator-mode -1)
@@ -3400,7 +3730,9 @@ centering text within a window.
             (diff-hl-mode -1))
 
         ;; Restore previous state
-        (setq display-line-numbers my/zen--old-display-line-numbers)
+        (if my/zen--old-display-line-numbers
+            (let ((display-line-numbers-type my/zen--old-display-line-numbers))
+              (display-line-numbers-mode)))
         (if my/zen--old-hl-line-mode (hl-line-mode +1))
         (if my/zen--old-column-highlight-mode (column-highlight-mode +1))
         (if my/zen--old-display-fill-column-indicator-mode (display-fill-column-indicator-mode +1))
@@ -3462,7 +3794,7 @@ For some reason, the ~use-package~ form for =so-long= (in
 =~/.config/emacs/lisp/doom-editor.el=) is not in effect, though I would like to
 use it.
 
-** evil [8/12]
+** evil [10/13]
 #+begin_quote
 This holy module brings the vim experience to Emacs.
 #+end_quote
@@ -3583,6 +3915,25 @@ form). Using ~:override~ advice in this case seems brittle, but works for now.
 (setq evil-v$-excludes-newline t)
 #+end_src
 
+*** DONE [#B] Activate evil bindings in Info mode :bug:
+This used to work on its own, but not anymore for whatever reason.
+
+#+begin_src emacs-lisp :tangle yes
+(when (modulep! :editor evil +everywhere)
+  (add-hook 'Info-mode-hook #'evil-collection-info-setup))
+#+end_src
+
+*** DONE [#C] Make =C-i= behave as =TAB= in info mode :tweak:module:
+#+begin_src emacs-lisp :tangle yes
+(defadvice! my/ergonomic-info-bindings-a (&rest _)
+  :after #'evil-collection-info-setup
+  (evil-collection-define-key 'normal 'Info-mode-map
+    (kbd "C-t") nil ;; open this up for `vimish-tab'
+    (kbd "C-i") 'Info-next-reference
+    (kbd "M-,") 'Info-history-back
+    (kbd "C-M-,") 'Info-history-forward))
+#+end_src
+
 *** DONE [#C] Define Vim bindings for games :feat:
 =evil-collection= already defines Vim bindings for Tetris, but not for any other
 builtin game.
@@ -3637,20 +3988,6 @@ builtin game.
     :e "H" #'solitaire-move-left
     :e "K" #'solitaire-move-up
     :e "J" #'solitaire-move-down))
-#+end_src
-
-*** TODO [#C] Make =C-i= behave as =TAB= in info mode :tweak:module:
-*UPDATE*: It seems as though ~evil-collection-info-setup~ is no longer getting
-called automatically. I must call it myself after entering ~Info-mode~.
-
-#+begin_src emacs-lisp :tangle yes
-(defadvice! my/ergonomic-info-bindings-a (&rest _)
-  :after #'evil-collection-info-setup
-  (evil-collection-define-key 'normal 'Info-mode-map
-    (kbd "C-t") nil ;; open this up for `vimish-tab'
-    (kbd "C-i") 'Info-next-reference
-    (kbd "M-,") 'Info-history-back
-    (kbd "C-M-,") 'Info-history-forward))
 #+end_src
 
 *** DONE [#C] Bind base64-encoding/decoding commands :feat:
@@ -4211,7 +4548,7 @@ Modules that reconfigure or augment packages or features built into Emacs.
 ;;; :emacs
 #+end_src
 
-** Miscellany [15/25]
+** Miscellany [16/24]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -4230,9 +4567,8 @@ Miscellaneous configuration without a corresponding module.
 
 *** DONE [#A] Configure C source directory :tweak:feat:
 #+begin_src emacs-lisp :tangle yes
-(let ((srcdir (format "%s.local/src/emacs/emacs-%s/src"
-                      (file-name-as-directory (getenv "HOME"))
-                      emacs-version)))
+(let ((srcdir (format "%s.local/src/emacs/gnu-emacs/src"
+                      (file-name-as-directory (getenv "HOME")))))
   (when (file-directory-p srcdir)
     (setq find-function-C-source-directory srcdir)))
 #+end_src
@@ -4425,6 +4761,48 @@ of the current buffer."
       (font-lock-update)))))
 
 (global-set-key [remap font-lock-update] #'my/font-lock-update)
+#+end_src
+
+*** DONE [#C] Create and bind a command similar to Vim's =C-g= :feat:
+Vim outputs information about the current buffer when you press =C-g=
+(defined by the Vim option ~shortmess~). This normally consists of:
+
+1. The file path
+   - The file path is double-quoted
+   - The path is relative to the working directory if within it
+   - Tildes for home directories are not expanded
+   - If the buffer is not buffer-visiting, ~"[No Name]"~ is used
+2. A series of indicators about the buffer
+   - ~[New]~ if the buffer is file-visiting but has not yet been written
+   - ~[Modified]~ if the buffer has been modified since creation or last filesystem write
+     - [[help:not-modified]]
+     - help:buffer-modified-p
+   - ~[readonly]~ if the buffer is readonly
+     - help:read-only-mode
+     - help:buffer-read-only
+3. Information about the file
+   - Number of lines as ~X lines~
+     - help:count-lines
+   - Percentage into the file as ~--Y%--~
+
+I would like something similar to this for Emacs. The mode line is useful for
+information that I want /all the time/, but I don't want to clutter it up with
+information I only want /some of the time/.
+
+#+begin_src emacs-lisp :tangle yes
+(defun my/current-buffer-information ()
+  (interactive)
+  (let* ((filepath (if buffer-file-name (abbreviate-file-name buffer-file-name) "nil"))
+         (new (if (and buffer-file-name (not (file-exists-p buffer-file-name))) "[new]" ""))
+         (modified (if (buffer-modified-p) "[modified]" ""))
+         (readonly (if buffer-read-only "[readonly]" ""))
+         (space (if (zerop (length (format "%s%s%s" new modified readonly))) "" " "))
+         (lines (format "%d lines" (save-restriction
+                                     (widen)
+                                     (count-lines (point-min) (point-max))))))
+    (message "%S %s%s%s%s%s %S" filepath new modified readonly space lines (buffer-name))))
+
+(define-key! help-map "h" #'my/current-buffer-information)
 #+end_src
 
 *** STRT [#B] Create and bind a function to copy the last message written :feat:
@@ -4631,7 +5009,7 @@ Compare with my old config and try to match it.
 I mostly want to do this to have an easier time tracking the local time of
 servers I have deployed around the world.
 
-** dired [2/3]
+** dired [3/4]
 #+begin_quote
 This module provides configuration for dired.
 #+end_quote
@@ -4687,6 +5065,16 @@ Now run the following snippets and compare with the previous example:
 (find-grep-dired default-directory "kubernetes\\|k8s")
 #+end_src
 
+*** DONE [#C] Do not use icons over SSH :tweak:
+#+begin_src emacs-lisp :tangle yes
+(when (getenv "SSH_CLIENT")
+  (when (modulep! :emacs dired +icons)
+    (after! dirvish
+      (setq dirvish-subtree-always-show-state nil)
+      (delq! 'nerd-icons dirvish-attributes)
+      (delq! 'subtree-state dirvish-attributes))))
+#+end_src
+
 *** STRT [#A] Define directory-exploring =evil-ex= commands :feat:
 I would like to refactor ~my/+dired-tab-jump~ to use mechanisms similar to
 ~dired-other-tab~ and ~switch-to-buffer-other-tab~. This will probably require
@@ -4724,7 +5112,7 @@ some additional functionality in =vimish-tab= (namely a new function called
 
 ** electric [0/0]
 ** eww [0/0] :ARCHIVE:
-** ibuffer [1/7]
+** ibuffer [2/8]
 #+begin_quote
 This module augments ibuffer.
 #+end_quote
@@ -4739,6 +5127,19 @@ to forget to refresh the buffer.
 (add-hook 'ibuffer-mode-hook #'ibuffer-auto-mode)
 #+end_src
 
+*** DONE [#C] Do not use icons over SSH :tweak:
+#+begin_src emacs-lisp :tangle yes
+(when (and (getenv "SSH_CLIENT")
+           (modulep! :emacs ibuffer +icons))
+  (after! ibuffer
+    (setcar ibuffer-formats
+            (let ((fmt (car ibuffer-formats)))
+              (append (seq-subseq fmt 0 5)
+                      (seq-subseq fmt 7)))))
+  (after! ibuffer-projectile
+    (setq ibuffer-projectile-prefix "Project: ")))
+#+end_src
+
 *** STRT [#B] Clean up the modeline :tweak:hack:
 Performance can become an issue when listing workspace-specific buffers.
 
@@ -4748,7 +5149,6 @@ Performance can become an issue when listing workspace-specific buffers.
     "Clean up the modeline and improve performance."
     (setcar mode-line-process "by ")
     (setf (nth 2 ibuffer-header-line-format) " by ")))
-    ;; (setf (alist-get 'header-line-format mode-line-process) "")))
 #+end_src
 
 *** TODO [#A] Figure out how to dynamically resize ~ibuffer~ columns :feat:
@@ -4820,6 +5220,27 @@ integration with git.
 Modules that offer terminal emulation.
 #+end_quote
 
+** COMMENT Goals
++ Configuration
+  - Bourne-compatible shell (no ~eshell~, for example)
+  - Reuse of my shell dotfiles
++ Keybindings
+  - Plays well with evil keybindings and evil state changes
+  - Evil insert state provides a standard command-line editing experience
+  - =C-x C-e= allows editing of the command line in Emacs
++ Buffer
+  - Reasonable scrollback length
+  - Scrollback is not cleared with =C-l= (maybe with =C-c C-l=)
+  - Soft line wrapping (not possible with =vterm=)
++ Performance
+  - Quick to open new terminal buffers from Emacs
+  - Can output a bunch of lines reasonably fast
++ Integration
+  - Directory tracking (~default-directory~ automatically updates)
+  - Prompt tracking (can quickly jump between prompts)
+  - =$EDITOR= is an =emacsclient= to the parent Emacs
+  - Plays well with TRAMP for Docker, Kubernetes, SSH, etc.
+
 ** Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
 ;;; :term
@@ -4830,7 +5251,7 @@ Modules that offer terminal emulation.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-*** DONE Define a helper function to wrap calls to ~with-editor-export-editor~ :feat:
+*** DONE [#B] Define a helper function to wrap calls to ~with-editor-export-editor~ :feat:
 #+begin_src emacs-lisp :tangle yes
 (defun my/with-editor-export ()
   "Run `with-editor-export-editor' for all envvars that I care about"
@@ -5937,6 +6358,11 @@ working with projects and Doom workspaces and make sure that things are working
 that way. In the meantime, ~projectile-invalidate-cache~ (=SPC p i=) seems to
 fix things.
 
+#+begin_src emacs-lisp
+(after! projectile
+  (add-to-list 'projectile-project-root-files "ansible.cfg"))
+#+end_src
+
 ** biblio [0/0] :ARCHIVE:
 ** bitwarden [3/4] :eeowaa:
 *** DONE [#A] Install prerequisites
@@ -6397,8 +6823,9 @@ npm install -g dockerfile-language-server-nodejs
 #+begin_src emacs-lisp :tangle yes
 ;; Replace default association with a more generic one
 (delq! "/Dockerfile\\(?:\\.[^/\\]*\\)?\\'" auto-mode-alist #'assoc-string)
-(pushnew! auto-mode-alist
-          '("/[^/\\]*\\<\\(Docker\\|Container\\)file\\>[^/\\]*$" . dockerfile-mode))
+(add-to-list 'auto-mode-alist
+             '("/[^/\\]*\\<\\(Docker\\|Container\\)file\\>[^/\\]*$" . dockerfile-mode)
+             'append)
 #+end_src
 
 *** TODO [#A] Seamlessly edit files from =vterm= buffers to Docker containers :feat:
@@ -6507,14 +6934,14 @@ sudo dnf -y install editorconfig
 #+begin_src emacs-lisp :tangle yes
 (after! editorconfig
   (add-to-list 'editorconfig-exclude-regexps
-               "/\\(?:\\(?:COMMIT\\|TAG\\)_EDIT\\|MERGE_\\)MSG\\'"))
+               "/\\(?:\\(?:COMMIT\\|TAG\\|NOTES\\)_EDIT\\|MERGE_\\)MSG\\'"))
 #+end_src
 
 It is also a good idea to add the following entry to project-specific
 editorconfig files ([[https://stackoverflow.com/questions/2290016/git-commit-messages-50-72-formatting][reference]]):
 
 #+begin_src editorconfig-conf :tangle no
-[COMMIT_EDITMSG,TAG_EDITMSG,MERGE_MSG]
+[COMMIT_EDITMSG,TAG_EDITMSG,NOTES_EDITMSG,MERGE_MSG]
 max_line_length = 70
 #+end_src
 
@@ -6963,7 +7390,7 @@ it doesn't want to install user-contributed docsets. References:
 + ~dash-docs-install-user-docset~
   - https://github.com/roberth-k/dash-docset-terraform
 
-** lsp [5/14]
+** lsp [6/15]
 *** COMMENT Documentation
 + [[doom-modules:tools/lsp/README.org][tools/lsp module documentation]]
 + [[doom:.local/straight/repos/lsp-mode/README.md][lsp-mode package README]]
@@ -7160,8 +7587,21 @@ that instead.
   (setq my/lsp-ui-imenu-text-scale -1)
   (after! lsp-ui-imenu
     (defun my/lsp-ui-imenu-text-scale-h ()
-      (text-scale-increase my/lsp-ui-imenu-text-scale))
+      (text-scale-set my/lsp-ui-imenu-text-scale))
     (add-hook 'lsp-ui-imenu-mode-hook #'my/lsp-ui-imenu-text-scale-h)))
+#+end_src
+
+*** DONE [#C] Prevent decreasing text scale too much in =lsp-treemacs= buffers :hack:bug:
+The ~lsp-treemacs-render~ function calls ~text-scale-increase~ when it should
+really be calling ~text-scale-set~. The result is that the text scale is
+increased or decreased by double the amount specified in ~treemacs-text-scale~.
+
+#+begin_src emacs-lisp :tangle yes
+(after! lsp-treemacs-generic
+  (defadvice! my/lsp-treemacs-render--text-scale (fn &rest args)
+    :around #'lsp-treemacs-render
+    (letf! ((#'text-scale-increase #'text-scale-set))
+      (apply fn args))))
 #+end_src
 
 *** LOOP [#C] Do not display code actions in the modeline :bug:
@@ -7177,7 +7617,7 @@ https://emacs-lsp.github.io/lsp-mode/page/main-features/#code-actions-on-modelin
 #+end_src
 
 ** magit [3/6]
-*** STRT [#A] Install prerequisites :feat:
+*** STRT [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/magit` module
@@ -7454,7 +7894,7 @@ sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
 
 ** rgb [0/0] :ARCHIVE:
 ** taskrunner [0/0] :ARCHIVE:
-** terraform [4/6] :ARCHIVE:
+** terraform [4/6]
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -8000,7 +8440,7 @@ Modules to improve integration into your OS, system, or devices.
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-*** TODO Eliminate display bugs on Wayland :bug:
+*** TODO [#B] Eliminate display bugs on Wayland :bug:
 The ~inhibit-double-buffering~ frame parameter might need to be set on Wayland.
 See also:
 
@@ -8328,22 +8768,42 @@ I would rather use ~use-package-hook!~ than rewrite the whole ~use-package!~
 declaration, but I don't know if/how that is possible, because ~:general~ is
 used instead of ~:config~ to specify the keybinding.
 
-** data [2/2]
+** data [4/4]
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/data` module
-curl --create-dirs \
-    -fsSLo ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
-    https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.20.0/org.eclipse.lemminx-0.20.0-uber.jar
+
+## xmllint
+brew install libxml2
+
+## xmlls
+(
+    xmlls_baseurl=https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx
+    xmlls_version=`curl -fsSLo- "$xmlls_baseurl/maven-metadata.xml" | xmllint --xpath '/metadata/versioning/release/text()' -`
+    mkdir -p ~/.config/emacs/.local/etc/lsp/xmlls
+    cd ~/.config/emacs/.local/etc/lsp/xmlls
+    curl -fsSLO "$xmlls_baseurl/$xmlls_version/org.eclipse.lemminx-$xmlls_version-uber.jar"
+    ln -sf "org.eclipse.lemminx-$xmlls_version-uber.jar" org.eclipse.lemminx-uber.jar
+)
 #+end_src
 
 **** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `lang/data` module
-curl --create-dirs \
-    -fsSLo ~/.config/emacs/.local/etc/lsp/xmlls/org.eclipse.lemminx-0.20.0-uber.jar \
-    https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.20.0/org.eclipse.lemminx-0.20.0-uber.jar
+
+## xmllint
+sudo dnf -y install libxml2
+
+## xmlls
+(
+    xmlls_baseurl=https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx
+    xmlls_version=`curl -fsSLo- "$xmlls_baseurl/maven-metadata.xml" | xmllint --xpath '/metadata/versioning/release/text()' -`
+    mkdir -p ~/.config/emacs/.local/etc/lsp/xmlls
+    cd ~/.config/emacs/.local/etc/lsp/xmlls
+    curl -fsSLO "$xmlls_baseurl/$xmlls_version/org.eclipse.lemminx-$xmlls_version-uber.jar"
+    ln -sf "org.eclipse.lemminx-$xmlls_version-uber.jar" org.eclipse.lemminx-uber.jar
+)
 #+end_src
 
 *** DONE [#A] Do not remove trailing whitespace in TSV mode :bug:
@@ -8360,6 +8820,26 @@ for =ws-butler= to use in =tsv-mode= buffers to remove trailing spaces while
 keeping trailing tabs, or maybe even to removing trailing spaces from each
 tab-separated field, but this is good enough for now.
 
+*** DONE [#B] Revert XML language server path to default :tweak:
+=lsp-xml.el= sets ~lsp-xml-jar-file~ as follows:
+: (f-join lsp-server-install-dir "xmlls" lsp-xml-jar-name)
+
+For some reason, however, the =:tools lsp= module is overriding that with
+~$XDG_CONFIG_HOME/emacs/.local/etc/lsp/org.eclipse.lsp4xml-0.3.0-uber.jar~.
+
+There is probably a good reason for that, but I'm going to revert to the default
+configuration unless I am disappointed when editing XML.
+
+#+begin_src emacs-lisp :tangle yes
+(setq lsp-xml-jar-file
+      (expand-file-name "xmlls/org.eclipse.lemminx-uber.jar" lsp-server-install-dir))
+#+end_src
+
+*** DONE [#C] Add basic support for CODEOWNERS files :feat:
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'auto-mode-alist '("/CODEOWNERS\\(?:\\.md\\)?\\'" . conf-mode))
+#+end_src
+
 ** dart [0/0] :ARCHIVE:
 #+begin_quote
 [[https://dart.dev/][Dart]] is a client-optimized language by Google for fast apps on any platform.
@@ -8375,7 +8855,7 @@ or [[https://github.com/elixir-lsp/elixir-ls/][elixir-ls]].
 #+end_quote
 
 ** elm [0/0] :ARCHIVE:
-** emacs-lisp [3/4]
+** emacs-lisp [4/4]
 #+begin_quote
 This module extends support for Emacs Lisp in Doom Emacs.
 #+end_quote
@@ -8427,11 +8907,11 @@ Reference: https://emacs.stackexchange.com/a/55914/21977
 (pushnew! auto-mode-alist '("Cask\\'" . lisp-data-mode))
 #+end_src
 
-*** LOOP [#B] Prepend ";; => " to output in Lisp Interaction Mode :tweak:
+*** DONE [#B] Prepend ";; => " to output in Lisp Interaction Mode :tweak:
 https://www.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_thread/eqrf693?utm_source=share&utm_medium=web2x
 
-*UPDATE*: This doesn't seem to be working for me anymore. All of my output is in
-an overlay due to the =eros= package.
+Use =C-j= to run ~eval-print-last-sexp~ and show the result in the buffer.
+This only works in ~lisp-interation-mode~ (not ~emacs-lisp-mode~).
 
 #+begin_src emacs-lisp :tangle yes
 (defadvice! my/format-result-a (f &rest r)
@@ -8799,7 +9279,7 @@ github_binary_release \
                 "main.lua")))
 #+end_src
 
-** markdown [11/18]
+** markdown [12/19]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
@@ -8859,7 +9339,7 @@ Regardless of what I've set ~browse-url-browser-function~ to, I would like to
 preview Markdown rendering in the system browser.
 
 #+begin_src emacs-lisp :tangle yes
-(after! markdown
+(after! markdown-mode
   (defun my/markdown-preview (f &rest r)
     (let ((browse-url-browser-function #'browse-url-default-browser))
       (apply f r)))
@@ -8951,6 +9431,14 @@ Currently only includes code blocks."
         :i "M-i" nil))
 #+end_src
 
+*** DONE [#B] Add a binding to align Markdown tables :tweak:
+#+begin_src emacs-lisp :tangle yes
+(after! markdown-mode
+  (map! :map markdown-mode-map
+        :localleader
+        "a" #'markdown-table-align))
+#+end_src
+
 *** DONE [#B] Disable error reporting in markdown-mode buffers :tweak:
 :LOGBOOK:
 - Note taken on [2023-02-16 Thu 14:58] \\
@@ -8984,17 +9472,13 @@ Reference: [[*Disable error reporting in sh-mode buffers][Disable error reportin
 
 *** DONE [#C] Fontify and scale Markdown headers :tweak:hack:
 #+begin_src emacs-lisp :tangle yes
-(setq markdown-fontify-whole-heading-line nil
-      markdown-header-scaling t)
-
-;; Setting `markdown-header-scaling' (even using Customize) is not enough.
-;; We must call `markdown-update-header-faces' within buffers, too.
-(defun my/markdown--update-display-h ()
-  "Apply desired styling to a markdown buffer."
-  (markdown-update-header-faces markdown-header-scaling))
-(add-hook 'markdown-mode-hook
-          #'my/markdown--update-display-h
-          nil 'local)
+(after! markdown-mode
+  (setq! markdown-fontify-whole-heading-line nil
+         markdown-header-scaling t)
+  (add-hook! markdown-mode
+    (defun my/markdown--update-display-h ()
+      "Apply desired styling to a markdown buffer."
+      (markdown-update-header-faces markdown-header-scaling))))
 #+end_src
 
 *** STRT [#B] Extend editing capabilities of code and pre blocks :feat:hack:
@@ -9006,7 +9490,9 @@ Reference: [[*Disable error reporting in sh-mode buffers][Disable error reportin
 - [-] Adding unindented text to the kill ring
 - [-] Sending unindented text to a REPL
 
-#+begin_src emacs-lisp :tangle yes
+*UPDATE*: I have disabled this for now for performance reasons.
+
+#+begin_src emacs-lisp :tangle no
 (after! markdown-mode
   (defun my/markdown-pre-block-bounds ()
     "Return the bounds of a pre block at point.
@@ -9178,7 +9664,9 @@ block at point is a pre block (as opposed to a code block)."
 - [ ] Tilde blocks
 - [ ] Pre blocks
 
-#+begin_src emacs-lisp :tangle yes
+*UPDATE*: I have disabled this for now for performance reasons.
+
+#+begin_src emacs-lisp :tangle no
 (setq-hook! 'markdown-mode-hook hs-allow-nesting nil)
 
 (after! markdown-mode
@@ -9227,6 +9715,29 @@ block at point is a pre block (as opposed to a code block)."
   (pushnew! markdown-code-lang-modes
             '("http" . restclient-mode)
             '("sh" . bash-mode)))
+#+end_src
+
+*** STRT [#B] Fix live-preview of Markdown buffers :hack:bug:
+*NOTE*: This crashes when using graphical Emacs. It could possibly be a bug
+related to the PGTK build of Emacs 29.4: https://github.com/doomemacs/doomemacs/issues/7915
+
+#+begin_src emacs-lisp :tangle yes
+;; HACK `grip-start-preview' calls `derived-mode-p' with a list of modes, when
+;; each mode should be passed as a separate argument.
+(after! grip-mode
+  (defadvice! my/grip-start-preview-a ()
+    :override #'grip-start-preview
+    (interactive)
+    (when buffer-file-name
+      (add-hook 'kill-buffer-hook #'grip-stop-preview nil t)
+      (add-hook 'kill-emacs-hook #'grip-stop-preview nil t)
+      (cond ((derived-mode-p 'org-mode)
+             (grip--preview-org))
+            ((derived-mode-p 'markdown-mode 'markdown-ts-mode)
+             (grip--preview-md))
+            (t
+             (grip-mode -1)
+             (user-error "`%s' not supported by grip preview" major-mode))))))
 #+end_src
 
 *** STRT [#C] Support reveal.js :feat:
@@ -9344,9 +9855,6 @@ I have opened Emacs /and then/ attempt to open an image that it will not work. I
 am guessing that the problem is caused by lazy-loaded code that has not loaded
 yet opening an image file from the command line.
 
-*** TODO [#B] Live-preview Markdown buffers in an external browser :tweak:
-Live preview still happens in =eww= buffers.
-
 ** nim [0/0] :ARCHIVE:
 #+begin_quote
 This module adds [[https://nim-lang.org][Nim]] support to Emacs.
@@ -9378,7 +9886,9 @@ intuitive out of the box.
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/org` module
 brew install ditaa gnuplot pandoc graphviz pngpaste
-mkdir -p ~/org/roam
+
+# Create `org-directory` if missing
+mkdir -p ~/Documents/notes
 #+end_src
 
 **** DONE Fedora
@@ -9388,6 +9898,9 @@ sudo dnf -y install ditaa gnuplot pandoc graphviz sqlite
 pipx install --include-deps jupyter
 pipx inject jupyter ipykernel
 sudo dnf -y install zeromq-devel libstdc++-static
+
+# Create `org-directory` if missing
+mkdir -p ~/Documents/notes
 #+end_src
 
 *** Document Structure [3/5]
@@ -9420,7 +9933,7 @@ reload the contents into a fresh buffer) has nearly become muscle memory, but I
 really shouldn't have to do this. *UPDATE*: I am not seeing this problem
 anymore.
 
-**** DONE [#B] Unbind =C-j= from ~org-down-element~ in Evil insert state
+**** DONE [#B] Unbind =C-j= from ~org-down-element~ in Evil insert state :tweak:
 I want =C-j= to simply insert a new line without electric/auto indentation.
 
 #+begin_src emacs-lisp :tangle yes
@@ -9429,7 +9942,7 @@ I want =C-j= to simply insert a new line without electric/auto indentation.
         :i "C-j" #'+default/newline))
 #+end_src
 
-**** STRT [#A] Insert new headlines just how I like them :tweak:
+**** STRT [#A] Insert new headlines just how I like them :tweak:hack:
 This is mostly done, but I do not want there to be a blank line after drawers or
 scheduling information:
 
@@ -9501,7 +10014,7 @@ just perform a complete cycle of `org-cycle'."
 + Reference ~org-sort-entries~
 
 *** Tables [0/0]
-*** Hyperlinks [3/6]
+*** Hyperlinks [3/7]
 **** DONE [#A] Add missing org link (=ol-*=) modules :feat:
 References:
 + [[file:~/.config/emacs/modules/lang/org/config.el::(defvar org-modules][~/.config/emacs/modules/lang/org/config.el]]
@@ -9509,16 +10022,19 @@ References:
 
 #+begin_src emacs-lisp :tangle yes
 (after! org
-  (pushnew! org-modules 'ol-man 'ol-info 'ol-w3m))
+  (pushnew! org-modules 'ol-bookmark 'ol-man 'ol-info 'ol-w3m))
 #+end_src
 
-**** DONE [#B] Open file links in another window :tweak:
+**** DONE [#B] Open specific link types in another window :tweak:
 + https://stackoverflow.com/questions/17590784/how-to-let-org-mode-open-a-link-like-file-file-org-in-current-window-inste
 + [[help:org-link-frame-setup]]
 
 #+begin_src emacs-lisp :tangle yes
 (after! org
-  (setcdr (assoc 'file org-link-frame-setup) #'find-file-other-window))
+  (setcdr (assoc 'file org-link-frame-setup) #'find-file-other-window)
+  (defadvice! my/org-bookmark-open-a (bookmark _)
+    :override #'org-bookmark-open
+    (bookmark-jump-other-window bookmark)))
 #+end_src
 
 **** DONE [#C] Configure how links to man pages are opened :tweak:
@@ -9528,6 +10044,58 @@ References:
           #'man
         #'woman))
 #+end_src
+
+**** TODO [#A] Store links to bookmarks by default in file-visiting buffers
+In file-visiting buffers without special link handling (such as ~org-mode~
+buffers), ~org-store-link~ (=SPC n l=) will store a ~file~ link. When
+~org-link-context-for-files~ is non-nil (the default), the link will contain a
+search string so that when visiting the link, the cursor will be positioned on
+the first occurence of that string within the buffer.
+
+Although slightly more robust than simply storing ~<file>:<number>~ links like
+in Vim, this is still a fragile mechanism. What if you want to link to a line
+containing the exact same text that appeared previously in the file? What if you
+want to change the text of that line altogether? For cases like these, the Emacs
+bookmarks mechanism is much better.
+
+Fortunately, =ob-bookmark= can be used to store org links to Emacs bookmarks.
+We have already loaded it in a previous code block; the following just
+configures ~bookmark~ links to be preferred over ~file~ links:
+
+#+begin_src emacs-lisp :tangle yes
+(setq org-link-context-for-files nil)
+
+;; (setq org-bookmark-when-visiting-a-file t
+;;       org-bookmark-use-first-bookmark nil)
+
+;; Optional: automatically prompt for and display bookmark annotations
+;; (setq bookmark-use-annotations t
+;;       bookmark-automatically-show-annotations t)
+#+end_src
+
+Now, in a file-visiting buffer, the following sequence to create and store an
+org link to the position in the file:
+
+1. Create a bookmark with ~bookmark-set~ (=SPC b m= or =C-x r m=)
+   - Give it a name that is contextually useful and unique
+   - Examples: ~<program>:<function>~, ~<task>:<step>~
+2. Optionally annotate the bookmark to provide more context
+   - You will be automatically prompted when ~bookmark-use-annotations~ is non-nil
+   - Otherwise open the bookmark menu using ~bookmark-bmenu-list~ (=C-x r l=)
+     and annotate your bookmark with ~bookmark-bmenu-edit-annotation~ (=E=)
+   - Note that you can show annotations in the bookmark menu using
+     ~bookmark-bmenu-show-annotation~ (=a=) and ~bookmark-bmenu-show-all-annotations~ (=A=)
+   - To delete an annotation from a bookmark, edit the annotation from the bookmark menu,
+     comment out all lines in the ~bookmark-edit-annotation-mode~ buffer, and commit changes
+3. Store an org link to the bookmark at point using (=SPC n l=)
+4. Insert the link into another buffer using ~org-insert-link~ (=SPC m l l= or =C-c C-l=)
+   - Note that the buffer into which you are inserting the link may be a better place than
+     annotations to provide long-form commentary
+   - For example, you could copy a code snippet at the bookmark location into the kill ring
+     and yank the snippet into an org source block next to the inserted link
+
+For now, this process is somewhat manual. Once I have developed a workflow
+that works for me, I will automate the menial steps.
 
 **** TODO [#B] Create method to open links in specified window :feat:
 I have at least four different options:
@@ -9685,15 +10253,10 @@ Relevant variables:
 | Agenda files        | org: =SPC u SPC u SPC m ,= | global: =SPC n S= |                   |
 | Org directory files | global: =SPC n f=          |                   | global: =SPC n s= |
 
-The following is a prerequisite for my organization:
-#+begin_src sh :tangle no
-mkdir -p ~/org
-#+end_src
-
 #+begin_src emacs-lisp :tangle yes
 (setq
       ;; Top-level directory (used by `+default/find-in-notes', etc.)
-      org-directory "~/org"
+      org-directory "~/Documents/notes"
 
       ;; Directories to search for agenda files
       my/org-directories `("work" "life" ,doom-user-dir)
@@ -10449,7 +11012,7 @@ This module adds a major mode and flycheck for Raku.
 This module adds [[https://en.wikipedia.org/wiki/Representational_state_transfer][REST]] support.
 #+end_quote
 
-*** DONE [#A] Install prerequisites :feat:
+*** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `lang/rest` module
@@ -10474,7 +11037,7 @@ This module adds support for the Rust language and integration for its tools,
 e.g. ~cargo~.
 #+end_quote
 
-*** OKAY [#A] Install prerequisites :feat:
+*** OKAY [#A] Install prerequisites
 **** OKAY macOS
 #+begin_src sh :tangle no
 # Install prerequisites for `lang/rust` module
@@ -10580,7 +11143,7 @@ powered by [[https://www.nongnu.org/geiser/geiser_1.html#introduction][geiser]].
 This module adds support for shell scripting languages.
 #+end_quote
 
-*** TODO [#A] Install prerequisites :feat:
+*** TODO [#A] Install prerequisites
 Still need to install PowerShell language server. References:
 
 + =lsp-pwsh=
@@ -10840,9 +11403,10 @@ saying that the implementation of ~lsp-yaml-download-schema-store-db~ is buggy.
 ~yaml-mode~ is derived from ~text-mode~, not ~prog-mode~, so we need to
 explicitly enable line numbers.
 
-#+begin_src emacs-lisp :tangle yes
-(setq-hook! 'yaml-mode-hook
-  display-line-numbers t)
+*UPDATE*: For now, I do not like seeing line numbers in YAML (it just clutters things).
+
+#+begin_src emacs-lisp :tangle no
+(add-hook! 'yaml-mode-hook #'display-line-numbers-mode)
 #+end_src
 
 *** STRT [#C] Display indent guides in YAML mode :tweak:
@@ -11217,7 +11781,7 @@ server and [[https://musicpd.org/clients/mpc/][mpc]] to update your music databa
 This module adds system-wide popup Emacs windows for quick edits.
 #+end_quote
 
-*** TODO [#A] Install prerequisites :feat:
+*** TODO [#A] Install prerequisites
 **** WAIT macOS
 ***** WAIT Create an automator service to run a command
 ****** DONE Manual instructions
@@ -11378,6 +11942,11 @@ with my own philosophy of using Emacs.
 
   ;; Do not stream responses
   (setq gptel-stream nil)
+
+  ;; Use 2-character prefixes instead of 3-character prefix
+  (setq gptel-prompt-prefix-alist '((markdown-mode . "## ")
+                                    (org-mode . "** ")
+                                    (text-mode . "## ")))
 
   (map! :map gptel-mode-map
         "C-c C-g" #'gptel-menu))
@@ -11714,7 +12283,7 @@ This can be done with ~#+INCLUDE~ directives. Doing so might make tangling
 faster, but currently I don't have any problems with performance. If and when I
 start to notice a problem, I'll revisit this item.
 
-** default [11/12]
+** default [12/13]
 #+begin_quote
 This module provides a set of reasonable defaults.
 #+end_quote
@@ -11757,6 +12326,52 @@ describing where all invocations of a key sequence is.
   "C-c" #'eeowaa-find-command)  ;; replaces `describe-coding-system' b/c I never use it
 #+end_src
 
+*** OKAY [#A] Prevent the =which-key= popop from "bouncing" :bug:doc:
+:LOGBOOK:
+- Note taken on [2023-01-22 Sun 16:48] \\
+  I have set ~which-key-popup-type~ to ~minibuffer~ for compatibility with my new
+  window management system (powered by my custom =:ui buffer-group= module). This
+  had the incidental benefit of "fixing" the window bouncing, although the problem
+  would probably still exist for me if I were to go back to Doom's way of
+  displaying the =which-key= popup window.
+:END:
+**** Description
+- Sometimes the window overshoots its height and settles back down to where it
+  should be. This is an annoying visual distraction.
+- The problem resides either within Doom's popup system or Emacs' side window
+  system, and only seems to happen when the ~window-height~ or ~size~ element of
+  ~display-buffer-alist~ or Doom's corresponding ~+popup--display-buffer-alist~
+  is set a to a resize function such as ~fit-window-to-buffer~ or Doom's
+  ~+popup-shrink-to-fit~.
+- Here is the function call sequence for displaying =which-key= buffers:
+  1. ~(which-key--create-buffer-and-show)~
+  2. ~(which-key--show-page)~
+  3. ~(which-key--show-popup act-popup-dim)~
+  4. ~(funcall which-key-custom-show-popup-function act-popup-dim)~
+     - lambda defined in =~/.config/emacs/modules/ui/popup/+hacks.el=
+  5. ~(which-key--show-buffer-side-window act-popup-dim)~
+  6. ~(+popup-display-buffer-stacked-side-window-fn ...)~
+     - overrides ~display-buffer-in-side-window~
+     - alist defined in ~which-key-custom-show-popup-function~ lambda and in
+       ~which-key--show-buffer-side-window~:
+       #+begin_src emacs-lisp :tangle no
+       `((vslot . -9999)
+         (select . t)
+         (window-width .  ,which-key--fit-buffer-to-window-horizontally)
+         (window-height . (lambda (w) (fit-window-to-buffer w nil 1)))
+         (side . ,which-key-side-window-location)
+         (slot . ,which-key-side-window-slot))
+       #+end_src
+  7. ~(window--display-buffer)~
+
+**** Debugging ideas
+- Use the Emacs debugger to step through
+  ~+popup-display-buffer-stacked-side-window-fn~ when it is called. You should
+  see the =which-key= window displayed at a taller height before being shrunk.
+- Disable the =:ui popup= module and try to replicate the issue (if you can't,
+  then the problem probably resides in Doom and not Emacs)
+- Try experimenting with ~which-key-side-window-*-height~ variables
+
 *** DONE [#B] Do not display line numbers in text mode :tweak:
 #+begin_src emacs-lisp :tangle yes
 (remove-hook 'text-mode-hook #'display-line-numbers-mode)
@@ -11764,8 +12379,8 @@ describing where all invocations of a key sequence is.
 
 *** DONE [#B] Do not display line numbers in lisp interaction mode :tweak:
 #+begin_src emacs-lisp :tangle yes
-(setq-hook! '(lisp-interaction-mode-hook doom-sandbox-emacs-lisp-mode-hook)
-  display-line-numbers nil)
+(add-hook! (lisp-interaction-mode doom-sandbox-emacs-lisp-mode)
+  (display-line-numbers-mode -1))
 #+end_src
 
 *** DONE [#B] Normalize the behavior of toggling line numbers :tweak:bug:
@@ -11788,10 +12403,12 @@ and uses visual instead."
   (interactive)
   (cond
    ((not display-line-numbers)
-    (setq display-line-numbers t)
+    (let ((display-line-numbers-type t))
+      (display-line-numbers-mode +1)
+      (setq display-line-numbers t)) ;; workaround for `my/inhibit-line-numbers-globally'
     (message "Switched to normal line numbers"))
    ((memq display-line-numbers '(visual relative))
-    (setq display-line-numbers nil)
+    (display-line-numbers-mode -1)
     (message "Switched to disabled line numbers"))
    (visual-line-mode
     (setq display-line-numbers 'visual)
@@ -11853,52 +12470,6 @@ and uses visual instead."
                   which-key-replacement-alist))))
 #+end_src
 
-*** OKAY [#A] Prevent the =which-key= popop from "bouncing" :bug:doc:
-:LOGBOOK:
-- Note taken on [2023-01-22 Sun 16:48] \\
-  I have set ~which-key-popup-type~ to ~minibuffer~ for compatibility with my new
-  window management system (powered by my custom =:ui buffer-group= module). This
-  had the incidental benefit of "fixing" the window bouncing, although the problem
-  would probably still exist for me if I were to go back to Doom's way of
-  displaying the =which-key= popup window.
-:END:
-**** Description
-- Sometimes the window overshoots its height and settles back down to where it
-  should be. This is an annoying visual distraction.
-- The problem resides either within Doom's popup system or Emacs' side window
-  system, and only seems to happen when the ~window-height~ or ~size~ element of
-  ~display-buffer-alist~ or Doom's corresponding ~+popup--display-buffer-alist~
-  is set a to a resize function such as ~fit-window-to-buffer~ or Doom's
-  ~+popup-shrink-to-fit~.
-- Here is the function call sequence for displaying =which-key= buffers:
-  1. ~(which-key--create-buffer-and-show)~
-  2. ~(which-key--show-page)~
-  3. ~(which-key--show-popup act-popup-dim)~
-  4. ~(funcall which-key-custom-show-popup-function act-popup-dim)~
-     - lambda defined in =~/.config/emacs/modules/ui/popup/+hacks.el=
-  5. ~(which-key--show-buffer-side-window act-popup-dim)~
-  6. ~(+popup-display-buffer-stacked-side-window-fn ...)~
-     - overrides ~display-buffer-in-side-window~
-     - alist defined in ~which-key-custom-show-popup-function~ lambda and in
-       ~which-key--show-buffer-side-window~:
-       #+begin_src emacs-lisp :tangle no
-       `((vslot . -9999)
-         (select . t)
-         (window-width .  ,which-key--fit-buffer-to-window-horizontally)
-         (window-height . (lambda (w) (fit-window-to-buffer w nil 1)))
-         (side . ,which-key-side-window-location)
-         (slot . ,which-key-side-window-slot))
-       #+end_src
-  7. ~(window--display-buffer)~
-
-**** Debugging ideas
-- Use the Emacs debugger to step through
-  ~+popup-display-buffer-stacked-side-window-fn~ when it is called. You should
-  see the =which-key= window displayed at a taller height before being shrunk.
-- Disable the =:ui popup= module and try to replicate the issue (if you can't,
-  then the problem probably resides in Doom and not Emacs)
-- Try experimenting with ~which-key-side-window-*-height~ variables
-
 *** DONE [#B] Improve interactive frame selection :feat:
 ~select-frame-by-name~ (bound to =SPC o F=) always prompts for a frame name,
 even when there are only two frames. Let's fix that.
@@ -11911,6 +12482,75 @@ even when there are only two frames. Let's fix that.
     (cond ((> frame-count 2) (call-interactively fn))
           ((= frame-count 2) (other-frame 1))
           (t (message "Fewer than 2 visible frames")))))
+#+end_src
+
+*** DONE [#B] Allow line numbers to be globally inhibited :feat:
+Sometimes line numbers just get in the way, especially on small displays.
+Unfortunately, there is no native way to globally inhibit line numbers. I've
+implemented a workaround that works well enough for now.
+
+To disable line numbers globally, call =M-x my/inhibit-line-numbers-globally=.
+To restore line numbers, call =M-x my/restore-line-numbers-globally=. While
+line numbers are globally disabled, you can still set ~display-line-numbers~
+via =SPC t l=, which sets an internal C variable that is /actually/ used by
+Emacs to control the display of line numbers per buffer.
+
+Going forward, make sure to use ~display-line-numbers-mode~ instead of setting
+~display-line-numbers~ directly, especially in hooks. This will ensure that
+global inhibition/restoration of line numbers works as expected.
+
+#+begin_src emacs-lisp :tangle yes
+(defvar my/inhibit-line-numbers-globally nil)
+
+(defun my/inhibit-line-numbers-h ()
+  (unless (bound-and-true-p my/inhibited-display-line-numbers)
+    (setq-local my/inhibited-display-line-numbers display-line-numbers))
+  (unless (bound-and-true-p my/inhibited-display-line-numbers-mode)
+    (setq-local my/inhibited-display-line-numbers-mode display-line-numbers-mode))
+  (setq display-line-numbers nil))
+
+(defun my/inhibit-line-numbers-globally ()
+  (interactive)
+
+  ;; Disable line numbers for all current buffers
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (setq-local my/inhibited-display-line-numbers display-line-numbers
+                  my/inhibited-display-line-numbers-mode display-line-numbers-mode)
+      (display-line-numbers-mode -1)))
+
+  ;; Disable global-display-line-numbers-mode
+  (global-display-line-numbers-mode -1)
+
+  ;; Nullify the effects of `display-line-numbers-mode'
+  (add-hook 'display-line-numbers-mode-hook #'my/inhibit-line-numbers-h 100)
+
+  (setq my/inhibit-line-numbers-globally t)
+  (message "Use `my/restore-line-numbers-globally' to allow line numbers"))
+
+(defun my/restore-line-numbers-globally ()
+  (interactive)
+  (if (not my/inhibit-line-numbers-globally)
+      (message "Line numbers are not globally inhibited (nothing to restore)")
+
+    ;; Allow `display-line-numbers-mode' to work again
+    (remove-hook 'display-line-numbers-mode-hook #'my/inhibit-line-numbers-h)
+
+    ;; Restore line numbers to previous state (if not already displayed)
+    (dolist (buffer (buffer-list))
+      (with-current-buffer buffer
+        (if (and (not display-line-numbers-mode)
+                 (bound-and-true-p my/inhibited-display-line-numbers-mode))
+            (let ((display-line-numbers-type
+                   (or display-line-numbers
+                       (bound-and-true-p my/inhibited-display-line-numbers))))
+              (display-line-numbers-mode +1))
+          (when (and (not display-line-numbers)
+                     (bound-and-true-p my/inhibited-display-line-numbers))
+            (setq display-line-numbers my/inhibited-display-line-numbers)))))
+
+    (setq my/inhibit-line-numbers-globally nil)
+    (message "Line numbers have been restored")))
 #+end_src
 
 *** STRT [#B] Add additional toggle keybindings :tweak:module:
@@ -11934,6 +12574,15 @@ even when there are only two frames. Let's fix that.
                   (not lsp-ui-doc-show-with-cursor))
       (lsp-ui-doc-hide))))
 
+;; TODO: Create toggle for interpretation of ANSI color sequences (cannot toggle off)
+;; (defvar-local my/ansi-colors-on nil)
+;; (defun my/toggle-ansi-colors ()
+;;   "Toggle ANSI color rendering in the current buffer."
+;;   (interactive)
+;;   (if (setq my/ansi-colors-on (not my/ansi-colors-on))
+;;       (ansi-color-apply-on-region (point-min) (point-max))
+;;     (ansi-color-filter-region (point-min) (point-max))))
+
 (map! :leader
       (:prefix-map ("t" . "toggle")
        :desc "Whitespace mode"       "SPC" #'whitespace-mode
@@ -11952,6 +12601,7 @@ even when there are only two frames. Let's fix that.
        :desc "Menu bar"              "M"   #'menu-bar-mode
        :desc "Overwrite"             "o"   #'overwrite-mode
        :desc "Truncate lines"        "t"   #'toggle-truncate-lines
+       :desc "Window splitting"      "S"   #'my/toggle-window-splitting
        :desc "Tab bar"               "T"   #'tab-bar-mode
        :desc "Visual fill column"    "|"   #'visual-fill-column-mode
        :desc "Page break lines"      "C-l" #'page-break-lines-mode
