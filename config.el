@@ -3123,7 +3123,7 @@ Currently only includes code blocks."
 
 (after! evil-org
   (map! :map evil-org-mode-map
-        :i "C-j" #'+default/newline))
+        :i "C-j" #'+default/newline-below))
 
 (after! org
   (setcdr (assoc 'heading org-blank-before-new-entry) nil)

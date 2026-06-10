@@ -9950,7 +9950,7 @@ I want =C-j= to simply insert a new line without electric/auto indentation.
 #+begin_src emacs-lisp :tangle yes
 (after! evil-org
   (map! :map evil-org-mode-map
-        :i "C-j" #'+default/newline))
+        :i "C-j" #'+default/newline-below))
 #+end_src
 
 **** STRT [#A] Insert new headlines just how I like them :tweak:hack:
