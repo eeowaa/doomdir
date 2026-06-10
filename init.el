@@ -25,7 +25,8 @@
        ;;layout            ; auie,ctsrnm is the superior home row
 
        :completion
-       (company +childframe)
+;;LEAN (company +childframe)
+       (company)
                          ; the ultimate code completion backend
        ;;(corfu +orderless)  ; complete with cap(f), cape and a flying feather!
        ;;helm              ; the *other* search engine for love and life
@@ -46,14 +47,15 @@
        ilist             ; XXX user module
        indent-guides     ; highlighted indent columns
        (ligatures +extra)  ; ligatures and symbols to make your code pretty again
-       minimap           ; show a map of the code on the side
+;;GONE minimap           ; show a map of the code on the side
        modeline          ; snazzy, Atom-inspired modeline, plus API
        ;;nav-flash         ; blink cursor line after big motions
        ;;neotree           ; a project drawer, like NERDTree for vim
        ophints           ; highlight the region an operation acts on
        ;;popup             ; tame sudden yet inevitable temporary windows
        tabs              ; XXX user module
-       (treemacs +lsp)   ; a project drawer, like neotree but cooler
+;;LEAN (treemacs +lsp)   ; a project drawer, like neotree but cooler
+       (treemacs)
        ;;unicode           ; extended unicode support for various languages
        (vc-gutter +diff-hl)
                          ; vcs diff in the fringe
@@ -89,37 +91,41 @@
        eshell            ; the elisp shell that works everywhere
        ;;shell             ; simple shell REPL for Emacs
        ;;term              ; basic terminal emulator for Emacs
-       vterm             ; the best terminal emulation in Emacs
+;;GONE vterm             ; the best terminal emulation in Emacs
 
        :checkers
-       (syntax +childframe)
+;;LEAN (syntax +childframe)
+       (syntax)
                          ; tasing you for every semicolon you forget
-       spell             ; tasing you for misspelling mispelling
-       grammar           ; tasing grammar mistake every you make
+;;GONE spell             ; tasing you for misspelling mispelling
+;;GONE grammar           ; tasing grammar mistake every you make
 
        :tools
        ansible
        ;;biblio            ; Writes a PhD for you (citation needed)
-       bitwarden           ; XXX user module
+;;GONE bitwarden           ; XXX user module
        ;;cloudformation  ; TODO XXX user module
        ;;collab            ; buffers with friends
-       (debugger +lsp)   ; FIXME stepping through code, to help you add bugs
+;;LEAN (debugger +lsp)   ; FIXME stepping through code, to help you add bugs
+       (debugger)
        direnv
-       (docker +lsp)
+;;GONE (docker +lsp)
        editorconfig      ; let someone else argue about tabs vs spaces
        ;;ein               ; tame Jupyter notebooks with emacs
        ;;elasticsearch       ; XXX user module
        (eval +overlay)     ; run code, run (also, repls)
        ;;gist              ; interacting with github gists
-       (kubernetes +lsp +tree-sitter) ; XXX user module
-       (lookup +dictionary +offline +docsets)
+;;GONE (kubernetes +lsp +tree-sitter) ; XXX user module
+;;LEAN (lookup +dictionary +offline +docsets)
+       (lookup)
                          ; navigate your code and its documentation
-       (lsp +peek)         ; M-x vscode
-       (magit +forge)      ; a git porcelain for Emacs
+;;GONE (lsp +peek)         ; M-x vscode
+;;LEAN (magit +forge)      ; a git porcelain for Emacs
+       (magit)
        make              ; run make tasks from Emacs
-       nginx               ; XXX user module
+;;GONE nginx               ; XXX user module
        ;;pass              ; password manager for nerds
-       pdf               ; pdf enhancements
+;;GONE pdf               ; pdf enhancements
        ;;prodigy           ; FIXME managing external services & code builders
        ;;rgb               ; creating color strings
        ;;taskrunner        ; taskrunner for all your projects
@@ -136,12 +142,14 @@
        ;;agda              ; types of types of types of types...
        ;;beancount         ; mind the GAAP
        ;; NOTE `+eglot' adds commands for displaying inheritance type hierarchies
-       (cc +lsp +tree-sitter) ; C > C++ == 1
+;;LEAN (cc +lsp +tree-sitter) ; C > C++ == 1
+       (cc +tree-sitter)
        ;;clojure           ; java with a lisp
        ;;common-lisp       ; if you've seen one lisp, you've seen them all
        ;;coq               ; proofs-as-programs
        ;;crystal           ; ruby at the speed of c
-       ;;(csharp +lsp +tree-sitter +dotnet)
+;;LEAN ;;(csharp +lsp +tree-sitter +dotnet)
+       (csharp +tree-sitter)
                          ; unity, .NET, and mono shenanigans
        data              ; config/data formats
        ;;(dart +flutter)   ; paint ui and not much else
@@ -157,31 +165,36 @@
        ;;fsharp            ; ML stands for Microsoft's Language
        ;;fstar             ; (dependent) types and (monadic) effects and Z3
        ;;gdscript          ; the language you waited for
-       (go +lsp +tree-sitter) ; the hipster dialect
+;;GONE (go +lsp +tree-sitter) ; the hipster dialect
        ;;(graphql +lsp)    ; Give queries a REST
        ;;(haskell +lsp +tree-sitter) ; a language that's lazier than I am
        ;;hy                ; readability of scheme w/ speed of python
        ;;idris             ; a language you can depend on
-       (json +lsp +tree-sitter) ; At least it ain't XML
+;;LEAN (json +lsp +tree-sitter) ; At least it ain't XML
+       (json +tree-sitter)
        ;;(java +lsp)       ; the poster child for carpal tunnel syndrome
-       (javascript +lsp +tree-sitter) ; all(hope(abandon(ye(who(enter(here))))))
+;;LEAN (javascript +lsp +tree-sitter) ; all(hope(abandon(ye(who(enter(here))))))
+       (javascript +tree-sitter)
        ;;julia             ; a better, faster MATLAB
        ;;kotlin            ; a better, slicker Java(Script)
-       (latex +lsp)      ; writing papers in Emacs has never been so fun
+;;GONE (latex +lsp)      ; writing papers in Emacs has never been so fun
        ;;lean              ; for folks with too much to prove
        ;;ledger            ; be audit you can be
-       (lua +lsp +tree-sitter) ; one-based indices? one-based indices
-       (markdown +grip)  ; writing docs for people to ignore
+;;GONE (lua +lsp +tree-sitter) ; one-based indices? one-based indices
+;;LEAN (markdown +grip)  ; writing docs for people to ignore
+       (markdown)
        ;;nim               ; python + lisp at the speed of c
        ;;nix               ; I hereby declare "nix geht mehr!"
        ;;ocaml             ; an objective camel
-       (org +dragndrop +gnuplot +journal +jupyter +noter +pandoc +pomodoro +present +roam2)
+;;LEAN (org +dragndrop +gnuplot +journal +jupyter +noter +pandoc +pomodoro +present +roam2)
+       (org +pandoc)
                          ; organize your plain life in plain text
        ;;php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
-       graphviz          ; diagrams for confusing yourself even more
+;;GONE graphviz          ; diagrams for confusing yourself even more
        ;;purescript        ; javascript, but functional
-       (python +lsp +tree-sitter +pyright)
+;;LEAN (python +lsp +tree-sitter +pyright)
+       (python +tree-sitter)
                          ; beautiful is better than ugly
        ;;qt                ; the 'cutest' gui framework ever
        ;;(racket +lsp +xp) ; a DSL for DSLs
@@ -189,18 +202,21 @@
        (rest +jq)        ; Emacs as a REST client
        rst               ; ReST in peace
        ;;(ruby +rails)     ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
-       (rust +lsp +tree-sitter) ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+;;GONE (rust +lsp +tree-sitter) ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
        ;;scala             ; java, but good
        ;;(scheme +guile)   ; a fully conniving family of lisps
-       (sh +lsp +tree-sitter +fish +powershell)
+;;LEAN (sh +lsp +tree-sitter +fish +powershell)
+       (sh +tree-sitter +powershell)
                          ; she sells {ba,z,fi}sh shells on the C xor
                          ; FIXME +tree-sitter breaks markdown code blocks
        ;;sml
        ;;solidity          ; do you need a blockchain? No.
        ;;swift             ; who asked for emoji variables?
        ;;terra             ; Earth and Moon in alignment for performance.
-       (web +lsp +tree-sitter) ; the tubes
-       (yaml +lsp +tree-sitter) ; JSON, but readable
+;;LEAN (web +lsp +tree-sitter) ; the tubes
+       (web +tree-sitter)
+;;LEAN (yaml +lsp +tree-sitter) ; JSON, but readable
+       (yaml +tree-sitter)
        ;;zig               ; C, but simpler
 
        :email
