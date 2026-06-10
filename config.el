@@ -2940,8 +2940,9 @@ See also: `ts-fold-summary--get'."
 (after! ws-butler
   (pushnew! ws-butler-global-exempt-modes 'tsv-mode))
 
-(setq lsp-xml-jar-file
-      (expand-file-name "xmlls/org.eclipse.lemminx-uber.jar" lsp-server-install-dir))
+(when (boundp 'lsp-server-install-dir)
+  (setq lsp-xml-jar-file
+        (expand-file-name "xmlls/org.eclipse.lemminx-uber.jar" lsp-server-install-dir)))
 
 (add-to-list 'auto-mode-alist '("/CODEOWNERS\\(?:\\.md\\)?\\'" . conf-mode))
 
