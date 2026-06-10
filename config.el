@@ -250,7 +250,7 @@ with special dedication semantics."
 
 (setq doom-theme
       (cond (initial-window-system 'ef-bio)
-            ((getenv "SSH_CLIENT") 'modus-vivendi) ;; best theme over SSH
+            (eeowaa-disable-icons 'modus-vivendi) ;; best theme on limited displays
             (t 'ef-tritanopia-dark)))
 
 (after! (:and solaire-mode (:or vertico ivy))
@@ -785,7 +785,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 
 (setq column-number-indicator-zero-based nil)
 
-(when (getenv "SSH_CLIENT")
+(when eeowaa-disable-icons
   (setq! doom-modeline-icon nil))
 
 (after! evil-goggles
@@ -948,7 +948,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   (setq-hook! 'treemacs-mode-hook
     revert-buffer-function #'my/treemacs-revert-buffer-function))
 
-(if (getenv "SSH_CLIENT")
+(if eeowaa-disable-icons
     ;; Prevent treemacs from using icons when using Emacs over SSH
     (progn
       (setq treemacs-no-png-images t
@@ -1533,7 +1533,7 @@ If the current frame has one window, restore the previous windows."
                       dired-listing-switches)
               (concat dired-listing-switches " -d"))))
 
-(when (getenv "SSH_CLIENT")
+(when eeowaa-disable-icons
   (when (modulep! :emacs dired +icons)
     (after! dirvish
       (setq dirvish-subtree-always-show-state nil)
@@ -1569,7 +1569,7 @@ If the current frame has one window, restore the previous windows."
 
 (add-hook 'ibuffer-mode-hook #'ibuffer-auto-mode)
 
-(when (and (getenv "SSH_CLIENT")
+(when (and eeowaa-disable-icons
            (modulep! :emacs ibuffer +icons))
   (after! ibuffer
     (setcar ibuffer-formats

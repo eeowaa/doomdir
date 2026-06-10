@@ -37,7 +37,7 @@
 
 ;; eeowaa-nerd-icons
 
-(unless (getenv "SSH_CLIENT")
+(unless (bound-and-true-p eeowaa-disable-icons)
   (require 'treemacs-nerd-icons)
 
   ;; Based on "nerd-icons" theme.

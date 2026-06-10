@@ -380,6 +380,16 @@ for autoload cookies or byte-compilation.
             (tc-transient-childframe--display-buffer-action)))))
 #+end_src
 
+*** DONE [#B] Disable icons when unavailable
+This must be configured in =early-init.el=.
+
+#+begin_src emacs-lisp :tangle early-init.el
+(defvar eeowaa-disable-icons nil "Configure Emacs to disable icons when nil")
+(when (or (getenv "SSH_CLIENT")
+          (featurep :system 'wsl)) ;; REVIEW: Can icons work in WSL v1?
+  (setq eeowaa-disable-icons t))
+#+end_src
+
 * :input
 ** Headers :SCAFFOLDING:
 #+begin_src emacs-lisp :tangle packages.el
@@ -688,7 +698,7 @@ These symbols are described in the docstring for the function
 
 *** DONE [#C] Do not use icons over SSH :tweak:
 #+begin_src emacs-lisp :tangle early-init.el
-(when (getenv "SSH_CLIENT")
+(when eeowaa-disable-icons
   ;; :completion vertico +icons
   (advice-add 'nerd-icons-completion-marginalia-setup :override #'always))
 #+end_src
@@ -1272,7 +1282,7 @@ migrated to ~ef-bio~ for now.
 #+begin_src emacs-lisp :tangle yes
 (setq doom-theme
       (cond (initial-window-system 'ef-bio)
-            ((getenv "SSH_CLIENT") 'modus-vivendi) ;; best theme over SSH
+            (eeowaa-disable-icons 'modus-vivendi) ;; best theme on limited displays
             (t 'ef-tritanopia-dark)))
 
 (after! (:and solaire-mode (:or vertico ivy))
@@ -2226,7 +2236,7 @@ icons if they are missing:
 
 *** DONE [#C] Do not use icons over SSH :tweak:
 #+begin_src emacs-lisp :tangle yes
-(when (getenv "SSH_CLIENT")
+(when eeowaa-disable-icons
   (setq! doom-modeline-icon nil))
 #+end_src
 
@@ -3025,7 +3035,7 @@ Attempting the first option:
 ;; I think I actually prefer the `doom-atom' theme -- it's less distracting
 ;; (setq doom-themes-treemacs-theme "doom-colors")
 (setq doom-themes-treemacs-theme
-      (if (getenv "SSH_CLIENT")
+      (if eeowaa-disable-icons
           "default"
         "nerd-icons"))
 #+end_src
@@ -3208,7 +3218,7 @@ possibly replacing =:ui treemacs= with your own configuration.
 
 #+begin_src emacs-lisp :tangle early-init.el
 ;; Prevent loading of nerd icons when using Emacs over SSH
-(when (getenv "SSH_CLIENT")
+(when eeowaa-disable-icons
   (use-package-hook! treemacs-nerd-icons
     :pre-init nil     ;; (require 'treemacs-nerd-icons)
     :pre-config nil)) ;; (treemacs-load-theme "nerd-icons")
@@ -3260,7 +3270,7 @@ possibly replacing =:ui treemacs= with your own configuration.
   (setq-hook! 'treemacs-mode-hook
     revert-buffer-function #'my/treemacs-revert-buffer-function))
 
-(if (getenv "SSH_CLIENT")
+(if eeowaa-disable-icons
     ;; Prevent treemacs from using icons when using Emacs over SSH
     (progn
       (setq treemacs-no-png-images t
@@ -5067,7 +5077,7 @@ Now run the following snippets and compare with the previous example:
 
 *** DONE [#C] Do not use icons over SSH :tweak:
 #+begin_src emacs-lisp :tangle yes
-(when (getenv "SSH_CLIENT")
+(when eeowaa-disable-icons
   (when (modulep! :emacs dired +icons)
     (after! dirvish
       (setq dirvish-subtree-always-show-state nil)
@@ -5129,7 +5139,7 @@ to forget to refresh the buffer.
 
 *** DONE [#C] Do not use icons over SSH :tweak:
 #+begin_src emacs-lisp :tangle yes
-(when (and (getenv "SSH_CLIENT")
+(when (and eeowaa-disable-icons
            (modulep! :emacs ibuffer +icons))
   (after! ibuffer
     (setcar ibuffer-formats

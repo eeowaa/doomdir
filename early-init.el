@@ -33,15 +33,20 @@ WARNINGS:
                (lambda () ,@body)
                'append)))
 
+(defvar eeowaa-disable-icons nil "Configure Emacs to disable icons when nil")
+(when (or (getenv "SSH_CLIENT")
+          (featurep :system 'wsl)) ;; REVIEW: Can icons work in WSL v1?
+  (setq eeowaa-disable-icons t))
+
 (unless initial-window-system
   (use-package-hook! company-box :pre-config nil))
 
-(when (getenv "SSH_CLIENT")
+(when eeowaa-disable-icons
   ;; :completion vertico +icons
   (advice-add 'nerd-icons-completion-marginalia-setup :override #'always))
 
 ;; Prevent loading of nerd icons when using Emacs over SSH
-(when (getenv "SSH_CLIENT")
+(when eeowaa-disable-icons
   (use-package-hook! treemacs-nerd-icons
     :pre-init nil     ;; (require 'treemacs-nerd-icons)
     :pre-config nil)) ;; (treemacs-load-theme "nerd-icons")
