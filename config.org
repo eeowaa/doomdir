@@ -10211,7 +10211,8 @@ Note that the following keybindings are very helpful:
 Would be better to lazy-load this.
 
 #+begin_src emacs-lisp :tangle yes
-(require 'org-pomodoro)
+(when (modulep! :lang org +pomodoro)
+  (require 'org-pomodoro))
 #+end_src
 
 **** DONE [#B] Add keybindings for ~org-pomodoro~ and ~org-pomodoro-extend-last-clock~ :feat:
@@ -10235,7 +10236,8 @@ set to whatever command-line options(s) should be passed to
 ~org-pomodoro-audio-player~ (=/usr/bin/afplay= on macOS).
 
 #+begin_src emacs-lisp :tangle yes
-(when (equal org-pomodoro-audio-player "/usr/bin/afplay")
+(when (and (modulep! :lang org +pomodoro)
+           (equal org-pomodoro-audio-player "/usr/bin/afplay"))
   (let ((args '("-v" "0.125")))
     (setq org-pomodoro-start-sound-args args
           org-pomodoro-finished-sound-args args

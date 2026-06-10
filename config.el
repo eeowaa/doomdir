@@ -3280,7 +3280,8 @@ This is a list of lists, not a list of cons cells.")
 (setq org-download-method 'directory
       org-download-image-dir "images")
 
-(require 'org-pomodoro)
+(when (modulep! :lang org +pomodoro)
+  (require 'org-pomodoro))
 
 (map! :map org-mode-map
       :localleader
@@ -3289,7 +3290,8 @@ This is a list of lists, not a list of cons cells.")
         "p" #'org-pomodoro
         "P" #'org-pomodoro-extend-last-clock)))
 
-(when (equal org-pomodoro-audio-player "/usr/bin/afplay")
+(when (and (modulep! :lang org +pomodoro)
+           (equal org-pomodoro-audio-player "/usr/bin/afplay"))
   (let ((args '("-v" "0.125")))
     (setq org-pomodoro-start-sound-args args
           org-pomodoro-finished-sound-args args
