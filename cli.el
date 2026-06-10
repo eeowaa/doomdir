@@ -24,10 +24,10 @@
                      "doom-checkout-main")))))
 
 (after! doom-cli-env
-  (pushnew! doom-env-deny
-            "^AWS_ACCESS_KEY_ID$"
-            "^AWS_SECRET_ACCESS_KEY$"
-            "^AWS_SESSION_TOKEN$"))
+  (dolist (value '("AWS_ACCESS_KEY_ID"
+                   "AWS_SECRET_ACCESS_KEY"
+                   "AWS_SESSION_TOKEN"))
+    (add-to-list 'doom-env-deny value)))
 
 (after! doom-cli-env
   (add-to-list 'doom-env-deny "VTERM_BUFFER_NAME"))

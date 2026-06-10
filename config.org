@@ -4310,10 +4310,10 @@ This solves the problem for me and allows me to run =SPC f u=
 *** DONE [#B] Prevent AWS credentials from being written to ~doom-env-file~ :tweak:module:
 #+begin_src emacs-lisp :tangle cli.el
 (after! doom-cli-env
-  (pushnew! doom-env-deny
-            "^AWS_ACCESS_KEY_ID$"
-            "^AWS_SECRET_ACCESS_KEY$"
-            "^AWS_SESSION_TOKEN$"))
+  (dolist (value '("AWS_ACCESS_KEY_ID"
+                   "AWS_SECRET_ACCESS_KEY"
+                   "AWS_SESSION_TOKEN"))
+    (add-to-list 'doom-env-deny value)))
 #+end_src
 
 *** DONE [#B] Save shell command lines automatically with ~server-edit~ :bug:
