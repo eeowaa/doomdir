@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# Navigate to the root of the git worktree
+cd "$(git rev-parse --show-toplevel)"
+
+# Extract config.org from the git index
+tmp=$(mktemp -d)
+trap "rm -rf '$tmp'" 0 1 2 3 15
+git show :config.org > "$tmp/config.org"
+
+# Extract paths of files generated from the staged config.org
+space=' 	'
+generated_files=$(
+{
+    sed -n 's/.*:tangle['"$space"']\{1,\}\([^'"$space"']\{1,\}\).*/\1/p' \
+        "$tmp/config.org" | grep -v '^\(yes\|no\)$'
+    echo 'config.el'
+} | sort -u
+)
+
+# Enable word-splitting in ZSH (for ranges in shell for-loops)
+[ "X$ZSH_VERSION" = X ] || setopt shwordsplit
+
+# Create leading directory components for generated files
+# TODO: Use the :mkdirp source block header to create directories
+for file in $generated_files; do
+    dir=$(dirname "$file")
+    [ "X$dir" = X. ] || mkdir -p "$tmp/$dir"
+done
+
+# Generate temporary files from the staged config.org
+doom +org tangle "$tmp/config.org"
+
+# Update the git index of generated files
+for file in $generated_files; do
+    blob=$(git hash-object -w "$tmp/$file")
+    git update-index --cacheinfo "100644,$blob,$file"
+done
