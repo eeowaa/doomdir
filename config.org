@@ -6375,7 +6375,7 @@ working with projects and Doom workspaces and make sure that things are working
 that way. In the meantime, ~projectile-invalidate-cache~ (=SPC p i=) seems to
 fix things.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
 (after! projectile
   (add-to-list 'projectile-project-root-files "ansible.cfg"))
 #+end_src
