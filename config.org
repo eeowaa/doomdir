@@ -2237,7 +2237,7 @@ icons if they are missing:
 *** DONE [#C] Do not use icons over SSH :tweak:
 #+begin_src emacs-lisp :tangle yes
 (when eeowaa-disable-icons
-  (setq! doom-modeline-icon nil))
+  (setopt doom-modeline-icon nil))
 #+end_src
 
 ** nav-flash [0/0] :ARCHIVE:
@@ -6805,27 +6805,27 @@ npm install -g dockerfile-language-server-nodejs
 
 *** DONE [#B] Adjust column widths :tweak:
 #+begin_src emacs-lisp :tangle yes
-(setq! docker-image-columns
-       '((:name "Repository" :width 49 :template "{{ json .Repository }}" :sort nil :format nil)
-         (:name "Tag" :width 9 :template "{{ json .Tag }}" :sort nil :format nil)
-         (:name "Id" :width 13 :template "{{ json .ID }}" :sort nil :format nil)
-         (:name "Created" :width 20 :template "{{ json .CreatedAt }}" :sort nil :format (lambda (x) (format-time-string "%F %T" (date-to-time x))))
-         (:name "Size" :width 10 :template "{{ json .Size }}" :sort docker-utils-human-size-predicate :format nil))
+(setopt docker-image-columns
+        '((:name "Repository" :width 49 :template "{{ json .Repository }}" :sort nil :format nil)
+          (:name "Tag" :width 9 :template "{{ json .Tag }}" :sort nil :format nil)
+          (:name "Id" :width 13 :template "{{ json .ID }}" :sort nil :format nil)
+          (:name "Created" :width 20 :template "{{ json .CreatedAt }}" :sort nil :format (lambda (x) (format-time-string "%F %T" (date-to-time x))))
+          (:name "Size" :width 10 :template "{{ json .Size }}" :sort docker-utils-human-size-predicate :format nil))
 
-       docker-container-columns
-       '((:name "Id" :width 13 :template "{{ json .ID }}" :sort nil :format nil)
-         (:name "Names" :width 35 :template "{{ json .Names }}" :sort nil :format nil)
-         (:name "Image" :width 41 :template "{{ json .Image }}" :sort nil :format nil)
-         (:name "Command" :width 58 :template "{{ json .Command }}" :sort nil :format nil)
-         (:name "Ports" :width 10 :template "{{ json .Ports }}" :sort nil :format nil)
-         (:name "Status" :width 26 :template "{{ json .Status }}" :sort nil :format nil)
-         (:name "Created" :width 20 :template "{{ json .CreatedAt }}" :sort nil :format (lambda (x) (format-time-string "%F %T" (date-to-time x)))))
+        docker-container-columns
+        '((:name "Id" :width 13 :template "{{ json .ID }}" :sort nil :format nil)
+          (:name "Names" :width 35 :template "{{ json .Names }}" :sort nil :format nil)
+          (:name "Image" :width 41 :template "{{ json .Image }}" :sort nil :format nil)
+          (:name "Command" :width 58 :template "{{ json .Command }}" :sort nil :format nil)
+          (:name "Ports" :width 10 :template "{{ json .Ports }}" :sort nil :format nil)
+          (:name "Status" :width 26 :template "{{ json .Status }}" :sort nil :format nil)
+          (:name "Created" :width 20 :template "{{ json .CreatedAt }}" :sort nil :format (lambda (x) (format-time-string "%F %T" (date-to-time x)))))
 
-       docker-network-columns
-       '((:name "Network ID" :width 13 :template "{{ json .ID }}" :sort nil :format nil)
-         (:name "Scope" :width 6 :template "{{ json .Scope }}" :sort nil :format nil)
-         (:name "Driver" :width 7 :template "{{ json .Driver }}" :sort nil :format nil)
-         (:name "Name" :width 50 :template "{{ json .Name }}" :sort nil :format nil)))
+        docker-network-columns
+        '((:name "Network ID" :width 13 :template "{{ json .ID }}" :sort nil :format nil)
+          (:name "Scope" :width 6 :template "{{ json .Scope }}" :sort nil :format nil)
+          (:name "Driver" :width 7 :template "{{ json .Driver }}" :sort nil :format nil)
+          (:name "Name" :width 50 :template "{{ json .Name }}" :sort nil :format nil)))
 #+end_src
 
 *** DONE [#B] Give the ~docker~ command a better keybinding :tweak:
@@ -9491,8 +9491,8 @@ Reference: [[*Disable error reporting in sh-mode buffers][Disable error reportin
 *** DONE [#C] Fontify and scale Markdown headers :tweak:hack:
 #+begin_src emacs-lisp :tangle yes
 (after! markdown-mode
-  (setq! markdown-fontify-whole-heading-line nil
-         markdown-header-scaling t)
+  (setopt markdown-fontify-whole-heading-line nil
+          markdown-header-scaling t)
   (add-hook! markdown-mode
     (defun my/markdown--update-display-h ()
       "Apply desired styling to a markdown buffer."
@@ -11723,12 +11723,12 @@ have listed some commented-out packages below that I would like to install.
 (setq w3m-home-page "https://www.google.com/")
 
 ;; Do not use tabs
-(setq! w3m-display-mode 'plain)
+(setopt w3m-display-mode 'plain)
 
 ;; Use the header line to display the page title and location
-(setq! w3m-use-tab-line nil
-       w3m-use-header-line-title t
-       w3m-use-header-line t)
+(setopt w3m-use-tab-line nil
+        w3m-use-header-line-title t
+        w3m-use-header-line t)
 
 ;; Reverting the buffer reloads the page
 (setq-hook! 'w3m-mode-hook

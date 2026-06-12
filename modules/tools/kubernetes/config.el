@@ -237,17 +237,17 @@ lines of the buffer are checked against this regexp. If there is a match,
           (define_action    . ts-fold-range-seq)
           (block_action     . ts-fold-range-seq)
           (with_action      . ts-fold-range-seq)))
-      (setq! ts-fold-range-alist
-             (cons `(kubernetes-helm-mode . ,(+kubernetes--ts-fold-parsers-gotmpl))
-                   (assq-delete-all 'kubernetes-helm-mode ts-fold-range-alist)))
+      (setopt ts-fold-range-alist
+              (cons `(kubernetes-helm-mode . ,(+kubernetes--ts-fold-parsers-gotmpl))
+                    (assq-delete-all 'kubernetes-helm-mode ts-fold-range-alist)))
       (defun +kubernetes--ts-fold-summary-gotmpl (doc-str)
         "Extract summary from DOC-STR in Go template block."
         (let ((first-line (nth 0 (split-string doc-str "\n"))))
           (string-match "\\`{-? *\\(.*?\\)\\(?: *-?}}\\)? *\\'" first-line)
           (match-string 1 first-line)))
-      (setq! ts-fold-summary-parsers-alist
-             (cons `(kubernetes-helm-mode . +kubernetes--ts-fold-summary-gotmpl)
-                   ts-fold-summary-parsers-alist)))
+      (setopt ts-fold-summary-parsers-alist
+              (cons `(kubernetes-helm-mode . +kubernetes--ts-fold-summary-gotmpl)
+                    ts-fold-summary-parsers-alist)))
 
     ;; evil-textobj-tree-sitter
     (after! evil-textobj-tree-sitter
