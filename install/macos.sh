@@ -155,6 +155,9 @@ brew install ripgrep sqlite3
 brew install perl git-absorb
 cpan install App::Git::Autofixup
 
+# Install prerequisites for `tools/pdf` module
+brew install pkg-config poppler automake
+
 # Install prerequisites for `lang/cc` module
 brew install ccls gdb glslang
 

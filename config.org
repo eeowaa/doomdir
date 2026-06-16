@@ -7807,7 +7807,7 @@ pipx install --python `which python3.10` nginx-language-server
 #+end_src
 
 ** pass [0/0] :ARCHIVE:
-** COMMENT pdf [1/1]
+** pdf [1/1]
 *** COMMENT Documentation
 + [[doom-modules:tools/pdf/README.org][tools/pdf module documentation]]
 + [[doom:.local/straight/repos/pdf-tools/README.org][pdf-tools package README]]
@@ -7820,9 +7820,24 @@ brew install pkg-config poppler automake
 #+end_src
 
 **** DONE Fedora
-#+begin_src sh :tangle install/macos.sh
+#+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `tools/pdf` module
 sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
+#+end_src
+
+**** DONE Ubuntu
+#+begin_src sh :tangle install/ubuntu.sh
+# Install prerequisites for `tools/pdf` module
+sudo apt -y install \
+    autoconf \
+    automake \
+    gcc \
+    libpng-dev \
+    libpoppler-dev \
+    libpoppler-glib-dev \
+    libz-dev \
+    make \
+    pkg-config
 #+end_src
 
 ** prodigy [0/0] :ARCHIVE:

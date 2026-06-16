@@ -241,6 +241,9 @@ sudo dnf -y install perl
 # TODO: Fix cpan install command
 cpan install App::Git::Autofixup
 
+# Install prerequisites for `tools/pdf` module
+sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
+
 # Install prerequisites for `lang/cc` module
 
 ## GCC
