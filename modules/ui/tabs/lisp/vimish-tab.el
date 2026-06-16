@@ -331,12 +331,6 @@ Use as around advice for functions calling `force-mode-line-update'."
                  (const :tag "Never" nil))
   :group 'vimish-tab)
 
-(defun vimish-tab-show-p ()
-  "Whether or not to display tabs for the current window."
-  (or (eq vimish-tab-show t)
-      (and (integerp vimish-tab-show)
-           (> (length (vimish-tab-list)) vimish-tab-show))))
-
 ;; NOTE The `tab-line-format' window parameter overrides the buffer-local
 ;; variable `tab-line-format'. Because a buffer can be displayed in multiple
 ;; windows with differing values of `vimish-tab-show-p', the window parameter
@@ -344,6 +338,16 @@ Use as around advice for functions calling `force-mode-line-update'."
 ;; Currently, this window parameter is updated by `vimish-tab--update' and
 ;; `vimish-tab-close-other-tabs'.
 (cl-pushnew '(tab-line-format . writable) window-persistent-parameters)
+(cl-pushnew '(vimish-tab-suppress . writable) window-persistent-parameters)
+
+(defun vimish-tab-show-p ()
+  "Whether or not to display tabs for the current window.
+When the `vimish-tab-suppress' window parameter is non-nil, tabs are
+never displayed. Otherwise, `vimish-tab-show' is consulted."
+  (unless (window-parameter nil 'vimish-tab-suppress)
+    (or (eq vimish-tab-show t)
+        (and (integerp vimish-tab-show)
+             (> (length (vimish-tab-list)) vimish-tab-show)))))
 
 (defun vimish-tab-redisplay ()
   "Selectively redisplay the tab line."
