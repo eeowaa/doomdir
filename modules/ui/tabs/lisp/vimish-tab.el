@@ -276,15 +276,18 @@ when switching between tabs containing the same buffer.
 This works by temporarily toggling the buffer-modified flag. For
 buffers not visiting a file, the variable `buffer-file-name' is
 temporarily set to a dummy file path."
-  (let ((mode-line-format (format-mode-line mode-line-format))
-        (no-file (not buffer-file-name)))
-    (when no-file (setq buffer-file-name "/tmp/.vimish-tab"))
-    (let ((flag (buffer-modified-p)))
-      (set-buffer-modified-p (not flag))
-      (funcall vimish-tab--force-mode-line-update)
-      (redisplay)
-      (set-buffer-modified-p flag))
-    (when no-file (setq buffer-file-name nil))))
+  (setq vimish-tab--force-updating t)
+  (unwind-protect
+      (let ((mode-line-format (format-mode-line mode-line-format))
+            (no-file (not buffer-file-name)))
+        (when no-file (setq buffer-file-name "/tmp/.vimish-tab"))
+        (let ((flag (buffer-modified-p)))
+          (set-buffer-modified-p (not flag))
+          (funcall vimish-tab--force-mode-line-update)
+          (redisplay)
+          (set-buffer-modified-p flag))
+        (when no-file (setq buffer-file-name nil)))
+    (setq vimish-tab--force-updating nil)))
 
 (defun vimish-tab--mode-line-update-hack (fn &rest args)
   "Temporarily redefine `force-mode-line-update' for `vimish-tab'.
