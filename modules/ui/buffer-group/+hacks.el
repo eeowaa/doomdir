@@ -88,10 +88,12 @@ the command buffer. Also use `quit-window' instead of `delete-window'."
   (defadvice! my/magit-commit-diff-display-a (fn &rest args)
     :around '(magit-commit-diff magit-commit-squash-internal)
     (let ((display-buffer-alist
-           `(("^magit-diff: "
+           `(("^\\*?magit-diff: "
               display-buffer-in-side-window
               (side . bottom)
-              (slot . 0))
+              (slot . 0)
+              ;; Hide tabs from the side window when using `vimish-tab-mode'
+              (window-parameters . ((vimish-tab-suppress . t))))
              ,@display-buffer-alist)))
       (apply fn args))))
 
