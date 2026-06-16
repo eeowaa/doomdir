@@ -98,7 +98,7 @@ should only activate for CloudFormation buffers.
                             ":" (one-or-more digit) ":" (one-or-more digit) ":"
                             (id "E" (one-or-more digit)) ":" (message) line-end))
     :modes (yaml-mode))
-    (pushnew! flycheck-checkers 'cfn-lint))
+    (add-to-list 'flycheck-checkers 'cfn-lint))
 #+end_src
 
 The following will disable LSP syntax checking (thus relying on ~cfn-lint~) in

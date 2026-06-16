@@ -198,7 +198,7 @@ tput: unknown terminal "eterm-color"
 :END:
 #+begin_src emacs-lisp :tangle no
 (mapc (lambda (config-file-dir)
-        (pushnew! +emacs-lisp-disable-flycheck-in-dirs config-file-dir))
+        (add-to-list '+emacs-lisp-disable-flycheck-in-dirs config-file-dir))
       ;; Unique directory components of canonical config file paths
       (delete-dups
        (mapcar (lambda (config-file)

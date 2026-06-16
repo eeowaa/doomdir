@@ -1279,7 +1279,7 @@ current buffer first unless the `force' argument is given."
 
 (setq evil-auto-balance-windows nil)
 
-(pushnew! evil-emacs-state-modes 'noaa-mode)
+(add-to-list 'evil-emacs-state-modes 'noaa-mode)
 
 (setq hs-allow-nesting t)
 
@@ -1589,9 +1589,9 @@ If the current frame has one window, restore the previous windows."
 (after! git-commit
   (cl-callf2 remove 'overlong-summary-line git-commit-style-convention-checks))
 
-(pushnew! auto-mode-alist
-          '("/git/config\\.d/.+" . gitconfig-mode)
-          '("\\.gitignore\\'" . gitignore-mode))
+(dolist (mode '(("/git/config\\.d/.+" . gitconfig-mode)
+                ("\\.gitignore\\'" . gitignore-mode)))
+  (add-to-list 'auto-mode-alist mode))
 
 (defun my/with-editor-export ()
   "Run `with-editor-export-editor' for all envvars that I care about"
@@ -1711,7 +1711,7 @@ If the current frame has one window, restore the previous windows."
   (setq flycheck-posframe-position 'window-bottom-right-corner))
 
 (after! ansible
-  (pushnew! evil-normal-state-modes 'ansible-doc-module-mode))
+  (add-to-list 'evil-normal-state-modes 'ansible-doc-module-mode))
 
 (after! projectile
   (add-to-list 'projectile-project-root-files "ansible.cfg"))
@@ -2065,7 +2065,7 @@ if you want to send region to a REPL or terminal emulator."
 
 ;; Missing from evil-textobj-tree-sitter.el:
 (after! evil-textobj-tree-sitter
-  (pushnew! evil-textobj-tree-sitter-major-mode-language-alist '(terraform-mode . "hcl")))
+  (add-to-list 'evil-textobj-tree-sitter-major-mode-language-alist '(terraform-mode . "hcl")))
 
 (after! ts-fold
   (defun my/ts-fold-summary-test (&optional summary-parser)
@@ -2175,7 +2175,7 @@ See also: `ts-fold-summary--get'."
          :nv "RET" #'sharper--nuget-search-install)))
 
 (after! ws-butler
-  (pushnew! ws-butler-global-exempt-modes 'tsv-mode))
+  (add-to-list 'ws-butler-global-exempt-modes 'tsv-mode))
 
 (when (boundp 'lsp-server-install-dir)
   (setq lsp-xml-jar-file
@@ -2198,7 +2198,7 @@ See also: `ts-fold-summary--get'."
           (not (string= "" oneline))
           (concat " | " (propertize oneline 'face 'italic))))))
 
-(pushnew! auto-mode-alist '("Cask\\'" . lisp-data-mode))
+(add-to-list 'auto-mode-alist '("Cask\\'" . lisp-data-mode))
 
 (defadvice! my/format-result-a (f &rest r)
   "Prepend \";; =>\"."
@@ -2229,7 +2229,7 @@ See also: `ts-fold-summary--get'."
          conf :cwd (expand-file-name
                      (read-directory-name "Select the working directory:" nil default-directory t)))))))
 
-(pushnew! auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
+(add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
 
 (after! markdown-mode
   (defun my/markdown-preview (f &rest r)
@@ -2292,7 +2292,7 @@ Currently only includes code blocks."
 
   ;; Prevent lsp diagnostics from being enabled
   (if (boundp 'lsp-diagnostics-disabled-modes)
-      (pushnew! lsp-diagnostics-disabled-modes mode)
+      (add-to-list 'lsp-diagnostics-disabled-modes mode)
     (setq lsp-diagnostics-disabled-modes (list mode))))
 
 ;; Don't bother checking for an LSP diagnostics provider in markdown-mode
@@ -2300,9 +2300,9 @@ Currently only includes code blocks."
 (setq-hook! 'markdown-mode-hook
   lsp-diagnostics-provider :none)
 
-(pushnew! auto-mode-alist
-          '("\\.mdx\\'" . markdown-mode)
-          '("/\\.markdownlintrc\\'" . json-mode))
+(dolist (mode '(("\\.mdx\\'" . markdown-mode)
+                ("/\\.markdownlintrc\\'" . json-mode)))
+  (add-to-list 'auto-mode-alist mode))
 
 (after! markdown-mode
   (setopt markdown-fontify-whole-heading-line nil
@@ -2313,9 +2313,9 @@ Currently only includes code blocks."
       (markdown-update-header-faces markdown-header-scaling))))
 
 (after! markdown-mode
-  (pushnew! markdown-code-lang-modes
-            '("http" . restclient-mode)
-            '("sh" . bash-mode)))
+  (dolist (mode '(("http" . restclient-mode)
+                  ("sh" . bash-mode)))
+    (add-to-list 'markdown-code-lang-modes mode)))
 
 ;; HACK `grip-start-preview' calls `derived-mode-p' with a list of modes, when
 ;; each mode should be passed as a separate argument.
@@ -2408,7 +2408,8 @@ just perform a complete cycle of `org-cycle'."
                                       #'my/org-insert-heading-evil-state))
 
 (after! org
-  (pushnew! org-modules 'ol-bookmark 'ol-man 'ol-info 'ol-w3m))
+  (dolist (module '(ol-bookmark ol-man ol-info ol-w3m))
+    (add-to-list 'org-modules module)))
 
 (after! org
   (setcdr (assoc 'file org-link-frame-setup) #'find-file-other-window)
@@ -2598,7 +2599,7 @@ Optional argument INFO is a plist of options."
 
 (when (modulep! :lang org +jupyter)
   (after! ob-async
-    (pushnew! ob-async-no-async-languages-alist "jupyter-bash"))
+    (add-to-list 'ob-async-no-async-languages-alist "jupyter-bash"))
 
   (after! org-src
     (cl-pushnew '("jupyter-bash" . bash)
@@ -2626,9 +2627,9 @@ This is a list of lists, not a list of cons cells.")
 
 (let* ((venv (concat (my/pipx-local-venvs) "jupyter"))
        (bindir (concat (file-name-as-directory venv) "bin")))
-  (pushnew! my/jupyter-envvars
-            (list "VIRTUAL_ENV" venv)
-            (list "PATH" (concat bindir (path-separator) (getenv "PATH")))))
+  (dolist (envvar `(("VIRTUAL_ENV" ,venv)
+                    ("PATH" ,(concat bindir (path-separator) (getenv "PATH")))))
+    (add-to-list 'my/jupyter-envvars envvar)))
 
 (after! zmq
   (defadvice! my/fix-zmq-build-a (fn &rest args)
@@ -2642,13 +2643,12 @@ This is a list of lists, not a list of cons cells.")
       (funcall fn args))))
 
 (after! projectile
-  (pushnew! projectile-other-file-alist
-            '("org" "el")
-            '("el" "org")))
+  (dolist (mode '(("org" "el")
+                  ("el" "org")))
+    (add-to-list 'projectile-other-file-alist mode)))
 
 (after! ob
-  (pushnew! org-src-lang-modes
-            '("dot" . graphviz-dot)))
+  (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot)))
 
 (require 'org-mouse)
 
@@ -2691,8 +2691,9 @@ This is a list of lists, not a list of cons cells.")
   (defun my/python-fill-column-h ()
     (setq fill-column 79)))
 
-(pushnew! auto-mode-alist '("pylint" . conf-mode)
-                          '("/activate\\'" . sh-mode))
+(dolist (mode '(("pylint" . conf-mode)
+                ("/activate\\'" . sh-mode)))
+  (add-to-list 'auto-mode-alist mode))
 
 (after! projectile
   (add-to-list 'projectile-project-root-files "pyvenv.cfg")
@@ -2709,16 +2710,16 @@ This is a list of lists, not a list of cons cells.")
 
 ;; Prevent lsp diagnostics from being enabled
 (if (boundp 'lsp-diagnostics-disabled-modes)
-    (pushnew! lsp-diagnostics-disabled-modes 'sh-mode)
+    (add-to-list 'lsp-diagnostics-disabled-modes 'sh-mode)
   (setq lsp-diagnostics-disabled-modes '(sh-mode)))
 
 ;; Don't bother checking for an LSP diagnostics provider in sh-mode
 (setq-hook! 'sh-mode-hook
   lsp-diagnostics-provider :none)
 
-(pushnew! auto-mode-alist
-          '("/\\.config/\\(shell\\|bash\\)/.+" . sh-mode)
-          '("\\.\\(env\\|cygport\\)\\'" . sh-mode))
+(dolist (mode '(("/\\.config/\\(shell\\|bash\\)/.+" . sh-mode)
+                ("\\.\\(env\\|cygport\\)\\'" . sh-mode)))
+  (add-to-list 'auto-mode-alist mode))
 
 (add-hook 'sh-mode-local-vars-hook #'outline-minor-mode)
 
@@ -2934,15 +2935,13 @@ This is a list of lists, not a list of cons cells.")
 
 ;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
 (after! projectile
-  (eval
-   `(pushnew!
-     projectile-globally-ignored-directories
-     ,@(mapcan
-        (lambda (f)
-          (when (file-directory-p f)
-            (list (abbreviate-file-name f))))
-        (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
-                                   t "\\`[^.]")))))
+  (dolist (directory (mapcan
+                      (lambda (f)
+                        (when (file-directory-p f)
+                          (list (abbreviate-file-name f))))
+                      (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
+                                       t "\\`[^.]")))
+    (add-to-list 'projectile-globally-ignored-directories directory)))
 
 ;; Map C-? to DEL
 (define-key key-translation-map (kbd "C-?") (kbd "DEL"))
@@ -3039,7 +3038,7 @@ and uses visual instead."
 
 (when (fboundp 'find-sibling-file)
   ;; Same directory, same base file name, different extension
-  (pushnew! find-sibling-rules '("\\([^/]+\\)\\..*\\'" "\\1\\..*\\'"))
+  (add-to-list 'find-sibling-rules '("\\([^/]+\\)\\..*\\'" "\\1\\..*\\'"))
   (define-key! doom-leader-file-map
     "o" #'find-sibling-file)
   (after! which-key

@@ -4037,7 +4037,7 @@ to exit Emacs state.
 
 *** STRT [#B] Associate evil states with major modes :tweak:
 #+begin_src emacs-lisp :tangle yes
-(pushnew! evil-emacs-state-modes 'noaa-mode)
+(add-to-list 'evil-emacs-state-modes 'noaa-mode)
 #+end_src
 
 *** TODO [#B] Associate evil states with buffer names :feat:
@@ -5221,9 +5221,9 @@ integration with git.
 
 *** DONE [#C] Filename-mode associations :tweak:
 #+begin_src emacs-lisp :tangle yes
-(pushnew! auto-mode-alist
-          '("/git/config\\.d/.+" . gitconfig-mode)
-          '("\\.gitignore\\'" . gitignore-mode))
+(dolist (mode '(("/git/config\\.d/.+" . gitconfig-mode)
+                ("\\.gitignore\\'" . gitignore-mode)))
+  (add-to-list 'auto-mode-alist mode))
 #+end_src
 
 * :term
@@ -5527,8 +5527,9 @@ These depend on the existence of a ~vterm_cmd~ function. See the =README.md= for
   (defun my/vterm--write-user-emacs-directory (tmpfile)
     "Write the string evaluation of `user-emacs-directory' to TMPFILE."
     (f-write (concat user-emacs-directory "\n") 'utf-8 tmpfile))
-  (pushnew! vterm-eval-cmds '("my/vterm--write-user-emacs-directory"
-                              my/vterm--write-user-emacs-directory))
+  (dolist (cmd '("my/vterm--write-user-emacs-directory"
+                 my/vterm--write-user-emacs-directory))
+    (add-to-list 'vterm-eval-cmds cmd))
 
   (defun my/set-vterm-alias (&rest aliases)
     "Define aliases for vterm.
@@ -5544,7 +5545,8 @@ ALIASES is a flat list of alias -> command pairs. e.g.
       (while aliases
         (let ((alias (pop aliases))
               (command (pop aliases)))
-          (pushnew! vterm-eval-cmds (list command (intern command)))
+          (dolist (cmd (list command (intern command)))
+            (add-to-list 'vterm-eval-cmds cmd))
           (insert (format "alias %s='vterm_cmd %s'\n" alias command))))))
 
   (my/set-vterm-alias
@@ -6359,7 +6361,7 @@ ansible-galaxy collection install community.general
 *** DONE [#B] Use evil keybindings in Ansible documentation modes :tweak:
 #+begin_src emacs-lisp :tangle yes
 (after! ansible
-  (pushnew! evil-normal-state-modes 'ansible-doc-module-mode))
+  (add-to-list 'evil-normal-state-modes 'ansible-doc-module-mode))
 #+end_src
 
 *** LOOP [#A] Ensure that ~+ansible-yaml-mode~ is enabled on all relevant YAML files :bug:
@@ -7021,7 +7023,7 @@ jupyter kernelspec list
 ;; HACK The machinery provided by `ob-ein-languages' and `ob-ein--babelize-lang'
 ;; is insufficient for bash, so we do it by hand.
 (after! ob
-  (pushnew! org-babel-load-languages '(ein . t))
+  (add-to-list 'org-babel-load-languages '(ein . t))
   (require 'ob-ein)
 
   ;; Execute in an anonymous local session by default
@@ -7035,9 +7037,9 @@ jupyter kernelspec list
     (define-derived-mode bash-mode sh-mode "Bash-script"
       "Major mode for editing bash scripts."
       (sh-set-shell "bash" nil nil)))
-  (pushnew! org-src-lang-modes
-            '("bash" . bash)
-            '("ein-bash" . bash))
+  (dolist (mode '(("bash" . bash)
+                  ("ein-bash" . bash)))
+    (add-to-list 'org-src-lang-modes mode))
 
   ;; Send output from `ein-bash' source blocks back to org buffer
   (let ((alist (assoc-delete-all :results ob-ein-default-header-args:ein)))
@@ -8346,7 +8348,7 @@ Also, ~tree-sitter-major-mode-language-alist~ already sets ~terraform-mode~ to
 
 ;; Missing from evil-textobj-tree-sitter.el:
 (after! evil-textobj-tree-sitter
-  (pushnew! evil-textobj-tree-sitter-major-mode-language-alist '(terraform-mode . "hcl")))
+  (add-to-list 'evil-textobj-tree-sitter-major-mode-language-alist '(terraform-mode . "hcl")))
 #+end_src
 
 *** STRT [#A] Do not use =ts-fold= for modes without a parser :bug:
@@ -8823,7 +8825,7 @@ whitespace is a series of consecutive tabs), which we want to preserve.
 
 #+begin_src emacs-lisp :tangle yes
 (after! ws-butler
-  (pushnew! ws-butler-global-exempt-modes 'tsv-mode))
+  (add-to-list 'ws-butler-global-exempt-modes 'tsv-mode))
 #+end_src
 
 We could be picky about this and write a different whitespace cleanup function
@@ -8916,7 +8918,7 @@ Reference: https://emacs.stackexchange.com/a/55914/21977
 
 *** DONE [#C] Filename-mode associations :feat:
 #+begin_src emacs-lisp :tangle yes
-(pushnew! auto-mode-alist '("Cask\\'" . lisp-data-mode))
+(add-to-list 'auto-mode-alist '("Cask\\'" . lisp-data-mode))
 #+end_src
 
 *** DONE [#B] Prepend ";; => " to output in Lisp Interaction Mode :tweak:
@@ -9199,7 +9201,7 @@ npm install -g typescript typescript-language-server eslint trepan-ni
 
 *** DONE [#C] Filename-mode associations :feat:
 #+begin_src emacs-lisp :tangle yes
-(pushnew! auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
+(add-to-list 'auto-mode-alist '("\\.npmignore\\'" . gitignore-mode))
 #+end_src
 
 ** julia [0/0] :ARCHIVE:
@@ -9466,7 +9468,7 @@ Reference: [[*Disable error reporting in sh-mode buffers][Disable error reportin
 
   ;; Prevent lsp diagnostics from being enabled
   (if (boundp 'lsp-diagnostics-disabled-modes)
-      (pushnew! lsp-diagnostics-disabled-modes mode)
+      (add-to-list 'lsp-diagnostics-disabled-modes mode)
     (setq lsp-diagnostics-disabled-modes (list mode))))
 
 ;; Don't bother checking for an LSP diagnostics provider in markdown-mode
@@ -9477,9 +9479,9 @@ Reference: [[*Disable error reporting in sh-mode buffers][Disable error reportin
 
 *** DONE [#C] Filename-mode associations :feat:
 #+begin_src emacs-lisp :tangle yes
-(pushnew! auto-mode-alist
-          '("\\.mdx\\'" . markdown-mode)
-          '("/\\.markdownlintrc\\'" . json-mode))
+(dolist (mode '(("\\.mdx\\'" . markdown-mode)
+                ("/\\.markdownlintrc\\'" . json-mode)))
+  (add-to-list 'auto-mode-alist mode))
 #+end_src
 
 *** DONE [#C] Fontify and scale Markdown headers :tweak:hack:
@@ -9724,9 +9726,9 @@ block at point is a pre block (as opposed to a code block)."
 *** STRT [#B] Associate language names in code block headers with major modes :tweak:
 #+begin_src emacs-lisp :tangle yes
 (after! markdown-mode
-  (pushnew! markdown-code-lang-modes
-            '("http" . restclient-mode)
-            '("sh" . bash-mode)))
+  (dolist (mode '(("http" . restclient-mode)
+                  ("sh" . bash-mode)))
+    (add-to-list 'markdown-code-lang-modes mode)))
 #+end_src
 
 *** STRT [#B] Fix live-preview of Markdown buffers :hack:bug:
@@ -9833,7 +9835,7 @@ images). You should make an effort to replace =font-lock= hiding with native
 
 #+begin_src emacs-lisp :tangle no
 ;; https://emacs.stackexchange.com/questions/3753/prettify-symbols-mode-character-replacement-regex
-(pushnew! font-lock-extra-managed-props 'display)
+(add-to-list 'font-lock-extra-managed-props 'display)
 (font-lock-add-keywords
  'markdown-mode
  '(("\\(\\\\\\)[[().-]" 1 '(face nil display ""))
@@ -10034,7 +10036,8 @@ References:
 
 #+begin_src emacs-lisp :tangle yes
 (after! org
-  (pushnew! org-modules 'ol-bookmark 'ol-man 'ol-info 'ol-w3m))
+  (dolist (module '(ol-bookmark ol-man ol-info ol-w3m))
+    (add-to-list 'org-modules module)))
 #+end_src
 
 **** DONE [#B] Open specific link types in another window :tweak:
@@ -10512,7 +10515,7 @@ https://stackoverflow.com/questions/53482343/how-to-disable-line-wrapping-in-jup
 #+begin_src emacs-lisp :tangle yes
 (when (modulep! :lang org +jupyter)
   (after! ob-async
-    (pushnew! ob-async-no-async-languages-alist "jupyter-bash"))
+    (add-to-list 'ob-async-no-async-languages-alist "jupyter-bash"))
 
   (after! org-src
     (cl-pushnew '("jupyter-bash" . bash)
@@ -10567,9 +10570,9 @@ Let's fix that:
 
 (let* ((venv (concat (my/pipx-local-venvs) "jupyter"))
        (bindir (concat (file-name-as-directory venv) "bin")))
-  (pushnew! my/jupyter-envvars
-            (list "VIRTUAL_ENV" venv)
-            (list "PATH" (concat bindir (path-separator) (getenv "PATH")))))
+  (dolist (envvar `(("VIRTUAL_ENV" ,venv)
+                    ("PATH" ,(concat bindir (path-separator) (getenv "PATH")))))
+    (add-to-list 'my/jupyter-envvars envvar)))
 #+end_src
 
 **** TODO [#A] Allow =jupyter= source blocks to be edited inline :bug:
@@ -10733,16 +10736,15 @@ of the time.
 
 #+begin_src emacs-lisp :tangle yes
 (after! projectile
-  (pushnew! projectile-other-file-alist
-            '("org" "el")
-            '("el" "org")))
+  (dolist (mode '(("org" "el")
+                  ("el" "org")))
+    (add-to-list 'projectile-other-file-alist mode)))
 #+end_src
 
 **** DONE [#C] Show ~dot~ source blocks in ~graphviz-dot-mode~ :feat:module:
 #+begin_src emacs-lisp :tangle yes
 (after! ob
-  (pushnew! org-src-lang-modes
-            '("dot" . graphviz-dot)))
+  (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot)))
 #+end_src
 
 *** Miscellaneous [1/2]
@@ -10904,8 +10906,9 @@ with ~flyspell-mode~ or ~flymake-mode~ in the future.
 
 *** DONE [#C] Filename-mode associations :feat:
 #+begin_src emacs-lisp :tangle yes
-(pushnew! auto-mode-alist '("pylint" . conf-mode)
-                          '("/activate\\'" . sh-mode))
+(dolist (mode '(("pylint" . conf-mode)
+                ("/activate\\'" . sh-mode)))
+  (add-to-list 'auto-mode-alist mode))
 #+end_src
 
 *** TODO [#B] Install texinfo documentation :feat:
@@ -11101,8 +11104,8 @@ References:
 
 *** DONE [#C] Open =Cargo.lock= files as read-only TOML config files :feat:
 #+begin_src emacs-lisp :tangle yes
-(pushnew! auto-mode-alist '("/Cargo\\.lock\\'" . conf-toml-mode))
-(pushnew! auto-minor-mode-alist '("/Cargo\\.lock\\'" . read-only-mode))
+(add-to-list 'auto-mode-alist '("/Cargo\\.lock\\'" . conf-toml-mode))
+(add-to-list 'auto-minor-mode-alist '("/Cargo\\.lock\\'" . read-only-mode))
 #+end_src
 
 *** TODO [#B] Get debugging to work :feat:
@@ -11203,7 +11206,7 @@ and indicators in ~sh-mode~.
 
 ;; Prevent lsp diagnostics from being enabled
 (if (boundp 'lsp-diagnostics-disabled-modes)
-    (pushnew! lsp-diagnostics-disabled-modes 'sh-mode)
+    (add-to-list 'lsp-diagnostics-disabled-modes 'sh-mode)
   (setq lsp-diagnostics-disabled-modes '(sh-mode)))
 
 ;; Don't bother checking for an LSP diagnostics provider in sh-mode
@@ -11213,9 +11216,9 @@ and indicators in ~sh-mode~.
 
 *** DONE [#C] Filename-mode associations :tweak:
 #+begin_src emacs-lisp :tangle yes
-(pushnew! auto-mode-alist
-          '("/\\.config/\\(shell\\|bash\\)/.+" . sh-mode)
-          '("\\.\\(env\\|cygport\\)\\'" . sh-mode))
+(dolist (mode '(("/\\.config/\\(shell\\|bash\\)/.+" . sh-mode)
+                ("\\.\\(env\\|cygport\\)\\'" . sh-mode)))
+  (add-to-list 'auto-mode-alist mode))
 #+end_src
 
 *** DONE [#C] Enable ~outline-minor-mode~ in ~sh-mode~ :feat:
@@ -12211,15 +12214,13 @@ again.
 #+begin_src emacs-lisp :tangle yes
 ;; REVIEW See if there is a cleaner way to flatten the `mapcan' list result
 (after! projectile
-  (eval
-   `(pushnew!
-     projectile-globally-ignored-directories
-     ,@(mapcan
-        (lambda (f)
-          (when (file-directory-p f)
-            (list (abbreviate-file-name f))))
-        (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
-                                   t "\\`[^.]")))))
+  (dolist (directory (mapcan
+                      (lambda (f)
+                        (when (file-directory-p f)
+                          (list (abbreviate-file-name f))))
+                      (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
+                                       t "\\`[^.]")))
+    (add-to-list 'projectile-globally-ignored-directories directory)))
 #+end_src
 
 *** LOOP [#C] Add ergonomic keybindings for hard-to-reach keys :module:tweak:
@@ -12473,7 +12474,7 @@ and uses visual instead."
 #+begin_src emacs-lisp :tangle yes
 (when (fboundp 'find-sibling-file)
   ;; Same directory, same base file name, different extension
-  (pushnew! find-sibling-rules '("\\([^/]+\\)\\..*\\'" "\\1\\..*\\'"))
+  (add-to-list 'find-sibling-rules '("\\([^/]+\\)\\..*\\'" "\\1\\..*\\'"))
   (define-key! doom-leader-file-map
     "o" #'find-sibling-file)
   (after! which-key

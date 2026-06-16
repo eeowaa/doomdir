@@ -69,7 +69,7 @@ PROMPT defaults to \"Positive integer: \""
            (not (eq 'not (car ,list-var))))
        (setq ,list-var (list 'not ,value))
      (let ((list-cdr (cdr ,list-var)))
-       (setcdr ,list-var (pushnew! list-cdr ,value))
+       (setcdr ,list-var (cl-pushnew ,value list-cdr))
        ,list-var)))
 
 (defun eeowaa-alist-set (alist key value &optional compare-fn)
