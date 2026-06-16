@@ -8,7 +8,7 @@
   :when (modulep! :ui workspaces)
   :hook (persp-mode . tab-bar-mode)
   :preface
-  (defun +tabs-workspace-tabs-fn ()
+  (defun +tabs-workspace-tabs-fn (&optional _frame)
     (let ((current (+workspace-current-name)) result)
       (dolist (workspace (+workspace-list-names) (reverse result))
         (push (cons (if (string= workspace current) 'current-tab 'tab)
