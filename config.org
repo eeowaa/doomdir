@@ -385,8 +385,11 @@ This must be configured in =early-init.el=.
 
 #+begin_src emacs-lisp :tangle early-init.el
 (defvar eeowaa-disable-icons nil "Configure Emacs to disable icons when nil")
+
+;; Do not use icons over SSH or in a WSL TTY
 (when (or (getenv "SSH_CLIENT")
-          (featurep :system 'wsl)) ;; REVIEW: Can icons work in WSL v1?
+          (and (featurep :system 'wsl)
+               (not initial-window-system)))
   (setq eeowaa-disable-icons t))
 #+end_src
 
@@ -1136,7 +1139,7 @@ advising ~balance-windows~ to respect side windows.
 formats, such as org-mode, markdown, and LaTeX.
 #+end_quote
 
-** doom [5/7]
+** doom [4/7]
 #+begin_quote
 This module gives Doom its signature look: powered by the =doom-one= theme
 (inspired by Atom's One Dark theme) and =solaire-mode=.
@@ -1223,12 +1226,13 @@ exchange of screen real estate.
               #'hide-mode-line-mode)
 #+end_src
 
-*** DONE [#C] Tweak the style of the tab bar :tweak:
+*** LOOP [#C] Tweak the style of the tab bar :tweak:
 The following advice needs to be defined before we set the initial theme in
 order for it to take effect.
 
 #+begin_src emacs-lisp :tangle yes
-(defadvice! my/tab-bar-theme-a (theme &rest _)
+; FIXME Warning: setting attribute `:foreground' of face `tab-bar': nil value is invalid, use `unspecified' instead.
+(undefadvice! my/tab-bar-theme-a (theme &rest _)
   "Tweak the style of the tab bar."
   :after '(load-theme consult-theme)
   (if (string-match-p "\\`ef-" (symbol-name theme))
@@ -1344,7 +1348,7 @@ When called interactively, reload the fonts in the current session."
   (and (interactive-p) (doom/reload-font)))
 
 ;; Set the font
-(my/select-font "Iosevka Comfy Fixed")
+;; (my/select-font "Iosevka Comfy Fixed")
 ;; (my/select-font "Comic Mono")
 #+end_src
 

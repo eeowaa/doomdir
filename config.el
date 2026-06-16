@@ -229,7 +229,8 @@ with special dedication semantics."
 
 (remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
 
-(defadvice! my/tab-bar-theme-a (theme &rest _)
+; FIXME Warning: setting attribute `:foreground' of face `tab-bar': nil value is invalid, use `unspecified' instead.
+(undefadvice! my/tab-bar-theme-a (theme &rest _)
   "Tweak the style of the tab bar."
   :after '(load-theme consult-theme)
   (if (string-match-p "\\`ef-" (symbol-name theme))
@@ -290,7 +291,7 @@ When called interactively, reload the fonts in the current session."
   (and (interactive-p) (doom/reload-font)))
 
 ;; Set the font
-(my/select-font "Iosevka Comfy Fixed")
+;; (my/select-font "Iosevka Comfy Fixed")
 ;; (my/select-font "Comic Mono")
 
 ;; (add-hook 'doom-load-theme-hook #'doom-themes-treemacs-config)

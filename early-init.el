@@ -34,8 +34,11 @@ WARNINGS:
                'append)))
 
 (defvar eeowaa-disable-icons nil "Configure Emacs to disable icons when nil")
+
+;; Do not use icons over SSH or in a WSL TTY
 (when (or (getenv "SSH_CLIENT")
-          (featurep :system 'wsl)) ;; REVIEW: Can icons work in WSL v1?
+          (and (featurep :system 'wsl)
+               (not initial-window-system)))
   (setq eeowaa-disable-icons t))
 
 (unless initial-window-system
