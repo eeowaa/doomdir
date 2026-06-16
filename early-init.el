@@ -33,13 +33,21 @@ WARNINGS:
                (lambda () ,@body)
                'append)))
 
-(defvar eeowaa-disable-icons nil "Configure Emacs to disable icons when nil")
+(defconst eeowaa-wsl-version
+  (when (file-exists-p "/proc/version")
+    (let ((release (string-trim (shell-command-to-string "uname -r"))))
+      (cond
+       ((string-match-p "WSL2" release) 2)
+       ((string-match-p "Microsoft" release) 1)
+       (t nil))))
+  "The WSL version (1 or 2), or nil if not WSL.")
 
 ;; Do not use icons over SSH or in a WSL v1 TTY
-(when (or (getenv "SSH_CLIENT")
-          (and (eq eeowaa-wsl-version 1)
-               (not initial-window-system)))
-  (setq eeowaa-disable-icons t))
+(defvar eeowaa-disable-icons
+  (or (getenv "SSH_CLIENT")
+      (and (eq eeowaa-wsl-version 1)
+           (not initial-window-system)))
+  "Configure Emacs to disable icons when nil.")
 
 (unless initial-window-system
   (use-package-hook! company-box :pre-config nil))

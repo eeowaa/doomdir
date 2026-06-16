@@ -384,13 +384,21 @@ for autoload cookies or byte-compilation.
 This must be configured in =early-init.el=.
 
 #+begin_src emacs-lisp :tangle early-init.el
-(defvar eeowaa-disable-icons nil "Configure Emacs to disable icons when nil")
+(defconst eeowaa-wsl-version
+  (when (file-exists-p "/proc/version")
+    (let ((release (string-trim (shell-command-to-string "uname -r"))))
+      (cond
+       ((string-match-p "WSL2" release) 2)
+       ((string-match-p "Microsoft" release) 1)
+       (t nil))))
+  "The WSL version (1 or 2), or nil if not WSL.")
 
 ;; Do not use icons over SSH or in a WSL v1 TTY
-(when (or (getenv "SSH_CLIENT")
-          (and (eq eeowaa-wsl-version 1)
-               (not initial-window-system)))
-  (setq eeowaa-disable-icons t))
+(defvar eeowaa-disable-icons
+  (or (getenv "SSH_CLIENT")
+      (and (eq eeowaa-wsl-version 1)
+           (not initial-window-system)))
+  "Configure Emacs to disable icons when nil.")
 #+end_src
 
 * :input
@@ -1965,6 +1973,7 @@ I just need to test this functionality.
 #+begin_src emacs-lisp :tangle yes
 (add-hook! '+indent-guides-inhibit-functions #'always)
 #+end_src
+
 ** ligatures [1/1]
 #+begin_quote
 This module enables ligatures and arbitrary symbol substitutions with
@@ -2220,7 +2229,7 @@ they are missing:
 (setq column-number-indicator-zero-based nil)
 #+end_src
 
-*** DONE [#C] Do not use icons over SSH :tweak:
+*** DONE [#C] Disable modeline icons if necessary :tweak:
 #+begin_src emacs-lisp :tangle yes
 (when eeowaa-disable-icons
   (setopt doom-modeline-icon nil))

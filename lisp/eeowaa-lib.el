@@ -113,17 +113,5 @@ server for the hostname of its own IP address."
     (dns-query eeowaa-onlinep-dns-server nil nil t)))
 
 
-;;; Operating System
-
-(defconst eeowaa-wsl-version
-  (when (file-exists-p "/proc/version")
-    (let ((release (string-trim (shell-command-to-string "uname -r"))))
-      (cond
-       ((string-match-p "WSL2" release) 2)
-       ((string-match-p "Microsoft" release) 1)
-       (t nil))))
-  "The WSL version (1 or 2), or nil if not WSL.")
-
-
 (provide 'eeowaa-lib)
 ;;; eeowaa-lib.el ends here
