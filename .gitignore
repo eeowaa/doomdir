@@ -1,5 +1,11 @@
 # Local modifications
 /custom.el
 
+# Temporary files
+flycheck_*
+
+# Rejected patches from git
+*.rej
+
 # Backup files
 *~
