@@ -894,8 +894,13 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
               (buffer-group-plist-get group :names))
         (mapc (lambda (mode) (cl-pushnew mode vimish-tab-exclude-modes))
               (buffer-group-plist-get group :modes)))))
+
   ;; Treemacs buffers are treated specially
-  (cl-pushnew 'treemacs-mode vimish-tab-exclude-modes))
+  (cl-pushnew 'treemacs-mode vimish-tab-exclude-modes)
+
+  ;; HACK Buffer groups with deferred definitions
+  (dolist (mode '(imenu-list-major-mode))
+    (cl-pushnew mode vimish-tab-exclude-modes)))
 
 ;; Load custom Treemacs theme definitions
 (after! treemacs

@@ -2576,8 +2576,24 @@ loads, so tabs will appear in the ~ilist~ buffer until you manually run the
               (buffer-group-plist-get group :names))
         (mapc (lambda (mode) (cl-pushnew mode vimish-tab-exclude-modes))
               (buffer-group-plist-get group :modes)))))
+
   ;; Treemacs buffers are treated specially
-  (cl-pushnew 'treemacs-mode vimish-tab-exclude-modes))
+  (cl-pushnew 'treemacs-mode vimish-tab-exclude-modes)
+
+  ;; HACK Buffer groups with deferred definitions
+  (dolist (mode '(imenu-list-major-mode))
+    (cl-pushnew mode vimish-tab-exclude-modes)))
+#+end_src
+
+*UPDATE*: Replacing the above block with the following block breaks =tab-line=
+for some types of buffers (e.g., ~helpful-mode~) and works great for others
+(e.g., ~imenu-list-major-mode~). I keep it here as food for thought:
+
+#+begin_src emacs-lisp :tangle no
+(setq buffer-group-side-window-defaults
+      '((side . bottom)
+        (slot . 0)
+        (window-parameters . ((vimish-tab-suppress . t)))))
 #+end_src
 
 *** HOLD [#C] Configure mail indicator
