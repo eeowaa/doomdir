@@ -2425,6 +2425,9 @@ not indicate which tabs abstration is being operated on.
        (:map magit-status-mode-map
         :nv "gt" #'+tabs:next-window-tab
         :nv "gT" #'+tabs:prev-window-tab)
+       (:map magit-diff-mode-map
+        :nv "gt" #'+tabs:next-window-tab
+        :nv "gT" #'+tabs:prev-window-tab)
        (:map magit-log-mode-map
         :nv "gt" #'+tabs:next-window-tab
         :nv "gT" #'+tabs:prev-window-tab)

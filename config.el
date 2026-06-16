@@ -819,6 +819,9 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
        (:map magit-status-mode-map
         :nv "gt" #'+tabs:next-window-tab
         :nv "gT" #'+tabs:prev-window-tab)
+       (:map magit-diff-mode-map
+        :nv "gt" #'+tabs:next-window-tab
+        :nv "gT" #'+tabs:prev-window-tab)
        (:map magit-log-mode-map
         :nv "gt" #'+tabs:next-window-tab
         :nv "gT" #'+tabs:prev-window-tab)
