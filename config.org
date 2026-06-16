@@ -2192,17 +2192,9 @@ See the *Documentation* section above and notes below.
       (apply fn args))))
 #+end_src
 
-*** DONE [#C] Unpin package :tweak:
-Unpinning =doom-modeline= gives us a more even and consisent modeline height
-between windows, among other things:
-
-#+begin_src emacs-lisp :tangle packages.el
-(unpin! doom-modeline)
-#+end_src
-
-However, =nerd-icons= is now required. Doom does not handle this very gracefully
-and it may cause yet-to-be-discovered issues. For now, I will just install the
-icons if they are missing:
+*** DONE [#C] Install required icons if missing :bug:
+=doom-modeline= requires =nerd-icons=. For now, I will just install the icons if
+they are missing:
 
 #+begin_src emacs-lisp :tangle yes
 ;; NOTE `font-dest' is ripped straight from `nerd-icons-install-fonts'

@@ -76,7 +76,7 @@ If the machine has no battery, `display-battery-mode' is always disabled."
           #'doom-modeline-override-battery)
         (remove-hook! '(display-time-mode-hook doom-modeline-mode-hook)
           #'doom-modeline-override-time)
-        (dolist (var '(doom-modeline-fn-alist doom-modeline-var-alist))
+        (dolist (var '(doom-modeline--fn-alist doom-modeline--var-alist))
           (when-let* ((alist (eval var))
                       (element (or (assq 'battery alist)
                                    (assq 'time alist))))

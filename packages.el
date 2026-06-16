@@ -33,8 +33,6 @@
 (package! vdiff)
 (package! vdiff-magit)
 
-(unpin! doom-modeline)
-
 ;;; :editor
 
 ;;; :emacs
