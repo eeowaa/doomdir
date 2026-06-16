@@ -28,6 +28,3 @@
                    "AWS_SECRET_ACCESS_KEY"
                    "AWS_SESSION_TOKEN"))
     (add-to-list 'doom-env-deny value)))
-
-(after! doom-cli-env
-  (add-to-list 'doom-env-deny "VTERM_BUFFER_NAME"))

@@ -1985,7 +1985,7 @@ otherwise.
       +ligatures-extras-in-modes '(org-mode))
 #+end_src
 
-** minimap [0/0]
+** COMMENT minimap [0/0]
 #+begin_quote
 This module adds a minimap to the right side of Emacs, similar to the feature
 found in many other editors.
@@ -5359,7 +5359,7 @@ to =eshell=, it forcefully clears the file on disk.
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [9/17]
+** COMMENT vterm [9/17]
 #+begin_quote
 This module provides a terminal emulator powered by libvterm. It is still in
 alpha and requires a component be compiled (=vterm-module.so=).
@@ -6096,7 +6096,7 @@ lines up with the error indicators in the right fringe.
 This workaround does not address all issues that can happen when resizing and
 moving windows, but it's good enough in most cases.
 
-** spell [4/4]
+** COMMENT spell [4/4]
 #+begin_quote
 This modules provides spellchecking powered by =aspell=, =hunspell= or =enchant=.
 #+end_quote
@@ -6236,7 +6236,7 @@ Reference:
       (advice-remove 'spell-fu--word-add-or-remove #'+spell--create-word-dict-a))))
 #+end_src
 
-** grammar [3/4]
+** COMMENT grammar [3/4]
 #+begin_quote
 This module adds grammar checking to Emacs to aid your writing by combining
 =lang-tool= and =writegood-mode=.
@@ -6381,7 +6381,7 @@ fix things.
 #+end_src
 
 ** biblio [0/0] :ARCHIVE:
-** bitwarden [3/4] :eeowaa:
+** COMMENT bitwarden [3/4] :eeowaa:
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -6776,7 +6776,7 @@ However, be wary of @purcell's comments on =direnv.el=:
   use the wrong environment. (This is probably quite rare in practice.)
 #+end_quote
 
-** docker [4/6]
+** COMMENT docker [4/6]
 #+begin_quote
 This module allows you to manipulate Docker images, containers & more from
 Emacs.
@@ -7210,7 +7210,7 @@ for inspiration. (Note that REPL buffers do not need to be shown in order to
 receive text from ~my/send-region~.)
 
 ** gist [0/0] :ARCHIVE:
-** kubernetes [1/1] :eeowaa:
+** COMMENT kubernetes [1/1] :eeowaa:
 #+begin_quote
 This custom module provides features for editing YAML-formatted Kubernetes
 manifests and Helm charts.
@@ -7407,7 +7407,7 @@ it doesn't want to install user-contributed docsets. References:
 + ~dash-docs-install-user-docset~
   - https://github.com/roberth-k/dash-docset-terraform
 
-** lsp [6/15]
+** COMMENT lsp [6/15]
 *** COMMENT Documentation
 + [[doom-modules:tools/lsp/README.org][tools/lsp module documentation]]
 + [[doom:.local/straight/repos/lsp-mode/README.md][lsp-mode package README]]
@@ -7804,7 +7804,7 @@ by Automake, CMake, etc.
        :desc "Make last target" "M" #'+make/run-last))
 #+end_src
 
-** nginx [1/1] :eeowaa:
+** COMMENT nginx [1/1] :eeowaa:
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -7819,7 +7819,7 @@ pipx install --python `which python3.10` nginx-language-server
 #+end_src
 
 ** pass [0/0] :ARCHIVE:
-** pdf [1/1]
+** COMMENT pdf [1/1]
 *** COMMENT Documentation
 + [[doom-modules:tools/pdf/README.org][tools/pdf module documentation]]
 + [[doom:.local/straight/repos/pdf-tools/README.org][pdf-tools package README]]
@@ -7911,7 +7911,7 @@ sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
 
 ** rgb [0/0] :ARCHIVE:
 ** taskrunner [0/0] :ARCHIVE:
-** terraform [4/6]
+** COMMENT terraform [4/6]
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -8714,7 +8714,7 @@ This module adds [[https://coq.inria.fr][coq]] support, powered by [[https://pro
 This modules adds [[https://crystal-lang.org/][crystal]] support.
 #+end_quote
 
-** csharp [1/2] :ARCHIVE:
+** csharp [1/2]
 #+begin_quote
 This module adds C# support to Emacs. Powered by omnisharp (directly or through
 LSP).
@@ -8982,7 +8982,7 @@ This module adds support for GDScript, the scripting language of the [[http://go
 engine, to Doom Emacs, powered by [[https://github.com/GDQuest/emacs-gdscript-mode][gdscript-mode]].
 #+end_quote
 
-** go [1/1]
+** COMMENT go [1/1]
 #+begin_quote
 This module adds [[https://golang.org][Go]] support, with optional (but recommended) LSP support via
 [[https://github.com/golang/tools/blob/master/gopls/README.md][gopls]].
@@ -9218,7 +9218,7 @@ This module adds support for [[https://julialang.org/][the Julia language]] to D
 This module adds Kotlin support to Emacs.
 #+end_quote
 
-** latex [1/2]
+** COMMENT latex [1/2]
 #+begin_quote
 Provide a helping hand when working with LaTeX documents.
 #+end_quote
@@ -9260,7 +9260,7 @@ This module adds support for [[https://www.ledger-cli.org/][ledger]] files. Ledg
 accounting system that works with simple text files holding transactions.
 #+end_quote
 
-** lua [1/2]
+** COMMENT lua [1/2]
 #+begin_quote
 Adds Lua support to Doom Emacs
 #+end_quote
@@ -10835,7 +10835,7 @@ This module adds support for PHP 5.3+ (including PHP7).
 #+end_quote
 
 ** plantuml [0/0] :ARCHIVE:
-** graphviz [0/0]
+** COMMENT graphviz [0/0]
 ** purescript [0/0] :ARCHIVE:
 ** python [5/9]
 :PROPERTIES:
@@ -11049,7 +11049,7 @@ sudo dnf -y install jq
 This module add Ruby and optional Ruby on Rails support to Emacs.
 #+end_quote
 
-** rust [2/3]
+** COMMENT rust [2/3]
 #+begin_quote
 This module adds support for the Rust language and integration for its tools,
 e.g. ~cargo~.
@@ -11470,7 +11470,7 @@ This module adds [[https://ziglang.org/][Zig]] support, with optional (but recom
 Miscellaneous configuration without a corresponding module.
 #+end_quote
 
-** mu4e [0/1]
+** mu4e [0/1] :ARCHIVE:
 #+begin_quote
 This module makes Emacs an email client, using ~mu4e~.
 #+end_quote

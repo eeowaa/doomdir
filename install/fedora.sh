@@ -217,44 +217,9 @@ sudo dnf -y install coreutils
 # Install prerequisites for `term/eshell` module
 sudo dnf -y install fish
 
-# Install prerequisites for `term/vterm` module
-sudo dnf -y install libvterm cmake
-
-## Soft line wrapping
-## <https://github.com/akermu/emacs-libvterm/issues/179#issuecomment-1045331359>
-sudo dnf -y install screen
-
-# Install prerequisites for `checkers/spell` module
-sudo dnf -y install aspell
-
-# Install prerequisites for `checkers/grammar` module
-# Reference: <https://raw.githubusercontent.com/languagetool-org/languagetool/master/install.sh>
-sudo dnf -y install unzip java-latest-openjdk-headless
-(
-    set -e
-    mkdir -p ~/.local/src/doom
-    cd ~/.local/src/doom
-
-    # Download stable release of LanguageTool
-    rm -f LanguageTool-stable.zip
-    curl -fsSLo LanguageTool-stable.zip \
-         -l https://languagetool.org/download/LanguageTool-stable.zip
-
-    # Unzip the tool and determine the release number
-    release_dir=$(unzip -u LanguageTool-stable.zip | awk '!x&&/creating:/{print$2;x=1}')
-
-    # Move into place and clean up
-    rm -rf LanguageTool
-    mv "$release_dir" LanguageTool
-    rm LanguageTool-stable.zip
-)
-
 # Install prerequisites for `tools/ansible` module
 pipx install ansible-core
 ansible-galaxy collection install community.general
-
-# Install prerequisites for `tools/bitwarden` module
-npm install -g @bitwarden/cli
 
 # Install prerequisites for `tools/debugger` module
 sudo dnf -y install lldb gdb unzip
@@ -263,55 +228,8 @@ nvm install node
 # Install prerequisites for `tools/direnv` module
 sudo dnf -y install direnv
 
-# Install prerequisites for `tools/docker` module
-which dockerd-rootless-setuptool.sh >/dev/null 2>&1 || {
-    sudo systemctl disable --now docker.service docker.socket
-    curl --proto '=https' --tlsv1.2 -fsSLo- https://get.docker.com | sudo sh -s
-    dockerd-rootless-setuptool.sh install
-    sudo loginctl enable-linger `whoami`
-    systemctl --user start docker.service
-}
-npm install -g dockerfile-language-server-nodejs
-
 # Install prerequisites for `tools/editorconfig` module
 sudo dnf -y install editorconfig
-
-# Install prerequisites for `tools/Kubernetes` module
-
-## Helm language server
-curl -fsSLo ~/.local/bin/helm_ls \
-    https://github.com/mrjosh/helm-ls/releases/download/master/helm_ls_linux_amd64
-
-## Build and install the tree-sitter grammar for Go templates
-(
-    cd ~/.local/src/emacs/tree-sitter-langs
-
-    # Register a submodule for tree-sitter-go-template
-    git submodule add -b master -- \
-        https://github.com/ngalaiko/tree-sitter-go-template repos/gotmpl
-    ed .gitmodules <<\EOF
-/\[submodule "repos\/gotmpl"]/a
-	update = none
-	ignore = dirty
-.
-wq
-EOF
-
-    # Copy the highlights file into place (for internal consistency)
-    mkdir -p queries/gotmpl
-    cp repos/gotmpl/queries/highlights.scm queries/gotmpl
-
-    # Build the grammar for Go templates
-    script/compile gotmpl
-
-    # Install the shared object into place
-    mkdir -p ~/.tree-sitter/bin
-    cp bin/gotmpl.so ~/.tree-sitter/bin
-
-    # Install the highlights file into place
-    mkdir -p ~/.tree-sitter/queries/gotmpl
-    cp queries/gotmpl/highlights.scm ~/.tree-sitter/queries/gotmpl
-)
 
 # Install prerequisites for `tools/lookup` module
 sudo dnf -y install ripgrep sqlite wordnet
@@ -322,12 +240,6 @@ sudo dnf -y install perl
 # TODO: Find equivalent to git-absorb
 # TODO: Fix cpan install command
 cpan install App::Git::Autofixup
-
-# Install prerequisites for `tools/nginx` module
-pipx install --python `which python3.10` nginx-language-server
-
-# Install prerequisites for `tools/terraform` module
-sudo dnf -y install terraform terraform-ls
 
 # Install prerequisites for `lang/cc` module
 
@@ -359,6 +271,27 @@ sudo dnf -y install glslang
 sudo dnf -y install cmake
 pipx install cmake-language-server
 
+# Install prerequisites for `lang/csharp` module
+
+## dotnet
+sudo dnf -y install dotnet
+
+## omnisharp-roslyn
+github_binary_release \
+    --repo OmniSharp/omnisharp-roslyn \
+    --asset omnisharp-linux-x64-net6.0.tar.gz \
+    --prefix "$HOME/.local/opt/microsoft/omnisharp-roslyn" \
+    --path . \
+    --binary OmniSharp
+
+## netcoredbg
+github_binary_release \
+    --repo Samsung/netcoredbg \
+    --asset netcoredbg-linux-amd64.tar.gz \
+    --prefix "$HOME/.local/opt/microsoft" \
+    --path netcoredbg \
+    --binary netcoredbg
+
 # Install prerequisites for `lang/data` module
 
 ## xmllint
@@ -373,37 +306,6 @@ sudo dnf -y install libxml2
     curl -fsSLO "$xmlls_baseurl/$xmlls_version/org.eclipse.lemminx-$xmlls_version-uber.jar"
     ln -sf "org.eclipse.lemminx-$xmlls_version-uber.jar" org.eclipse.lemminx-uber.jar
 )
-
-# Install prerequisites for `lang/go` module
-(cd ~/Documents/src/life/stow-dotfiles && make go)
-export GOPATH=$HOME/go
-
-## Required dependencies
-sudo dnf -y install golang
-go install golang.org/x/tools/gopls@latest
-go install github.com/x-motemen/gore/cmd/gore@latest
-go install github.com/stamblerre/gocode@latest
-go install golang.org/x/tools/cmd/godoc@latest
-go install golang.org/x/tools/cmd/goimports@latest
-go install golang.org/x/tools/cmd/gorename@latest
-go install golang.org/x/tools/cmd/guru@latest
-go install github.com/cweill/gotests/gotests@latest
-go install github.com/fatih/gomodifytags@latest
-
-## Linting
-asset=`
-    curl -fsSLo- https://api.github.com/repos/golangci/golangci-lint/releases/latest | jq -r \
-    '.assets[] | select(.name | endswith("-linux-amd64.tar.gz")) | .name'
-`
-github_binary_release \
-    --repo golangci/golangci-lint \
-    --asset "$asset" \
-    --prefix "$HOME/.local/opt/golangci" \
-    --path "${asset%*.tar.gz}" \
-    --binary golangci-lint
-
-## Debugging
-sudo dnf -y install llvm
 
 # Install prerequisites for `lang/json` module
 sudo dnf -y install jq
@@ -430,25 +332,6 @@ npm install -g typescript typescript-language-server eslint trepan-ni
     mkdir -p "$destdir"
     unzip -o $1 -d "$destdir"
 )
-
-# Install prerequisites for `lang/latex` module
-(cd ~/Documents/src/life/stow-dotfiles && make lua)
-sudo dnf -y install texlive-scheme-basic
-
-## Install lsp server: digestif
-sudo dnf -y install luarocks lua-devel
-luarocks --local install digestif
-
-## Install ulem.sty for org preview
-sudo dnf -y install texlive-ulem
-
-# Install prerequisites for `lang/lua` module
-github_binary_release \
-    --repo LuaLS/lua-language-server \
-    --asset 'lua-language-server-.*-linux-x64.tar.gz' \
-    --prefix "$HOME/.local/opt/lua-language-server" \
-    --path . \
-    --binary bin/lua-language-server
 
 # Install prerequisites for `lang/markdown` module
 npm install -g markdownlint-cli marked
@@ -513,20 +396,6 @@ pip3 install --user debugpy
 
 # Install prerequisites for `lang/rest` module
 sudo dnf -y install jq
-
-# Install prerequisites for `lang/rust` module
-curl --proto '=https' --tlsv1.2 -fsSLo- https://sh.rustup.rs \
-    | sh -s -- --no-modify-path --quiet -y
-cargo install cargo-check
-rustup component add rustfmt-preview clippy-preview
-
-## rust-analyzer
-rustup component add rust-src
-rustup +nightly component add rust-analyzer-preview
-ln -sf ~/.rustup/toolchains/nightly-*/bin/rust-analyzer ~/.cargo/bin
-
-## rls
-rustup component add rls rust-analysis rust-src
 
 # Install prerequisites for `lang/sh` module
 sudo dnf -y install bash zsh fish powershell ShellCheck

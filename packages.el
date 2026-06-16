@@ -48,9 +48,6 @@
 (when (> emacs-major-version 27)
   (package! xref :pin "a82f459b37b31546bf274388baf8aca79e9c30d9"))
 
-;; If this causes issues, try `(unpin! (:tools lsp))' instead
-(unpin! lsp-mode)
-
 (package! rfc-mode)
 
 (unpin! tree-sitter-langs)
