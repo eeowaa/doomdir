@@ -2756,59 +2756,6 @@ This is a list of lists, not a list of cons cells.")
 (when (modulep! :tools tree-sitter)
   (eeowaa-add-to-exclusion-list +tree-sitter-hl-enabled-modes 'yaml-mode))
 
-;; REVIEW Compare `kubel' with `kubernetes-el'
-;; - kubel is great for working with pods (listing, examining, modifying, logging, and interacting)
-;; - kubernetes-el might be closer to Lens in terms of functionality, but I have not tried it yet
-(use-package! kubel
-  :defer t
-  :config
-  (defadvice! my/activate-k8s-mode-a (&rest _)
-    :after #'kubel-yaml-editing-mode
-    (k8s-mode)))
-
-(use-package! kubel-evil
-  :after kubel
-  :when (modulep! :editor evil +everywhere))
-
-(use-package! kubernetes
-  :defer t
-  :init
-  (defvar +kubernetes-workspace-name "*kubernetes*")
-  :commands (kubernetes-overview)
-  :config
-  (setq ;; Disable automatic refresh (call `kubernetes-refresh' manually)
-        kubernetes-poll-frequency 3600
-        kubernetes-redraw-frequency 3600
-
-        ;; Display pods even if they are done running
-        kubernetes-pods-display-completed t)
-
-  (setq-hook! 'kubernetes-overview-mode-hook
-    revert-buffer-function (lambda (&rest _) (kubernetes-refresh)))
-
-  (defun =kubernetes ()
-    "Activate (or switch to) `kubernetes' in its workspace."
-    (interactive)
-    (if (modulep! :ui workspaces)
-        (progn
-          (+workspace-switch +kubernetes-workspace-name t)
-          (unless (memq (buffer-local-value 'major-mode
-                                            (window-buffer
-                                             (selected-window)))
-                        ;; TODO Add more major modes
-                        '(kubernetes-overview-mode))
-            (doom/switch-to-scratch-buffer)
-            (kubernetes-overview))
-          (+workspace/display))
-      (setq +kubernetes--wconf (current-window-configuration))
-      (delete-other-windows)
-      (switch-to-buffer (doom-fallback-buffer))
-      (kubernetes-overview))))
-
-(use-package! kubernetes-evil
-  :after kubernetes-modes
-  :when (modulep! :editor evil +everywhere))
-
 ;; Open online documentation in `w3m'
 (setq +lookup-open-url-fn #'w3m-browse-url)
 

@@ -168,11 +168,11 @@
 ;;(package! code-cells)
 
 ;; Kubernetes
-(package! kubel)      ;; interaction with pods
-(package! kubernetes) ;; interaction with a cluster
-(when (modulep! :editor evil +everywhere)
-  (package! kubel-evil)
-  (package! kubernetes-evil))
+;; (package! kubel)      ;; interaction with pods
+;; (package! kubernetes) ;; interaction with a cluster
+;; (when (modulep! :editor evil +everywhere)
+;;   (package! kubel-evil)
+;;   (package! kubernetes-evil))
 
 ;; Git
 ;;(package! blamer)

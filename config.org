@@ -11588,11 +11588,11 @@ have listed some commented-out packages below that I would like to install.
 ;;(package! code-cells)
 
 ;; Kubernetes
-(package! kubel)      ;; interaction with pods
-(package! kubernetes) ;; interaction with a cluster
-(when (modulep! :editor evil +everywhere)
-  (package! kubel-evil)
-  (package! kubernetes-evil))
+;; (package! kubel)      ;; interaction with pods
+;; (package! kubernetes) ;; interaction with a cluster
+;; (when (modulep! :editor evil +everywhere)
+;;   (package! kubel-evil)
+;;   (package! kubernetes-evil))
 
 ;; Git
 ;;(package! blamer)
@@ -11627,7 +11627,7 @@ have listed some commented-out packages below that I would like to install.
 ;;(package! mastadon)
 #+end_src
 
-*** STRT [#A] Configure kubel :feat:module:
+*** STRT [#A] COMMENT Configure kubel :feat:module:
 + [X] Open k8s manifest buffers in ~k8s-mode~
 + [X] Activate =kubel-evil= before =kubel=
 + [ ] Scroll to top of resource buffers after they are populated
@@ -11655,7 +11655,7 @@ have listed some commented-out packages below that I would like to install.
   :when (modulep! :editor evil +everywhere))
 #+end_src
 
-*** STRT [#A] Configure kubernetes :feat:module:
+*** STRT [#A] COMMENT Configure kubernetes :feat:module:
 + [X] Activate =kubernetes-evil= before =kubernetes=
 + [X] Display pods that are done executing
 + [-] Do not automatically refresh
