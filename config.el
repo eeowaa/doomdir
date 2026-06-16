@@ -1945,6 +1945,19 @@ if you want to send region to a REPL or terminal emulator."
         :nv "C-t" nil ;; open this up for `vimish-tab'
         :nv "gz" #'magit-jump-to-stashes)))
 
+;; Performance improvements for `magit' under WSL 1
+(when (eq eeowaa-wsl-version 1)
+
+  ;; Do not refresh `diff-hl' fringes when refreshing `magit'. This is an easy way
+  ;; to speed things up (discovered by running `magit-profile-refresh-buffers').
+  (after! diff-hl
+    (remove-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
+
+  ;; Do not refresh the status buffer from, say, a diff buffer. This way,
+  ;; you can stage hunks from an "unstaged diff" buffer for a single file without
+  ;; incurring the cost of a full magit refresh.
+  (setq magit-refresh-status-buffer nil))
+
 (defvar my/makefile-search-list '("GNUmakefile" "makefile" "Makefile")
   "List of makefile names to sequentially search for.")
 

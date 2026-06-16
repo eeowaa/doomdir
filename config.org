@@ -7624,7 +7624,7 @@ https://emacs-lsp.github.io/lsp-mode/page/main-features/#code-actions-on-modelin
 (setq lsp-modeline-code-actions-segments nil)
 #+end_src
 
-** magit [3/6]
+** magit [3/7]
 *** STRT [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -7667,6 +7667,95 @@ cpan install App::Git::Autofixup
         :nv "C-t" nil ;; open this up for `vimish-tab'
         :nv "gz" #'magit-jump-to-stashes)))
 #+end_src
+
+*** STRT [#B] Increase performance on Windows :tweak:
+Performance in WSL 1 is very slow (at least for repos hosted on WSL filesystems
+rather than Windows). Setting ~magit-refresh-verbose~ will show the refresh time
+in the echo area. Running =M-x magit-profile-refresh-buffer= provides detailed
+profiling information. This may also be something that can be solved via git
+configuration (look at which processes are called by =magit=).
+
+See also:
+- ~magit-profile-refresh-buffer~
+- [[man:git-config(1)]]
+
+#+begin_src emacs-lisp :tangle yes
+;; Performance improvements for `magit' under WSL 1
+(when (eq eeowaa-wsl-version 1)
+
+  ;; Do not refresh `diff-hl' fringes when refreshing `magit'. This is an easy way
+  ;; to speed things up (discovered by running `magit-profile-refresh-buffers').
+  (after! diff-hl
+    (remove-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
+
+  ;; Do not refresh the status buffer from, say, a diff buffer. This way,
+  ;; you can stage hunks from an "unstaged diff" buffer for a single file without
+  ;; incurring the cost of a full magit refresh.
+  (setq magit-refresh-status-buffer nil))
+#+end_src
+
+**** Performance Metrics
+***** Example output from ~magit-profile-refresh-buffer~
+#+begin_example
+Refreshing magit...
+Running magit-pre-refresh-hook...
+  +magit--set-window-state-h                         0.000015
+Running magit-pre-refresh-hook...done (0.000s)
+Refreshing buffer `*magit: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/*'...
+  magit-insert-error-header                          0.000006 
+  magit-insert-diff-filter-header                    0.217318 !!
+  magit-insert-head-branch-header                    0.136044 !!
+  magit-insert-upstream-branch-header                0.000165 
+  magit-insert-push-branch-header                    0.000124 
+  magit-insert-tags-header                           0.140187 !!
+  magit-insert-status-headers                        0.560534 !!
+  magit-insert-merge-log                             0.062979 !!
+  magit-insert-rebase-sequence                       0.000248 
+  magit-insert-am-sequence                           0.000090 
+  magit-insert-sequencer-sequence                    0.000281 
+  magit-insert-bisect-output                         0.000085 
+  magit-insert-bisect-rest                           0.000085 
+  magit-insert-bisect-log                            0.000082 
+  magit-insert-untracked-files                       0.217646 !!
+  magit-insert-unstaged-changes                      0.125845 !!
+  magit-insert-staged-changes                        0.178122 !!
+  magit-insert-stashes                               0.068279 !!
+  magit-insert-unpushed-to-pushremote                0.000247 
+  magit-insert-unpushed-to-upstream-or-recent        0.414716 !!
+  magit-insert-unpulled-from-pushremote              0.000024 
+  magit-insert-unpulled-from-upstream                0.000018 
+Refreshing buffer `*magit: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/*'...done (1.937s)
+Running magit-post-refresh-hook...
+  diff-hl-magit-post-refresh                         0.129181
+Running magit-post-refresh-hook...done (0.130s)
+Refreshing magit...done (2.070s, cached 34/55 (62%))
+#+end_example
+
+***** Example output translated to a function call hierarchy
+- magit-status-sections-hook
+  - magit-insert-status-headers :: 0.560534 !!
+    - magit-status-headers-hook
+      - magit-insert-error-header :: 0.000006 
+      - magit-insert-diff-filter-header :: 0.217318 !!
+      - magit-insert-head-branch-header :: 0.136044 !!
+      - magit-insert-upstream-branch-header :: 0.000165 
+      - magit-insert-push-branch-header :: 0.000124 
+      - magit-insert-tags-header :: 0.140187 !!
+  - magit-insert-merge-log :: 0.062979 !!
+  - magit-insert-rebase-sequence :: 0.000248 
+  - magit-insert-am-sequence :: 0.000090 
+  - magit-insert-sequencer-sequence :: 0.000281 
+  - magit-insert-bisect-output :: 0.000085 
+  - magit-insert-bisect-rest :: 0.000085 
+  - magit-insert-bisect-log :: 0.000082 
+  - magit-insert-untracked-files :: 0.217646 !!
+  - magit-insert-unstaged-changes :: 0.125845 !!
+  - magit-insert-staged-changes :: 0.178122 !!
+  - magit-insert-stashes :: 0.068279 !!
+  - magit-insert-unpushed-to-pushremote :: 0.000247 
+  - magit-insert-unpushed-to-upstream-or-recent :: 0.414716 !!
+  - magit-insert-unpulled-from-pushremote :: 0.000024 
+  - magit-insert-unpulled-from-upstream :: 0.000018 
 
 *** TODO [#B] Add support for Azure DevOps :feat:
 - [ ] Define a ~forge-azure-repository~ class (reference =forge-bitbucket=)
