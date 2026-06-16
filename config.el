@@ -104,19 +104,9 @@ with special dedication semantics."
 
 ;; Mostly stolen from tecosaur's config
 (setq frame-title-format
-      '(""
-        (:eval
-         (if (s-contains-p org-roam-directory (or buffer-file-name ""))
-             (replace-regexp-in-string
-              ".*/[0-9]*-?" "☰ "
-              (subst-char-in-string ?_ ?  buffer-file-name))
-           "%b"))
-        (:eval
-         (let ((project-name (projectile-project-name)))
-           (unless (string= "-" project-name)
-             (format (if (and (buffer-modified-p) (vimish-tab-force-updating-p))
-                         " ◉ %s"
-                       "  ●  %s") project-name))))))
+      '("%F"
+        (:eval (format " on %s" (terminal-name)))
+        (:eval (format " (up %s)" (emacs-uptime "%H, %M")))))
 
 (setf (alist-get 'fullscreen initial-frame-alist) 'maximized)
 
