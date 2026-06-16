@@ -28,7 +28,7 @@
   (add-hook! company-box-mode
     (defun my/company-box-toggles-h ()
       (if company-box-mode
-          (delq! 'company-echo-metadata-frontend company-frontends)
+          (cl-callf2 remove 'company-echo-metadata-frontend company-frontends)
         (cl-pushnew 'company-echo-metadata-frontend company-frontends)))))
 
 (after! company-box
@@ -1528,8 +1528,8 @@ If the current frame has one window, restore the previous windows."
   (when (modulep! :emacs dired +icons)
     (after! dirvish
       (setq dirvish-subtree-always-show-state nil)
-      (delq! 'nerd-icons dirvish-attributes)
-      (delq! 'subtree-state dirvish-attributes))))
+      (cl-callf2 remove 'nerd-icons dirvish-attributes)
+      (cl-callf2 remove 'subtree-state dirvish-attributes))))
 
 (defun my/+dired-split-jump ()
   (interactive)
@@ -1587,7 +1587,7 @@ If the current frame has one window, restore the previous windows."
                  '+undo-tree--show-visualizer-diff-safely-a))
 
 (after! git-commit
-  (delq! 'overlong-summary-line git-commit-style-convention-checks))
+  (cl-callf2 remove 'overlong-summary-line git-commit-style-convention-checks))
 
 (pushnew! auto-mode-alist
           '("/git/config\\.d/.+" . gitconfig-mode)

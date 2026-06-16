@@ -472,7 +472,7 @@ we can still see documentation.
   (add-hook! company-box-mode
     (defun my/company-box-toggles-h ()
       (if company-box-mode
-          (delq! 'company-echo-metadata-frontend company-frontends)
+          (cl-callf2 remove 'company-echo-metadata-frontend company-frontends)
         (cl-pushnew 'company-echo-metadata-frontend company-frontends)))))
 #+end_src
 
@@ -2465,7 +2465,7 @@ Doom lazy loads =evil-ex= commands via the following code in the ~:config~
 section of the ~use-package! evil~ form in =:editor evil= configuration:
 
 #+begin_src emacs-lisp :tangle no
-(delq! 'evil-ex features)
+(cl-callf2 remove 'evil-ex features)
 (add-transient-hook! 'evil-ex (provide 'evil-ex))
 (after! evil-ex (load! "+commands"))
 #+end_src
@@ -5075,8 +5075,8 @@ Now run the following snippets and compare with the previous example:
   (when (modulep! :emacs dired +icons)
     (after! dirvish
       (setq dirvish-subtree-always-show-state nil)
-      (delq! 'nerd-icons dirvish-attributes)
-      (delq! 'subtree-state dirvish-attributes))))
+      (cl-callf2 remove 'nerd-icons dirvish-attributes)
+      (cl-callf2 remove 'subtree-state dirvish-attributes))))
 #+end_src
 
 *** STRT [#A] Define directory-exploring =evil-ex= commands :feat:
@@ -5216,7 +5216,7 @@ integration with git.
 *** DONE [#B] Do not prompt when the commit message is too long :tweak:
 #+begin_src emacs-lisp :tangle yes
 (after! git-commit
-  (delq! 'overlong-summary-line git-commit-style-convention-checks))
+  (cl-callf2 remove 'overlong-summary-line git-commit-style-convention-checks))
 #+end_src
 
 *** DONE [#C] Filename-mode associations :tweak:
@@ -6833,7 +6833,7 @@ npm install -g dockerfile-language-server-nodejs
 *** DONE [#C] Filename-mode associations :tweak:
 #+begin_src emacs-lisp :tangle yes
 ;; Replace default association with a more generic one
-(delq! "/Dockerfile\\(?:\\.[^/\\]*\\)?\\'" auto-mode-alist #'assoc-string)
+(cl-callf2 remove "/Dockerfile\\(?:\\.[^/\\]*\\)?\\'" auto-mode-alist #'assoc-string)
 (add-to-list 'auto-mode-alist
              '("/[^/\\]*\\<\\(Docker\\|Container\\)file\\>[^/\\]*$" . dockerfile-mode)
              'append)
