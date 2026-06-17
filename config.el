@@ -1724,60 +1724,6 @@ If the current frame has one window, restore the previous windows."
 (after! projectile
   (add-to-list 'projectile-project-root-files "ansible.cfg"))
 
-(map! :leader
-      ;;; <leader> d --- debug
-      (:prefix-map ("d" . "debug")
-       :desc "Next"                "n" #'dap-next
-       :desc "Step in"             "i" #'dap-step-in
-       :desc "Step out"            "o" #'dap-step-out
-       :desc "Continue"            "c" #'dap-continue
-       :desc "Restart frame"       "r" #'dap-restart-frame
-       :desc "Disconnect"          "Q" #'dap-disconnect
-       (:prefix ("s" . "switch")
-        :desc "Session"             "s" #'dap-switch-session
-        :desc "Thread"              "t" #'dap-switch-thread
-        :desc "Stack frame"         "f" #'dap-switch-stack-frame
-        :desc "Up stack frame"      "u" #'dap-up-stack-frame
-        :desc "Down stack frame"    "d" #'dap-down-stack-frame)
-       (:prefix ("b" . "breakpoints")
-        :desc "Toggle"              "b" #'dap-breakpoint-toggle
-        :desc "Delete"              "d" #'dap-breakpoint-delete
-        :desc "Add"                 "a" #'dap-breakpoint-add
-        :desc "Set condition"       "c" #'dap-breakpoint-condition
-        :desc "Set hit count"       "h" #'dap-breakpoint-hit-condition
-        :desc "Set log message"     "l" #'dap-breakpoint-log-message)
-       (:prefix ("d" . "debug")
-        :desc "Debug"               "d" #'dap-debug
-        :desc "Debug recent"        "r" #'dap-debug-recent
-        :desc "Debug last"          "l" #'dap-debug-last
-        :desc "Edit debug template" "e" #'dap-debug-edit-template
-        :desc "Debug restart"       "s" #'dap-debug-restart)
-       (:prefix ("e" . "eval")
-        :desc "Eval"                "e" #'dap-eval
-        :desc "Eval region"         "r" #'dap-eval-region
-        :desc "Eval thing at point" "s" #'dap-eval-thing-at-point
-        :desc "Add expression"      "a" #'dap-ui-expressions-add)
-       (:prefix ("w" . "window")
-        :desc "Locals"              "l" #'dap-ui-locals
-        :desc "Breakpoints"         "b" #'dap-ui-breakpoints
-        :desc "Breakpoint List"     "B" #'dap-ui-breakpoints-list
-        :desc "Expressions"         "e" #'dap-ui-expressions
-        :desc "Sessions"            "s" #'dap-ui-sessions
-        :desc "REPL"                "r" #'dap-ui-repl)))
-
-(setq dap-auto-configure-features
-      '(sessions       ;; `dap-ui-sessions'
-        ;; locals      ;; `dap-ui-locals'
-        breakpoints    ;; `dap-ui-breakpoints'
-        ;; expressions ;; `dap-ui-expressions'
-        repl           ;; `dap-ui-repl'
-        ;; controls    ;; FIXME: `dap-ui-controls-mode'
-        ;; tooltip     ;; FIXME: `dap-tooltip-mode'
-        ))
-
-;; Remove hook installed by Doom
-(remove-hook 'dap-ui-mode-hook 'dap-ui-controls-mode)
-
 (after! editorconfig
   (add-to-list 'editorconfig-exclude-regexps
                "/\\(?:\\(?:COMMIT\\|TAG\\|NOTES\\)_EDIT\\|MERGE_\\)MSG\\'"))

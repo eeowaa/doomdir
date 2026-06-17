@@ -221,10 +221,6 @@ sudo dnf -y install fish
 pipx install ansible-core
 ansible-galaxy collection install community.general
 
-# Install prerequisites for `tools/debugger` module
-sudo dnf -y install lldb gdb unzip
-nvm install node
-
 # Install prerequisites for `tools/direnv` module
 sudo dnf -y install direnv
 

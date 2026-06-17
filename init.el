@@ -106,8 +106,7 @@
 ;;GONE bitwarden           ; XXX user module
        ;;cloudformation  ; TODO XXX user module
        ;;collab            ; buffers with friends
-;;LEAN (debugger +lsp)   ; FIXME stepping through code, to help you add bugs
-       (debugger)
+;;GONE (debugger +lsp)   ; FIXME stepping through code, to help you add bugs
        direnv
 ;;GONE (docker +lsp)
        editorconfig      ; let someone else argue about tabs vs spaces
