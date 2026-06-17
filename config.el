@@ -2034,6 +2034,23 @@ if you want to send region to a REPL or terminal emulator."
   :init
   (defalias 'rfc #'rfc-mode-browse)
 
+  (defadvice! +rfc--read-index-a (buffer)
+    :override #'rfc-mode-read-index
+    (with-current-buffer buffer
+      (goto-char (point-min))
+      (let ((entries nil))
+        (while (search-forward-regexp "^[0-9]+ " nil t)
+          (let ((start (match-beginning 0)))
+            ;; HACK Replace a failing-to-match regex: " $"
+            (search-forward-regexp "^$")
+            (let* ((end (match-beginning 0))
+                   (lines (buffer-substring start end))
+                   (entry-string (replace-regexp-in-string "[ \n]+" " " lines))
+                   (entry (rfc-mode-parse-index-entry entry-string)))
+              (unless (string= (plist-get entry :title) "Not Issued")
+                (push entry entries)))))
+        (nreverse entries))))
+
   (defadvice! +rfc--goto-top-a ()
     :after #'rfc-mode-init
     (goto-char (point-min))
