@@ -227,7 +227,8 @@ called by the latter."
              "^\\*trace-output\\*"
              "^\\*\\(?:CPU\\|Memory\\)-Profiler-Report "
              "^\\*lsp-log\\*"
-             "^\\*.*ls\\(?:::stderr\\)?\\*"
+             ;; FIXME Matches "*Customize Group: Terminals*"
+             ;; "^\\*.*ls\\(?:::stderr\\)?\\*"
              "^\\*envrc\\*")
      :modes (messages-buffer-mode backtrace-mode debugger-mode))))
 

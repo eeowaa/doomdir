@@ -56,7 +56,7 @@ machines that I work on. Here is a good reference: https://github.com/blahgeek/e
 Although external packages can sometimes provide more/better functionality than
 built-in packages, it often takes considerably more integration work to get them
 to play nicely together. When an external package is needed, it is better to use
-a package than integrates tightly with built-in packages.
+a package that integrates tightly with built-in packages.
 
 + projectile :: project
 + flycheck :: flymake
