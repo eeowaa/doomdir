@@ -2817,31 +2817,116 @@ This is a list of lists, not a list of cons cells.")
 
 (use-package! gptel
   :defer t
-  :config
-  (defun my/gptel-modify-header-line-h ()
-    "Replace \"*ChatGPT*\" with \"Status:\" in the header line of a `gptel-mode' buffer."
-    (setcar header-line-format
-            (concat (propertize " " 'display '(space :align-to 0))
-                    "Status:")))
+  :init
 
+  ;;; Keybindings
+
+  ;; Define a global keybinding to configure and interact with LLMs.
+  ;; (`gptel' is not constrained to chat buffers and can be used everywhere.)
+  (global-set-key (kbd "C-c SPC") #'gptel-menu)
+
+  (when (modulep! :editor evil +everywhere)
+
+    ;; Do not bind `gptel-menu' to S-RET in chat buffers.
+    ;; (We already have a global keybinding.)
+    (setq evil-collection-gptel-want-shift-ret-menu nil)
+
+    ;; Bind `gptel-send' to RET in normal state instead of insert state.
+    ;; (This makes it easier to insert multi-line prompt text in chat buffers.)
+    (defadvice! my/evil-collection-gptel-setup-a (fn &rest args)
+      :around #'evil-collection-gptel-setup
+      (let ((evil-collection-repl-submit-state 'normal))
+        (apply fn args))))
+
+  :config
+
+  ;;; Formatting
+
+  ;; Nest queries and responses within parent prompt sections.
+  (setq gptel-prompt-prefix-alist '((org-mode . "** Prompt\n*** Query\n")
+                                    (markdown-mode . "## Prompt\n### Query\n")
+                                    (text-mode . "## Prompt\n### Query\n"))
+        gptel-response-prefix-alist '((org-mode . "*** Response\n")
+                                      (markdown-mode . "### Response\n")
+                                      (text-mode . "### Response\n")))
+
+  ;; TODO: Open new chat buffers in `org-mode' instead of `markdown-mode'.
+  ;; (This allows richer annotations and Emacs integration.)
+
+  ;; TODO: Automatically insert level-1 headers into new chat buffers.
+  ;; (Can provide top-level declaration of "conversations", i.e., context.)
+
+  ;; TODO: Limit context to everything beneath level-1 headers in `org-mode'.
+  ;; (Facilitates creation of files similar in structure to the ChatGPT web UI.)
+
+  ;; TODO: Add CUSTOM_ID properties to `org-mode' headers for new prompts.
+  ;; (Provides a reliable linking mechanism to persistent chat logs for note-taking.)
+
+  ;; TODO: Record prompt metadata in `org-mode' header properties.
+  ;; - Timestamp
+  ;; - Model
+  ;; - Additional context (e.g., file paths)
+
+  ;;; Presentation
+
+  ;; Insert complete responses once they have been received.
+  ;; (Streaming text is distracting and not worth the overhead.)
+  (setq gptel-stream nil)
+
+  ;; Indicate response regions in the fringe or margin.
+  ;; (Lightweight method that avoids conflicts with major-mode highlighting.)
+  (setq gptel-highlight-methods `(,(if initial-window-system 'fringe 'margin)))
+  (defun my/gptel-highlight-mode-toggle-h ()
+    (gptel-highlight-mode (unless gptel-mode -1)))
+  (add-hook 'gptel-mode-hook #'my/gptel-highlight-mode-toggle-h)
+
+  ;; Adaptively scale fringe bitmaps to proper dimensions (inspired by `diff-hl').
+  ;; (Without this, fringe indicators may be fragmented between lines).
+  (setq my/gptel-highlight-bmp-max-width 16)
+  (defun my/gptel-highlight-redefine-bitmap ()
+    (when (window-system)
+      (let* ((scale (if (and (boundp 'text-scale-mode-amount)
+                             (numberp text-scale-mode-amount))
+                        (expt text-scale-mode-step text-scale-mode-amount)
+                      1))
+             (spacing (or (and (display-graphic-p) (default-value 'line-spacing)) 0))
+             (total-spacing (pcase spacing
+                              ((pred numberp) spacing)
+                              (`(,above . ,below) (+ above below))))
+             (height (+ (ceiling (* (frame-char-height) scale))
+                        (if (floatp total-spacing)
+                            (truncate (* (frame-char-height) total-spacing))
+                          total-spacing)))
+             (width (min (frame-parameter nil 'left-fringe)
+                         my/gptel-highlight-bmp-max-width))
+             (_ (when (zerop width) (setq width my/gptel-highlight-bmp-max-width))))
+        (define-fringe-bitmap 'gptel-highlight-fringe
+          (make-vector height (expt 2 (1- width)))
+          height width 'center))))
+  (defun my/gptel-highlight-adaptive-bitmap-h ()
+    (if gptel-highlight-mode
+        (progn
+          (my/gptel-highlight-redefine-bitmap)
+          (add-hook 'text-scale-mode-hook #'my/gptel-highlight-redefine-bitmap nil t))
+      (remove-hook 'text-scale-mode-hook #'my/gptel-highlight-redefine-bitmap t)))
+  (add-hook 'gptel-highlight-mode-hook #'my/gptel-highlight-adaptive-bitmap-h)
+
+  ;; Replace the backend name (e.g., "*ChatGPT*") with "Status:" in the header line.
+  ;; (We already see the backend name in the mode line and/or tab line.)
+  (defun my/gptel-modify-header-line-h ()
+    (when gptel-mode
+      (setcar header-line-format
+              (concat (propertize " " 'display '(space :align-to 0))
+                      "Status:"))))
+  (add-hook 'gptel-mode-hook #'my/gptel-modify-header-line-h)
+
+  ;; Wrap lines to present responses legibly.
+  ;; (Responses typically do *not* contain hard line breaks for formatting.)
   (defun my/gptel-wrap-lines-h ()
     (if (modulep! :editor word-wrap)
         (+word-wrap-mode)
       (toggle-truncate-lines -1)))
-
-  (add-hook! gptel-mode #'my/gptel-modify-header-line-h
-                        #'my/gptel-wrap-lines-h)
-
-  ;; Do not stream responses
-  (setq gptel-stream nil)
-
-  ;; Use 2-character prefixes instead of 3-character prefix
-  (setq gptel-prompt-prefix-alist '((markdown-mode . "## ")
-                                    (org-mode . "** ")
-                                    (text-mode . "## ")))
-
-  (map! :map gptel-mode-map
-        "C-c C-g" #'gptel-menu))
+  (add-hook 'gptel-mode-hook #'my/gptel-wrap-lines-h))
 
 (when (file-exists-p custom-file)
   ;; Protect the file in case it contain sensitive information
