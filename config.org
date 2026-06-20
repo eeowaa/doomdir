@@ -371,13 +371,27 @@ for autoload cookies or byte-compilation.
 ;; (require 'eeowaa-debug)
 ;; (require 'eeowaa-project)
 
+;; Load `transient-childframe' and configure `transient'
 (when initial-window-system
   (require 'transient-childframe)
+
+  ;; HACK: Revert Doom's configuration
   (when (modulep! :tools magit)
     (after! magit
-      ;; Revert Doom's configuration
       (setq transient-display-buffer-action
             (tc-transient-childframe--display-buffer-action)))))
+
+;; NOTE: Since introducing `gptel' into my workflow, I can no longer use "SPC"
+;; to pop up transient childframes; I have to use the default "C-t" binding.
+;; Every workaround I have tried (including the following) has failed to prevent
+;; broken `transient-childframe' windows.
+;;
+;; (define-key transient-map (kbd "SPC") #'transient-show)
+;; (after! gptel-transient
+;;   (transient-suffix-put 'gptel-menu "SPC" :key "C-SPC")
+;;   (defadvice! my/gptel-no-crowdsourced-prompts-a (args)
+;;     :filter-args #'gptel--setup-directive-menu
+;;     (cons (car args) (list (car (cdr args))))))
 #+end_src
 
 *** DONE [#B] Disable icons when unavailable

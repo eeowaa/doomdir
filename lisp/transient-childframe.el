@@ -29,15 +29,14 @@
 
 ;;; Transient
 
+;; REVIEW Replacing `transient-show-popup' and `transient-enable-popup-navigation'
+;; with `transient-show-menu' and `transient-enable-menu-navigation' causes nested
+;; transient menus to break for some reason.
 (setq transient-show-popup nil
       transient-semantic-coloring t
       transient-detect-key-conflicts t
       transient-mode-line-format nil
       transient-enable-popup-navigation nil)
-
-;; Use `SPC' to pop up the menu immediately (in addition to the default `C-t'
-;; key binding); otherwise wait for `transient-show-popup' seconds.
-(define-key transient-map (kbd "SPC") #'transient-show)
 
 
 ;;; Childframe
