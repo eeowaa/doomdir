@@ -1695,6 +1695,14 @@ If the current frame has one window, restore the previous windows."
   (setq flycheck-checker-error-threshold 500))
 
 (after! flycheck
+  (when-let ((cmd (flycheck-checker-get 'awk-gawk 'command)))
+    (setcdr cmd
+            '("--source" "BEGIN{exit} END{exit}"
+              "-f" source
+              "--lint=fatal"
+              "/dev/null"))))
+
+(after! flycheck
   (defun my/flycheck-set-level (level)
     "Set the Flycheck error level"
     (interactive

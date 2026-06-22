@@ -5965,7 +5965,7 @@ displayed in the echo area that I do not want to see. Let's disable them.
 (setq next-error-verbose nil)
 #+end_src
 
-** syntax [6/10]
+** syntax [7/11]
 *** DONE [#A] Disable flycheck in all Org source blocks :hack:
 References:
 + [[help:flycheck-may-enable-mode]]
@@ -6035,6 +6035,84 @@ errors should not be reported*.
 #+begin_src emacs-lisp :tangle yes
 (after! flycheck
   (setq flycheck-checker-error-threshold 500))
+#+end_src
+
+*** DONE [#C] Fix spurious error messages for =awk-mode= :bug:hack:
+When there are no errors in an =awk-mode= buffer, =flycheck= complains:
+
+#+begin_quote
+Suspicious state from syntax checker awk-gawk: Flycheck checker awk-gawk returned 1, but its output contained no errors: 
+Try installing a more recent version of awk-gawk, and please open a bug report if the issue persists in the latest release.  Thanks!
+#+end_quote
+
+The following patch to the ~flycheck-define-checker~ block for the ~awk-gawk~
+checker in =flycheck.el= seems to solve the problem:
+
+#+begin_src diff :tangle no
+--- /tmp/ediffFfwCMg	2026-06-17 18:27:27.061268700 -0600
++++ /tmp/ediffTKc9FJ	2026-06-17 18:27:27.061268700 -0600
+@@ -2,9 +2,9 @@
+   "GNU awk's built-in --lint checker."
+   :command ("gawk"
+             ;; Avoid code execution.  See https://github.com/w0rp/ale/pull/1411
+-            "--source" "BEGIN{exit} END{exit 1}"
++            "--source" "BEGIN{exit} END{exit}"
+             "-f" source
+-            "--lint"
++            "--lint=fatal"
+             "/dev/null")
+   :standard-input nil
+   :error-patterns
+@@ -18,4 +18,4 @@
+                                (one-or-more not-newline)))
+             line-end))
+   :error-filter flycheck-awk-gawk-error-filter
+-  :modes awk-mode)
++  :modes awk-mode)
+\ No newline at end of file
+#+end_src
+
+Applying the patch *at runtime* works as intended:
+
+#+begin_src emacs-lisp :tangle no
+(after! flycheck
+  ;; HACK Patched definition
+  (flycheck-define-checker awk-gawk
+    "GNU awk's built-in --lint checker."
+    :command ("gawk"
+              ;; Avoid code execution.  See https://github.com/w0rp/ale/pull/1411
+              "--source" "BEGIN{exit} END{exit}"
+              "-f" source
+              "--lint=fatal"
+              "/dev/null")
+    :standard-input nil
+    :error-patterns
+    ((warning line-start
+              "gawk: "
+              (file-name) ":" line ":" (optional column ":")
+              (message (one-or-more not-newline)
+                       (optional "\n"
+                                 (one-or-more not-newline)
+                                 " ^ "
+                                 (one-or-more not-newline)))
+              line-end))
+    :error-filter flycheck-awk-gawk-error-filter
+    :modes awk-mode))
+#+end_src
+
+However, this causes a startup error. Specifically, some configuration code that
+expects ~flycheck-global-modes~ to be a list sees ~flycheck-global-modes~ as its
+original value of ~t~. Modifying (instead of overwriting) the ~awk-gawk~ checker
+avoids any startup issues:
+
+#+begin_src emacs-lisp :tangle yes
+(after! flycheck
+  (when-let ((cmd (flycheck-checker-get 'awk-gawk 'command)))
+    (setcdr cmd
+            '("--source" "BEGIN{exit} END{exit}"
+              "-f" source
+              "--lint=fatal"
+              "/dev/null"))))
 #+end_src
 
 *** STRT [#A] Allow dynamic changing of error levels displayed :feat:
