@@ -5562,6 +5562,12 @@ This function works even if the current window is a side window."
     (kbd "C-s") 'evil-window-map))
 #+end_src
 
+*** DONE [#C] Always show the modeline :tweak:
+#+begin_src emacs-lisp :tangle yes
+(after! vterm
+  (remove-hook 'vterm-mode-hook 'mode-line-invisible-mode))
+#+end_src
+
 *** STRT [#B] Define aliases :feat:
 :LOGBOOK:
 - Note taken on [2023-01-30 Mon 08:33] \\

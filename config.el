@@ -1747,6 +1747,9 @@ This function works even if the current window is a side window."
     (kbd "C-s") 'evil-window-map))
 
 (after! vterm
+  (remove-hook 'vterm-mode-hook 'mode-line-invisible-mode))
+
+(after! vterm
 
   ;; This function is to be called in shell configuration to obtain the
   ;; directory in which to read aliases
