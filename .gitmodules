@@ -1,0 +1,4 @@
+[submodule "csproj-mode"]
+	path = vendor/csproj-mode
+	url = git@github.com:eeowaa/csproj-mode.git
+	branch = eeowaa/fixes

@@ -91,6 +91,10 @@
 (package! ebnf-mode)
 (package! protobuf-mode)
 
+(when (modulep! :lang csharp)
+  (package! csproj-mode
+    :recipe (:local-repo "vendor/csproj-mode")))
+
 (when (modulep! :lang org +jupyter)
   (package! ox-ipynb
     :recipe (:host github :repo "jkitchin/ox-ipynb")))

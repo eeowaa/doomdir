@@ -8866,7 +8866,7 @@ This module adds [[https://coq.inria.fr][coq]] support, powered by [[https://pro
 This modules adds [[https://crystal-lang.org/][crystal]] support.
 #+end_quote
 
-** csharp [1/2]
+** csharp [3/5]
 #+begin_quote
 This module adds C# support to Emacs. Powered by omnisharp (directly or through
 LSP).
@@ -8936,6 +8936,60 @@ declaration for =sharper=:
 I would rather use ~use-package-hook!~ than rewrite the whole ~use-package!~
 declaration, but I don't know if/how that is possible, because ~:general~ is
 used instead of ~:config~ to specify the keybinding.
+
+*** DONE [#B] Associate specific file extensions with XML :feat:
+- =.DotSettings= (https://www.jetbrains.com/help/resharper/Sharing_Configuration_Options.html)
+- =.xaml= (https://learn.microsoft.com/en-us/dotnet/desktop/wpf/xaml/)
+
+#+begin_src emacs-lisp :tangle yes
+(dolist (mode '(("\\.xaml\\'" . nxml-mode)
+                ("\\.DotSettings\\'" . nxml-mode)))
+  (add-to-list 'auto-mode-alist mode))
+#+end_src
+
+*** DONE [#B] Enable folding in =.csproj= buffers :feat:
+Doom's =:editor fold= module adds an entry to ~hs-special-modes-alist~ for
+~nxml-mode~, but not for ~csharp-mode~. This is an easy fix:
+
+#+begin_src emacs-lisp :tangle yes
+(after! hideshow
+  (add-to-list 'hs-special-modes-alist
+               (cons 'csproj-mode (alist-get 'nxml-mode hs-special-modes-alist))))
+#+end_src
+
+...But that somehow triggers an error when opening =.csproj= files:
+
+#+begin_quote
+[yas] Check your `yas-snippet-dirs': /path/to/project/snippets is not a directory
+#+end_quote
+
+Looks like it's coming from this bit in =csproj-mode.el=:
+
+#+begin_src emacs-lisp :tangle no
+(eval-after-load 'yasnippet
+  '(let ((snippet-dir (expand-file-name
+                       "snippets"
+                       (file-name-directory (or load-file-name (buffer-file-name))))))
+     (add-to-list 'yas-snippet-dirs snippet-dir t)
+     (yas-load-directory snippet-dir)))
+#+end_src
+
+Specifically, it seems like ~(or load-file-name (buffer-file-name))~ is expanding to
+=/path/to/project= instead of =/path/to/csproj-mode=.
+
+Since =csproj-mode.el= is so small, and there appear to be multiple issues with
+it, I just forked the repo, made some fixes, and added it as a submodule. Let's
+use my version instead:
+
+#+begin_src emacs-lisp :tangle packages.el
+(when (modulep! :lang csharp)
+  (package! csproj-mode
+    :recipe (:local-repo "vendor/csproj-mode")))
+#+end_src
+
+*** TODO [#C] Look into "Solution Explorer" visualizers for =.sln= files :feat:
+Visual Studio provides a Solution Explorer window, and Emacs does not.
+Let's fix that when we have the time.
 
 ** data [4/4]
 *** DONE [#A] Install prerequisites

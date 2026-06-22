@@ -2172,6 +2172,14 @@ See also: `ts-fold-summary--get'."
         (:map sharper--nuget-results-mode-map
          :nv "RET" #'sharper--nuget-search-install)))
 
+(dolist (mode '(("\\.xaml\\'" . nxml-mode)
+                ("\\.DotSettings\\'" . nxml-mode)))
+  (add-to-list 'auto-mode-alist mode))
+
+(after! hideshow
+  (add-to-list 'hs-special-modes-alist
+               (cons 'csproj-mode (alist-get 'nxml-mode hs-special-modes-alist))))
+
 (after! ws-butler
   (add-to-list 'ws-butler-global-exempt-modes 'tsv-mode))
 
