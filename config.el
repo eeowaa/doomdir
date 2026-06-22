@@ -2137,6 +2137,11 @@ See also: `ts-fold-summary--get'."
         (set-face-attribute (car group-member) nil
           :height 1.0)))))
 
+(after! markdown-mode
+  (add-to-list 'markdown-code-lang-modes '("batch" . bat-mode)))
+(after! org-src
+  (add-to-list 'org-src-lang-modes '("batch" . bat)))
+
 (setq-hook! 'c-mode-hook
   lsp-lens-enable nil)
 

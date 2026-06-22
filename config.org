@@ -8766,6 +8766,19 @@ This module adds support for the [[http://wiki.portal.chalmers.se/agda/pmwiki.ph
 exists directly in the agda repository but not in melpa.
 #+end_quote
 
+** batch [1/1] :eeowaa:module:
+*** DONE [#C] Use bat-mode for "batch" code blocks :tweak:
+Some =markdown= and =org= source blocks use a language indicator of ~batch~
+instead of ~bat~ or ~cmd~. However, batch files do not typically have a =.batch=
+extension, so instead of modifying ~auto-mode-alist~, we modify other variables.
+
+#+begin_src emacs-lisp :tangle yes
+(after! markdown-mode
+  (add-to-list 'markdown-code-lang-modes '("batch" . bat-mode)))
+(after! org-src
+  (add-to-list 'org-src-lang-modes '("batch" . bat)))
+#+end_src
+
 ** beancount [0/0] :ARCHIVE:
 #+begin_quote
 This module adds support for [[https://beancount.github.io/][Beancount]] to Emacs. Beancount, like ledger, lets
