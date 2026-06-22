@@ -858,7 +858,9 @@ with special dedication semantics."
 
 *** DONE [#C] Start Emacs with a maximized frame :tweak:
 #+begin_src emacs-lisp :tangle yes
-(setf (alist-get 'fullscreen initial-frame-alist) 'maximized)
+;; I find maximization to be unreliable on WSL 1, at least using VcXsrv.
+(unless (eq eeowaa-wsl-version 1)
+  (setf (alist-get 'fullscreen initial-frame-alist) 'maximized))
 #+end_src
 
 *** DONE [#C] Configure =col-highlight= :tweak:module:

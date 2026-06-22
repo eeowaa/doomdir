@@ -122,7 +122,9 @@ with special dedication semantics."
         (:eval (format " on %s" (terminal-name)))
         (:eval (format " (up %s)" (emacs-uptime "%H, %M")))))
 
-(setf (alist-get 'fullscreen initial-frame-alist) 'maximized)
+;; I find maximization to be unreliable on WSL 1, at least using VcXsrv.
+(unless (eq eeowaa-wsl-version 1)
+  (setf (alist-get 'fullscreen initial-frame-alist) 'maximized))
 
 (after! col-highlight
   (require 'hl-line)
