@@ -1659,6 +1659,233 @@ If the current frame has one window, restore the previous windows."
 
 (add-hook! eshell-mode #'my/with-editor-export)
 
+(defvar my/with-editor-emacsclient-executable--vterm
+  (file-name-concat (getenv "HOME") ".local" "libexec" "emacs" "emacsclient-vterm"))
+
+(add-hook! vterm-mode
+  (defun my/with-editor-export--vterm ()
+    (if (file-executable-p my/with-editor-emacsclient-executable--vterm)
+        (let ((with-editor-emacsclient-executable
+               my/with-editor-emacsclient-executable--vterm))
+          (my/with-editor-export))
+      (my/with-editor-export))))
+
+(after! vterm
+  (defalias 'vterm-send-C-m #'vterm-send-return))
+
+(after! evil-collection-vterm
+  (dolist (key '("C-h" "C-u" "C-j" "<M-backspace>"))
+    (evil-collection-define-key 'insert 'vterm-mode-map
+      (kbd key) 'vterm--self-insert)))
+
+(setq vterm-buffer-name-string "%s")
+(defadvice! my/vterm-popup-preserve-buffer-name-a (fn &rest args)
+  "Use Doom's standard buffer name for vterm popups."
+  :around #'+vterm/toggle
+  (let ((vterm-environment
+         `(,(format "VTERM_BUFFER_NAME=*doom:vterm-popup:%s*"
+                    (if (bound-and-true-p persp-mode)
+                        (safe-persp-name (get-current-persp))
+                      "main")))))
+    (apply fn args)))
+
+(after! vterm
+
+  (defun my/vterm--display-buffer-same-window (buffer)
+    "Display a buffer in the current window.
+This function works even if the current window is a side window."
+    (interactive)
+    (if-let* ((side (window-parameter nil 'window-side))
+              (slot (window-parameter nil 'window-slot)))
+        (display-buffer-in-side-window buffer `((side . ,side) (slot . ,slot)))
+      (display-buffer-same-window buffer nil)))
+
+  (defun my/vterm--dedicate-window-h ()
+    (set-window-dedicated-p (selected-window)
+                            (window-parameter nil 'my/vterm--window-dedicated)))
+
+  (add-hook 'server-switch-hook #'my/vterm--dedicate-window-h)
+
+  (defun my/vterm-edit-indirect ()
+    "Edit a command line by sending `C-x C-e' to vterm."
+    (interactive)
+    ;; We must undedicate the window so that `server-switch-buffer' will select it
+    (set-window-parameter nil 'my/vterm--window-dedicated (window-dedicated-p))
+    (set-window-dedicated-p (selected-window) nil)
+    (vterm-send-key "x" nil nil t)
+    (vterm-send-key "e" nil nil t))
+
+  (setq-hook! 'vterm-mode-hook
+    server-window #'my/vterm--display-buffer-same-window)
+
+  (map! :map vterm-mode-map
+        :i "C-x C-e" #'my/vterm-edit-indirect))
+
+(after! vterm
+  (setq-hook! 'vterm-mode-hook
+    revert-buffer-function (lambda (&rest _) (vterm-clear)))
+  (map! :map vterm-mode-map
+        "C-l" #'eeowaa-refresh-buffer-and-display))
+
+(after! evil-collection-vterm
+  (dolist (state '(normal insert))
+    (evil-collection-define-key state 'vterm-mode-map
+      (kbd "M-0") #'+workspace/switch-to-final
+      (kbd "M-1") #'+workspace/switch-to-0
+      (kbd "M-2") #'+workspace/switch-to-1
+      (kbd "M-3") #'+workspace/switch-to-2
+      (kbd "M-4") #'+workspace/switch-to-3
+      (kbd "M-5") #'+workspace/switch-to-4
+      (kbd "M-6") #'+workspace/switch-to-5
+      (kbd "M-7") #'+workspace/switch-to-6
+      (kbd "M-8") #'+workspace/switch-to-7
+      (kbd "M-9") #'+workspace/switch-to-8
+      (kbd "M-:") #'eval-expression)))
+
+(after! (:and vterm evil-collection-vterm)
+  (evil-collection-define-key 'insert 'vterm-mode-map
+    (kbd "C-s") 'evil-window-map))
+
+(after! vterm
+
+  ;; This function is to be called in shell configuration to obtain the
+  ;; directory in which to read aliases
+  (defun my/vterm--write-user-emacs-directory (tmpfile)
+    "Write the string evaluation of `user-emacs-directory' to TMPFILE."
+    (f-write (concat user-emacs-directory "\n") 'utf-8 tmpfile))
+  (let ((cmd 'my/vterm--write-user-emacs-directory))
+    (add-to-list 'vterm-eval-cmds (list (symbol-name cmd) cmd)))
+
+  (defun my/set-vterm-alias (&rest aliases)
+    "Define aliases for vterm.
+
+ALIASES is a flat list of alias -> command pairs. e.g.
+
+  (my/set-vterm-alias
+    \"e\" \"find-file\"
+    \"r\" \"find-file-read-only\")"
+    (or (cl-evenp (length aliases))
+        (signal 'wrong-number-of-arguments (list 'even (length aliases))))
+    (with-temp-file (concat user-emacs-directory "vterm-aliases.sh")
+      (while aliases
+        (let ((alias (pop aliases))
+              (command (pop aliases)))
+          (add-to-list 'vterm-eval-cmds (list command (intern command)))
+          (insert (format "alias %s='vterm_cmd %s'\n" alias command))))))
+
+  (my/set-vterm-alias
+    ;; Define aliases to open files in Emacs
+    "e"  "find-file"
+    "4e" "find-file-other-window"
+    "5e" "find-file-other-frame"
+
+    ;; Define aliases to open files in Emacs (read-only)
+    "r"  "find-file-read-only"
+    "4r" "find-file-read-only-other-window"
+    "5r" "find-file-read-only-other-frame"
+
+    ;; Define aliases to prevent issues with recursive editing
+    "vi"    "find-file"
+    "vim"   "find-file"
+    "emacs" "find-file"
+
+    ;; Define aliases for standalone commands that have Emacs equivalents
+    "man"  "man"
+    "info" "info"
+
+    ;; Define aliases for special Emacs functionality
+    "w3m"  "w3m-find-file"
+    "gg"   "magit-status"))
+
+(after! vterm
+  (let ((alist (assoc-delete-all "kubectl" vterm-tramp-shells)))
+    (setq vterm-tramp-shells
+          (push '("kubectl" "sh -c \"clear; (bash || ash || sh)\"") alist))))
+
+(after! vterm
+  (defadvice! my/kubernetes-utils-vterm-start-a (bufname command args)
+    "Fix `kubernetes-utils-vterm-start'.
+The workaround is to `pop-to-buffer' for an existing buffer
+instead of using a `when-let' form to conditionally kill it,
+which causes problems even if there is no existing buffer."
+    :override 'kubernetes-utils-vterm-start
+    (let ((existing (get-buffer bufname)))
+      (if existing
+          ;; Do not kill the buffer!
+          (pop-to-buffer existing)
+        (let* ((vterm-buffer-name bufname)
+               (command-str (format "%s %s" command (string-join args " ")))
+               (vterm-shell command-str))
+          (vterm-other-window))))))
+
+;; NOTE Allow cursor to appear after last character in line
+(after! vterm
+  (setq-hook! 'vterm-mode-hook
+    evil-move-beyond-eol t))
+
+;; HACK Send <backspace> instead of <delete>
+;; C-d works, too, but it can send EOF and close vterm
+(after! vterm
+  (defadvice! my/vterm-delete-region-a (start end)
+    :override #'vterm-delete-region
+    (when vterm--term
+      (if (vterm-goto-char end)
+          (cl-loop repeat (- end start) do
+                   (vterm-send-key "<backspace>" nil nil nil t))
+        (let ((inhibit-read-only nil))
+          (vterm--delete-region start end))))))
+
+;; HACK Prevent vterm from changing cursor type (e.g. when quitting out of top(1))
+;; <https://github.com/akermu/emacs-libvterm/issues/313>
+(after! vterm
+  (defadvice! my/vterm--redraw-a (fn &rest args)
+    "Prevent vterm from changing the cursor type."
+    :around #'vterm--redraw
+    (let ((cursor-type cursor-type))
+      (apply fn args))))
+
+(after! evil-collection-vterm
+
+  ;; HACK If `vterm-goto-char' fails, reset cursor point
+  (defadvice! my/evil-collection-vterm-insert-a ()
+    :override #'evil-collection-vterm-insert
+    (interactive)
+    (let ((inhibit-redisplay t))
+      (or (vterm-goto-char (point))
+          (vterm-reset-cursor-point)))
+    (evil-insert-state))
+
+  ;; HACK Send <right> before entering insert state
+  (defadvice! my/evil-collection-vterm-append-a ()
+    :override #'evil-collection-vterm-append
+    (interactive)
+    (let ((inhibit-redisplay t))
+      (or (vterm-goto-char (point))
+          (vterm-reset-cursor-point))
+      (or (looking-at-p " *$")
+          (vterm-send-right)))
+    (evil-insert-state))
+
+  ;; HACK Send C-a instead of relying on vterm functions
+  (defadvice! my/evil-collection-vterm-insert-line-a ()
+    :override #'evil-collection-vterm-insert-line
+    (interactive)
+    (let ((inhibit-redisplay t))
+      (vterm-reset-cursor-point)
+      (vterm-send-C-a))
+    (evil-insert-state))
+
+  ;; HACK Send C-e instead of relying on vterm functions
+  (defadvice! my/evil-collection-vterm-append-line-a ()
+    :override #'evil-collection-vterm-append-line
+    (interactive)
+    (let ((inhibit-redisplay t))
+      (vterm-reset-cursor-point)
+      (vterm-send-C-e))
+    (evil-insert-state)))
+
+(setq vterm-copy-mode-remove-fake-newlines t)
+
 (setq next-error-verbose nil)
 
 (after! flycheck

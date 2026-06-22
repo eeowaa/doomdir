@@ -217,6 +217,13 @@ sudo dnf -y install coreutils
 # Install prerequisites for `term/eshell` module
 sudo dnf -y install fish
 
+# Install prerequisites for `term/vterm` module
+sudo dnf -y install libvterm cmake
+
+## Soft line wrapping
+## <https://github.com/akermu/emacs-libvterm/issues/179#issuecomment-1045331359>
+sudo dnf -y install screen
+
 # Install prerequisites for `tools/ansible` module
 pipx install ansible-core
 ansible-galaxy collection install community.general

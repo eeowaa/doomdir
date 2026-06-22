@@ -23,8 +23,22 @@
                       (expand-file-name "bin" doom-user-dir))
                      "doom-checkout-main")))))
 
+(setq my/doom-cli-env-deny-list
+      '(
+        ;; AWS credentials
+        "AWS_ACCESS_KEY_ID"
+        "AWS_SECRET_ACCESS_KEY"
+        "AWS_SESSION_TOKEN"
+
+        ;; TMUX runtime
+        "TMUX"
+        "TMUX_PANE"
+        "TMUX_TMPDIR"
+       ))
+
 (after! doom-cli-env
-  (dolist (value '("AWS_ACCESS_KEY_ID"
-                   "AWS_SECRET_ACCESS_KEY"
-                   "AWS_SESSION_TOKEN"))
+  (dolist (value my/doom-cli-env-deny-list)
     (add-to-list 'doom-env-deny value)))
+
+(after! doom-cli-env
+  (add-to-list 'doom-env-deny "VTERM_BUFFER_NAME"))
