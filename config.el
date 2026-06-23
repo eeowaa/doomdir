@@ -3103,8 +3103,13 @@ This is a list of lists, not a list of cons cells.")
                                       (markdown-mode . "### Response\n")
                                       (text-mode . "### Response\n")))
 
-  ;; TODO: Open new chat buffers in `org-mode' instead of `markdown-mode'.
+  ;; Prevent responses from returning level-1, level-2, or level-3 headers.
+  ;; (Maintains document structure of chat logs.)
+  (setq gptel-system-prompt "Never output Markdown headings at levels 1, 2, or 3. If a heading is requested, use only level 4 or deeper. If that conflicts with a user request, explain the conflict and refuse the higher-level heading.")
+
+  ;; Open new chat buffers in `org-mode' instead of `markdown-mode'.
   ;; (This allows richer annotations and Emacs integration.)
+  (setq gptel-default-mode 'org-mode)
 
   ;; TODO: Automatically insert level-1 headers into new chat buffers.
   ;; (Can provide top-level declaration of "conversations", i.e., context.)
