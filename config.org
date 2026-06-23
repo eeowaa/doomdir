@@ -3817,6 +3817,18 @@ Miscellaneous configuration without a corresponding module.
   "Perform a line feed after jumping to a ^L character"
   :after #'forward-page
   (recenter 0))
+
+;; Fix `forward-page' for `evil' mode so that C-x ] works at page boundaries.
+(defadvice! my/forward-page-evil-fix-a (&optional count)
+  "Position `point' correctly in `evil' normal state."
+  :before #'forward-page
+  (when (and (or (not count)
+                 (and (numberp count)
+                      (> count 0)))
+             (bound-and-true-p evil-local-mode)
+             (eq evil-state 'normal)
+             (looking-at-p "\f"))
+    (forward-char)))
 #+end_src
 
 *** DONE [#B] Truncate lines by default :tweak:

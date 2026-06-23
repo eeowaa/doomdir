@@ -1151,6 +1151,18 @@ works even when `global-diff-hl-mode' is disabled.")
   :after #'forward-page
   (recenter 0))
 
+;; Fix `forward-page' for `evil' mode so that C-x ] works at page boundaries.
+(defadvice! my/forward-page-evil-fix-a (&optional count)
+  "Position `point' correctly in `evil' normal state."
+  :before #'forward-page
+  (when (and (or (not count)
+                 (and (numberp count)
+                      (> count 0)))
+             (bound-and-true-p evil-local-mode)
+             (eq evil-state 'normal)
+             (looking-at-p "\f"))
+    (forward-char)))
+
 (remove-hook 'text-mode-hook #'visual-line-mode)
 
 (evil-define-command my/evil-quit-a (&optional force)
