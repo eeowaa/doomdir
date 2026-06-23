@@ -61,6 +61,19 @@ PROMPT defaults to \"Positive integer: \""
       (eeowaa-read-positive-int prompt))))
 
 
+;;; Functions
+
+(defmacro eeowaa-undefine (symbol &rest _)
+  "Set SYMBOL's function definition to nil."
+  `(fset ',symbol nil))
+
+;; Convenience aliases to quickly undefine functions in elisp code
+(defalias 'undefun #'eeowaa-undefine)
+(defalias 'undefmacro #'eeowaa-undefine)
+(defalias 'undefalias #'eeowaa-undefine)
+(defalias 'undefsubst #'eeowaa-undefine)
+
+
 ;;; Lists
 
 (defmacro eeowaa-add-to-exclusion-list (list-var value)
@@ -72,13 +85,18 @@ PROMPT defaults to \"Positive integer: \""
        (setcdr ,list-var (cl-pushnew ,value list-cdr))
        ,list-var)))
 
-(defun eeowaa-alist-set (alist key value &optional compare-fn)
+(defmacro eeowaa-alist-set (alist key value &optional compare-fn)
   "Ensure that ALIST contains (KEY . VALUE).
 If ALIST already contains an element with a car of KEY, the cdr
 of that element will be set to VALUE. Otherwise, a new element
 will be inserted into the ALIST. If COMPARE-FN is provided, ALIST
 element KEY values will be compared with that instead of `eq'."
-  (error "Unimplemented"))
+  (let ((element (make-symbol "element")))
+    `(if (not (boundp ',alist))
+         (setq ,alist (list (cons ,key ,value)))
+       (if-let* ((,element (assoc ,key ,alist (or ,compare-fn #'eq))))
+           (setcdr ,element ,value)
+         (push (cons ,key ,value) ,alist)))))
 
 
 ;;; Faces
