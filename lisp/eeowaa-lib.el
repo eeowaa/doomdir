@@ -78,12 +78,13 @@ PROMPT defaults to \"Positive integer: \""
 
 (defmacro eeowaa-add-to-exclusion-list (list-var value)
   "Add VALUE to cdr of LIST-VAR with car of not."
-  `(if (or (not (boundp ',list-var))
-           (not (eq 'not (car ,list-var))))
-       (setq ,list-var (list 'not ,value))
-     (let ((list-cdr (cdr ,list-var)))
-       (setcdr ,list-var (cl-pushnew ,value list-cdr))
-       ,list-var)))
+  (let ((list-cdr (make-symbol "list-cdr")))
+    `(if (or (not (boundp ',list-var))
+             (not (eq 'not (car ,list-var))))
+         (setq ,list-var (list 'not ,value))
+       (let ((,list-cdr (cdr ,list-var)))
+         (setcdr ,list-var (cl-pushnew ,value ,list-cdr))
+         ,list-var))))
 
 (defmacro eeowaa-alist-set (alist key value &optional compare-fn)
   "Ensure that ALIST contains (KEY . VALUE).
