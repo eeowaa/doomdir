@@ -91,13 +91,45 @@ PROMPT defaults to \"Positive integer: \""
 If ALIST already contains an element with a car of KEY, the cdr
 of that element will be set to VALUE. Otherwise, a new element
 will be inserted into the ALIST. If COMPARE-FN is provided, ALIST
-element KEY values will be compared with that instead of `eq'."
-  (let ((element (make-symbol "element")))
-    `(if (not (boundp ',alist))
+element KEY values will be compared with that instead of `eq'.
+
+ALIST can be either an unquoted symbol or an expression. If the symbol
+is unbound, an interned symbol named ALIST is created whose value is
+(list (cons KEY VALUE)). If ALIST is an expression, it is modified
+in-place similar to `setf'. For example:
+
+  (let ((restorep (boundp 'alist))
+        (original-value (bound-and-true-p alist)))
+    (unwind-protect
+        (let ((favorites '((color . \"red\")
+                           (food . \"pizza\")
+                           (sport . \"football\"))))
+          (makunbound 'alist)
+          (eeowaa-alist-set alist 'name \"Bob\")
+          (eeowaa-alist-set alist 'favorites favorites)
+          (eeowaa-alist-set (assq 'favorites alist)
+                            'sport
+                            (concat \"American \"
+                                    (alist-get 'sport
+                                               (assq 'favorites alist))))
+          alist) ;; return the newly-created and modified alist
+      (when restorep
+        (setq alist original-value))))
+"
+  (let ((_alist (make-symbol "alist"))
+        (_key (make-symbol "key"))
+        (element (make-symbol "element")))
+    `(if (and (symbolp ',alist)
+              (not (bound-and-true-p ,alist)))
          (setq ,alist (list (cons ,key ,value)))
-       (if-let* ((,element (assoc ,key ,alist (or ,compare-fn #'eq))))
+       (if-let* ((,_alist ,alist) ;; prevent repeated evaluation of `alist'
+                 (,_key ,key)     ;; prevent repeated evaluation of `key'
+                 (,element (assoc ,_key ,_alist (or ,compare-fn #'eq))))
            (setcdr ,element ,value)
-         (push (cons ,key ,value) ,alist)))))
+         ;; let-bound `alist' cannot be modified in-place using `push' or
+         ;; `setf' because both of those macros eventually expand to `setq'
+         (setcdr ,_alist (cons (car ,_alist) (cdr ,_alist)))
+         (setcar ,_alist (cons ,_key ,value))))))
 
 
 ;;; Faces
