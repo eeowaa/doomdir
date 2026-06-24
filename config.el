@@ -3107,16 +3107,18 @@ This is a list of lists, not a list of cons cells.")
 
   ;;; Formatting
 
-  ;; Nest queries and responses within parent prompt sections.
-  (setq gptel-prompt-prefix-alist '((org-mode . "** Prompt\n*** Query\n")
-                                    (markdown-mode . "## Prompt\n### Query\n")
-                                    (text-mode . "## Prompt\n### Query\n"))
-        gptel-response-prefix-alist '((org-mode . "*** Response\n")
-                                      (markdown-mode . "### Response\n")
-                                      (text-mode . "### Response\n")))
+  ;; Nest queries and responses within prompt sections of structured markup.
+  ;; In `text-mode', use page breaks (line feeds) to separate prompts.
+  (dolist (config '((org-mode      "** Prompt\n*** Query\n" "*** Response\n")
+                    (markdown-mode "## Prompt\n### Query\n" "### Response\n")
+                    (text-mode     "\f"                     "")))
+    (cl-destructuring-bind (mode prompt-prefix response-prefix) config
+      (eeowaa-alist-set gptel-prompt-prefix-alist mode prompt-prefix)
+      (eeowaa-alist-set gptel-response-prefix-alist mode response-prefix)))
 
   ;; Prevent responses from returning level-1, level-2, or level-3 headers.
   ;; (Maintains document structure of chat logs.)
+  ;; TODO: Limit the headings via a function that finds the header level at point.
   (setq gptel-system-prompt "Never output Markdown headings at levels 1, 2, or 3. If a heading is requested, use only level 4 or deeper. If that conflicts with a user request, explain the conflict and refuse the higher-level heading.")
 
   ;; Open new chat buffers in `org-mode' instead of `markdown-mode'.
