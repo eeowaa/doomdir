@@ -98,8 +98,8 @@ is unbound, an interned symbol named ALIST is created whose value is
 (list (cons KEY VALUE)). If ALIST is an expression, it is modified
 in-place similar to `setf'. For example:
 
-  (let ((restorep (boundp 'alist))
-        (original-value (bound-and-true-p alist)))
+  (let ((bound (boundp 'alist))
+        (value (bound-and-true-p alist)))
     (unwind-protect
         (let ((favorites '((color . \"red\")
                            (food . \"pizza\")
@@ -113,23 +113,27 @@ in-place similar to `setf'. For example:
                                     (alist-get 'sport
                                                (assq 'favorites alist))))
           alist) ;; return the newly-created and modified alist
-      (when restorep
-        (setq alist original-value))))
+      (if bound
+          (setq alist value)
+        (makunbound 'alist))))
 "
-  (let ((_alist (make-symbol "alist"))
-        (_key (make-symbol "key"))
-        (element (make-symbol "element")))
-    `(if (and (symbolp ',alist)
-              (not (bound-and-true-p ,alist)))
-         (setq ,alist (list (cons ,key ,value)))
-       (if-let* ((,_alist ,alist) ;; prevent repeated evaluation of `alist'
-                 (,_key ,key)     ;; prevent repeated evaluation of `key'
-                 (,element (assoc ,_key ,_alist (or ,compare-fn #'eq))))
-           (setcdr ,element ,value)
-         ;; let-bound `alist' cannot be modified in-place using `push' or
-         ;; `setf' because both of those macros eventually expand to `setq'
-         (setcdr ,_alist (cons (car ,_alist) (cdr ,_alist)))
-         (setcar ,_alist (cons ,_key ,value))))))
+  (let* ((--alist-- (make-symbol "alist"))
+         (--key-- (make-symbol "key"))
+         (--element-- (make-symbol "element"))
+         (standard-form
+          `(if-let* ((,--alist-- ,alist) ;; prevent repeated evaluation of `alist'
+                     (,--key-- ,key)     ;; prevent repeated evaluation of `key'
+                     (,--element-- (assoc ,--key-- ,--alist-- (or ,compare-fn #'eq))))
+               (setcdr ,--element-- ,value)
+             ;; let-bound `alist' cannot be modified in-place using `push' or
+             ;; `setf' because both of those macros eventually expand to `setq'
+             (setcdr ,--alist-- (cons (car ,--alist--) (cdr ,--alist--)))
+             (setcar ,--alist-- (cons ,--key-- ,value)))))
+    (if (symbolp `,alist)
+        `(if (not (boundp ',alist))
+             (setq ,alist (list (cons ,key ,value)))
+           ,standard-form)
+      standard-form)))
 
 
 ;;; Faces
