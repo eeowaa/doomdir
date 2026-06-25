@@ -1671,6 +1671,104 @@ If the current frame has one window, restore the previous windows."
 
 (add-hook! eshell-mode #'my/with-editor-export)
 
+(after! vterm
+  (defalias 'vterm-send-C-m #'vterm-send-return))
+
+(after! evil-collection-vterm
+  (dolist (key '("C-h" "C-u" "C-j" "<M-backspace>"))
+    (evil-collection-define-key 'insert 'vterm-mode-map
+      (kbd key) 'vterm--self-insert)))
+
+(after! evil-collection-vterm
+  (dolist (state '(normal insert))
+    (evil-collection-define-key state 'vterm-mode-map
+      (kbd "M-0") #'+workspace/switch-to-final
+      (kbd "M-1") #'+workspace/switch-to-0
+      (kbd "M-2") #'+workspace/switch-to-1
+      (kbd "M-3") #'+workspace/switch-to-2
+      (kbd "M-4") #'+workspace/switch-to-3
+      (kbd "M-5") #'+workspace/switch-to-4
+      (kbd "M-6") #'+workspace/switch-to-5
+      (kbd "M-7") #'+workspace/switch-to-6
+      (kbd "M-8") #'+workspace/switch-to-7
+      (kbd "M-9") #'+workspace/switch-to-8
+      (kbd "M-:") #'eval-expression)))
+
+(when (modulep! :editor evil)
+  (after! vterm
+    (map! :map vterm-mode-map
+          :n "0"  #'evil-beginning-of-line)))
+
+(after! (:and vterm evil-collection-vterm)
+  (evil-collection-define-key 'insert 'vterm-mode-map
+    (kbd "C-s") 'evil-window-map))
+
+;; NOTE Allow cursor to appear after last character in line
+(after! vterm
+  (setq-hook! 'vterm-mode-hook
+    evil-move-beyond-eol t))
+
+;; HACK Send <backspace> instead of <delete>
+;; C-d works, too, but it can send EOF and close vterm
+(after! vterm
+  (defadvice! my/vterm-delete-region-a (start end)
+    :override #'vterm-delete-region
+    (when vterm--term
+      (if (vterm-goto-char end)
+          (cl-loop repeat (- end start) do
+                   (vterm-send-key "<backspace>" nil nil nil t))
+        (let ((inhibit-read-only nil))
+          (vterm--delete-region start end))))))
+
+;; HACK Prevent vterm from changing cursor type (e.g. when quitting out of top(1))
+;; <https://github.com/akermu/emacs-libvterm/issues/313>
+(after! vterm
+  (defadvice! my/vterm--redraw-a (fn &rest args)
+    "Prevent vterm from changing the cursor type."
+    :around #'vterm--redraw
+    (let ((cursor-type cursor-type))
+      (apply fn args))))
+
+(after! evil-collection-vterm
+
+  ;; HACK If `vterm-goto-char' fails, reset cursor point
+  (defadvice! my/evil-collection-vterm-insert-a ()
+    :override #'evil-collection-vterm-insert
+    (interactive)
+    (let ((inhibit-redisplay t))
+      (or (vterm-goto-char (point))
+          (vterm-reset-cursor-point)))
+    (evil-insert-state))
+
+  ;; HACK Send <right> before entering insert state
+  (defadvice! my/evil-collection-vterm-append-a ()
+    :override #'evil-collection-vterm-append
+    (interactive)
+    (let ((inhibit-redisplay t))
+      (or (vterm-goto-char (point))
+          (vterm-reset-cursor-point))
+      (or (looking-at-p " *$")
+          (vterm-send-right)))
+    (evil-insert-state))
+
+  ;; HACK Send C-a instead of relying on vterm functions
+  (defadvice! my/evil-collection-vterm-insert-line-a ()
+    :override #'evil-collection-vterm-insert-line
+    (interactive)
+    (let ((inhibit-redisplay t))
+      (vterm-reset-cursor-point)
+      (vterm-send-C-a))
+    (evil-insert-state))
+
+  ;; HACK Send C-e instead of relying on vterm functions
+  (defadvice! my/evil-collection-vterm-append-line-a ()
+    :override #'evil-collection-vterm-append-line
+    (interactive)
+    (let ((inhibit-redisplay t))
+      (vterm-reset-cursor-point)
+      (vterm-send-C-e))
+    (evil-insert-state)))
+
 (defvar my/with-editor-emacsclient-executable--vterm
   (file-name-concat (getenv "HOME") ".local" "libexec" "emacs" "emacsclient-vterm"))
 
@@ -1681,25 +1779,6 @@ If the current frame has one window, restore the previous windows."
                my/with-editor-emacsclient-executable--vterm))
           (my/with-editor-export))
       (my/with-editor-export))))
-
-(after! vterm
-  (defalias 'vterm-send-C-m #'vterm-send-return))
-
-(after! evil-collection-vterm
-  (dolist (key '("C-h" "C-u" "C-j" "<M-backspace>"))
-    (evil-collection-define-key 'insert 'vterm-mode-map
-      (kbd key) 'vterm--self-insert)))
-
-(setq vterm-buffer-name-string "%s")
-(defadvice! my/vterm-popup-preserve-buffer-name-a (fn &rest args)
-  "Use Doom's standard buffer name for vterm popups."
-  :around #'+vterm/toggle
-  (let ((vterm-environment
-         `(,(format "VTERM_BUFFER_NAME=*doom:vterm-popup:%s*"
-                    (if (bound-and-true-p persp-mode)
-                        (safe-persp-name (get-current-persp))
-                      "main")))))
-    (apply fn args)))
 
 (after! vterm
 
@@ -1732,34 +1811,6 @@ This function works even if the current window is a side window."
 
   (map! :map vterm-mode-map
         :i "C-x C-e" #'my/vterm-edit-indirect))
-
-(after! vterm
-  (setq-hook! 'vterm-mode-hook
-    revert-buffer-function (lambda (&rest _) (vterm-clear)))
-  (map! :map vterm-mode-map
-        "C-l" #'eeowaa-refresh-buffer-and-display))
-
-(after! evil-collection-vterm
-  (dolist (state '(normal insert))
-    (evil-collection-define-key state 'vterm-mode-map
-      (kbd "M-0") #'+workspace/switch-to-final
-      (kbd "M-1") #'+workspace/switch-to-0
-      (kbd "M-2") #'+workspace/switch-to-1
-      (kbd "M-3") #'+workspace/switch-to-2
-      (kbd "M-4") #'+workspace/switch-to-3
-      (kbd "M-5") #'+workspace/switch-to-4
-      (kbd "M-6") #'+workspace/switch-to-5
-      (kbd "M-7") #'+workspace/switch-to-6
-      (kbd "M-8") #'+workspace/switch-to-7
-      (kbd "M-9") #'+workspace/switch-to-8
-      (kbd "M-:") #'eval-expression)))
-
-(after! (:and vterm evil-collection-vterm)
-  (evil-collection-define-key 'insert 'vterm-mode-map
-    (kbd "C-s") 'evil-window-map))
-
-(after! vterm
-  (remove-hook 'vterm-mode-hook 'mode-line-invisible-mode))
 
 (after! vterm
 
@@ -1833,73 +1884,27 @@ which causes problems even if there is no existing buffer."
                (vterm-shell command-str))
           (vterm-other-window))))))
 
-;; NOTE Allow cursor to appear after last character in line
 (after! vterm
   (setq-hook! 'vterm-mode-hook
-    evil-move-beyond-eol t))
-
-;; HACK Send <backspace> instead of <delete>
-;; C-d works, too, but it can send EOF and close vterm
-(after! vterm
-  (defadvice! my/vterm-delete-region-a (start end)
-    :override #'vterm-delete-region
-    (when vterm--term
-      (if (vterm-goto-char end)
-          (cl-loop repeat (- end start) do
-                   (vterm-send-key "<backspace>" nil nil nil t))
-        (let ((inhibit-read-only nil))
-          (vterm--delete-region start end))))))
-
-;; HACK Prevent vterm from changing cursor type (e.g. when quitting out of top(1))
-;; <https://github.com/akermu/emacs-libvterm/issues/313>
-(after! vterm
-  (defadvice! my/vterm--redraw-a (fn &rest args)
-    "Prevent vterm from changing the cursor type."
-    :around #'vterm--redraw
-    (let ((cursor-type cursor-type))
-      (apply fn args))))
-
-(after! evil-collection-vterm
-
-  ;; HACK If `vterm-goto-char' fails, reset cursor point
-  (defadvice! my/evil-collection-vterm-insert-a ()
-    :override #'evil-collection-vterm-insert
-    (interactive)
-    (let ((inhibit-redisplay t))
-      (or (vterm-goto-char (point))
-          (vterm-reset-cursor-point)))
-    (evil-insert-state))
-
-  ;; HACK Send <right> before entering insert state
-  (defadvice! my/evil-collection-vterm-append-a ()
-    :override #'evil-collection-vterm-append
-    (interactive)
-    (let ((inhibit-redisplay t))
-      (or (vterm-goto-char (point))
-          (vterm-reset-cursor-point))
-      (or (looking-at-p " *$")
-          (vterm-send-right)))
-    (evil-insert-state))
-
-  ;; HACK Send C-a instead of relying on vterm functions
-  (defadvice! my/evil-collection-vterm-insert-line-a ()
-    :override #'evil-collection-vterm-insert-line
-    (interactive)
-    (let ((inhibit-redisplay t))
-      (vterm-reset-cursor-point)
-      (vterm-send-C-a))
-    (evil-insert-state))
-
-  ;; HACK Send C-e instead of relying on vterm functions
-  (defadvice! my/evil-collection-vterm-append-line-a ()
-    :override #'evil-collection-vterm-append-line
-    (interactive)
-    (let ((inhibit-redisplay t))
-      (vterm-reset-cursor-point)
-      (vterm-send-C-e))
-    (evil-insert-state)))
+    revert-buffer-function (lambda (&rest _) (vterm-clear)))
+  (map! :map vterm-mode-map
+        "C-l" #'eeowaa-refresh-buffer-and-display))
 
 (setq vterm-copy-mode-remove-fake-newlines t)
+
+(after! vterm
+  (remove-hook 'vterm-mode-hook 'mode-line-invisible-mode))
+
+(setq vterm-buffer-name-string "%s")
+(defadvice! my/vterm-popup-preserve-buffer-name-a (fn &rest args)
+  "Use Doom's standard buffer name for vterm popups."
+  :around #'+vterm/toggle
+  (let ((vterm-environment
+         `(,(format "VTERM_BUFFER_NAME=*doom:vterm-popup:%s*"
+                    (if (bound-and-true-p persp-mode)
+                        (safe-persp-name (get-current-persp))
+                      "main")))))
+    (apply fn args)))
 
 (setq next-error-verbose nil)
 
