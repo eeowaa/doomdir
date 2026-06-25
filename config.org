@@ -12300,29 +12300,61 @@ with my own philosophy of using Emacs.
 
   ;;; Formatting
 
-  ;; Nest queries and responses within prompt sections of structured markup.
-  ;; In `text-mode', use page breaks (line feeds) to separate prompts.
-  (dolist (config '((org-mode      "** Prompt\n*** Query\n" "*** Response\n")
-                    (markdown-mode "## Prompt\n### Query\n" "### Response\n")
-                    (text-mode     "\f"                     "")))
+  ;; In `text-mode', use page breaks to separate prompt/response pairs.
+  ;; In `org-mode', use @gptel prompt prefixes and wrap responses in drawers.
+  ;; In `markdown-mode', use structured sections for prompts and responses.
+  (dolist (config '((text-mode "\f\n" "")
+                    (org-mode "@gptel" ":RESPONSE:\n")
+                    (markdown-mode "## Prompt\n### Query\n" "### Response\n")))
     (cl-destructuring-bind (mode prompt-prefix response-prefix) config
       (eeowaa-alist-set gptel-prompt-prefix-alist mode prompt-prefix)
       (eeowaa-alist-set gptel-response-prefix-alist mode response-prefix)))
 
-  ;; Prevent responses from returning level-1, level-2, or level-3 headers.
-  ;; (Maintains document structure of chat logs.)
-  ;; TODO: Limit the headings via a function that finds the header level at point.
-  (setq gptel-system-prompt "Never output Markdown headings at levels 1, 2, or 3. If a heading is requested, use only level 4 or deeper. If that conflicts with a user request, explain the conflict and refuse the higher-level heading.")
+  (defun my/gptel-response-drawer-h (_start end)
+    (when (and gptel-mode (derived-mode-p 'org-mode))
+      (save-excursion
+        (goto-char end)
+        (insert "\n:END:"))))
+  (add-hook 'gptel-post-response-hook #'my/gptel-response-drawer-h)
+
+  ;; To maintain document structure, prevent responses from returning headers at
+  ;; levels shallower than or equal to the level of point. If the current buffer
+  ;; contains no headers, or if point is before the first header in the buffer,
+  ;; assume point is at level 1. (This makes it easy to move chat logs to another
+  ;; buffer by manually adding a level-1 header before the first prompt.)
+  (defun my/gptel-system-prompt ()
+    (let* ((level-at-point
+            (cond ((derived-mode-p 'org-mode)
+                   (org-current-level))
+                  ((derived-mode-p 'markdown-mode)
+                   (save-excursion
+                     (when (or (thing-at-point-looking-at markdown-regex-header)
+                               (re-search-backward markdown-regex-header nil t))
+                       (markdown-outline-level))))))
+           (current-level (or level-at-point 1)))
+      (string-join
+       `(,(format "Never output Markdown headings at %s."
+                  (cond ((= 1 current-level) "level 1")
+                        ((= 2 current-level) "levels 1 or 2")
+                        (t (concat "levels" (let ((n 1)
+                                                  (s ""))
+                                              (while (< n current-level)
+                                                (setq s (format "%s %d," s n))
+                                                (setq n (1+ n)))
+                                              (format "%s or %d" s n))))))
+         ,(format "If a heading is requested, use only level %d or deeper."
+                  (1+ current-level))
+         "If that conflicts with a user request, explain the conflict and refuse the higher-level heading.")
+       " ")))
+  (setq gptel-system-prompt #'my/gptel-system-prompt)
 
   ;; Open new chat buffers in `org-mode' instead of `markdown-mode'.
   ;; (This allows richer annotations and Emacs integration.)
   (setq gptel-default-mode 'org-mode)
 
-  ;; TODO: Automatically insert level-1 headers into new chat buffers.
-  ;; (Can provide top-level declaration of "conversations", i.e., context.)
-
-  ;; TODO: Limit context to everything beneath level-1 headers in `org-mode'.
+  ;; Limit context to the lineage of the current heading in `org-mode'.
   ;; (Facilitates creation of files similar in structure to the ChatGPT web UI.)
+  (setq gptel-org-branching-context t)
 
   ;; TODO: Add CUSTOM_ID properties to `org-mode' headers for new prompts.
   ;; (Provides a reliable linking mechanism to persistent chat logs for note-taking.)
