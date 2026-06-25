@@ -231,6 +231,16 @@ ansible-galaxy collection install community.general
 # Install prerequisites for `tools/direnv` module
 sudo dnf -y install direnv
 
+# Install prerequisites for `tools/docker` module
+which dockerd-rootless-setuptool.sh >/dev/null 2>&1 || {
+    sudo systemctl disable --now docker.service docker.socket
+    curl --proto '=https' --tlsv1.2 -fsSLo- https://get.docker.com | sudo sh -s
+    dockerd-rootless-setuptool.sh install
+    sudo loginctl enable-linger `whoami`
+    systemctl --user start docker.service
+}
+npm install -g dockerfile-language-server-nodejs
+
 # Install prerequisites for `tools/editorconfig` module
 sudo dnf -y install editorconfig
 

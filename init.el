@@ -108,7 +108,8 @@
        ;;collab            ; buffers with friends
 ;;GONE (debugger +lsp)   ; FIXME stepping through code, to help you add bugs
        direnv
-;;GONE (docker +lsp)
+;;LEAN (docker +lsp)
+       (docker)
        editorconfig      ; let someone else argue about tabs vs spaces
        ;;ein               ; tame Jupyter notebooks with emacs
        ;;elasticsearch       ; XXX user module

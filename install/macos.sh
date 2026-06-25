@@ -147,6 +147,10 @@ brew install ansible
 # Install prerequisites for `tools/direnv` module
 brew install direnv
 
+# Install prerequisites for `tools/docker` module
+brew install docker
+npm install -g dockerfile-language-server-nodejs
+
 # Install prerequisites for `tools/editorconfig` module
 brew install editorconfig
 
