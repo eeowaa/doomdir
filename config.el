@@ -2614,6 +2614,31 @@ Currently only includes code blocks."
       (markdown-update-header-faces markdown-header-scaling))))
 
 (after! markdown-mode
+
+  (defvar my/markdown-regex-atuser
+    "\\(?:^\\|[^[:word:]_]\\)\\(@\\(?:\\sw\\|\\s_\\|\\s.\\)+\\)\\_>"
+    "Regular expression for matching @user strings.")
+
+  (defun my/markdown-match-atuser (last)
+    "Match @user strings from point to LAST."
+    (when (re-search-forward my/markdown-regex-atuser last t)
+      (set-match-data (list (match-beginning 1) (match-end 1)))
+      t))
+
+  (defun my/markdown-fontify-atuser (last)
+    "Add text properties to @user strings from point to LAST."
+    (when (my/markdown-match-atuser last)
+      (let* ((start (match-beginning 0))
+             (end (match-end 0))
+             (props (list 'face 'font-lock-builtin-face
+                          'rear-nonsticky t
+                          'front-sticky nil)))
+        (add-text-properties start end props)
+        t)))
+
+  (add-to-list 'markdown-mode-font-lock-keywords '(my/markdown-fontify-atuser) 'append))
+
+(after! markdown-mode
   (dolist (mode '(("http" . restclient-mode)
                   ("sh" . bash-mode)))
     (add-to-list 'markdown-code-lang-modes mode)))

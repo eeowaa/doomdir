@@ -9669,7 +9669,7 @@ github_binary_release \
                 "main.lua")))
 #+end_src
 
-** markdown [12/19]
+** markdown [13/20]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
@@ -9869,6 +9869,36 @@ Reference: [[*Disable error reporting in sh-mode buffers][Disable error reportin
     (defun my/markdown--update-display-h ()
       "Apply desired styling to a markdown buffer."
       (markdown-update-header-faces markdown-header-scaling))))
+#+end_src
+
+*** DONE [#C] Highlight =@user= sequences in Markdown buffers :tweak:
+This brings =markdown-mode= closer to =org= and is especially nice with =gptel=.
+
+#+begin_src emacs-lisp :tangle yes
+(after! markdown-mode
+
+  (defvar my/markdown-regex-atuser
+    "\\(?:^\\|[^[:word:]_]\\)\\(@\\(?:\\sw\\|\\s_\\|\\s.\\)+\\)\\_>"
+    "Regular expression for matching @user strings.")
+
+  (defun my/markdown-match-atuser (last)
+    "Match @user strings from point to LAST."
+    (when (re-search-forward my/markdown-regex-atuser last t)
+      (set-match-data (list (match-beginning 1) (match-end 1)))
+      t))
+
+  (defun my/markdown-fontify-atuser (last)
+    "Add text properties to @user strings from point to LAST."
+    (when (my/markdown-match-atuser last)
+      (let* ((start (match-beginning 0))
+             (end (match-end 0))
+             (props (list 'face 'font-lock-builtin-face
+                          'rear-nonsticky t
+                          'front-sticky nil)))
+        (add-text-properties start end props)
+        t)))
+
+  (add-to-list 'markdown-mode-font-lock-keywords '(my/markdown-fontify-atuser) 'append))
 #+end_src
 
 *** STRT [#B] Extend editing capabilities of code and pre blocks :feat:hack:
