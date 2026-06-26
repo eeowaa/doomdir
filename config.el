@@ -3170,29 +3170,73 @@ This is a list of lists, not a list of cons cells.")
 
   ;;; Formatting
 
-  ;; In `text-mode', use page breaks to separate prompt/response pairs.
-  ;; In `org-mode', use @gptel prompt prefixes and wrap responses in drawers.
-  ;; In `markdown-mode', use structured sections for prompts and responses.
-  (dolist (config '((text-mode "\f\n" "")
-                    (org-mode "@gptel" ":RESPONSE:\n")
-                    (markdown-mode "## Prompt\n### Query\n" "### Response\n")))
-    (cl-destructuring-bind (mode prompt-prefix response-prefix) config
-      (eeowaa-alist-set gptel-prompt-prefix-alist mode prompt-prefix)
-      (eeowaa-alist-set gptel-response-prefix-alist mode response-prefix)))
+  ;; `text-mode' formatting
+  (setf (alist-get 'text-mode gptel-prompt-prefix-alist) "@prompt")
+  (setf (alist-get 'text-mode gptel-response-prefix-alist) "@response\n")
 
-  (defun my/gptel-response-drawer-h (_start end)
-    (when (and gptel-mode (derived-mode-p 'org-mode))
-      (save-excursion
-        (goto-char end)
-        (insert "\n:END:"))))
-  (add-hook 'gptel-post-response-hook #'my/gptel-response-drawer-h)
+  ;; `org-mode' formatting
+  (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "@prompt")
+  (setf (alist-get 'org-mode gptel-response-prefix-alist) ":RESPONSE:\n")
+  (eeowaa-alist-set my/gptel-response-suffix-alist 'org-mode "\n:END:")
 
-  ;; To maintain document structure, prevent responses from returning headers at
-  ;; levels shallower than or equal to the level of point. If the current buffer
-  ;; contains no headers, or if point is before the first header in the buffer,
-  ;; assume point is at level 1. (This makes it easy to move chat logs to another
-  ;; buffer by manually adding a level-1 header before the first prompt.)
-  (defun my/gptel-system-prompt ()
+  ;; `markdown-mode' formatting
+  (setf (alist-get 'markdown-mode gptel-prompt-prefix-alist) "@prompt")
+  (setf (alist-get 'markdown-mode gptel-response-prefix-alist)
+        (concat "<details><summary>Response</summary><!--------\n"
+                "--------------------------------------------->\n"))
+  (eeowaa-alist-set my/gptel-response-suffix-alist 'markdown-mode "\n</details>")
+
+  ;; Automatically insert response suffixes.
+  ;; (Facilitates response folding without the use of headings.)
+  (add-hook! gptel-post-response
+    (defun my/gptel-close-response-block-h (_start end)
+      (when-let* ((_ gptel-mode)
+                  (mode (seq-find #'derived-mode-p '(org-mode
+                                                     markdown-mode
+                                                     text-mode)))
+                  (suffix (alist-get mode my/gptel-response-suffix-alist)))
+        (save-excursion
+          (goto-char end)
+          (insert suffix)))))
+
+  ;; Define a `disallow-headings' directive and use it by default.
+  ;; (This is the most flexible arrangement for persistent "chat sessions".)
+  (defvar my/gptel-prompt--disallow-headings "\
+Never emit Markdown headings. Where you would normally emit Markdown headings, use the following format instead:
+```
+-----
+**Heading text**
+
+```
+
+Formatting rules for Markdown heading substitution:
+- Line 1 must contain exactly `-----`
+- Line 2 must contain **bold** heading text
+- Line 3 must be blank
+- Do not insert or omit additional characters or newlines
+
+If these instructions conflict with a user request, explain the conflict and refuse the user request."
+    "An LLM prompt to disallow headings in output.
+
+Instead of headings, use Org-compatible horizontal rules followed by bold
+section titles. This provides several advantages:
+
+1. Subsequent prompts will never be placed within nested sections
+2. Non-nil `gptel-org-branching-context' works as expected
+3. Responses can be wrapped in :RESPONSE: drawers if desired")
+  (eeowaa-alist-set gptel-directives 'disallow-headings my/gptel-prompt--disallow-headings)
+  (setq gptel-system-prompt my/gptel-prompt--disallow-headings)
+
+  ;; Define a `nested-headings' directive that can be selectively enabled.
+  ;; (This breaks `gptel-org-branching-context' and `my/gptel-close-response-block-h'.)
+  (defun my/gptel-prompt--nested-headings ()
+    "Construct an LLM prompt to output headings only at nested levels.
+
+To maintain document structure, prevent responses from returning headings at
+levels shallower than or equal to the level of point. If the current buffer
+contains no headings, or if point is before the first heading in the buffer,
+assume point is at level 1. (This makes it easy to move chat logs to another
+buffer by manually adding a level-1 heading before the first prompt.)"
     (let* ((level-at-point
             (cond ((derived-mode-p 'org-mode)
                    (org-current-level))
@@ -3216,7 +3260,7 @@ This is a list of lists, not a list of cons cells.")
                   (1+ current-level))
          "If that conflicts with a user request, explain the conflict and refuse the higher-level heading.")
        " ")))
-  (setq gptel-system-prompt #'my/gptel-system-prompt)
+  (eeowaa-alist-set gptel-directives 'nested-headings #'my/gptel-prompt--nested-headings)
 
   ;; Open new chat buffers in `org-mode' instead of `markdown-mode'.
   ;; (This allows richer annotations and Emacs integration.)
