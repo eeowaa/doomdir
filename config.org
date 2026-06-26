@@ -909,8 +909,7 @@ Taken from tecosaur's configuration.
       (when value
         (when (stringp value)
           (setq-local whitespace-trailing-regexp value))
-        (cl-pushnew 'trailing whitespace-style)
-        (whitespace-turn-on)))))
+        (cl-pushnew 'trailing whitespace-style)))))
 
 (add-hook 'whitespace-mode-hook
           #'my/show-trailing-whitespace-maybe-h)
