@@ -3212,7 +3212,8 @@ This is a list of lists, not a list of cons cells.")
   ;; Define a `disallow-headings' directive and use it by default.
   ;; (This is the most flexible arrangement for persistent "chat sessions".)
   (defvar my/gptel-prompt--disallow-headings "\
-Never emit Markdown headings. Where you would normally emit Markdown headings, use the following format instead:
+Never emit Markdown headings.
+Where you would normally emit Markdown headings, use the following format instead:
 ```
 -----
 **Heading text**
@@ -3234,8 +3235,9 @@ section titles. This provides several advantages:
 1. Subsequent prompts will never be placed within nested sections
 2. Non-nil `gptel-org-branching-context' works as expected
 3. Responses can be wrapped in :RESPONSE: drawers if desired")
-  (eeowaa-alist-set gptel-directives 'disallow-headings my/gptel-prompt--disallow-headings)
-  (setq gptel-system-prompt my/gptel-prompt--disallow-headings)
+  (eeowaa-alist-set gptel-directives 'disallow-headings
+                                     (setq gptel-system-prompt
+                                           my/gptel-prompt--disallow-headings))
 
   ;; Define a `nested-headings' directive that can be selectively enabled.
   ;; (This breaks `gptel-org-branching-context' and `my/gptel-close-response-block-h'.)
@@ -3347,7 +3349,20 @@ buffer by manually adding a level-1 heading before the first prompt.)"
     (if (modulep! :editor word-wrap)
         (+word-wrap-mode)
       (toggle-truncate-lines -1)))
-  (add-hook 'gptel-mode-hook #'my/gptel-wrap-lines-h))
+  (add-hook 'gptel-mode-hook #'my/gptel-wrap-lines-h)
+
+  ;; Limit the width of transient windows when using `transient-childframe'.
+  ;; (Do not want popups covering the entire width of the frame.)
+  (defvar my/gptel-transient--childframe-max-width 120)
+  (defadvice! my/gptel-system-prompt--format-truncate-a (s)
+    :filter-return #'gptel-system-prompt--format
+    (string-replace "⮐" "↵" ;; also use a more standard line continuation glyph
+                    (if-let* ((_ (featurep 'transient-childframe))
+                              (frame (or (frame-parent) (selected-frame)))
+                              (width (frame-width frame))
+                              (_ (> (length s) my/gptel-transient--childframe-max-width)))
+                        (substring s 0 my/gptel-transient--childframe-max-width)
+                      s))))
 
 (when (file-exists-p custom-file)
   ;; Protect the file in case it contain sensitive information
