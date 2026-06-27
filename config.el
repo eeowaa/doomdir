@@ -2637,6 +2637,17 @@ Currently only includes code blocks."
 
   (add-to-list 'markdown-mode-font-lock-keywords '(my/markdown-fontify-atuser) 'append))
 
+;; The `hideshow' configuration for `nxml-mode' works well for HTML tags
+;; embedded in `markdown-mode' buffers and those of derived modes.
+(after! hideshow
+  (dolist (mode '(markdown-mode gfm-mode))
+    (add-to-list 'hs-special-modes-alist
+                 (cons 'markdown-mode (alist-get 'nxml-mode hs-special-modes-alist)))))
+
+;; Need `sgml-skip-tag-forward' for `hideshow' to fold HTML tags.
+(after! (:and hideshow markdown-mode)
+  (require 'sgml-mode))
+
 (after! markdown-mode
   (dolist (mode '(("http" . restclient-mode)
                   ("sh" . bash-mode)))

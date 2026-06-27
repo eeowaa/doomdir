@@ -9668,7 +9668,7 @@ github_binary_release \
                 "main.lua")))
 #+end_src
 
-** markdown [13/20]
+** markdown [14/21]
 :PROPERTIES:
 :CATEGORY: doom/markdown
 :END:
@@ -9898,6 +9898,24 @@ This brings =markdown-mode= closer to =org= and is especially nice with =gptel=.
         t)))
 
   (add-to-list 'markdown-mode-font-lock-keywords '(my/markdown-fontify-atuser) 'append))
+#+end_src
+
+*** DONE [#C] Enable folding of HTML tags :tweak:
+To collapse sections in =markdown-mode=, one uses the ~markdown-cycle~ command,
+bound to =TAB=. However, ~markdown-cycle~ cannot handle HTML tags; for that, we
+turn to =hideshow=.
+
+#+begin_src emacs-lisp :tangle yes
+;; The `hideshow' configuration for `nxml-mode' works well for HTML tags
+;; embedded in `markdown-mode' buffers and those of derived modes.
+(after! hideshow
+  (dolist (mode '(markdown-mode gfm-mode))
+    (add-to-list 'hs-special-modes-alist
+                 (cons 'markdown-mode (alist-get 'nxml-mode hs-special-modes-alist)))))
+
+;; Need `sgml-skip-tag-forward' for `hideshow' to fold HTML tags.
+(after! (:and hideshow markdown-mode)
+  (require 'sgml-mode))
 #+end_src
 
 *** STRT [#B] Extend editing capabilities of code and pre blocks :feat:hack:
