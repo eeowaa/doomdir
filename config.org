@@ -577,6 +577,19 @@ or when running =C-l= in a REPL.
     (company-box-doc--set-frame-position doc-frame)))
 #+end_src
 
+*** DONE [#B] Immediately draw childframe borders for =company-box-doc= :bug:
+On WSL 1, childframe borders for =company-box-doc= are drawn after the frame and
+buffer contents are displayed, sometimes up to a second later. For whatever
+reason, a miniscule sleep after every ~company-box-doc--set-frame-position~ call
+eliminates this problem.
+
+#+begin_src emacs-lisp :tangle yes
+(when (eq eeowaa-wsl-version 1)
+  (defadvice! my/company-box-doc--fix-border-display-a (fn &rest args)
+    :after #'company-box-doc--set-frame-position
+    (sleep-for 0.01)))
+#+end_src
+
 *** STRT [#C] Quit =company-box= when switching evil states :bug:
 :LOGBOOK:
 - Note taken on [2023-02-01 Wed 19:58] \\

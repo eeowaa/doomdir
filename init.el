@@ -25,8 +25,7 @@
        ;;layout            ; auie,ctsrnm is the superior home row
 
        :completion
-;;LEAN (company +childframe)
-       (company)
+       (company +childframe)
                          ; the ultimate code completion backend
        ;;(corfu +orderless)  ; complete with cap(f), cape and a flying feather!
        ;;helm              ; the *other* search engine for love and life
@@ -94,8 +93,7 @@
        vterm             ; the best terminal emulation in Emacs
 
        :checkers
-;;LEAN (syntax +childframe)
-       (syntax)
+       (syntax +childframe)
                          ; tasing you for every semicolon you forget
 ;;GONE (spell +hunspell +flyspell) ; tasing you for misspelling mispelling
 ;;GONE grammar           ; tasing grammar mistake every you make

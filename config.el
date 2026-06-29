@@ -61,6 +61,11 @@
              (_ (frame-visible-p doc-frame)))
     (company-box-doc--set-frame-position doc-frame)))
 
+(when (eq eeowaa-wsl-version 1)
+  (defadvice! my/company-box-doc--fix-border-display-a (fn &rest args)
+    :after #'company-box-doc--set-frame-position
+    (sleep-for 0.01)))
+
 (when (modulep! company +childframe)
   (after! company
     (add-hook! 'evil-normal-state-entry-hook
