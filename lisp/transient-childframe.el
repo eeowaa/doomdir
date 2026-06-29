@@ -226,7 +226,7 @@ potentially reusing an existing child frame.
 
 The `window-size' alist entry is set to `fit-window-to-buffer',
 which will resize the childframe to fit the contents of the
-buffer when `fit-frame-to-buffer' is non-nil.
+buffer when variable `fit-frame-to-buffer' is non-nil.
 
 If the `left' and `top' entries of `child-frame-parameters' are
 floating point values between 0.0 and 1.0, they are assigned to

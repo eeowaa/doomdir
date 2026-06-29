@@ -11,14 +11,16 @@
 ;; (require 'eeowaa-project)
 
 ;; Load `transient-childframe' and configure `transient'
-(when initial-window-system
-  (require 'transient-childframe)
-
-  ;; HACK: Revert Doom's configuration
-  (when (modulep! :tools magit)
-    (after! magit
-      (setq transient-display-buffer-action
-            (tc-transient-childframe--display-buffer-action)))))
+;; FIXME: "C-g" from nested transients leaves a nested childframe
+;; FIXME: Evil insert state is activated by "i", "s", etc.
+;; (when initial-window-system
+;;   (require 'transient-childframe)
+;;
+;;   ;; HACK: Revert Doom's configuration
+;;   (when (modulep! :tools magit)
+;;     (after! magit
+;;       (setq transient-display-buffer-action
+;;             (tc-transient-childframe--display-buffer-action)))))
 
 ;; NOTE: Since introducing `gptel' into my workflow, I can no longer use "SPC"
 ;; to pop up transient childframes; I have to use the default "C-t" binding.
