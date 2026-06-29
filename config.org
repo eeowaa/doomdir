@@ -1964,7 +1964,7 @@ I just need to test this functionality.
 ** ilist [3/3] :eeowaa:
 *** DONE [#A] Window configuration :tweak:
 #+begin_src emacs-lisp :tangle yes
-(setq imenu-list-mode-line-format "  Ilist"
+(setq imenu-list-mode-line-format " Ilist"
       imenu-list-position 'right
       imenu-list-size 35) ;; same as treemacs
 #+end_src
@@ -2392,7 +2392,7 @@ to work:
   - *UPDATE*: Treemacs windows are *not* popups; they are simply side windows.
 
 #+begin_src emacs-lisp :tangle yes
-(setq imenu-list-mode-line-format "  Ilist")
+(setq imenu-list-mode-line-format " Ilist")
 (after! imenu-list
   (set-popup-rule! "^\\*Ilist\\*"
     :side 'right :size 35 :quit 'current))

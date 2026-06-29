@@ -6,11 +6,23 @@ ones I solve now.
 
 * Inbox
 * Regressions
-** Attributable to Emacs/Doom/package updates [1/2]
+** Attributable to Emacs/Doom/package updates [2/3]
 *** DONE No modeline in =Man-mode= and =woman-mode= buffers :tweak:
 :LOGBOOK:
 CLOCK: [2026-06-29 Mon 14:08]--[2026-06-29 Mon 14:18] =>  0:10
 :END:
+*** DONE My custom =treemacs= modeline is no longer displaying :tweak:
+:LOGBOOK:
+CLOCK: [2026-06-29 Mon 14:21]--[2026-06-29 Mon 14:33] =>  0:12
+:END:
+- I am not sure how replicable this bug is.
+- Going to restart Emacs and see if it comes up again.
+  - I am not seeing this problem anymore
+  - Can just run =M-: (treemacs--setup-mode-line)= to refresh if needed
+- However, I just noticed that Ilist and Treemacs modelines are slightly
+  different (Ilist has 2 leading spaces instead of 1)
+  - Easy enough fix... done
+
 *** TODO ~my/send-region~ no longer includes a trailing newline :feat:
 ** Attributable to Ubuntu compatibility issues [0/2]
 *** TODO Missing spell checker :feat:

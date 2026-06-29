@@ -666,7 +666,7 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
   ("c" (table-generate-source 'cals) "CALS")
   ("SPC" hydra-table/body "Menu" :exit 1))
 
-(setq imenu-list-mode-line-format "  Ilist"
+(setq imenu-list-mode-line-format " Ilist"
       imenu-list-position 'right
       imenu-list-size 35) ;; same as treemacs
 
