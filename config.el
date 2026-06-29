@@ -2193,8 +2193,9 @@ if you want to send region to a REPL or terminal emulator."
         (setq dash-docs-docsets-path zeal-docsets)))))
 
 (setq magit-repository-directories
-      '(("~/Documents/src" . 2)
-        ("~/Documents/ref" . 1)))
+      '(("~/Documents/src" . 2) ;; code I work on professionally or personally
+        ("~/.local/src" . 2) ;; 3rd-party code (often used for local builds)
+        ("~/Documents/notes/life/ref" . 0))) ;; version-controlled personal notes
 
 (map! (:after evil-collection-magit
        (:map magit-status-mode-map
