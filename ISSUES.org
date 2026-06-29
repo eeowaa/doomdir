@@ -6,7 +6,7 @@ ones I solve now.
 
 * Inbox
 * Regressions
-** Attributable to Emacs/Doom/package updates [2/3]
+** Attributable to Emacs/Doom/package updates [3/4]
 *** DONE No modeline in =Man-mode= and =woman-mode= buffers :tweak:
 :LOGBOOK:
 CLOCK: [2026-06-29 Mon 14:08]--[2026-06-29 Mon 14:18] =>  0:10
@@ -24,6 +24,25 @@ CLOCK: [2026-06-29 Mon 14:21]--[2026-06-29 Mon 14:33] =>  0:12
   - Easy enough fix... done
 
 *** TODO ~my/send-region~ no longer includes a trailing newline :feat:
+*** OKAY The tab bar is no longer distinguishable from tab lines :feat:
+:LOGBOOK:
+CLOCK: [2026-06-29 Mon 14:57]--[2026-06-29 Mon 15:02] =>  0:05
+CLOCK: [2026-06-29 Mon 14:34]--[2026-06-29 Mon 14:45] =>  0:11
+:END:
+_Problem_
+- The background color for =tab-bar= now matches =tab-line=
+- The =tab-bar= used to have a background matching the "modeline inactive" face
+  - This was causing a lot of error messages to be spewed
+  - I worked around this in my config by setting the background to something else
+
+_Remediation_
+- For now, I am just hiding the =tab-bar= in my =custom.el=
+  - ~(remove-hook 'persp-mode-hook 'tab-bar-mode)~
+- In my current situation, I do not really need or want the =tab-bar=
+  - I am only working with one or two projects at a time
+  - I can't get rid of the title bar in WSL 1 with VcXsrv
+    - Hiding =tab-bar= preserves some screen real estate
+
 ** Attributable to Ubuntu compatibility issues [0/2]
 *** TODO Missing spell checker :feat:
 *** TODO Missing grammar checker :feat:
