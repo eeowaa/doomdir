@@ -1214,7 +1214,8 @@ themes in GUI Emacs.
 ;; `always' is just a no-op that returns `t'
 (defadvice! my/never-hide-modeline-a (&rest _)
   "Never hide the modeline"
-  :around 'hide-mode-line-mode
+  :around '(hide-mode-line-mode
+            mode-line-invisible-mode)
   #'always)
 
 (after! doom-themes-ext-treemacs
@@ -5418,7 +5419,7 @@ to =eshell=, it forcefully clears the file on disk.
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [14/23]
+** vterm [13/22]
 :PROPERTIES:
 :CATEGORY: doom/vterm
 :COOKIE_DATA: recursive
@@ -6025,13 +6026,7 @@ WS   (str)   Resize  display. This capability has the desired width and height a
              ments. SunView(tm) example: '\E[8;%d;%dt'.
 #+end_example
 
-*** Miscellaneous [2/3]
-**** DONE [#C] Always show the modeline :tweak:
-#+begin_src emacs-lisp :tangle yes
-(after! vterm
-  (remove-hook 'vterm-mode-hook 'mode-line-invisible-mode))
-#+end_src
-
+*** Miscellaneous [1/2]
 **** DONE [#B] Rename ~vterm~ buffers according to the host and directory :tweak:
 Some extra shell-side configuration is needed for this, which I have stuck in my
 =~/.environ.d/vterm.sh= file.

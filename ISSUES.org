@@ -6,8 +6,11 @@ ones I solve now.
 
 * Inbox
 * Regressions
-** Attributable to Emacs/Doom/package updates [0/2]
-*** TODO No modeline in =Man-mode= and =woman-mode= buffers :tweak:
+** Attributable to Emacs/Doom/package updates [1/2]
+*** DONE No modeline in =Man-mode= and =woman-mode= buffers :tweak:
+:LOGBOOK:
+CLOCK: [2026-06-29 Mon 14:08]--[2026-06-29 Mon 14:18] =>  0:10
+:END:
 *** TODO ~my/send-region~ no longer includes a trailing newline :feat:
 ** Attributable to Ubuntu compatibility issues [0/2]
 *** TODO Missing spell checker :feat:
@@ -115,6 +118,7 @@ _Remediation_
 - Use =]p= and =[p= to jump between prompts
 - Use =]r= and =[r= to jump between responses
 - There might already be functions to navigate between these (provided by =gptel=)
+
 ** Better diffing [0/4]
 *** TODO =ediff= buffers should be presented better :tweak:
 - The best workaround to bad Magit performance on WSL 1 is to use =ediff=

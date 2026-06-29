@@ -235,7 +235,8 @@ with special dedication semantics."
 ;; `always' is just a no-op that returns `t'
 (defadvice! my/never-hide-modeline-a (&rest _)
   "Never hide the modeline"
-  :around 'hide-mode-line-mode
+  :around '(hide-mode-line-mode
+            mode-line-invisible-mode)
   #'always)
 
 (after! doom-themes-ext-treemacs
@@ -1892,9 +1893,6 @@ which causes problems even if there is no existing buffer."
         "C-l" #'eeowaa-refresh-buffer-and-display))
 
 (setq vterm-copy-mode-remove-fake-newlines t)
-
-(after! vterm
-  (remove-hook 'vterm-mode-hook 'mode-line-invisible-mode))
 
 (setq vterm-buffer-name-string "%s")
 (defadvice! my/vterm-popup-preserve-buffer-name-a (fn &rest args)
