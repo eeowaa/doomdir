@@ -1,0 +1,165 @@
+#+title: Known Issues
+
+I don't have time to solve every problem. The problems I should solve are the
+ones affecting my workflow. Even among those, I should be selective about which
+ones I solve now.
+
+* Inbox
+* Regressions
+** Attributable to Emacs/Doom/package updates [0/2]
+*** TODO No modeline in =Man-mode= and =woman-mode= buffers :tweak:
+*** TODO ~my/send-region~ no longer includes a trailing newline :feat:
+** Attributable to Ubuntu compatibility issues [0/2]
+*** TODO Missing spell checker :feat:
+*** TODO Missing grammar checker :feat:
+** Attributable to WSL 1 performance issues [2/2]
+*** OKAY Staging hunks from the Magit status buffer is slow :perf:
+_Problem_
+- It takes multiple seconds to stage hunks from the Magit status buffer
+
+_Remediation_
+- *Configure Magit status refresh to improve performance*
+  - Removed automatic =diff-hl= updates when refreshing Magit
+    - Shaves ~1 second off from Magit status refresh
+    - Toggle =diff-hl= off/on again to refresh fringes (=SPC t v= twice)
+  - Removed automatic Magit status buffer updates from other Magit commands
+    - Improves performance of per-file Magit operations
+    - Force a refresh from the Magit status buffer via =C-l=
+- *Use the status buffer while avoiding unnecessary refreshes*
+  - Select multiple hunks with =v= before applying a Magit operation
+    - Performs a single status refresh instead of one per hunk
+    - Only works with subsequent hunks (out-of-order hunks cannot use this)
+    - Point must be on the header line of the hunk (not in the middle)
+  - Stage hunks by opening per-file =magit-diff= buffers
+    - Avoids Magit status refresh, but still need to wait for diff refresh
+    - Diff refresh is pretty fast for single-file diffs
+    - For a given file under point in the status buffer:
+      - =d -- RET u= replicates the "Unstaged changes" section
+      - =d -- RET s= replicates the "Staged changes" section
+      - =d -- RET w= diffs the worktree against HEAD
+    - Same comfortable diffing interface as the Magit status buffer
+  - Stage hunks by opening per-file =magit-ediff= buffers with =e=
+    - Performs a single Magit refresh after all changes have been finalized
+    - The interface feels a bit clunky (3-way diff) but it is the most efficient
+    - Can be used to replicate =add=, =reset=, and =checkout= commands
+      - =ab= applies HEAD to the index (/unstages/ the hunk like =git reset -p=)
+      - =ac= applies HEAD to the worktree (/discards/ the hunk like =git checkout -p HEAD=)
+      - =bc= applies the index to the worktree (/discards/ the hunk like =git checkout -p=)
+      - =cb= applies the worktree to the index (/stages/ the hunk like =git add -p=)
+    - Unfortunately, the 2-way diff ~magit-ediff-show-*~ commands do not allow edits.
+      If they did, the following commands would be especially useful and easy to use:
+      - ~magit-ediff-show-staged~ (=E i RET=) to unstage hunks
+      - ~magit-ediff-show-unstaged~ (=E u RET=) to stage/discard hunks
+      - ~magit-ediff-show-working-tree~ (=E w RET=) to discard hunks
+- *Use Magit while avoiding the status buffer*
+  - Open per-file =magit-diff= buffers via =SPC g . D u/s/w=
+  - Open per-file =magit-ediff= buffers via =M-x magit-ediff-stage RET RET=
+  - Navigate between and stage hunks in a file via =SPC g ]/[/s=
+  - Use =SPC g /= to open Magit dispatch (like =h= from Magit status)
+- *Fall back to Git CLI from =vterm=*
+  - Use =git add -p= to selectively stage
+  - Use =git reset -p= to selectively unstage
+  - Use =git checkout -p= to selectively discard
+
+*** OKAY Git lockfile contention during Magit rebases :perf:
+_Problem_
+- Sometimes rebases fail from Magit due to lockfile contention
+- Hard to unstick the problem within Magit or even the Git CLI
+- Git itself seems to get confused
+
+_Remediation_
+- Perform rebases via the command line in =vterm=:
+  #+begin_src sh :eval no
+  # Add to <commit> but keep original message
+  git commit --fixup=<commit>
+
+  # --OR-- Add to <commit> and merge <message> with original message
+  git commit --fixup=amend:<commit> -m <message>
+
+  # --OR-- Keep <commit> but replace original message
+  git commit --fixup=reword:<commit> --allow-empty -m <message>
+
+  # Perform rebase (--autostash and --autosquash already applied per config)
+  git rebase -i <commit>^
+  #+end_src
+- Resolve any conflicts in Magit per usual
+
+** No clear attribution [1/1]
+*** OKAY Unpredictable breakage with transient childframes
+_Problem_
+- The transient buffer can become editable
+- Key presses can be interpreted as evil commands
+- No clear way to unstick the problem
+
+_Remediation_
+- Disable transient-childframe for now
+- Use standard transient windows (like in TTY Emacs)
+
+* New Ground
+** Windows integration [0/2]
+*** TODO Use Emacs-like command-line editing for PowerShell :tweak:
+- See ChatGPT log for more details
+- Should go in PowerShell ~PROFILE~
+
+*** TODO Write a script to export breakpoints from the VS debugger :feat:
+- See ChatGPT log for more details
+- Can integrate with =bookmark= or use a more generic ~file:line~ format
+
+** LLM integration [0/2]
+*** TODO Automatically insert line breaks before new =gptel= prompts :feat:
+- I do not want to include "\f\n" in ~gptel-prompt-prefix-alist~
+- I want to be able to specify ~@prompt~ in a buffer and go from there
+- However, I like the visual separation between prompt/response pairs
+
+*** TODO Add keybindings to jump between =gptel= prompts and responses :feat:
+- Use =]p= and =[p= to jump between prompts
+- Use =]r= and =[r= to jump between responses
+- There might already be functions to navigate between these (provided by =gptel=)
+** Better diffing [0/4]
+*** TODO =ediff= buffers should be presented better :tweak:
+- The best workaround to bad Magit performance on WSL 1 is to use =ediff=
+- There are some real annoyances with using =ediff= that I keep facing
+- I want to change how buffers are displayed in an =ediff= session
+- I also want to restore buffers to their original display state afterward
+- References:
+  - var:ediff-prepare-buffer-hook
+  - var:ediff-quit-hook
+  - var:magit-ediff-quit-hook
+
+- *Line numbers should not be displayed*
+  - Line numbers take up precious screen real estate with split windows
+  - Not a huge problem with 2-way ediffs, but a major issue with 3-way ediffs
+  - Line numbers are already displayed in the mode line
+  - References:
+    - [[var:display-line-numbers]]
+    - [[fn:display-line-numbers-mode]]
+
+- *Diff indicators in fringes/margins should be disabled*
+  - I don't want to have to worry about updating =diff-hl= indicators
+  - Presently, they get out of sync when updating the diffs
+  - This is only something I care about when invoking =ediff= from Magit
+  - References:
+    - fn:diff-hl-mode
+
+- *Buffers should expand all folds and hidden text*
+  - It is supremely annoying to have to manually open all folds
+    and toggle global visibility within buffers in an =ediff= session
+  - References:
+    - fn:without-restriction
+    - fn:widen
+
+*** TODO 2-way =magit-ediff= sessions should be editable :feat:
+- The 2-way =magit-ediff= functions only use read-only buffers
+- I don't want to be forced into using the 3-way ediff interface
+- I would use =magit-ediff= a lot more if I could use 2-way diffs
+
+*** TODO ~magit-diff-dwim~ should limit to file at point :feat:
+- In a Magit status buffer, ~magit-diff-dwim~ selects the appropriate
+  ~magit-diff-*~ function depending on the section at point
+- I would also like for it to automatically limit the diff to the file
+  at point (which could be un-done by pressing =--= in the transient)
+
+*** HOLD ~magit-ediff-dwim~ should use appropriate 2-way diffs :feat:
+- I basically want ~magit-ediff-dwim~ to act like ~magit-diff-dwim~
+- Before that can happen, I need to make editable 2-way =magit-ediff= functions
+
