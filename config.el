@@ -3491,6 +3491,24 @@ buffer by manually adding a level-1 heading before the first prompt.)"
                                        t "\\`[^.]")))
     (add-to-list 'projectile-globally-ignored-directories directory)))
 
+(when (featurep :system 'wsl)
+
+  (defun my/project-wsl-mount-p (project-root)
+    "Return t if PROJECT-ROOT starts with /mnt/c (case-insensitive)"
+    (let ((case-fold-search t))
+      (string-match-p "\\`/mnt/c\\(?:/\\|\\'\\)" project-root)))
+
+  ;; If there is an existing `projectile-ignored-project-function',
+  ;; use that function in addition to `my/project-wsl-mount-p'
+  (after! projectile
+    (let ((body (if (fboundp projectile-ignored-project-function)
+                    `(or (,projectile-ignored-project-function project-root)
+                         (my/project-wsl-mount-p project-root))
+                  '(my/project-wsl-mount-p project-root))))
+      (eval (macroexpand
+             `(defun my/project-ignore-function (project-root) ,body)))
+      (setq projectile-ignored-project-function #'my/project-ignore-function))))
+
 ;; Map C-? to DEL
 (define-key key-translation-map (kbd "C-?") (kbd "DEL"))
 

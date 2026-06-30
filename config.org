@@ -12827,7 +12827,7 @@ for you to customize it yourself. It is best to load these last.
 ;;; :config
 #+end_src
 
-** Miscellany [5/6]
+** Miscellany [6/7]
 #+begin_quote
 Miscellaneous configuration without a corresponding module.
 #+end_quote
@@ -12948,6 +12948,32 @@ again.
                       (directory-files (format "%s/.local/straight/repos" doom-emacs-dir)
                                        t "\\`[^.]")))
     (add-to-list 'projectile-globally-ignored-directories directory)))
+#+end_src
+
+*** DONE [#B] Ignore projects under =/mnt/c= in WSL :tweak:
+In WSL, =/mnt/c= provides access to the host =C:= drive, which is case-insensitive.
+Projectile stores project directories in a case-sensitive way, so for that reason
+(among others), I prefer to symlink project directories from =/mnt/c= to somewhere
+under my WSL home directory and have Projectile detect them from there.
+
+#+begin_src emacs-lisp :tangle yes
+(when (featurep :system 'wsl)
+
+  (defun my/project-wsl-mount-p (project-root)
+    "Return t if PROJECT-ROOT starts with /mnt/c (case-insensitive)"
+    (let ((case-fold-search t))
+      (string-match-p "\\`/mnt/c\\(?:/\\|\\'\\)" project-root)))
+
+  ;; If there is an existing `projectile-ignored-project-function',
+  ;; use that function in addition to `my/project-wsl-mount-p'
+  (after! projectile
+    (let ((body (if (fboundp projectile-ignored-project-function)
+                    `(or (,projectile-ignored-project-function project-root)
+                         (my/project-wsl-mount-p project-root))
+                  '(my/project-wsl-mount-p project-root))))
+      (eval (macroexpand
+             `(defun my/project-ignore-function (project-root) ,body)))
+      (setq projectile-ignored-project-function #'my/project-ignore-function))))
 #+end_src
 
 *** LOOP [#C] Add ergonomic keybindings for hard-to-reach keys :module:tweak:
