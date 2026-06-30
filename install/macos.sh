@@ -141,6 +141,11 @@ brew install libvterm cmake
 ## <https://github.com/akermu/emacs-libvterm/issues/179#issuecomment-1045331359>
 brew install screen
 
+# Install prerequisites for `checkers/spell` module
+brew install aspell
+mkdir -p ~/.local/share/dict
+aspell dump master en_US | sort -u > ~/.local/share/dict/words-en_US.txt
+
 # Install prerequisites for `tools/ansible` module
 brew install ansible
 

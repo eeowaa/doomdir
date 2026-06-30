@@ -224,6 +224,11 @@ sudo dnf -y install libvterm cmake
 ## <https://github.com/akermu/emacs-libvterm/issues/179#issuecomment-1045331359>
 sudo dnf -y install screen
 
+# Install prerequisites for `checkers/spell` module
+sudo dnf -y install aspell
+mkdir -p ~/.local/share/dict
+aspell dump master en_US | sort -u > ~/.local/share/dict/words-en_US.txt
+
 # Install prerequisites for `tools/ansible` module
 pipx install ansible-core
 ansible-galaxy collection install community.general

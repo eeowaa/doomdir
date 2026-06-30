@@ -1993,6 +1993,51 @@ which causes problems even if there is no existing buffer."
 (after! flycheck-posframe
   (setq flycheck-posframe-position 'window-bottom-right-corner))
 
+(when (modulep! :checkers spell)
+  (if (modulep! :checkers spell +flyspell)
+      (remove-hook! '(org-mode-hook
+                      markdown-mode-hook
+                      TeX-mode-hook
+                      rst-mode-hook
+                      mu4e-compose-mode-hook
+                      message-mode-hook
+                      git-commit-mode-hook)
+                    #'flyspell-mode)
+    (remove-hook 'text-mode-hook 'spell-fu-mode)))
+
+(when (and (modulep! :checkers spell)
+           (not (modulep! :checkers spell +flyspell)))
+  (require 'spell-fu))
+
+(when (and (modulep! :checkers spell)
+           (not (modulep! :checkers spell +flyspell)))
+  (setq ispell-dictionary "en"
+        ispell-personal-dictionary
+        (expand-file-name (concat "ispell/" ispell-dictionary ".pws")
+                          doom-data-dir))
+
+  ;; Create `ispell-personal-dictionary' if the file is missing
+  (after! ispell
+    (if (not (file-exists-p
+              (concat (file-name-as-directory ispell-aspell-data-dir) ispell-dictionary ".dat")))
+        (warn (concat "ispell-dictionary \"%s\" has no corresponding .dat file in %s.\n"
+                      "Modify `ispell-dictionary' or install the missing aspell language pack.")
+              ispell-dictionary ispell-aspell-data-dir)
+      (unless (file-exists-p ispell-personal-dictionary)
+        (make-directory (file-name-directory ispell-personal-dictionary) t)
+        (with-temp-file ispell-personal-dictionary
+          (insert (format "personal_ws-1.1 %s 0\n" ispell-dictionary))))))
+
+  ;; Remove Doom's `+spell--create-word-dict-a' advice (which doesn't work
+  ;; for me) and just rely on the existence of `ispell-personal-dictionary'.
+  (after! spell-fu
+    (when (fboundp '+spell--create-word-dict-a)
+      (advice-remove 'spell-fu--word-add-or-remove #'+spell--create-word-dict-a))))
+
+(setq ispell-complete-word-dict
+      (concat (file-name-as-directory (getenv "HOME"))
+              ".local/share/dict/words-en_US.txt"))
+
 (after! ansible
   (add-to-list 'evil-normal-state-modes 'ansible-doc-module-mode))
 

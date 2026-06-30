@@ -6370,22 +6370,26 @@ lines up with the error indicators in the right fringe.
 This workaround does not address all issues that can happen when resizing and
 moving windows, but it's good enough in most cases.
 
-** COMMENT spell [4/4]
+** spell [5/6]
 #+begin_quote
 This modules provides spellchecking powered by =aspell=, =hunspell= or =enchant=.
 #+end_quote
 
 *** DONE [#A] Install prerequisites
-**** DONE macoS
+**** DONE macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `checkers/spell` module
 brew install aspell
+mkdir -p ~/.local/share/dict
+aspell dump master en_US | sort -u > ~/.local/share/dict/words-en_US.txt
 #+end_src
 
 **** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `checkers/spell` module
 sudo dnf -y install aspell
+mkdir -p ~/.local/share/dict
+aspell dump master en_US | sort -u > ~/.local/share/dict/words-en_US.txt
 #+end_src
 
 *** DONE [#A] Prevent spell checking from being enabled by default :tweak:
@@ -6509,6 +6513,35 @@ Reference:
     (when (fboundp '+spell--create-word-dict-a)
       (advice-remove 'spell-fu--word-add-or-remove #'+spell--create-word-dict-a))))
 #+end_src
+
+*** OKAY [#B] Fix =C-x s= (~company-ispell~) :bug:
+The following should do the trick (if you've installed the prerequisites
+for the =:checkers spell= module):
+
+#+begin_src emacs-lisp :tangle yes
+(setq ispell-complete-word-dict
+      (concat (file-name-as-directory (getenv "HOME"))
+              ".local/share/dict/words-en_US.txt"))
+#+end_src
+
+Note that =C-x s= will *not* consult words added to ~ispell-personal-dictionary~
+via =zg=, because that file is not in sorted order; as such, the =look= process
+will fail. I /could/ work around this, but I don't think it's worth it for now.
+
+Reference:
+- fn:ispell-lookup-words
+- var:ispell-alternate-dictionary
+
+*** TODO [#C] Add word definitions to =company-box-doc= for ~company-ispell~ :feat:
+It would be really nice to have definitions pop up alongside word suggestions.
+This doesn't seem too far-fetched, especially because =SPC s t= already looks up
+the offline definitions of word at point.
+
+- References:
+  - [[fn:set-company-backend!]]
+  - var:company-backends
+  - fn:company-ispell
+  - fn:+lookup/dictionary-definition
 
 ** COMMENT grammar [3/4]
 #+begin_quote
@@ -7462,6 +7495,12 @@ brew install ripgrep sqlite3
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `tools/lookup` module
 sudo dnf -y install ripgrep sqlite wordnet
+#+end_src
+
+**** DONE Ubuntu
+#+begin_src sh :tangle install/ubuntu.sh
+# Install prerequisites for `tools/lookup` module
+sudo apt -y install ripgrep sqlite3 wordnet
 #+end_src
 
 *** DONE [#A] Fix ~+lookup-project-search-backend-fn~ :bug:hack:

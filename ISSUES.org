@@ -6,7 +6,7 @@ ones I solve now.
 
 * Inbox
 * Regressions
-** Attributable to Emacs/Doom/package updates [4/4]
+** Attributable to Emacs/Doom/package updates [5/5]
 *** DONE No modeline in =Man-mode= and =woman-mode= buffers :tweak:
 :LOGBOOK:
 CLOCK: [2026-06-29 Mon 14:08]--[2026-06-29 Mon 14:18] =>  0:10
@@ -39,17 +39,21 @@ _Problem_
   - I worked around this in my config by setting the background to something else
 
 _Remediation_
-- For now, I am just hiding the =tab-bar= in my =custom.el=
-  - ~(remove-hook 'persp-mode-hook 'tab-bar-mode)~
+- For now, I am just hiding the =tab-bar= in my =custom.el=:
+  #+begin_src emacs-lisp :tangle no
+  (remove-hook 'persp-mode-hook 'tab-bar-mode)
+  (tab-bar-mode -1) ;; needed to ensure `display-time-mode' is disabled
+  #+end_src
 - In my current situation, I do not really need or want the =tab-bar=
   - I am only working with one or two projects at a time
   - I can't get rid of the title bar in WSL 1 with VcXsrv
     - Hiding =tab-bar= preserves some screen real estate
 
-** Attributable to Ubuntu compatibility issues [0/2]
-*** TODO Missing spell checker :feat:
+*** DONE Word completion via =C-x s= (~company-ispell~) is broken :bug:
+** Attributable to Ubuntu compatibility issues [1/2]
+*** DONE Missing spell checker :feat:
 *** TODO Missing grammar checker :feat:
-** Attributable to WSL 1 performance issues [2/2]
+** Attributable to WSL 1 performance issues [3/3]
 *** OKAY Staging hunks from the Magit status buffer is slow :perf:
 _Problem_
 - It takes multiple seconds to stage hunks from the Magit status buffer
@@ -121,8 +125,22 @@ _Remediation_
   #+end_src
 - Resolve any conflicts in Magit per usual
 
-** No clear attribution [1/1]
-*** OKAY Unpredictable breakage with transient childframes
+*** DONE Spell-checking is very slow and unresponsive :perf:
+_Problem_
+- Sometimes it takes a minute for errors from =flyspell= to appear in a buffer
+  after activating ~flyspell-mode~ with =SPC t s=
+- =C-x s= (~company-complete-common~) in evil insert state fails to lookup words
+
+_Remediation_
+- =z== (~flyspell-correct-at-point~) still works, even when errors are not highlighted
+- =SPC s t= (~+lookup/dictionary-definition~) can still be used to lookup definitions
+- Replace =flyspell= with =spell-fu=
+  - Doom's =:checkers spell= module documentation says that =spell-fu= is faster
+  - I just removed the =+flyspell= flag and that was enough
+
+** No clear attribution [2/2]
+*** DONE Lag when drawing childframe borders for symbol documentation :perf:
+*** OKAY Unpredictable breakage with transient childframes :bug:
 _Problem_
 - The transient buffer can become editable
 - Key presses can be interpreted as evil commands
@@ -200,4 +218,3 @@ _Remediation_
 *** HOLD ~magit-ediff-dwim~ should use appropriate 2-way diffs :feat:
 - I basically want ~magit-ediff-dwim~ to act like ~magit-diff-dwim~
 - Before that can happen, I need to make editable 2-way =magit-ediff= functions
-

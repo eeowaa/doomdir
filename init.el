@@ -95,7 +95,7 @@
        :checkers
        (syntax +childframe)
                          ; tasing you for every semicolon you forget
-;;GONE (spell +hunspell +flyspell) ; tasing you for misspelling mispelling
+       (spell +aspell) ; tasing you for misspelling mispelling
 ;;GONE grammar           ; tasing grammar mistake every you make
 
        :tools
@@ -115,7 +115,7 @@
        ;;gist              ; interacting with github gists
 ;;GONE (kubernetes +lsp +tree-sitter) ; XXX user module
 ;;LEAN (lookup +dictionary +offline +docsets)
-       (lookup)
+       (lookup +dictionary +offline)
                          ; navigate your code and its documentation
 ;;GONE (lsp +peek)         ; M-x vscode
 ;;LEAN (magit +forge)      ; a git porcelain for Emacs
