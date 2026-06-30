@@ -9852,6 +9852,35 @@ preview Markdown rendering in the system browser.
   (advice-add 'markdown-preview :around #'my/markdown-preview))
 #+end_src
 
+*UPDATE*: Some additional machinery is needed for WSL:
+- Convert file://<path> to file:///<wslpath> (see below)
+- Create a wrapper script for =xdg-open= to launch an appropriate application
+- Within the =xdg-open= wrapper script, ensure that URLs for WSL files are opened
+  in a browser that understands them (Microsoft Edge beats Firefox here)
+
+#+begin_src emacs-lisp :tangle yes
+(when (featurep :system 'wsl)
+  (defun my/convert-standard-filename-wslpath-mixed (filename)
+    "Call wslpath -m on FILENAME and return the string"
+    (with-temp-buffer
+      (call-process "wslpath" nil t nil "-m" filename)
+      (string-trim-right (buffer-string))))
+
+  ;; Advice for opening file:// URLs in the default browser on WSL
+  (defadvice! my/browse-url-of-file-wslpath-a (f &rest r)
+    :around #'browse-url-of-file
+    (letf! ((defun my/url-of-file-wslpath-a (args)
+              (cons (if-let* ((url (car args))
+                              (_ (string-match "\\`file://\\(.+\\)" url))
+                              (path (my/convert-standard-filename-wslpath-mixed (match-string 1 url))))
+                        (concat "file:///" path)
+                      url)
+                    (cdr-safe args)))
+            (defadvice #'browse-url-default-browser :filter-args
+                       #'my/url-of-file-wslpath-a))
+      (apply f r))))
+#+end_src
+
 *** DONE [#B] Fontify source blocks :feat:
 #+begin_src emacs-lisp :tangle yes
 (setq markdown-fontify-code-blocks-natively t)

@@ -2624,6 +2624,27 @@ See also: `ts-fold-summary--get'."
       (apply f r)))
   (advice-add 'markdown-preview :around #'my/markdown-preview))
 
+(when (featurep :system 'wsl)
+  (defun my/convert-standard-filename-wslpath-mixed (filename)
+    "Call wslpath -m on FILENAME and return the string"
+    (with-temp-buffer
+      (call-process "wslpath" nil t nil "-m" filename)
+      (string-trim-right (buffer-string))))
+
+  ;; Advice for opening file:// URLs in the default browser on WSL
+  (defadvice! my/browse-url-of-file-wslpath-a (f &rest r)
+    :around #'browse-url-of-file
+    (letf! ((defun my/url-of-file-wslpath-a (args)
+              (cons (if-let* ((url (car args))
+                              (_ (string-match "\\`file://\\(.+\\)" url))
+                              (path (my/convert-standard-filename-wslpath-mixed (match-string 1 url))))
+                        (concat "file:///" path)
+                      url)
+                    (cdr-safe args)))
+            (defadvice #'browse-url-default-browser :filter-args
+                       #'my/url-of-file-wslpath-a))
+      (apply f r))))
+
 (setq markdown-fontify-code-blocks-natively t)
 (defadvice! my/markdown-fontify-code-block-a (fn &rest args)
   "Prevent `lsp!' and `tree-sitter!' from running during fontification."
