@@ -691,6 +691,16 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 (setq +ligatures-in-modes '(org-mode)
       +ligatures-extras-in-modes '(org-mode))
 
+;; Set the width to be the same as Ilist
+(setq demap-minimap-window-width 35)
+
+;; FIXME: Use a basic modeline
+(defvar my/demap-mode-line-format " Minimap")
+(defun my/demap-set-mode-line-h ()
+  "Locally change `mode-line-format' to `my/demap-mode-line-format'."
+  (setq-local mode-line-format my/demap-mode-line-format))
+(add-hook 'demap-minimap-construct-hook #'my/demap-set-mode-line-h)
+
 ;; HACK: I redefine `doom-modeline-format--main' from its original value (see below)
 ;; because `doom-modeline' is not responding to changes to `doom-modeline-buffer-name'
 ;; as it should. Other segments have been removed and rearranged, as well.

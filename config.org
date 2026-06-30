@@ -2019,11 +2019,24 @@ otherwise.
       +ligatures-extras-in-modes '(org-mode))
 #+end_src
 
-** COMMENT minimap [0/0]
+** minimap [0/0]
 #+begin_quote
 This module adds a minimap to the right side of Emacs, similar to the feature
 found in many other editors.
 #+end_quote
+
+*** STRT [#A] Window configuration :tweak:
+#+begin_src emacs-lisp :tangle yes
+;; Set the width to be the same as Ilist
+(setq demap-minimap-window-width 35)
+
+;; FIXME: Use a basic modeline
+(defvar my/demap-mode-line-format " Minimap")
+(defun my/demap-set-mode-line-h ()
+  "Locally change `mode-line-format' to `my/demap-mode-line-format'."
+  (setq-local mode-line-format my/demap-mode-line-format))
+(add-hook 'demap-minimap-construct-hook #'my/demap-set-mode-line-h)
+#+end_src
 
 ** modeline [4/5]
 #+begin_quote
