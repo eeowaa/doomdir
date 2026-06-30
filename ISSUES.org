@@ -57,6 +57,8 @@ _Remediation_
 *** TODO Line numbers sometimes temporarily appear when they shouldn't :bug:
 - This has been a problem for a while now
 - A common example is when you stage changes in the Magit status buffer
+- References:
+  - fn:doom-disable-line-numbers-h
 
 ** Attributable to Ubuntu compatibility issues [2/2]
 *** DONE Missing spell checker :feat:
@@ -163,10 +165,10 @@ _Remediation_
 - *UPDATE*: For whatever reason, this just started to work again.
 
 * Reintroductions
-** Emacs [0/1]
-*** TODO Fold indicators in the modeline :tweak:
+** Emacs [1/1]
+*** DONE Fold indicators in the modeline :tweak:
 ** Programming [0/4]
-*** TODO Minimap :feat:
+*** STRT Minimap :feat:
 *** HOLD LSP scaffolding :feat:
 - [ ] =lsp=
 - [ ] =treemacs +lsp=
@@ -185,16 +187,22 @@ _Remediation_
 - [ ] =csharp +lsp=
 
 * Reinventions
-** Windows integration [0/3]
-*** TODO Allow direnv in Windows host directory :feat:
+** Windows integration [3/3]
+*** DONE Allow direnv in Windows host directory :feat:
+_Problem_
 - I have a symlink from =/mnt/c= to =~/Documents/src/work=
 - I need to =direnv allow= the path under =/mnt/c= every time
 
-*** TODO Use Emacs-like command-line editing for PowerShell :tweak:
+_Remediation_
+- Remove all =/mnt/c= entries from ~projectile-known-projects~
+- Ensure that paths under =/mnt/c= are never added to ~projectile-known-projects~
+  by modifying ~projectile-known-project-function~
+
+*** DONE Use Emacs-like command-line editing for PowerShell :tweak:
 - See ChatGPT log for more details
 - Should go in PowerShell ~PROFILE~
 
-*** TODO Write a script to export breakpoints from the VS debugger :feat:
+*** DONE Write a script to export breakpoints from the VS debugger :feat:
 - See ChatGPT log for more details
 - Can integrate with =bookmark= or use a more generic ~file:line~ format
 
