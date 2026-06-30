@@ -771,8 +771,13 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
          local-map ,local-map)
         ((or line-number-mode column-number-mode) ,sep))))
 
+  (doom-modeline-def-segment my/buffer-state
+    "The buffer state information."
+    (concat (doom-modeline-spc)
+            (doom-modeline--buffer-state-icon)))
+
   (doom-modeline-def-modeline 'main
-    '(bar window-number my/modals follow remote-host my/buffer-position matches selection-info)
+    '(bar window-number my/modals follow my/buffer-state remote-host my/buffer-position matches selection-info)
     '(compilation check misc-info repl lsp input-method buffer-encoding major-mode process project-name vcs)))
 
 (if initial-window-system
