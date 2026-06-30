@@ -4,9 +4,8 @@ I don't have time to solve every problem. The problems I should solve are the
 ones affecting my workflow. Even among those, I should be selective about which
 ones I solve now.
 
-* Inbox
 * Regressions
-** Attributable to Emacs/Doom/package updates [5/5]
+** Attributable to Emacs/Doom/package updates [5/7]
 *** DONE No modeline in =Man-mode= and =woman-mode= buffers :tweak:
 :LOGBOOK:
 CLOCK: [2026-06-29 Mon 14:08]--[2026-06-29 Mon 14:18] =>  0:10
@@ -50,9 +49,18 @@ _Remediation_
     - Hiding =tab-bar= preserves some screen real estate
 
 *** DONE Word completion via =C-x s= (~company-ispell~) is broken :bug:
-** Attributable to Ubuntu compatibility issues [1/2]
+*** TODO ~my/send-region~ sometimes breaks =evil= in =vterm= :bug:
+- I can always continue in Evil Emacs state, but Insert state breaks
+- This might have something to do with changes to =evil-collection=
+- It might also have to do with my recent fix to ~my/send-region~ 
+
+*** TODO Line numbers sometimes temporarily appear when they shouldn't :bug:
+- This has been a problem for a while now
+- A common example is when you stage changes in the Magit status buffer
+
+** Attributable to Ubuntu compatibility issues [2/2]
 *** DONE Missing spell checker :feat:
-*** TODO Missing grammar checker :feat:
+*** DONE Missing grammar checker :feat:
 ** Attributable to WSL 1 performance issues [3/3]
 *** OKAY Staging hunks from the Magit status buffer is slow :perf:
 _Problem_
@@ -138,7 +146,7 @@ _Remediation_
   - Doom's =:checkers spell= module documentation says that =spell-fu= is faster
   - I just removed the =+flyspell= flag and that was enough
 
-** No clear attribution [2/2]
+** Without clear attribution [3/3]
 *** DONE Lag when drawing childframe borders for symbol documentation :perf:
 *** OKAY Unpredictable breakage with transient childframes :bug:
 _Problem_
@@ -150,8 +158,38 @@ _Remediation_
 - Disable transient-childframe for now
 - Use standard transient windows (like in TTY Emacs)
 
-* New Ground
-** Windows integration [0/2]
+*** OKAY Word wrap is not working :bug:
+- With word wrap enabled, wrapped list items content is not proparly indented
+- *UPDATE*: For whatever reason, this just started to work again.
+
+* Reintroductions
+** Emacs [0/1]
+*** TODO Fold indicators in the modeline :tweak:
+** Programming [0/4]
+*** TODO Minimap :feat:
+*** HOLD LSP scaffolding :feat:
+- [ ] =lsp=
+- [ ] =treemacs +lsp=
+
+*** HOLD LSP support for auxiliary languages :feat:
+- [ ] =docker +lsp=
+- [ ] =json +lsp=
+- [ ] =javascript +lsp=
+- [ ] =python +lsp=
+- [ ] =sh +lsp=
+- [ ] =web +lsp=
+- [ ] =yaml +lsp=
+
+*** HOLD LSP support for primary languages :feat:
+- [ ] =cc +lsp=
+- [ ] =csharp +lsp=
+
+* Reinventions
+** Windows integration [0/3]
+*** TODO Allow direnv in Windows host directory :feat:
+- I have a symlink from =/mnt/c= to =~/Documents/src/work=
+- I need to =direnv allow= the path under =/mnt/c= every time
+
 *** TODO Use Emacs-like command-line editing for PowerShell :tweak:
 - See ChatGPT log for more details
 - Should go in PowerShell ~PROFILE~
@@ -160,7 +198,10 @@ _Remediation_
 - See ChatGPT log for more details
 - Can integrate with =bookmark= or use a more generic ~file:line~ format
 
-** LLM integration [0/2]
+** LLM integration [0/3]
+*** TODO Automatically enable ~gptel-mode~ in specific files :feat:
+- I think this will be easy enough using file-local variables.
+
 *** TODO Automatically insert line breaks before new =gptel= prompts :feat:
 - I do not want to include "\f\n" in ~gptel-prompt-prefix-alist~
 - I want to be able to specify ~@prompt~ in a buffer and go from there
