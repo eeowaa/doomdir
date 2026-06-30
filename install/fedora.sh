@@ -229,6 +229,28 @@ sudo dnf -y install aspell
 mkdir -p ~/.local/share/dict
 aspell dump master en_US | sort -u > ~/.local/share/dict/words-en_US.txt
 
+# Install prerequisites for `checkers/grammar` module
+# Reference: <https://raw.githubusercontent.com/languagetool-org/languagetool/master/install.sh>
+sudo dnf -y install unzip java-latest-openjdk-headless
+(
+    set -e
+    mkdir -p ~/.local/src/doom
+    cd ~/.local/src/doom
+
+    # Download stable release of LanguageTool
+    rm -f LanguageTool-stable.zip
+    curl -fsSLo LanguageTool-stable.zip \
+         -l https://languagetool.org/download/LanguageTool-stable.zip
+
+    # Unzip the tool and determine the release number
+    release_dir=$(unzip -u LanguageTool-stable.zip | awk '!x&&/creating:/{print$2;x=1}')
+
+    # Move into place and clean up
+    rm -rf LanguageTool
+    mv "$release_dir" LanguageTool
+    rm LanguageTool-stable.zip
+)
+
 # Install prerequisites for `tools/ansible` module
 pipx install ansible-core
 ansible-galaxy collection install community.general

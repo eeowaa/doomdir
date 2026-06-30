@@ -146,6 +146,10 @@ brew install aspell
 mkdir -p ~/.local/share/dict
 aspell dump master en_US | sort -u > ~/.local/share/dict/words-en_US.txt
 
+# Install prerequisites for `checkers/grammar` module
+brew install languagetool
+sudo ln -sfn /usr/local/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk
+
 # Install prerequisites for `tools/ansible` module
 brew install ansible
 

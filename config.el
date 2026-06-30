@@ -2038,6 +2038,20 @@ which causes problems even if there is no existing buffer."
       (concat (file-name-as-directory (getenv "HOME"))
               ".local/share/dict/words-en_US.txt"))
 
+(when (featurep :system 'linux)
+  (let ((langtool-dir (concat (file-name-as-directory (getenv "HOME"))
+                              ".local/src/doom/LanguageTool/")))
+    (setq langtool-language-tool-jar (concat langtool-dir "languagetool-commandline.jar")
+          langtool-language-tool-server-jar (concat langtool-dir "languagetool-server.jar"))))
+
+(remove-hook! '(org-mode-hook
+                markdown-mode-hook
+                rst-mode-hook
+                asciidoc-mode-hook
+                latex-mode-hook
+                LaTeX-mode-hook)
+  #'writegood-mode)
+
 (after! ansible
   (add-to-list 'evil-normal-state-modes 'ansible-doc-module-mode))
 

@@ -6543,7 +6543,7 @@ the offline definitions of word at point.
   - fn:company-ispell
   - fn:+lookup/dictionary-definition
 
-** COMMENT grammar [3/4]
+** grammar [3/4]
 #+begin_quote
 This module adds grammar checking to Emacs to aid your writing by combining
 =lang-tool= and =writegood-mode=.
@@ -6562,6 +6562,31 @@ sudo ln -sfn /usr/local/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVir
 # Install prerequisites for `checkers/grammar` module
 # Reference: <https://raw.githubusercontent.com/languagetool-org/languagetool/master/install.sh>
 sudo dnf -y install unzip java-latest-openjdk-headless
+(
+    set -e
+    mkdir -p ~/.local/src/doom
+    cd ~/.local/src/doom
+
+    # Download stable release of LanguageTool
+    rm -f LanguageTool-stable.zip
+    curl -fsSLo LanguageTool-stable.zip \
+         -l https://languagetool.org/download/LanguageTool-stable.zip
+
+    # Unzip the tool and determine the release number
+    release_dir=$(unzip -u LanguageTool-stable.zip | awk '!x&&/creating:/{print$2;x=1}')
+
+    # Move into place and clean up
+    rm -rf LanguageTool
+    mv "$release_dir" LanguageTool
+    rm LanguageTool-stable.zip
+)
+#+end_src
+
+**** DONE Ubuntu
+#+begin_src sh :tangle install/ubuntu.sh
+# Install prerequisites for `checkers/grammar` module
+# Reference: <https://raw.githubusercontent.com/languagetool-org/languagetool/master/install.sh>
+sudo apt -y install unzip default-jre-headless
 (
     set -e
     mkdir -p ~/.local/src/doom
@@ -6602,7 +6627,7 @@ sudo dnf -y install unzip java-latest-openjdk-headless
   #'writegood-mode)
 #+end_src
 
-*** TODO [#B] Add toggle bindings for =lang-tool= and/or =writegood-mode= :feat:
+*** TODO [#B] Add toggle bindings for =langtool-check= and/or =writegood-mode= :feat:
 * :tools
 #+begin_quote
 Small modules that give Emacs access to external tools & services.
