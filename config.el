@@ -2263,6 +2263,9 @@ if you want to send region to a REPL or terminal emulator."
         :nv "C-t" nil ;; open this up for `vimish-tab'
         :nv "gz" #'magit-jump-to-stashes)))
 
+(after! magit-status
+  (require 'magit-bisect))
+
 ;; Performance improvements for `magit' under WSL 1
 (when (eq eeowaa-wsl-version 1)
 

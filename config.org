@@ -7934,6 +7934,23 @@ cpan install App::Git::Autofixup
         :nv "gz" #'magit-jump-to-stashes)))
 #+end_src
 
+*** TODO [#A] Fix load order bug with =magit-status= :bug:
+I've been getting the following error suddenly:
+#+begin_example
+`magit-status-sections-hook' contains entries that are no longer valid.
+  `magit-insert-bisect-output'
+  `magit-insert-bisect-rest'
+  `magit-insert-bisect-log'
+  `magit-insert-stashes'
+Using standard value instead.  Please re-configure hook variable.
+#+end_example
+
+This should fix it:
+#+begin_src emacs-lisp :tangle yes
+(after! magit-status
+  (require 'magit-bisect))
+#+end_src
+
 *** STRT [#B] Increase performance on Windows :tweak:
 Performance in WSL 1 is very slow (at least for repos hosted on WSL filesystems
 rather than Windows). Setting ~magit-refresh-verbose~ will show the refresh time
