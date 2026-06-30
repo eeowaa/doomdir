@@ -2556,6 +2556,11 @@ See also: `ts-fold-summary--get'."
   (add-to-list 'hs-special-modes-alist
                (cons 'csproj-mode (alist-get 'nxml-mode hs-special-modes-alist))))
 
+(after! csharp-mode
+  (add-to-list 'markdown-code-lang-modes '("c#" . csharp-mode)))
+(after! org-src
+  (add-to-list 'org-src-lang-modes '("c#" . csharp)))
+
 (after! ws-butler
   (add-to-list 'ws-butler-global-exempt-modes 'tsv-mode))
 

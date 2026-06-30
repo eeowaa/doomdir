@@ -9140,7 +9140,7 @@ This module adds [[https://coq.inria.fr][coq]] support, powered by [[https://pro
 This modules adds [[https://crystal-lang.org/][crystal]] support.
 #+end_quote
 
-** csharp [3/5]
+** csharp [4/6]
 #+begin_quote
 This module adds C# support to Emacs. Powered by omnisharp (directly or through
 LSP).
@@ -9259,6 +9259,14 @@ use my version instead:
 (when (modulep! :lang csharp)
   (package! csproj-mode
     :recipe (:local-repo "vendor/csproj-mode")))
+#+end_src
+
+*** DONE [#C] Use csharp-mode for "c#" code blocks :tweak:
+#+begin_src emacs-lisp :tangle yes
+(after! csharp-mode
+  (add-to-list 'markdown-code-lang-modes '("c#" . csharp-mode)))
+(after! org-src
+  (add-to-list 'org-src-lang-modes '("c#" . csharp)))
 #+end_src
 
 *** TODO [#C] Look into "Solution Explorer" visualizers for =.sln= files :feat:
