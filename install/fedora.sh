@@ -9,7 +9,7 @@ sudo dnf versionlock exclude --raw 'emacs-1:29.4-*'
 # prevent upgrades (even to a newer <name>-<epoch>:<version>-<release>) to avoid
 # ever having to run 'doom upgrade' unexpectedly after upgrading system packages
 # NOTE: "epoch" is an RPM construct and is required for proper version comparison
-target="1:29.2"
+target="1:30.2"
 sudo dnf versionlock delete emacs
 rpm -q emacs >/dev/null || {
     sudo dnf -y install "emacs-$target" || :
