@@ -42,6 +42,21 @@ WARNINGS:
        (t nil))))
   "The WSL version (1 or 2), or nil if not WSL.")
 
+(defun eeowaa-os-release (&optional key)
+  "Return value of KEY string (default \"NAME\") in /etc/os-release.
+If value is quoted, return the unquoted and unescaped string value."
+  (when (file-exists-p "/etc/os-release")
+    (with-temp-buffer
+      (insert-file-contents "/etc/os-release")
+      (when (re-search-forward (format "^%s=\\(['\"]?\\)\\(.*\\)\\1$"
+                                       (or key "NAME")))
+        (if (string= "" (match-string 1))
+            (match-string 2) ;; unquoted
+          (replace-regexp-in-string (format "\\\\\\(%s\\)"
+                                            (match-string 1))
+                                    "\\1"
+                                    (match-string 2)))))))
+
 ;; Do not use icons over SSH or in a WSL v1 TTY
 (defvar eeowaa-disable-icons
   (or (getenv "SSH_CLIENT")

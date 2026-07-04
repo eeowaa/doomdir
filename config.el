@@ -277,20 +277,19 @@ with special dedication semantics."
                              ,(face-attribute face :background)))))
 
 ;; Define fonts that I like
-(setq my/fonts '(("Iosevka Comfy Fixed" ;; Remove " Fixed" if you want ligatures
+(setq my/fonts `(("Iosevka Comfy Fixed" ;; Remove " Fixed" if you want ligatures
                   :variable-pitch "Iosevka Comfy Duo"
                   :serif "Iosevka Comfy Motion Fixed"
-                  ;; :default-size 15)
                   :default-size 14)
                  ("Source Code Pro"
                   :default-size 15)
-                 ("Terminus"
+                 (,(if (string= (eeowaa-os-release) "Ubuntu") "Terminus (TTF)" "Terminus")
                   :default-size 30)
                  ("Comic Mono"
                   :variable-pitch "Comic Neue"
                   :default-size 16)))
 
-;; Define a fuction to change the fonts
+;; Define a fuction to change the fonts (call in custom.el)
 (defun my/select-font (font &optional size)
   "Change the current fonts to a collection in `my/fonts'.
 If SIZE is omitted, the default will be used.
@@ -312,10 +311,6 @@ When called interactively, reload the fonts in the current session."
           doom-variable-pitch-font (funcall f variable-pitch-font size)
           doom-serif-font          (funcall f serif-font size)))
   (and (interactive-p) (doom/reload-font)))
-
-;; Set the font
-;; (my/select-font "Iosevka Comfy Fixed")
-;; (my/select-font "Comic Mono")
 
 ;; (add-hook 'doom-load-theme-hook #'doom-themes-treemacs-config)
 

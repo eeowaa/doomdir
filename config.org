@@ -332,6 +332,21 @@ This must be configured in =early-init.el=.
        (t nil))))
   "The WSL version (1 or 2), or nil if not WSL.")
 
+(defun eeowaa-os-release (&optional key)
+  "Return value of KEY string (default \"NAME\") in /etc/os-release.
+If value is quoted, return the unquoted and unescaped string value."
+  (when (file-exists-p "/etc/os-release")
+    (with-temp-buffer
+      (insert-file-contents "/etc/os-release")
+      (when (re-search-forward (format "^%s=\\(['\"]?\\)\\(.*\\)\\1$"
+                                       (or key "NAME")))
+        (if (string= "" (match-string 1))
+            (match-string 2) ;; unquoted
+          (replace-regexp-in-string (format "\\\\\\(%s\\)"
+                                            (match-string 1))
+                                    "\\1"
+                                    (match-string 2)))))))
+
 ;; Do not use icons over SSH or in a WSL v1 TTY
 (defvar eeowaa-disable-icons
   (or (getenv "SSH_CLIENT")
@@ -1268,20 +1283,19 @@ Some of my favorite free and open-source fonts include:
 
 #+begin_src emacs-lisp :tangle yes
 ;; Define fonts that I like
-(setq my/fonts '(("Iosevka Comfy Fixed" ;; Remove " Fixed" if you want ligatures
+(setq my/fonts `(("Iosevka Comfy Fixed" ;; Remove " Fixed" if you want ligatures
                   :variable-pitch "Iosevka Comfy Duo"
                   :serif "Iosevka Comfy Motion Fixed"
-                  ;; :default-size 15)
                   :default-size 14)
                  ("Source Code Pro"
                   :default-size 15)
-                 ("Terminus"
+                 (,(if (string= (eeowaa-os-release) "Ubuntu") "Terminus (TTF)" "Terminus")
                   :default-size 30)
                  ("Comic Mono"
                   :variable-pitch "Comic Neue"
                   :default-size 16)))
 
-;; Define a fuction to change the fonts
+;; Define a fuction to change the fonts (call in custom.el)
 (defun my/select-font (font &optional size)
   "Change the current fonts to a collection in `my/fonts'.
 If SIZE is omitted, the default will be used.
@@ -1303,10 +1317,19 @@ When called interactively, reload the fonts in the current session."
           doom-variable-pitch-font (funcall f variable-pitch-font size)
           doom-serif-font          (funcall f serif-font size)))
   (and (interactive-p) (doom/reload-font)))
+#+end_src
 
-;; Set the font
-;; (my/select-font "Iosevka Comfy Fixed")
-;; (my/select-font "Comic Mono")
+Font preferences are heavily machine-dependent (font availability, monitor size,
+display scaling, etc.) and should therefore be specified in =custom.el=.
+
+#+CAPTION: Example font specification in custom.el
+#+begin_src emacs-lisp :tangle no
+;; Option 1: Simple selection
+(my/select-font "Iosevka Comfy Fixed" 20)
+
+;; Option 2: Change defaults for better interactive calls to `my/select-font'
+(plist-put (alist-get "Iosevka Comfy Fixed" my/fonts nil nil #'string=) :default-size 20)
+(my/select-font "Iosevka Comfy Fixed")
 #+end_src
 
 *** TODO [#C] Make Treemacs look good again
@@ -2293,7 +2316,7 @@ unconditionally sets during startup (see table below) are overridden, as well:
     (cons predicate (list (plist-put plist :vslot nil)))))
 #+end_src
 
-#+caption: Doom's builtin popup rules
+#+CAPTION: Doom's builtin popup rules
 | pattern                         | vslot |
 |---------------------------------+-------|
 | ~"^\\*Process List\\*"~         |   101 |
@@ -12756,6 +12779,18 @@ Miscellaneous configuration without a corresponding module.
 #+begin_src emacs-lisp :tangle no
 ;;; Manual
 
+;;;; Preferences
+
+;; Fonts
+(plist-put (alist-get "Iosevka Comfy Fixed" my/fonts nil nil #'string=) :default-size 20)
+(my/select-font "Iosevka Comfy Fixed")
+
+;; RSS feeds
+(setq elfeed-feeds
+      '("https://example.com/rss.xml"))
+
+;;;; Secrets
+
 ;; Identifying information
 (setq user-full-name "John Doe"
       user-mail-address "johndoe@example.com")
@@ -12764,10 +12799,6 @@ Miscellaneous configuration without a corresponding module.
 (setq calendar-latitude 35.0933
       calendar-longitude -98.2632
       calendar-location-name "Nowhere, OK")
-
-;; RSS feeds
-(setq elfeed-feeds
-      '("https://example.com/rss.xml"))
 
 ;; IRC
 (set-irc-server! "irc.libera.chat"
