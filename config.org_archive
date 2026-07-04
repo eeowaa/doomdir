@@ -877,3 +877,49 @@ C-f=) for symbols under point.
 The current workaround is to select the "object" under point using =v i e= and
 then use the corresponding help command. This works well enough, but is an
 annoying extra step.
+
+* KILL External Tree Sitter (Emacs < 29)
+:PROPERTIES:
+:ARCHIVE_TIME: 2026-07-04 Sat 09:09
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: Miscellany/Install prerequisites
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: KILL
+:ARCHIVE_ITAGS: doom
+:END:
+#+name: tree_sitter_langs
+#+begin_src sh :exports none :tangle no
+
+## Install and use the correct version of the tree-sitter CLI
+npm -g install tree-sitter-cli@0.19.3
+for ts in `which -a tree-sitter | sort -u`
+do
+    case `$ts --version` in
+    tree-sitter\ 0.19.3*)
+        export PATH=${ts%/*}:$PATH
+        break ;;
+    esac
+done
+
+## Install Cask
+if [ -d ~/.local/opt/cask ]
+then
+    git -C ~/.local/opt/cask pull
+else
+    mkdir -p ~/.local/opt
+    git clone https://github.com/cask/cask ~/.local/opt/cask
+    ln -sf ~/.local/opt/cask/bin/cask ~/.local/bin
+fi
+
+## Obtain elisp-tree-sitter source code in its own directory
+[ -d ~/.local/src/emacs/tree-sitter-langs ] || {
+    mkdir -p ~/.local/src/emacs
+    git clone https://github.com/emacs-tree-sitter/tree-sitter-langs \
+        ~/.local/src/emacs/tree-sitter-langs
+}
+
+## Install dependencies for tree-sitter-langs
+cd ~/.local/src/emacs/tree-sitter-langs
+cask install
+#+end_src
+
