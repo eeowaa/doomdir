@@ -263,6 +263,52 @@ sudo dnf -y install jq
 <<github_release_downloader>>
 #+end_src
 
+*** TODO Ubuntu
+My preferred way to run Emacs on Windows is through WSL 1 (host NTFS filesystem
+performance is [[https://learn.microsoft.com/en-us/windows/wsl/compare-versions#exceptions-for-using-wsl-1-rather-than-wsl-2][terrible on WSL 2]] -- even when using [[https://www.boxofcables.dev/wsl2-per-device-swiotlb-pools-for-virtiofs-and-virtioproxy/][virtiofs]] -- and the Windows
+build of Emacs does not integrate well with Unix tooling). As of 2026, Ubuntu
+seems to be the only practical distro for WSL 1, so all special considerations
+for installing prerequisites on WSL 1 should tangle to =install/ubuntu.sh=.
+
+#+begin_src sh :tangle install/ubuntu.sh
+# Determine the WSL version (0 means not on WSL)
+case `uname -r` in
+,*-WSL2)      WSL_VERSION=2 ;;
+,*-Microsoft) WSL_VERSION=1 ;;
+,*)           WSL_VERSION=0 ;;
+esac
+
+# TODO: Obtain Emacs source code corresponding to installed DPKG
+
+# Install Emacs info manuals
+sudo apt-get -y install emacs-common-non-dfsg
+
+# Install ripgrep and fd (Doom prerequisites)
+sudo apt-get -y install ripgrep fd-find
+mkdir -p ~/.local/bin && ln -sf /usr/bin/fdfind ~/.local/bin/fd
+
+if [ $WSL_VERSION -eq 1 ]
+then
+    # FIXME: Support NodeJS on WSL 1 (requires configuration hacks)
+    echo >&2 'ERROR: NodeJS configuration is unimplemented on WSL 1'
+    exit 1
+else
+    # Install NVM
+    curl -fsSLo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
+        | env PROFILE=/dev/null bash
+
+    # Install NodeJS and NPM through NVM
+    nvm install node
+fi
+
+# Install pipx to install Python packages
+sudo apt-get -y install pipx
+
+# Install the gh-release-dl script to install binary assets from GitHub releases
+sudo apt-get -y install jq
+<<github_release_downloader>>
+#+end_src
+
 ** Elisp setup [4/4]
 *** DONE [#A] Add =$DOOMDIR/lisp= to ~load-path~
 References:
@@ -7473,6 +7519,15 @@ curl -fsSLo ~/.local/bin/helm_ls \
     https://github.com/mrjosh/helm-ls/releases/download/master/helm_ls_linux_amd64
 #+end_src
 
+**** DONE Ubuntu
+#+begin_src sh :tangle install/ubuntu.sh
+# Install prerequisites for `tools/Kubernetes` module
+
+## Helm language server
+curl -fsSLo ~/.local/bin/helm_ls \
+    https://github.com/mrjosh/helm-ls/releases/download/master/helm_ls_linux_amd64
+#+end_src
+
 ** lookup [8/11]
 *** DONE [#A] Install prerequisites
 **** OKAY macOS
@@ -7854,7 +7909,7 @@ https://emacs-lsp.github.io/lsp-mode/page/main-features/#code-actions-on-modelin
 (setq lsp-modeline-code-actions-segments nil)
 #+end_src
 
-** magit [3/7]
+** magit [4/8]
 *** STRT [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -7899,7 +7954,7 @@ cpan install App::Git::Autofixup
         :nv "gz" #'magit-jump-to-stashes)))
 #+end_src
 
-*** TODO [#A] Fix load order bug with =magit-status= :bug:
+*** DONE [#A] Fix load order bug with =magit-status= :bug:
 I've been getting the following error suddenly:
 #+begin_example
 `magit-status-sections-hook' contains entries that are no longer valid.
