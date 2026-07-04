@@ -8734,29 +8734,7 @@ a single line."
 #+end_src
 
 ** tmux [0/0] :ARCHIVE:
-** tree-sitter [4/6]
-*** DONE [#A] Unpin =tree-sitter-langs= :feat:
-Unfortunately, the font-locking provided by =yaml-mode= does not properly
-fontify multiline quoted strings within string literals. My hope is that
-=tree-sitter= will provided more accurate syntax highlighting for YAML.
-
-Doom currently uses an old version of =tree-sitter-langs= without support for
-YAML, so I am going to unpin that package for now.
-
-#+begin_src emacs-lisp :tangle packages.el
-(unpin! tree-sitter-langs)
-#+end_src
-
-*** DONE [#A] Use a different recipe for =tree-sitter-indent= :hack:
-My firewall is blocking the URL for the =tree-sitter-indent= package as defined
-in the MELPA recipe. The ~emacsattic~ GitHub repo is used instead.
-
-#+begin_src emacs-lisp :tangle packages.el
-(package! tree-sitter-indent
-  :recipe (:host github
-           :repo "emacsattic/tree-sitter-indent"))
-#+end_src
-
+** tree-sitter [2/3]
 *** DONE [#A] Add tree-sitter syntax highlighting to terraform :feat:
 Although there is no ~+tree-sitter~ flag for =:tools terraform=, there is
 support for HCL syntax [[https://github.com/emacs-tree-sitter/tree-sitter-langs/tree/master/repos][parsing]] and [[https://github.com/emacs-tree-sitter/tree-sitter-langs/tree/master/queries][highlighting]], so Terraform should use this.
@@ -8770,27 +8748,6 @@ Also, ~tree-sitter-major-mode-language-alist~ already sets ~terraform-mode~ to
 ;; Missing from evil-textobj-tree-sitter.el:
 (after! evil-textobj-tree-sitter
   (add-to-list 'evil-textobj-tree-sitter-major-mode-language-alist '(terraform-mode . "hcl")))
-#+end_src
-
-*** STRT [#A] Do not use =ts-fold= for modes without a parser :bug:
-There is a comment above the current definition of ~+fold--ts-fold-p~ that says
-"does this need more?", and the answer is "yes":
-
-*UPDATE*: The following code block works great, but I've disabled it:
-
-#+begin_src emacs-lisp :tangle no
-(defadvice! my/fold--ts-fold-p-a ()
-  "Check for tree-sitter-based folding in the current major mode."
-  :after-while #'+fold--ts-fold-p
-  (assq major-mode ts-fold-range-alist))
-#+end_src
-
-However, the =:editor fold= module has a lot of problems and I eventually want
-to replace it. For now, I'm going to completely disallow ~ts-fold-mode~.
-
-#+begin_src emacs-lisp :tangle packages.el
-;; HACK: Do not install ts-fold mode
-(package! ts-fold :disable t)
 #+end_src
 
 *** DONE [#C] Write test function for obtaining fold summaries :module:
@@ -8817,8 +8774,8 @@ For now, what I do is just manually run =M-x lsp-semantic-tokens-mode= in a
 buffer when I want to disable LSP semantic highlighting in that buffer (for
 example, in ~terraform-mode~ buffers).
 
-As a temporary workaround, since most LSP-supported languages that I use also
-support Tree-Sitter, I will just globally disable LSP semantic tokens:
+*UPDATE*: As a temporary workaround, since most LSP-supported languages that I
+use also support Tree-Sitter, I will just globally disable LSP semantic tokens:
 
 #+begin_src emacs-lisp :tangle yes
 (setq lsp-semantic-tokens-enable nil)

@@ -878,6 +878,88 @@ The current workaround is to select the "object" under point using =v i e= and
 then use the corresponding help command. This works well enough, but is an
 annoying extra step.
 
+* DONE [#A] Unpin =tree-sitter-langs= :feat:
+:PROPERTIES:
+:ARCHIVE_TIME: 2026-07-04 Sat 07:40
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :tools/tree-sitter
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: DONE
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2026-07-04 Sat 08:07] \\
+  Emacs 29+ uses built-in treesit instead of 3rd-party tree-sitter
+:END:
+Unfortunately, the font-locking provided by =yaml-mode= does not properly
+fontify multiline quoted strings within string literals. My hope is that
+=tree-sitter= will provided more accurate syntax highlighting for YAML.
+
+Doom currently uses an old version of =tree-sitter-langs= without support for
+YAML, so I am going to unpin that package for now.
+
+#+begin_src emacs-lisp :tangle packages.el
+(unpin! tree-sitter-langs)
+#+end_src
+
+
+* DONE [#A] Use a different recipe for =tree-sitter-indent= :hack:
+:PROPERTIES:
+:ARCHIVE_TIME: 2026-07-04 Sat 07:41
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :tools/tree-sitter
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: DONE
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2026-07-04 Sat 08:07] \\
+  Emacs 29+ uses built-in treesit instead of 3rd-party tree-sitter
+:END:
+My firewall is blocking the URL for the =tree-sitter-indent= package as defined
+in the MELPA recipe. The ~emacsattic~ GitHub repo is used instead.
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! tree-sitter-indent
+  :recipe (:host github
+           :repo "emacsattic/tree-sitter-indent"))
+#+end_src
+
+
+* KILL [#A] Do not use =ts-fold= for modes without a parser :bug:
+:PROPERTIES:
+:ARCHIVE_TIME: 2026-07-04 Sat 08:21
+:ARCHIVE_FILE: ~/Documents/src/life/stow-dotfiles/doom/.config/doom/config.org
+:ARCHIVE_OLPATH: :tools/tree-sitter
+:ARCHIVE_CATEGORY: config
+:ARCHIVE_TODO: STRT
+:ARCHIVE_ITAGS: doom
+:END:
+:LOGBOOK:
+- Note taken on [2026-07-04 Sat 08:22] \\
+  Emacs 29+ uses built-in treesit instead of 3rd-party tree-sitter
+:END:
+There is a comment above the current definition of ~+fold--ts-fold-p~ that says
+"does this need more?", and the answer is "yes":
+
+*UPDATE*: The following code block works great, but I've disabled it:
+
+#+begin_src emacs-lisp :tangle no
+(defadvice! my/fold--ts-fold-p-a ()
+  "Check for tree-sitter-based folding in the current major mode."
+  :after-while #'+fold--ts-fold-p
+  (assq major-mode ts-fold-range-alist))
+#+end_src
+
+However, the =:editor fold= module has a lot of problems and I eventually want
+to replace it. For now, I'm going to completely disallow ~ts-fold-mode~.
+
+#+begin_src emacs-lisp :tangle packages.el
+;; HACK: Do not install ts-fold mode
+(package! ts-fold :disable t)
+#+end_src
+
+
 * KILL External Tree Sitter (Emacs < 29)
 :PROPERTIES:
 :ARCHIVE_TIME: 2026-07-04 Sat 09:09
