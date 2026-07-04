@@ -148,7 +148,7 @@ _Remediation_
   - Doom's =:checkers spell= module documentation says that =spell-fu= is faster
   - I just removed the =+flyspell= flag and that was enough
 
-** Without clear attribution [3/3]
+** Without clear attribution [3/4]
 *** DONE Lag when drawing childframe borders for symbol documentation :perf:
 *** OKAY Unpredictable breakage with transient childframes :bug:
 _Problem_
@@ -161,8 +161,13 @@ _Remediation_
 - Use standard transient windows (like in TTY Emacs)
 
 *** OKAY Word wrap is not working :bug:
-- With word wrap enabled, wrapped list items content is not proparly indented
+- With word wrap enabled, wrapped list items content is not properly indented
 - *UPDATE*: For whatever reason, this just started to work again.
+
+*** TODO Trailing whitespace is only highlighted in ~whitespace-mode~ :tweak:
+- Trailing whitespace used to be underlined even outside of ~whitespace-mode~
+- Now I only notice trailing whitespace in Magit diffs before committing
+- /I might have intentionally disabled this at some point last year/
 
 * Reintroductions
 ** Emacs [1/1]
@@ -187,7 +192,7 @@ _Remediation_
 - [ ] =csharp +lsp=
 
 * Reinventions
-** Windows integration [3/3]
+** Windows integration [3/4]
 *** DONE Allow direnv in Windows host directory :feat:
 _Problem_
 - I have a symlink from =/mnt/c= to =~/Documents/src/work=
@@ -206,8 +211,87 @@ _Remediation_
 - See ChatGPT log for more details
 - Can integrate with =bookmark= or use a more generic ~file:line~ format
 
-** LLM integration [0/3]
-*** TODO Automatically enable ~gptel-mode~ in specific files :feat:
+*** STRT Benchmark NTFS performance on WSL 2 using opt-in VirtIO :perf:
+:LOGBOOK:
+- Note taken on [2026-07-04 Sat 14:35] \\
+  I just tried this using Fedora 44 and performance was still *awful*. Other ideas:
+  - Ensure kernel modules are all present + all kernel parameters are correctly set
+  - Try another WSL 2 distro (Ubuntu might have better out-of-the-box support)
+  - Convert =/mnt/c/path/to/code= to a Samba share and mount in WSL 2
+- Note taken on [2026-07-01 Wed 13:08] \\
+  There is an open issue with using virtiofs. Wait until this has gotten resolved.
+  - https://github.com/microsoft/WSL/issues/40719
+  - https://github.com/microsoft/openvmm/pull/3689
+:END:
+- I selected WSL 1 instead of WSL 2 due to NTFS performance
+  + https://learn.microsoft.com/en-us/windows/wsl/compare-versions#exceptions-for-using-wsl-1-rather-than-wsl-2
+  + https://chatgpt.com/c/6a1df3ba-3390-83e8-91e2-978d7d7e3251
+- Using virtiofs instead of 9P in WSL 2 may offer satisfactory NTFS performance
+  + I was not aware of this when initially configuring my machine
+  + See the *Web page transcription* below for more information
+- Switching back to WSL 2 would offer the following benefits:
+  + Ability to use Fedora again
+    - Fewer compatibility issues in my Doom Emacs config
+    - Familiar package management
+    - Closer to RHEL (good for work stuff)
+  + Better performance
+    - Executables should all be faster (no syscall compatibility layer)
+    - Filesystem access outside of =/mnt= should be much faster
+    - Better subprocess performance in Emacs (linters, LSP, etc.)
+  + Native display server instead of VcXsrv
+    - Can use fullscreen Emacs without a title bar
+    - Hopefully no more scaling issues across different monitors
+    - Hopefully better performance with Wayland
+- Sticking with WSL 1 still offers some benefits over WSL 2:
+  + NTFS performance in WSL 1 might still be slightly better than WSL 2
+  + Added friction outside of =/mnt= encourages global performance fixes
+  + My dotfiles are becoming more portable (accounting for Ubuntu and WSL 1)
+  + Collaboration might be easier (colleagues using WSL are using Ubuntu)
+  + No switching cost
+
+
+The following is a transcription of this fantastic article (published May 31, 2026, by Hayden Barnes): https://www.boxofcables.dev/wsl2-per-device-swiotlb-pools-for-virtiofs-and-virtioproxy/
+
+***** WSL 2 is getting faster Windows file system access
+From DrvFs in WSL 1 to Plan 9 to virtiofs, cross-OS file access in WSL 2 has improved with each generation. A new change gives each virtio device its own dedicated DMA pool, removing the last major contention point on the virtiofs path.
+-----
+If your workflow crosses the Windows/Linux boundary, file I/O performance in WSL 2 has been getting steadily better. [[https://github.com/microsoft/WSL/pull/40654][A change landed in WSL 2]] in May 2026 that removes one of the last remaining bottlenecks on the virtiofs path. To understand why it matters, it helps to follow how cross-OS file access has evolved.
+
+****** How we got here
+WSL 1 (2016) handled Windows drive access through DrvFs, a custom filesystem driver running inside the Windows NT kernel. Because WSL 1 ran Linux processes directly on the Windows kernel through a [[https://learn.microsoft.com/en-us/windows/wsl/compare-versions][compatibility layer]], file operations on =/mnt/c= could reach NTFS almost directly. Performance was good for file-heavy workloads.
+
+WSL 2 (May 2019) replaced that model with a [[https://learn.microsoft.com/en-us/windows/wsl/compare-versions#whats-new-in-wsl-2][full Linux kernel in a lightweight Hyper-V VM]]. That was the right trade: real Linux kernel calls, proper syscall compatibility, and much better performance for Linux-native workloads. For cross-OS access, the VM boundary meant a different approach was needed. Microsoft built a [[https://en.wikipedia.org/wiki/9P_(protocol)][Plan 9 (9P) file server]] into the Windows-side WSL service. Your Linux session connects to it over a [[https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/user-guide/make-integration-service][Hyper-V socket]] at boot, and file operations on =/mnt/c= travel through that 9P protocol channel.
+
+9P over a Hyper-V socket works, but it has protocol overhead: each operation is bounded by a message size parameter (~msize=65536~, 64 KB). File-heavy workloads that hit many small files carry that overhead on every round trip. Microsoft has been iterating on this since WSL 2 launched.
+
+Around 2021, [[https://virtio-fs.gitlab.io/][virtiofs]] arrived as an experimental opt-in. Virtiofs uses the [[https://docs.oasis-open.org/virtio/virtio/v1.2/virtio-v1.2.html][VirtIO]] transport for shared-memory file access, reducing serialization overhead compared to 9P. You enable it in the ~[wsl2]~ section of your [[https://learn.microsoft.com/en-us/windows/wsl/wsl-config][.wslconfig]] with ~virtiofs=true~. It has been working its way through incrementally since then: device reuse improvements in [[https://github.com/microsoft/WSL/pull/40298][PR #40298]], shared mmap support without [[https://docs.kernel.org/filesystems/dax.html][DAX]] in [[https://github.com/microsoft/WSL/pull/40426][PR #40426]], and now the DMA layer fix.
+
+****** The DMA layer
+Virtual machines on Hyper-V perform DMA for I/O through bounce buffers: a reserved memory region below the 4 GB DMA boundary that hardware can address directly. The Linux kernel calls this the [[https://docs.kernel.org/core-api/swiotlb.html][SWIOTLB]] pool. Until recently, all virtio devices in a WSL 2 session shared one global pool. A virtiofs mount for =/mnt/c=,= one for =/mnt/d=, and the virtio network adapter all queued into the same buffer, contending with each other during heavy I/O.
+
+[[https://github.com/microsoft/WSL/pull/40654][PR #40654]], authored by [[https://github.com/benhillis][Ben Hillis]] and merged May 27, 2026, gives each virtio device its own dedicated DMA pool. The kernel allocates a contiguous physical range below 4 GB at boot, publishes its address through sysfs (=/sys/bus/vmbus/drivers/hv_pci/swiotlb_base= and =swiotlb_size=), and the WSL service reads those values and injects a per-device ~swiotlb=~ option into each virtio device at creation time. No more shared queue between drives and the network adapter.
+
+*Note:* this requires kernel Microsoft.WSL.Kernel 6.18.26.3-1, shipping with WSL 2 DeviceHost 1.2.29-0. If you are on an older kernel, WSL will tell you: /"The running kernel is missing a patch that significantly improves virtio device performance. Update to a more recent WSL kernel to enable this optimization."/
+
+****** What this means in practice
+The scenarios that benefit most are the file-heavy cross-OS workflows: working in a project that lives on a Windows drive but builds in Linux. If you keep your code under =C:\Users\you\code= and run ~cargo build~, ~npm install~, or ~mvn package~ from =/mnt/c=, every file read pays a cross-OS I/O cost. The per-device pool removes one of the remaining contention points on the virtiofs path.
+
+VirtioProxy networking also benefits, since it shares the same DMA infrastructure and gets its own pool too.
+
+To get the most out of this:
+- Set ~virtiofs=true~ in the ~[wsl2]~ section of your =.wslconfig= (https://learn.microsoft.com/en-us/windows/wsl/wsl-config).
+- Update to the latest WSL kernel with ~wsl.exe --update --pre-release~ (https://learn.microsoft.com/en-us/windows/wsl/basic-commands#update-wsl).
+- Keep your WSL 2 session RAM above 1 GB. The SWIOTLB pool needs at least 64 MB of headroom.
+
+Virtiofs remains opt-in for now: the default transport is still Plan 9 over a Hyper-V socket.
+
+****** The longer arc
+WSL filesystem performance across the OS boundary has gotten better with each generation. WSL 1's DrvFs was fast because there was no VM boundary. WSL 2 introduced the VM and the shift to 9P. Virtiofs closed most of the gap. Per-device SWIOTLB pools remove contention at the DMA layer. The gap keeps narrowing.
+
+The default is still Plan 9 over a Hyper-V socket. Virtiofs is still opt-in. The work is ongoing in the open at [[https://github.com/microsoft/WSL][github.com/microsoft/WSL]].
+
+** LLM integration [1/3]
+*** DONE Automatically enable ~gptel-mode~ in specific files :feat:
 - I think this will be easy enough using file-local variables.
 
 *** TODO Automatically insert line breaks before new =gptel= prompts :feat:
