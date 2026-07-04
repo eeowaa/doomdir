@@ -140,7 +140,23 @@ EOF
 fi
 #+end_src
 
-** Install prerequisites [2/2]
+*** TODO Ubuntu
+#+begin_src sh :tangle install/ubuntu.sh
+#!/bin/sh
+
+cat >&2 <<EOF
+WARNING: If installed by a package manager, Emacs might not be pinned at a
+specific version (Doom has no knowledge of whether this is the case). System
+package updates may upgrade Emacs, resulting in:
+
+  1. Potential package breakages
+  2. Potential configuration breakages
+  3. The need to run \`doom build'
+
+,*** Use caution when performing system updates! ***
+EOF
+#+end_src
+
 :PROPERTIES:
 :header-args: :noweb yes
 :END:
@@ -732,6 +748,12 @@ brew install ripgrep
 sudo dnf -y install ripgrep
 #+end_src
 
+**** DONE Ubuntu
+#+begin_src sh :tangle install/ubuntu.sh
+# Install prerequisites for `completion/vertico` module
+sudo apt-get -y install ripgrep
+#+end_src
+
 *** DONE [#B] Find a reference for the symbols in the completing-read buffer :doc:
 These symbols are described in the docstring for the function
 ~marginalia--symbol-class~.
@@ -1203,6 +1225,27 @@ sudo dnf -y install terminus-fonts
 npm install -g comic-mono
 mkdir -p "$XDG_DATA_HOME/fonts"
 ln -sf "`npm root -g`/comic-mono" "$XDG_DATA_HOME/fonts"
+
+## Iosevka Comfy
+if [ -e "$XDG_DATA_HOME/fonts/iosevka-comfy/.git" ]
+then
+    git -C "$XDG_DATA_HOME/fonts/iosevka-comfy" pull
+else
+    git clone --depth 1 \
+        'https://git.sr.ht/~protesilaos/iosevka-comfy' \
+        "$XDG_DATA_HOME/fonts/iosevka-comfy"
+fi
+
+## Update fonts
+fc-cache -v
+#+end_src
+
+**** STRT Ubuntu
+#+begin_src sh :tangle install/ubuntu.sh
+# Install prerequisites for `ui/doom` module
+sudo apt-get -y install fonts-terminus
+
+## TODO: Comic Mono
 
 ## Iosevka Comfy
 if [ -e "$XDG_DATA_HOME/fonts/iosevka-comfy/.git" ]
@@ -2806,6 +2849,12 @@ brew install python3
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `ui/treemacs` module
 sudo dnf -y install python3
+#+end_src
+
+***** DONE Ubuntu
+#+begin_src sh :tangle install/ubuntu.sh
+# Install prerequisites for `ui/treemacs` module
+sudo apt-get -y install python3
 #+end_src
 
 **** DONE [#A] Unpin treemacs packages :bug:
@@ -5128,6 +5177,12 @@ brew install coreutils
 sudo dnf -y install coreutils
 #+end_src
 
+**** DONE Ubuntu
+#+begin_src sh :tangle install/ubuntu.sh
+# Install prerequisites for `emacs/dired` module
+sudo apt-get -y install coreutils
+#+end_src
+
 *** DONE [#C] Format the results of ~find-dired~ to be like ~dired~ :tweak:
 Evaluate the following elisp forms to compare output buffer formats:
 
@@ -5385,6 +5440,12 @@ brew install fish
 sudo dnf -y install fish
 #+end_src
 
+**** DONE Ubuntu
+#+begin_src sh :tangle install/ubuntu.sh
+# Install prerequisites for `term/eshell` module
+sudo apt-get -y install fish
+#+end_src
+
 *** DONE [#B] Define aliases :feat:
 #+begin_src emacs-lisp :tangle yes
 (set-eshell-alias!
@@ -5450,7 +5511,7 @@ to =eshell=, it forcefully clears the file on disk.
 
 ** shell [0/0] :ARCHIVE:
 ** term [0/0] :ARCHIVE:
-** vterm [13/22]
+** vterm [13/23]
 :PROPERTIES:
 :CATEGORY: doom/vterm
 :COOKIE_DATA: recursive
@@ -5479,6 +5540,17 @@ sudo dnf -y install libvterm cmake
 ## Soft line wrapping
 ## <https://github.com/akermu/emacs-libvterm/issues/179#issuecomment-1045331359>
 sudo dnf -y install screen
+#+end_src
+
+**** STRT Ubuntu
+#+begin_src sh :tangle install/ubuntu.sh
+# Install prerequisites for `term/vterm` module
+# REVIEW: Ensure this is everything you need
+sudo apt-get -y install libvterm-dev cmake
+
+## Soft line wrapping
+## <https://github.com/akermu/emacs-libvterm/issues/179#issuecomment-1045331359>
+sudo apt-get -y install screen
 #+end_src
 
 *** Keybindings [5/6]
@@ -6410,6 +6482,14 @@ mkdir -p ~/.local/share/dict
 aspell dump master en_US | sort -u > ~/.local/share/dict/words-en_US.txt
 #+end_src
 
+**** DONE Ubuntu
+#+begin_src sh :tangle install/ubuntu.sh
+# Install prerequisites for `checkers/spell` module
+sudo apt-get -y install aspell
+mkdir -p ~/.local/share/dict
+aspell dump master en_US | sort -u > ~/.local/share/dict/words-en_US.txt
+#+end_src
+
 *** DONE [#A] Prevent spell checking from being enabled by default :tweak:
 I like having the option, but I would prefer to enable it manually per buffer.
 
@@ -6604,7 +6684,7 @@ sudo dnf -y install unzip java-latest-openjdk-headless
 #+begin_src sh :tangle install/ubuntu.sh
 # Install prerequisites for `checkers/grammar` module
 # Reference: <https://raw.githubusercontent.com/languagetool-org/languagetool/master/install.sh>
-sudo apt -y install unzip default-jre-headless
+sudo apt-get -y install unzip default-jre-headless
 (
     set -e
     mkdir -p ~/.local/src/doom
@@ -7543,7 +7623,7 @@ sudo dnf -y install ripgrep sqlite wordnet
 **** DONE Ubuntu
 #+begin_src sh :tangle install/ubuntu.sh
 # Install prerequisites for `tools/lookup` module
-sudo apt -y install ripgrep sqlite3 wordnet
+sudo apt-get -y install ripgrep sqlite3 wordnet
 #+end_src
 
 *** DONE [#A] Fix ~+lookup-project-search-backend-fn~ :bug:hack:
@@ -8221,7 +8301,7 @@ sudo dnf -y install pkgconf pkgconf-pkg-config poppler automake
 **** DONE Ubuntu
 #+begin_src sh :tangle install/ubuntu.sh
 # Install prerequisites for `tools/pdf` module
-sudo apt -y install \
+sudo apt-get -y install \
     autoconf \
     automake \
     gcc \
