@@ -22,68 +22,16 @@ curl -fsSLo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
 # Install NodeJS and NPM through NVM
 nvm install node
 
-# Function to install a binary asset from the latest release of a GitHub repo
+# Install the gh-release-dl script to install binary assets from GitHub releases
 brew install jq
-github_binary_release() {
-    local func='github_binary_release'
-    local repo= asset= prefix= root= binary=
-    while [ $# -gt 0 ]
-    do
-        case $1 in
-        --repo)
-            # A "<user>/<repo>" string to identify a GitHub repo
-            repo=$2 ;;
-        --asset)
-            # An anchored regular expression used by `jq` for a named tarball
-            asset=$2 ;;
-        --prefix)
-            # Directory to pass to `tar -C`
-            prefix=$2 ;;
-        --path)
-            # Directory path within the tarball to the data root
-            # NOTE: This variable cannot be named `path` due to conflict with ZSH
-            root=$2 ;;
-        --binary)
-            # Path relative to the data root to the executable file
-            binary=$2 ;;
-        esac
-        shift; shift
-    done
-    for arg in "$repo" "$asset" "$prefix" "$root" "$binary"
-    do
-        [ "X$arg" = X ] && {
-            echo >&2 "ERROR: $func: missing argument"
-            return 1
-        }
-    done
-    local url=`
-        curl -fsSLo- https://api.github.com/repos/$repo/releases/latest | jq -r \
-        '.assets[] | select(.name | test("^'"$asset"'$")) | .browser_download_url'
-    `
-    [ "X$url" = X ] && {
-        echo >&2 "ERROR: $func: could not find URL"
-        return 1
+which gh-release-dl >/dev/null 2>&1 || {
+    # TODO: Install to a more "permanent" directory used by Doom Emacs
+    test -f "${TMPDIR:-/tmp}/gh-release-dl" || {
+        test -d "${TMPDIR:-/tmp}" || mkdir -p "${TMPDIR:-/tmp}"
+        curl -fsSLo "${TMPDIR:-/tmp}/gh-release-dl" https://raw.githubusercontent.com/eeowaa/stow-dotfiles/refs/heads/main/utils/.local/bin/gh-release-dl
     }
-    local canonical_path=`readlink -m "$prefix/$root"`
-    [ -e "$canonical_path" ] && {
-        printf "\
-$func: found existing: $canonical_path
-$func: (recursively) delete? [y/N]: "
-        read delete
-        case $delete in
-        [yY]*)
-            rm -rf "$canonical_path" ;;
-        *)  echo >&2 "ERROR: $func: refusing to download"
-            return 1 ;;
-        esac
-    }
-    mkdir -p "$prefix" "$HOME/.local/bin"
-    curl -fsSLo- "$url" | tar -C "$prefix" -xzf -
-    [ -x "$canonical_path/$binary" ] || {
-        echo >&2 "ERROR: $func: not an executable file: $canonical_path/$binary"
-        return 1
-    }
-    ln -sf "$canonical_path/$binary" "$HOME/.local/bin"
+    chmod +x "${TMPDIR:-/tmp}/gh-release-dl"
+    alias gh-release-dl="${TMPDIR:-/tmp}/gh-release-dl"
 }
 
 # Install prerequisites for `completion/vertico` module
