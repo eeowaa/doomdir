@@ -15,6 +15,9 @@ EOF
 # Install Homebrew to install system packages
 curl -fsSLo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
 
+# Install ripgrep and fd (Doom prerequisites)
+brew install ripgrep fd
+
 # Install NVM
 curl -fsSLo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
     | env PROFILE=/dev/null bash
@@ -33,9 +36,6 @@ which gh-release-dl >/dev/null 2>&1 || {
     chmod +x "${TMPDIR:-/tmp}/gh-release-dl"
     alias gh-release-dl="${TMPDIR:-/tmp}/gh-release-dl"
 }
-
-# Install prerequisites for `completion/vertico` module
-brew install ripgrep
 
 # Install prerequisites for `ui/doom` module
 brew install font-terminus
@@ -78,7 +78,7 @@ npm install -g dockerfile-language-server-nodejs
 brew install editorconfig
 
 # Install prerequisites for `tools/lookup` module
-brew install ripgrep sqlite3
+brew install sqlite3
 
 # Install prerequisites for `tools/magit` module
 (cd ~/Documents/src/life/stow-dotfiles && make perl)

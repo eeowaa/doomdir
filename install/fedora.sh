@@ -77,6 +77,9 @@ fi
 # Install openssh-askpass to install Elisp packages
 sudo dnf -y install openssh-askpass
 
+# Install ripgrep and fd (Doom prerequisites)
+sudo dnf -y install ripgrep fd-find
+
 # Install NVM
 curl -fsSLo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
     | env PROFILE=/dev/null bash
@@ -98,9 +101,6 @@ which gh-release-dl >/dev/null 2>&1 || {
     chmod +x "${TMPDIR:-/tmp}/gh-release-dl"
     alias gh-release-dl="${TMPDIR:-/tmp}/gh-release-dl"
 }
-
-# Install prerequisites for `completion/vertico` module
-sudo dnf -y install ripgrep
 
 # Install prerequisites for `ui/doom` module
 sudo dnf -y install terminus-fonts
@@ -186,7 +186,7 @@ npm install -g dockerfile-language-server-nodejs
 sudo dnf -y install editorconfig
 
 # Install prerequisites for `tools/lookup` module
-sudo dnf -y install ripgrep sqlite wordnet
+sudo dnf -y install sqlite wordnet
 
 # Install prerequisites for `tools/magit` module
 (cd ~/Documents/src/life/stow-dotfiles && make perl)

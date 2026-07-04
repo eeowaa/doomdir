@@ -12,8 +12,6 @@ package updates may upgrade Emacs, resulting in:
 *** Use caution when performing system updates! ***
 EOF
 
-# Install prerequisites for `completion/vertico` module
-sudo apt-get -y install ripgrep
 
 # Install prerequisites for `ui/doom` module
 sudo apt-get -y install fonts-terminus
@@ -75,7 +73,7 @@ sudo apt-get -y install unzip default-jre-headless
 )
 
 # Install prerequisites for `tools/lookup` module
-sudo apt-get -y install ripgrep sqlite3 wordnet
+sudo apt-get -y install sqlite3 wordnet
 
 # Install prerequisites for `tools/pdf` module
 sudo apt-get -y install \

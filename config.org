@@ -180,6 +180,9 @@ which gh-release-dl >/dev/null 2>&1 || {
 # Install Homebrew to install system packages
 curl -fsSLo- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
 
+# Install ripgrep and fd (Doom prerequisites)
+brew install ripgrep fd
+
 # Install NVM
 curl -fsSLo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
     | env PROFILE=/dev/null bash
@@ -241,6 +244,9 @@ brew install jq
 
 # Install openssh-askpass to install Elisp packages
 sudo dnf -y install openssh-askpass
+
+# Install ripgrep and fd (Doom prerequisites)
+sudo dnf -y install ripgrep fd-find
 
 # Install NVM
 curl -fsSLo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
@@ -612,19 +618,6 @@ This module provides Ivy integration for a variety of Emacs commands, as well as
 a unified interface for project search and replace, powered by [[https://github.com/BurntSushi/ripgrep/][ripgrep]].
 #+end_quote
 
-*** DONE [#A] Install prerequisites
-**** DONE macoS
-#+begin_src sh :tangle install/macos.sh
-# Install prerequisites for `completion/ivy` module
-brew install ripgrep
-#+end_src
-
-**** DONE Fedora
-#+begin_src sh :tangle install/fedora.sh
-# Install prerequisites for `completion/ivy` module
-sudo dnf -y install ripgrep
-#+end_src
-
 *** DONE [#A] Make it easier to jump to headlines across Org buffers
 #+begin_src emacs-lisp :tangle yes
 (setq counsel-org-goto-all-outline-path-prefix 'buffer-name)
@@ -635,25 +628,6 @@ sudo dnf -y install ripgrep
 This module enhances the Emacs search and completion experience, and also
 provides a united interface for project search and replace, powered by [[https://github.com/BurntSushi/ripgrep/][ripgrep]].
 #+end_quote
-
-*** DONE [#A] Install prerequisites
-**** DONE macoS
-#+begin_src sh :tangle install/macos.sh
-# Install prerequisites for `completion/vertico` module
-brew install ripgrep
-#+end_src
-
-**** DONE Fedora
-#+begin_src sh :tangle install/fedora.sh
-# Install prerequisites for `completion/vertico` module
-sudo dnf -y install ripgrep
-#+end_src
-
-**** DONE Ubuntu
-#+begin_src sh :tangle install/ubuntu.sh
-# Install prerequisites for `completion/vertico` module
-sudo apt-get -y install ripgrep
-#+end_src
 
 *** DONE [#B] Find a reference for the symbols in the completing-read buffer :doc:
 These symbols are described in the docstring for the function
@@ -7481,19 +7455,19 @@ curl -fsSLo ~/.local/bin/helm_ls \
 **** OKAY macOS
 #+begin_src sh :tangle install/macos.sh
 # Install prerequisites for `tools/lookup` module
-brew install ripgrep sqlite3
+brew install sqlite3
 #+end_src
 
 **** DONE Fedora
 #+begin_src sh :tangle install/fedora.sh
 # Install prerequisites for `tools/lookup` module
-sudo dnf -y install ripgrep sqlite wordnet
+sudo dnf -y install sqlite wordnet
 #+end_src
 
 **** DONE Ubuntu
 #+begin_src sh :tangle install/ubuntu.sh
 # Install prerequisites for `tools/lookup` module
-sudo apt-get -y install ripgrep sqlite3 wordnet
+sudo apt-get -y install sqlite3 wordnet
 #+end_src
 
 *** DONE [#A] Fix ~+lookup-project-search-backend-fn~ :bug:hack:
