@@ -12468,12 +12468,100 @@ that. I'm sure it's not too difficult.
   - Enables flexible =gptel= integration across Emacs.
 
 *** STRT Packages
-The two most promising packages at this time seem to be =chatgpt-shell= and
-=gptel=. The former is currently more popular, but the latter seems more in line
-with my own philosophy of using Emacs.
+The landscape for LLM packages in Emacs is rapidly evolving, but right now,
+=gptel= remains at the center. Because I'm already familiar with it, I would
+like to use packages based on =gptel=, but I'm interested in some others, too
+(see @tryme tags below). I've documented my research on packages below, though
+I still haven't even looked at a fair number of available packages. Use
+=M-x list-packages= to search for more. See also:
+
+- https://sukany.cz/blog/2026-03-23-emacs-gptel-setup/
+  - https://github.com/skissue/llm-tool-collection
+  - https://github.com/positron-solutions/ragmacs
+    - https://www.youtube.com/watch?v=JHXG225oP8E
+    - https://www.youtube.com/watch?v=2VoOoS4cEV0
+  - https://codeberg.org/bajsicki/gptel-got
+
+_Base packages_
+- [[https://github.com/karthink/gptel][gptel]]
+  - The most popular LLM package for Emacs
+  - Lots of packages are based off of =gptel=
+  - I still have lots of ground to explore here (e.g., tools, MCP, "presets" a.k.a. agents)
+- [[https://github.com/ahyatt/llm][llm]]
+  - Library package for interating with LLMs (no UI)
+  - Some other packages (like =ellama=) are based on this
+
+_Code completion_
+- [[https://github.com/milanglacier/minuet-ai.el][minuet]] (scope)
+  - Feature-rich scoped completion after point ("fill in the middle")
+  - Requires separate configuration (*not* based on =gptel=)
+- [[https://github.com/mwolson/gptel-fn-complete][gptel-fn-complete]] (function)
+  - Suggest function definition at point given a prompt embedded in a code comment
+  - Documentation includes a nice comparison of AI code completion packages
+- [[https://github.com/lanceberge/elysium][elysium]] (file or region)
+  - Inject =smerge= patches into the current buffer given an interactive prompt
+  - Reasoning is provided in a linked =gptel= chat buffer
+- [[https://github.com/kmontag/macher][macher]] @tryme (multiple files)
+  - Generate project-level patches for review and approval (like =elysium= but for projects)
+  - Calls tools to limit context (does not read all files at once)
+- [[https://github.com/beacoder/gptel-cpp-complete][gptel-cpp-complete]]
+  - Context-aware C++ completion without prompting
+  - Requires a hyper-specific set of dependencies (e.g., =eglot=, =clangd=, =treesit=)
+  - Seems more like a good reference implementation than something I'd actually use
+
+_Agentic workflows_
+- *General*
+  - [[https://github.com/karthink/gptel-agent][gptel-agent]] @tryme
+    - Seems relatively simple, but well-designed (same author as =gptel=)
+    - Might want to start here to get a feel for "agentic coding"
+  - [[https://github.com/inaimathi/aidev-mode][aidev-mode]]
+  - [[https://github.com/s-kostyaev/ellama][ellama]]
+  - [[https://github.com/captainflasmr/ollama-buddy][ollama-buddy]] @tryme
+    - Everything but the kitchen sink (batteries-included maximalist package)
+    - Probably too heavy for daily use, but I should try it to get some ideas
+    - Documentaion has a nice [[https://github.com/captainflasmr/ollama-buddy#alternative-llm-feature-comparison-matrix][comparison of LLM packages]]
+- *[[https://modelcontextprotocol.io/docs/getting-started/intro][MCP]]*
+  - [[https://github.com/lizqwerscott/mcp.el][mcp]] @tryme
+  - [[https://codeberg.org/martenlienen/emcp][emcp]]
+- *[[https://github.com/Aider-AI/aider][Aider]]*
+  - [[https://github.com/tninja/aider.el][aider]]
+  - [[https://github.com/MatthewZMD/aidermacs][aidermacs]] @tryme
+    - This seems to be the 2nd-most popular LLM package after =gptel=
+    - Should probably try this to see what the fuss is about (alongside the Aider CLI)
+  - [[https://github.com/localredhead/ob-aider.el][ob-aider]]
+- *[[https://github.com/TabbyML/tabby][Tabby]]*
+  - [[https://github.com/ragnard/tabby-mode][tabby-mode]]
+  - [[https://github.com/Bastillan/tabbymacs][tabbymacs]]
+
+_Writing assistance_
+- *Commit message generation*
+  - [[https://github.com/lakkiy/gptel-commit][gptel-commit]]
+  - [[https://github.com/ragnard/gptel-magit][gptel-magit]] (also explains diffs)
+- *PR description generation*
+  - [[https://gitlab.com/rogs/forge-llm][forge-llm]]
+  - [[https://github.com/ArthurHeymans/gptel-forge-prs][gptel-forge-prs]]
+- *General*
+  - [[https://github.com/awdeorio/flywrite][flywrite]]
+  - [[https://github.com/ahyatt/ekg/][ekg]] (knowledge management like =org-roam=)
+
+_Elisp development_
+- [[https://github.com/laurynas-biveinis/elisp-dev-mcp][elisp-dev-mcp]]
+- [[https://github.com/ahyatt/llm-test][llm-test]]
+- [[https://github.com/s-kostyaev/elisa][elisa]]
+
+_Applications_
+- [[https://github.com/fritzgrabo/elfeed-summarize][elfeed-summarize]]
+- [[https://github.com/sillyfellow/mu4e-llm][mu4e-llm]]
+
+_Org-mode integration_
+- [[https://github.com/rksm/org-ai][org-ai]]
+- [[https://github.com/laurynas-biveinis/org-mcp][org-mcp]]
+- [[https://github.com/sunflowerseastar/ob-llm][ob-llm]]
+- [[https://codeberg.org/Anoncheg/emacs-cui][cui]]
 
 #+begin_src emacs-lisp :tangle packages.el
 (package! gptel)
+(package! gptel-agent)
 #+end_src
 
 *** STRT Configuration

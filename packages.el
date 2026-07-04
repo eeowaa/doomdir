@@ -202,6 +202,7 @@
 ;;(package! mastadon)
 
 (package! gptel)
+(package! gptel-agent)
 
 ;;; :config
 
