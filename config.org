@@ -9222,7 +9222,7 @@ use my version instead:
 
 *** DONE [#C] Use csharp-mode for "c#" code blocks :tweak:
 #+begin_src emacs-lisp :tangle yes
-(after! csharp-mode
+(after! markdown-mode
   (add-to-list 'markdown-code-lang-modes '("c#" . csharp-mode)))
 (after! org-src
   (add-to-list 'org-src-lang-modes '("c#" . csharp)))
