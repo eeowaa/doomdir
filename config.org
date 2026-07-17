@@ -1135,7 +1135,7 @@ advising ~balance-windows~ to respect side windows.
 formats, such as org-mode, markdown, and LaTeX.
 #+end_quote
 
-** doom [4/7]
+** doom [3/7]
 #+begin_quote
 This module gives Doom its signature look: powered by the =doom-one= theme
 (inspired by Atom's One Dark theme) and =solaire-mode=.
@@ -1197,10 +1197,13 @@ fi
 fc-cache -v
 #+end_src
 
-*** DONE [#A] Never hide the modeline :tweak:bug:
+*** STRT [#A] Never hide the modeline :tweak:bug:
 Without a modeline, the only way to see a clear distinction between the bottom
 of a window without a modeline and the top of another window is by using certain
 themes in GUI Emacs.
+
+*UPDATE*: The ~*Messages*~ buffer (~messages-buffer-mode~) is now hiding its
+mode line. The probable cause is a recent update to Doom or =doom-modeline=.
 
 #+begin_src emacs-lisp :tangle yes
 ;; `always' is just a no-op that returns `t'
