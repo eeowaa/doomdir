@@ -1019,6 +1019,10 @@ _SPC_: Play/Pause    _l_: Playlist    _s_: By name     _o_: Application
 ;; Use proper indentation for the environment
 (setq treemacs-indentation (if initial-window-system 3 2))
 
+;; Open `treemacs-persist-file' in `org-mode' for better editing
+(after! treemacs
+  (add-to-list 'auto-mode-alist (cons treemacs-persist-file 'org-mode)))
+
 ;; REVIEW Where is this supposed to happen?
 ;; (add-hook 'doom-load-theme-hook #'doom-themes-treemacs-config))
 
