@@ -363,6 +363,9 @@ for autoload cookies or byte-compilation.
 ;;   (defadvice! my/gptel-no-crowdsourced-prompts-a (args)
 ;;     :filter-args #'gptel--setup-directive-menu
 ;;     (cons (car args) (list (car (cdr args))))))
+
+(after! org
+  (require 'ol-project))
 #+end_src
 
 *** DONE [#B] Disable icons when unavailable

@@ -34,6 +34,9 @@
 ;;     :filter-args #'gptel--setup-directive-menu
 ;;     (cons (car args) (list (car (cdr args))))))
 
+(after! org
+  (require 'ol-project))
+
 (setq default-input-method "latin-postfix")
 
 (unless initial-window-system
