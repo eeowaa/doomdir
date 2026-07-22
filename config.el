@@ -3188,6 +3188,8 @@ This is a list of lists, not a list of cons cells.")
 
 (map! :v "C-c '" #'edit-indirect-region)
 
+(add-to-list 'auto-mode-alist '("\\.cshtml\\'" . web-mode))
+
 (after! lsp-yaml
   (let ((f lsp-yaml-schema-store-local-db))
     (unless (file-exists-p f)

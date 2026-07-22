@@ -11882,7 +11882,7 @@ This module adds [[https://github.com/ethereum/solidity][Solidity]] support thro
 
 ** swift [0/0] :ARCHIVE:
 ** terra [0/0] :ARCHIVE:
-** web [1/2]
+** web [2/3]
 *** DONE [#A] Install prerequisites
 **** DONE macOS
 #+begin_src sh :tangle install/macos.sh
@@ -11898,6 +11898,13 @@ npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
 sudo dnf -y install tidy
 npm install -g js-beautify stylelint
 npm install -g vscode-html-languageserver-bin vscode-css-languageserver-bin
+#+end_src
+
+*** DONE [#B] Open Razor files in web-mode :tweak:
+https://learn.microsoft.com/en-us/aspnet/core/mvc/views/razor
+
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'auto-mode-alist '("\\.cshtml\\'" . web-mode))
 #+end_src
 
 *** TODO [#B] Indent HTML by 2 spaces :tweak:
