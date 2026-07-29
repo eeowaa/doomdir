@@ -1,16 +1,42 @@
 #!/bin/sh
 
-cat >&2 <<EOF
-WARNING: If installed by a package manager, Emacs might not be pinned at a
-specific version (Doom has no knowledge of whether this is the case). System
-package updates may upgrade Emacs, resulting in:
+# Prevent Emacs 29.4 from being installed (Pin-Priority < 0) and only allow
+# Emacs 30.2 specifically to be installed (Pin-Priority > 1000)
+target="1:30.2"
+sudo tee /etc/apt/preferences.d/emacs.pref >/dev/null <<EOF
+Package: emacs
+Pin: version /^1:29.4([.+-:~].*)?\$/
+Pin-Priority: -1
 
-  1. Potential package breakages
-  2. Potential configuration breakages
-  3. The need to run \`doom build'
-
-*** Use caution when performing system updates! ***
+Package: emacs
+Pin: version /^${target}([.+-:~].*)?\$/
+Pin-Priority: 1001
 EOF
+sudo apt-get update
+
+apt-cache show emacs >/dev/null && {
+    # If Emacs is already installed, compare current and target versions
+    current=`dpkg-query --show --showformat='${Version}' emacs | sed 's/+.*//'`
+    dpkg --compare-versions "$current" eq "$target"
+} || {
+    # If Emacs is not installed, or if the installed version does not match the
+    # target version, install (or upgrade/downgrade to) the newest available
+    # package matching the target version
+    sudo apt-mark unhold emacs
+    sudo apt-get -y install emacs
+}
+
+# If the installed Emacs version matches the target version, prevent removal,
+# downgrades, or upgrades (even to a newer <debian-revision> for a given
+# <epoch>:<upstream-version>-<debian-revision>) to avoid ever having to run
+# 'doom upgrade' unexpectedly after system package operations
+current=`dpkg-query --show --showformat='${Version}' emacs | sed 's/+.*//'`
+if [ "X$target" = "X$current" ]
+then sudo apt-mark hold emacs
+else cat >&2 <<EOF
+WARNING: Incorrect Emacs version (using $current, want $target)
+EOF
+fi
 
 # Determine the WSL version (0 means not on WSL)
 case `uname -r` in

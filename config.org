@@ -81,7 +81,7 @@ WARNINGS:
 #+end_src
 
 * Miscellany
-** Use Emacs version 30.2 [2/3]
+** Use Emacs version 30.2 [3/3]
 *** OKAY macOS
 #+begin_src sh :tangle install/macos.sh
 #!/bin/sh
@@ -115,46 +115,87 @@ Reference:
 sudo dnf -y install 'dnf-command(versionlock)'
 sudo dnf versionlock exclude --raw 'emacs-1:29.4-*'
 
-# Install the newest release of the desired <name>-<epoch>:<version> RPM and
-# prevent upgrades (even to a newer <name>-<epoch>:<version>-<release>) to avoid
-# ever having to run 'doom upgrade' unexpectedly after upgrading system packages
-# NOTE: "epoch" is an RPM construct and is required for proper version comparison
 target="1:30.2"
-sudo dnf versionlock delete emacs
-rpm -q emacs >/dev/null || {
-    sudo dnf -y install "emacs-$target" || :
-} || {
+dnfcmd="install"
+rpm -q emacs >/dev/null && {
+    # If Emacs is already installed, compare current and target versions
     current=`rpm -q --qf '%{epoch}:%{version}' emacs`
     case `rpm -E "%{lua:print(rpm.vercmp('$current', '$target'))}"` in
-     0) ;;
-    -1) sudo dnf -y upgrade "emacs-$target" ;;
-     1) sudo dnf -y downgrade "emacs-$target" ;;
+     0) true ;;
+    -1) dnfcmd="upgrade"   ; false ;;
+     1) dnfcmd="downgrade" ; false ;;
     esac
+} || {
+    # If Emacs is not installed, or if the installed version does not match the
+    # target version, install (or upgrade/downgrade to) the newest available
+    # package matching the target version
+    sudo dnf versionlock delete emacs
+    sudo dnf -y "$dnfcmd" "emacs-$target"
 }
+
+# If the installed Emacs version matches the target version, prevent upgrades
+# (even to a newer <name>-<epoch>:<version>-<release>) to avoid ever having to run
+# 'doom upgrade' unexpectedly after upgrading system packages
 current=`rpm -q --qf '%{epoch}:%{version}' emacs`
 if [ "X$target" = "X$current" ]
 then sudo dnf versionlock add emacs
 else cat >&2 <<EOF
-WARNING: Incorrect Emacs version (using $actual_version, want $target_version)
+WARNING: Incorrect Emacs version (using $current, want $target)
 EOF
 fi
 #+end_src
 
-*** TODO Ubuntu
+*** DONE Ubuntu
+Use ~dpkg-query --show --showformat='${Version}\n' emacs~ to see the current
+version of Emacs that you are using. Use ~apt-get update && apt-cache policy emacs~
+to see available versions of Emacs.
+
+Reference:
+- [[man:deb-version(7)]]
+- [[man:apt_preferences(5)]]
+- [[man:apt-cache(8)]]
+- [[man:apt-mark(8)]]
+
 #+begin_src sh :tangle install/ubuntu.sh
 #!/bin/sh
 
-cat >&2 <<EOF
-WARNING: If installed by a package manager, Emacs might not be pinned at a
-specific version (Doom has no knowledge of whether this is the case). System
-package updates may upgrade Emacs, resulting in:
+# Prevent Emacs 29.4 from being installed (Pin-Priority < 0) and only allow
+# Emacs 30.2 specifically to be installed (Pin-Priority > 1000)
+target="1:30.2"
+sudo tee /etc/apt/preferences.d/emacs.pref >/dev/null <<EOF
+Package: emacs
+Pin: version /^1:29.4([.+-:~].*)?\$/
+Pin-Priority: -1
 
-  1. Potential package breakages
-  2. Potential configuration breakages
-  3. The need to run \`doom build'
-
-,*** Use caution when performing system updates! ***
+Package: emacs
+Pin: version /^${target}([.+-:~].*)?\$/
+Pin-Priority: 1001
 EOF
+sudo apt-get update
+
+apt-cache show emacs >/dev/null && {
+    # If Emacs is already installed, compare current and target versions
+    current=`dpkg-query --show --showformat='${Version}' emacs | sed 's/+.*//'`
+    dpkg --compare-versions "$current" eq "$target"
+} || {
+    # If Emacs is not installed, or if the installed version does not match the
+    # target version, install (or upgrade/downgrade to) the newest available
+    # package matching the target version
+    sudo apt-mark unhold emacs
+    sudo apt-get -y install emacs
+}
+
+# If the installed Emacs version matches the target version, prevent removal,
+# downgrades, or upgrades (even to a newer <debian-revision> for a given
+# <epoch>:<upstream-version>-<debian-revision>) to avoid ever having to run
+# 'doom upgrade' unexpectedly after system package operations
+current=`dpkg-query --show --showformat='${Version}' emacs | sed 's/+.*//'`
+if [ "X$target" = "X$current" ]
+then sudo apt-mark hold emacs
+else cat >&2 <<EOF
+WARNING: Incorrect Emacs version (using $current, want $target)
+EOF
+fi
 #+end_src
 
 ** Install prerequisites [2/3]

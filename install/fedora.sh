@@ -5,27 +5,32 @@
 sudo dnf -y install 'dnf-command(versionlock)'
 sudo dnf versionlock exclude --raw 'emacs-1:29.4-*'
 
-# Install the newest release of the desired <name>-<epoch>:<version> RPM and
-# prevent upgrades (even to a newer <name>-<epoch>:<version>-<release>) to avoid
-# ever having to run 'doom upgrade' unexpectedly after upgrading system packages
-# NOTE: "epoch" is an RPM construct and is required for proper version comparison
 target="1:30.2"
-sudo dnf versionlock delete emacs
-rpm -q emacs >/dev/null || {
-    sudo dnf -y install "emacs-$target" || :
-} || {
+dnfcmd="install"
+rpm -q emacs >/dev/null && {
+    # If Emacs is already installed, compare current and target versions
     current=`rpm -q --qf '%{epoch}:%{version}' emacs`
     case `rpm -E "%{lua:print(rpm.vercmp('$current', '$target'))}"` in
-     0) ;;
-    -1) sudo dnf -y upgrade "emacs-$target" ;;
-     1) sudo dnf -y downgrade "emacs-$target" ;;
+     0) true ;;
+    -1) dnfcmd="upgrade"   ; false ;;
+     1) dnfcmd="downgrade" ; false ;;
     esac
+} || {
+    # If Emacs is not installed, or if the installed version does not match the
+    # target version, install (or upgrade/downgrade to) the newest available
+    # package matching the target version
+    sudo dnf versionlock delete emacs
+    sudo dnf -y "$dnfcmd" "emacs-$target"
 }
+
+# If the installed Emacs version matches the target version, prevent upgrades
+# (even to a newer <name>-<epoch>:<version>-<release>) to avoid ever having to run
+# 'doom upgrade' unexpectedly after upgrading system packages
 current=`rpm -q --qf '%{epoch}:%{version}' emacs`
 if [ "X$target" = "X$current" ]
 then sudo dnf versionlock add emacs
 else cat >&2 <<EOF
-WARNING: Incorrect Emacs version (using $actual_version, want $target_version)
+WARNING: Incorrect Emacs version (using $current, want $target)
 EOF
 fi
 
