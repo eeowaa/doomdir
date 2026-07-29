@@ -45,7 +45,39 @@ case `uname -r` in
 *)           WSL_VERSION=0 ;;
 esac
 
-# TODO: Obtain Emacs source code corresponding to installed DPKG
+# Obtain Emacs source code corresponding to installed .deb
+(
+    # Download source tarballs, extract contents, and apply patches
+    mkdir -p ~/.local/src/emacs/deb-source
+    cd ~/.local/src/emacs/deb-source
+    source_version=`dpkg-query -Wf '${source:Version}' emacs`
+    apt-get source emacs="$source_version"
+
+    # Install Debian build tools and Emacs build dependencies
+    sudo apt-get -y install devscripts build-essential
+    sudo apt-get -y build-dep emacs="$source_version"
+
+    # Configure sources to match the installed Emacs package
+    flags=`command emacs -Q --batch --eval "\
+    (let ((text-quoting-style 'straight))
+      (princ system-configuration-options))" 2>&1`
+    source_upstream_version=`dpkg-query -Wf '${source:Upstream-Version}' emacs`
+    cd "emacs-$source_upstream_version"
+    eval "./autogen.sh && ./configure $flags"
+
+    # NOTE The debian/rules executable Makefile contains rules for generating
+    # and building different source trees for different binary Emacs packages
+    # (emacs-gtk, emacs-lucid, etc.). I tried leveraging debuild(1),
+    # dpkg-buildpackage(1), and manual invocation of debian/rules to generate
+    # the debian/emacs-gtk source tree (the X11 build that I currently use),
+    # without success. Instead, I just configured the root source tree using
+    # the system-configuration-options Emacs variable as a reference, similar to
+    # how I manage the source RPM on Fedora.
+
+    # Symlink Emacs source tree to platform-independent source directory
+    cd ~/.local/src/emacs
+    ln -sf "deb-source/emacs-$source_upstream_version" gnu-emacs
+)
 
 # Install Emacs info manuals
 sudo apt-get -y install emacs-common-non-dfsg

@@ -64,7 +64,7 @@ fi
     srcdir=`rpm --eval '%{_builddir}'`/emacs-$version
     flags=`command emacs -Q --batch --eval "\
     (let ((text-quoting-style 'straight))
-      (message system-configuration-options))" 2>&1`
+      (princ system-configuration-options))" 2>&1`
     cd "$srcdir"
     eval "./configure $flags"
 
@@ -76,7 +76,7 @@ fi
 
     # Symlink Emacs source tree to platform-independent source directory
     mkdir -p ~/.local/src/emacs && cd ~/.local/src/emacs
-    ln -sf "$srcdir" .
+    ln -sf "$srcdir" gnu-emacs
 )
 
 # Install openssh-askpass to install Elisp packages
