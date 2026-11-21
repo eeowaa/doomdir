@@ -86,19 +86,19 @@ sudo apt-get -y install emacs-common-non-dfsg
 sudo apt-get -y install ripgrep fd-find
 mkdir -p ~/.local/bin && ln -sf /usr/bin/fdfind ~/.local/bin/fd
 
+# Install NVM
+curl -fsSLo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
+    | env PROFILE=/dev/null bash
+
+# Install NodeJS and NPM through NVM
 if [ $WSL_VERSION -eq 1 ]
 then
-    # FIXME: Support NodeJS on WSL 1 (requires configuration hacks)
-    echo >&2 'ERROR: NodeJS configuration is unimplemented on WSL 1'
-    exit 1
-else
-    # Install NVM
-    curl -fsSLo- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh \
-        | env PROFILE=/dev/null bash
-
-    # Install NodeJS and NPM through NVM
-    nvm install node
+    # NOTE `npm install node` fails to extract the downloaded node-*.tar.xz with
+    # the tar(1) that ships with WSL 1 (GNU tar) due to unimplemented syscalls.
+    # However, bsdtar(1) works; see stow-dotfiles for how this is instrumented.
+    sudo apt-get -y install libarchive-tools
 fi
+nvm install node
 
 # Install pipx to install Python packages
 sudo apt-get -y install pipx
